@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"nearbyassist/internal/handler"
 	"net/http"
 	"time"
 )
@@ -19,12 +18,10 @@ func NewServer() *http.Server {
 		port: port,
 	}
 
-	handler := handler.Handler{}
-
 	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(handler),
+		Handler:      NewServer.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
