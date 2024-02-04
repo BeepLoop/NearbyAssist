@@ -14,5 +14,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	e.GET("/health", s.HealthHandler)
 
+	s.HandleVersionOneRoutes(e.Group("/v1"))
+
 	return e
 }
