@@ -16,9 +16,3 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	return e
 }
-
-func (s *Server) HealthHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{
-		"health": "hello world",
-	})
-}
