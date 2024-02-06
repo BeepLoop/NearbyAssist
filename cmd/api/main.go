@@ -3,8 +3,15 @@ package main
 import (
 	"log"
 
+	"nearbyassist/internal/db"
 	"nearbyassist/internal/server"
 )
+
+func init() {
+	if err := db.Init(); err != nil {
+		log.Fatal("error initializing database connection: ", err)
+	}
+}
 
 func main() {
 
