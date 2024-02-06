@@ -1,6 +1,7 @@
 package server
 
 import (
+	"nearbyassist/internal/db"
 	"nearbyassist/internal/types"
 	"net/http"
 
@@ -18,6 +19,13 @@ func (s *Server) HandleRegister(c echo.Context) error {
 	if err := c.Validate(u); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "invalid request data",
+		})
+	}
+
+	err := db.RegisterUser(*u)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
 		})
 	}
 
