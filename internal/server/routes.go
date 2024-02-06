@@ -11,9 +11,12 @@ import (
 
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
+
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.RemoveTrailingSlash())
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+
 	e.Validator = &utils.Validator{Validator: validator.New()}
 
 	e.GET("/health", s.HealthHandler)
