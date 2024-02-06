@@ -3,11 +3,16 @@ package main
 import (
 	"log"
 
+	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/server"
 )
 
 func init() {
+	if err := config.Init(); err != nil {
+		log.Fatal("error reading environment variables: ", err)
+	}
+
 	if err := db.Init(); err != nil {
 		log.Fatal("error initializing database connection: ", err)
 	}
