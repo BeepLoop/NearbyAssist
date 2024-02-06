@@ -15,4 +15,6 @@ func (s *Server) HandleVersionOneRoutes(r *echo.Group) {
 	})
 
 	r.POST("/register", s.HandleRegister)
+
+    r.POST("/login", s.HandleLogin)
 }
