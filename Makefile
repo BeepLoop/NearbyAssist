@@ -39,3 +39,9 @@ watch:
 	fi
 
 .PHONY: all build run test clean
+
+migrate-up:
+	migrate -database ${mysql_conn}/nearby_assist -path internal/models/migrations up
+
+migrate-down:
+	migrate -database ${mysql_conn}/nearby_assist -path internal/models/migrations down
