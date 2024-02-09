@@ -2,6 +2,7 @@ package server
 
 import (
 	"nearbyassist/internal/db"
+	"nearbyassist/internal/types"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -30,5 +31,24 @@ func (s *Server) HandleVersionOneRoutes(r *echo.Group) {
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"locations": locations,
 		})
+	})
+
+	r.GET("/locations/vicinity", func(c echo.Context) error {
+		var position types.Position
+		err := c.Bind(&position)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "invalid request",
+			})
+		}
+
+		locations, err := db.SearchVicinity(position)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": err.Error(),
+			})
+		}
+
+		return c.JSON(http.StatusOK, locations)
 	})
 }
