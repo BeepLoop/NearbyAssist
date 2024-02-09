@@ -33,6 +33,34 @@ func (s *Server) HandleVersionOneRoutes(r *echo.Group) {
 		})
 	})
 
+	r.POST("/locations/register", func(c echo.Context) error {
+		var location types.Location
+		err := c.Bind(&location)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "invalid request",
+			})
+		}
+
+		err = c.Validate(location)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": err.Error(),
+			})
+		}
+
+		err = db.RegisterLocation(location)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": err.Error(),
+			})
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{
+			"status": "ok",
+		})
+	})
+
 	r.GET("/locations/vicinity", func(c echo.Context) error {
 		var position types.Position
 		err := c.Bind(&position)
