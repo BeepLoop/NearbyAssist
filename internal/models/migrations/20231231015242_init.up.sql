@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS User (
 CREATE TABLE IF NOT EXISTS Location (
     id Int NOT NULL AUTO_INCREMENT,
     address Varchar(255) NOT NULL,
-    latitude Double NOT NULL,
-    longitude Double NOT NULL,
+    location Geometry NOT NULL SRID 4326,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    SPATIAL INDEX(location),
     PRIMARY KEY(id)
 );
