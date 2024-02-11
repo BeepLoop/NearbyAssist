@@ -6,9 +6,9 @@ import "nearbyassist/internal/types"
 func GetLocations() ([]types.Location, error) {
 	query := `
         SELECT
-            *
+            address, longitude, latitude
         FROM 
-            addresses
+            Location
         LIMIT 
             10
     `

@@ -1,25 +1,28 @@
 package db
 
-import "nearbyassist/internal/types"
+import (
+	"fmt"
+	"nearbyassist/internal/types"
+)
 
 // retrieves all establishments nearby the given position
 func SearchVicinity(pos types.Position) ([]types.Location, error) {
-	query := `
+	query := fmt.Sprintf(`
         SELECT
-            * 
-        FROM
-            addresses
+            address, ST_AsText(location) as point
+        FROM 
+            Location 
         WHERE
-            ST_distance_sphere(
-                point(?,?),
-                point(longitude, latitude)
-            ) * 0.001 < 500
-    `
-	// ST_distance_sphere returns distance in meters
+            ST_Distance_Sphere(
+                location,
+                ST_GeomFromText('POINT(%s %s)', 4326)
+            ) * 0.001 < 10;
+    `, pos.Latitude, pos.Longitude)
+	// ST_Distance_Sphere returns distance in meters
 	// used 0.001 to convert meters to km
 
 	var locations []types.Location
-	err := DB_CONN.Select(&locations, query, pos.Longitude, pos.Latitude)
+	err := DB_CONN.Select(&locations, query)
 	if err != nil {
 		return nil, err
 	}

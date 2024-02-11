@@ -28,13 +28,11 @@ func (s *Server) HandleVersionOneRoutes(r *echo.Group) {
 			})
 		}
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"locations": locations,
-		})
+		return c.JSON(http.StatusOK, locations)
 	})
 
 	r.POST("/locations/register", func(c echo.Context) error {
-		var location types.Location
+		var location types.LocationRegister
 		err := c.Bind(&location)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
@@ -62,13 +60,9 @@ func (s *Server) HandleVersionOneRoutes(r *echo.Group) {
 	})
 
 	r.GET("/locations/vicinity", func(c echo.Context) error {
-		var position types.Position
-		err := c.Bind(&position)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "invalid request",
-			})
-		}
+		latitude := c.QueryParam("lat")
+		longitude := c.QueryParam("long")
+		position := types.Position{Latitude: latitude, Longitude: longitude}
 
 		locations, err := db.SearchVicinity(position)
 		if err != nil {
