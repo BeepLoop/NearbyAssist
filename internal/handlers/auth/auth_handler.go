@@ -10,6 +10,7 @@ import (
 func AuthHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck)
 
-	r.GET("/login", auth.HandleLogin)
+	r.POST("/", auth.AdminLogin)
+	r.POST("/login", auth.HandleLogin)
 	r.POST("/register", auth.HandleRegister)
 }

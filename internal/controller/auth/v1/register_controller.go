@@ -22,21 +22,27 @@ func HandleRegister(c echo.Context) error {
 		})
 	}
 
-	resultPtr, err := query.GetUser(*u)
+	exists, err := query.DoesUserExist(*u)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	if exists {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "email already registered",
+		})
+	}
+
+	err = query.RegisterUser(*u)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": err.Error(),
 		})
 	}
 
-	if resultPtr == nil {
-		err = query.RegisterUser(*u)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": err.Error(),
-			})
-		}
-	}
-
-	return c.JSON(http.StatusCreated, u)
+	return c.JSON(http.StatusCreated, map[string]string{
+		"status": "ok",
+	})
 }
