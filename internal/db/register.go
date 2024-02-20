@@ -5,9 +5,9 @@ import "nearbyassist/internal/types"
 func RegisterUser(user types.User) error {
 	query := `
 	        INSERT INTO
-	            User (name, email)
+	            User (name, email, imageUrl)
 	        VALUES
-            (:name, :email)
+                (:name, :email, :imageUrl)
 	    `
 
 	_, err := DB_CONN.NamedExec(query, user)
