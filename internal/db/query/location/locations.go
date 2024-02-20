@@ -1,6 +1,9 @@
-package db
+package query
 
-import "nearbyassist/internal/types"
+import (
+	"nearbyassist/internal/db"
+	"nearbyassist/internal/types"
+)
 
 // Returns the first 10 locations and an error if any
 func GetLocations() ([]types.Location, error) {
@@ -14,7 +17,7 @@ func GetLocations() ([]types.Location, error) {
     `
 
 	var locations []types.Location
-	err := DB_CONN.Select(&locations, query)
+	err := db.Connection.Select(&locations, query)
 	if err != nil {
 		return nil, err
 	}

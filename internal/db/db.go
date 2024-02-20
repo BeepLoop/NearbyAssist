@@ -7,14 +7,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var DB_CONN *sqlx.DB
+var Connection *sqlx.DB
 
 func Init() error {
 	conn, err := sqlx.Connect("mysql", config.Env.DSN)
 	if err != nil {
 		return err
 	}
-	DB_CONN = conn
+	Connection = conn
 
 	return nil
 }

@@ -1,6 +1,9 @@
-package db
+package query
 
-import "nearbyassist/internal/types"
+import (
+	"nearbyassist/internal/db"
+	"nearbyassist/internal/types"
+)
 
 func GetUser(user types.User) (*types.User, error) {
 	query := `
@@ -15,7 +18,7 @@ func GetUser(user types.User) (*types.User, error) {
     `
 
 	userResult := new(types.User)
-	err := DB_CONN.Get(userResult, query, user.Name, user.Email)
+	err := db.Connection.Get(userResult, query, user.Name, user.Email)
 	if err != nil {
 		return nil, err
 	}

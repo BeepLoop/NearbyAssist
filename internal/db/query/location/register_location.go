@@ -1,7 +1,8 @@
-package db
+package query
 
 import (
 	"fmt"
+	"nearbyassist/internal/db"
 	"nearbyassist/internal/types"
 )
 
@@ -15,7 +16,7 @@ func RegisterLocation(location types.LocationRegister) error {
 
 	point := fmt.Sprintf("POINT(%f %f)", location.Latitude, location.Longitude)
 
-	_, err := DB_CONN.Exec(query, location.Address, point)
+	_, err := db.Connection.Exec(query, location.Address, point)
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,9 @@
-package db
+package query
 
-import "nearbyassist/internal/types"
+import (
+	"nearbyassist/internal/db"
+	"nearbyassist/internal/types"
+)
 
 func RegisterUser(user types.User) error {
 	query := `
@@ -10,7 +13,7 @@ func RegisterUser(user types.User) error {
                 (:name, :email, :imageUrl)
 	    `
 
-	_, err := DB_CONN.NamedExec(query, user)
+	_, err := db.Connection.NamedExec(query, user)
 	if err != nil {
 		return err
 	}

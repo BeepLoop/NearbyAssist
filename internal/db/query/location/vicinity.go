@@ -1,7 +1,8 @@
-package db
+package query
 
 import (
 	"fmt"
+	"nearbyassist/internal/db"
 	"nearbyassist/internal/types"
 )
 
@@ -22,7 +23,7 @@ func SearchVicinity(pos types.Position) ([]types.Location, error) {
 	// used 0.001 to convert meters to km
 
 	var locations []types.Location
-	err := DB_CONN.Select(&locations, query)
+	err := db.Connection.Select(&locations, query)
 	if err != nil {
 		return nil, err
 	}

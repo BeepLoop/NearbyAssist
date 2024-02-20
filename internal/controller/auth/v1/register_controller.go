@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"nearbyassist/internal/db"
+	"nearbyassist/internal/db/query/user"
 	"nearbyassist/internal/types"
 	"net/http"
 
@@ -22,7 +22,7 @@ func HandleRegister(c echo.Context) error {
 		})
 	}
 
-	resultPtr, err := db.GetUser(*u)
+	resultPtr, err := query.GetUser(*u)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": err.Error(),
@@ -30,7 +30,7 @@ func HandleRegister(c echo.Context) error {
 	}
 
 	if resultPtr == nil {
-		err = db.RegisterUser(*u)
+		err = query.RegisterUser(*u)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": err.Error(),

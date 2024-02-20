@@ -1,7 +1,7 @@
 package location
 
 import (
-	"nearbyassist/internal/db"
+	"nearbyassist/internal/db/query/location"
 	"nearbyassist/internal/types"
 	"net/http"
 
@@ -13,7 +13,7 @@ func HandleVicinity(c echo.Context) error {
 	longitude := c.QueryParam("long")
 	position := types.Position{Latitude: latitude, Longitude: longitude}
 
-	locations, err := db.SearchVicinity(position)
+	locations, err := query.SearchVicinity(position)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

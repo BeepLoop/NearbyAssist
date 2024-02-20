@@ -1,7 +1,7 @@
 package location
 
 import (
-	"nearbyassist/internal/db"
+	"nearbyassist/internal/db/query/location"
 	"nearbyassist/internal/types"
 	"net/http"
 
@@ -24,7 +24,7 @@ func RegisterLocation(c echo.Context) error {
 		})
 	}
 
-	err = db.RegisterLocation(location)
+	err = query.RegisterLocation(location)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
