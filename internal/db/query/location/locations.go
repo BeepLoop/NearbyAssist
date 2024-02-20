@@ -9,7 +9,7 @@ import (
 func GetLocations() ([]types.Location, error) {
 	query := `
         SELECT
-            address, longitude, latitude
+            address, ST_AsText(location) as location
         FROM 
             Location
         LIMIT 

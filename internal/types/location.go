@@ -1,8 +1,8 @@
 package types
 
 type Location struct {
-	Address string `query:"address"`
-	Point   string `query:"point"`
+	Address string `query:"address" db:"address"`
+	Point   string `query:"point" db:"location"`
 }
 
 type LocationRegister struct {
