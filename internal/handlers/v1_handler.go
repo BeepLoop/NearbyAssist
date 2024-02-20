@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"nearbyassist/internal/controller/auth/v1"
 	"nearbyassist/internal/controller/health"
 	"nearbyassist/internal/db"
+	"nearbyassist/internal/handlers/auth"
 	"nearbyassist/internal/types"
 	"net/http"
 
