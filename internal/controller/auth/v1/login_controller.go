@@ -1,4 +1,4 @@
-package server
+package auth
 
 import (
 	"nearbyassist/internal/types"
@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (s *Server) HandleLogin(c echo.Context) error {
+func HandleLogin(c echo.Context) error {
 	admin := new(types.Admin)
 	if err := c.Bind(admin); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{

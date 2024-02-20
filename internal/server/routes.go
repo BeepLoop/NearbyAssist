@@ -1,6 +1,8 @@
 package server
 
 import (
+	"nearbyassist/internal/controller/health"
+	"nearbyassist/internal/handlers"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -19,9 +21,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	e.Validator = &utils.Validator{Validator: validator.New()}
 
-	e.GET("/health", s.HealthHandler)
+	e.GET("/health", health.HealthCheck)
 
-	s.HandleVersionOneRoutes(e.Group("/v1"))
+	handlers.RouteHandlerV1(e.Group("/v1"))
 
 	return e
 }

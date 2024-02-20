@@ -1,4 +1,4 @@
-package server
+package health
 
 import (
 	"net/http"
@@ -6,8 +6,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (s *Server) HealthHandler(c echo.Context) error {
+func HealthCheck(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
-		"health": "hello world",
+		"health": "ok",
 	})
 }
