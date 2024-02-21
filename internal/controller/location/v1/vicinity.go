@@ -21,7 +21,12 @@ func HandleVicinity(c echo.Context) error {
 	longitude := c.QueryParam("long")
 	position := types.Position{Latitude: latitude, Longitude: longitude}
 
-	result, err := query.SearchVicinity(position)
+	radius := c.QueryParam("radius")
+	if radius == "" {
+		radius = "200"
+	}
+
+	result, err := query.SearchVicinity(position, radius)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
