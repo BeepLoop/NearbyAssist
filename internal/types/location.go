@@ -1,6 +1,7 @@
 package types
 
 type Location struct {
+	OwnerId int    `query:"ownerId" db:"ownerId"`
 	Address string `query:"address" db:"address"`
 	Point   string `query:"point" db:"location"`
 }

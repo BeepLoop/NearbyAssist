@@ -10,9 +10,10 @@ import (
 )
 
 type Point struct {
+	OwnerId   int
 	Address   string
-	Latitude  string
-	Longitude string
+	Latitude  float64
+	Longitude float64
 }
 
 func HandleVicinity(c echo.Context) error {
@@ -30,8 +31,13 @@ func HandleVicinity(c echo.Context) error {
 	var locations []Point
 
 	for _, location := range result {
-		latlong := utils.LatlongExtractor(location.Point)
-		point := Point{Address: location.Address, Latitude: latlong[0], Longitude: latlong[1]}
+		lat, long := utils.LatlongExtractor(location.Point)
+		point := Point{
+			OwnerId:   location.OwnerId,
+			Address:   location.Address,
+			Latitude:  lat,
+			Longitude: long,
+		}
 		locations = append(locations, point)
 	}
 
