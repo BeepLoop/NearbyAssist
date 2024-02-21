@@ -10,7 +10,7 @@ import (
 func SearchVicinity(pos types.Position) ([]types.Location, error) {
 	query := fmt.Sprintf(`
         SELECT
-            address, ST_AsText(location) as point
+            address, ST_AsText(location) as location
         FROM 
             Location 
         WHERE
