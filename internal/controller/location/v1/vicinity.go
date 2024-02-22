@@ -2,7 +2,6 @@ package location
 
 import (
 	"nearbyassist/internal/db/query/location"
-	"nearbyassist/internal/types"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -17,16 +16,14 @@ type Point struct {
 }
 
 func HandleVicinity(c echo.Context) error {
-	latitude := c.QueryParam("lat")
-	longitude := c.QueryParam("long")
-	position := types.Position{Latitude: latitude, Longitude: longitude}
-
-	radius := c.QueryParam("radius")
-	if radius == "" {
-		radius = "200"
+	params, err := utils.GetSearchParams(c)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
 	}
 
-	result, err := query.SearchVicinity(position, radius)
+	result, err := query.SearchVicinity(params)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

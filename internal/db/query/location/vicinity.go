@@ -7,7 +7,7 @@ import (
 )
 
 // retrieves all establishments nearby the given position
-func SearchVicinity(pos types.Position, radius string) ([]types.Location, error) {
+func SearchVicinity(params *types.SearchParams) ([]types.Location, error) {
 	query := fmt.Sprintf(`
         SELECT
             ownerId, address, ST_AsText(location) as location
@@ -16,14 +16,13 @@ func SearchVicinity(pos types.Position, radius string) ([]types.Location, error)
         WHERE
             ST_Distance_Sphere(
                 location,
-                ST_GeomFromText('POINT(%s %s)', 4326)
+                ST_GeomFromText('POINT(%f %f)', 4326)
             ) < ?;
-    `, pos.Latitude, pos.Longitude)
-	// ST_Distance_Sphere returns distance in meters
-	// used 0.001 to convert meters to km
+    `, params.Latitude, params.Longitude)
+	// ST_Distance_Sphere returns the distance in meters
 
 	var locations []types.Location
-	err := db.Connection.Select(&locations, query, radius)
+	err := db.Connection.Select(&locations, query, params.Radius)
 	if err != nil {
 		return nil, err
 	}
