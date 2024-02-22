@@ -23,3 +23,5 @@ tmp/
 .idea
 
 .env
+
+*.csv

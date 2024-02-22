@@ -19,3 +19,26 @@ CREATE TABLE IF NOT EXISTS Location (
     PRIMARY KEY(id),
     FOREIGN KEY(ownerId) REFERENCES User(id)
 );
+
+CREATE TABLE IF NOT EXISTS Category (
+    id Int NOT NULL AUTO_INCREMENT,
+    title Varchar(255) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS Service (
+    id Int NOT NULL AUTO_INCREMENT,
+    vendor Int NOT NULL,
+    title Varchar(255) NOT NULL,
+    description Varchar(255) NOT NULL,
+    rate Double NOT NULL,
+    location Int NOT NULL,
+    category  Int NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(location) REFERENCES Location(id),
+    FOREIGN KEY(category) REFERENCES Category(id)
+);

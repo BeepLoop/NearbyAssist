@@ -42,7 +42,11 @@ watch:
 .PHONY: all build run test clean
 
 migrate-up:
-	migrate -database ${mysql_conn}/nearby_assist -path internal/models/migrations up
+	@echo "running up migration..."
+	@migrate -database ${mysql_conn}/nearby_assist -path internal/models/migrations up
+	@echo "done"
 
 migrate-down:
-	migrate -database ${mysql_conn}/nearby_assist -path internal/models/migrations down
+	@echo "running down migration..."
+	@migrate -database ${mysql_conn}/nearby_assist -path internal/models/migrations down
+	@echo "done"
