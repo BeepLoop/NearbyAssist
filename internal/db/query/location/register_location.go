@@ -1,22 +1,27 @@
 package query
 
 import (
-	"fmt"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/types"
 )
 
-func RegisterLocation(location types.LocationRegister) error {
+func RegisterLocation(service types.ServiceRegister) error {
 	query := `
 	        INSERT INTO
-	            Location (ownerId, address, location)
+	            Service
+	                (vendor, title, description, rate, location, category)
 	        VALUES 
-	            (1, ?, ST_GeomFromText(?, 4326))
+                (
+                    :vendorId,
+                    :title,
+                    :description,
+                    :rate,
+                    ST_GeomFromText(:point, 4326),
+                    :categoryId
+                )
 	    `
 
-	point := fmt.Sprintf("POINT(%f %f)", location.Latitude, location.Longitude)
-
-	_, err := db.Connection.Exec(query, location.Address, point)
+	_, err := db.Connection.NamedExec(query, service)
 	if err != nil {
 		return err
 	}

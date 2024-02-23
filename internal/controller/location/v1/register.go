@@ -3,28 +3,37 @@ package location
 import (
 	"nearbyassist/internal/db/query/location"
 	"nearbyassist/internal/types"
+	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func RegisterLocation(c echo.Context) error {
-	var location types.LocationRegister
-	err := c.Bind(&location)
+	var service types.ServiceRegister
+	err := c.Bind(&service)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "invalid request",
 		})
 	}
 
-	err = c.Validate(location)
+	err = c.Validate(service)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
 		})
 	}
 
-	err = query.RegisterLocation(location)
+    // construct point from given Latitude and Longitude
+	transfromedData, err := utils.TransformServiceData(service)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	err = query.RegisterLocation(*transfromedData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
