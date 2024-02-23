@@ -5,20 +5,18 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func GetUser(user types.User) (*types.User, error) {
+func GetUser(userId int) (*types.User, error) {
 	query := `
         SELECT
-            name, email
+            name, email, imageUrl
         FROM 
             User 
         WHERE
-            name = ?
-        AND
-            email = ?
+            id = ?
     `
 
 	userResult := new(types.User)
-	err := db.Connection.Get(userResult, query, user.Name, user.Email)
+	err := db.Connection.Get(userResult, query, userId)
 	if err != nil {
 		return nil, err
 	}

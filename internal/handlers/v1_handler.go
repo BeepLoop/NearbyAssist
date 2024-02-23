@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/controller/health"
 	"nearbyassist/internal/handlers/auth"
 	"nearbyassist/internal/handlers/service"
+	"nearbyassist/internal/handlers/user"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,4 +17,7 @@ func RouteHandlerV1(r *echo.Group) {
 
 	serviceGroup := r.Group("/services")
 	service.ServiceHandler(serviceGroup)
+
+	userGroup := r.Group("/users")
+	user.UserHandler(userGroup)
 }
