@@ -6,22 +6,24 @@ import (
 	"nearbyassist/internal/types"
 )
 
-// retrieves all establishments nearby the given position
-func SearchVicinity(params *types.SearchParams) ([]types.Location, error) {
+// retrieves all services matching the query within location radius
+func SearchVicinity(params *types.SearchParams) ([]types.Service, error) {
 	query := fmt.Sprintf(`
         SELECT
-            ownerId, address, ST_AsText(location) as location
+            vendor, title, description, rate, ST_AsText(location) as location, category
         FROM 
-            Location 
+            Service
         WHERE
+            title LIKE '%%%s%%'
+        AND
             ST_Distance_Sphere(
                 location,
                 ST_GeomFromText('POINT(%f %f)', 4326)
             ) < ?;
-    `, params.Latitude, params.Longitude)
+    `, params.Query, params.Latitude, params.Longitude)
 	// ST_Distance_Sphere returns the distance in meters
 
-	var locations []types.Location
+	var locations []types.Service
 	err := db.Connection.Select(&locations, query, params.Radius)
 	if err != nil {
 		return nil, err

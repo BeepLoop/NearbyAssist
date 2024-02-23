@@ -2,18 +2,12 @@ package location
 
 import (
 	"nearbyassist/internal/db/query/location"
+	"nearbyassist/internal/types"
 	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
-
-type Point struct {
-	OwnerId   int
-	Address   string
-	Latitude  float64
-	Longitude float64
-}
 
 func HandleVicinity(c echo.Context) error {
 	params, err := utils.GetSearchParams(c)
@@ -30,15 +24,17 @@ func HandleVicinity(c echo.Context) error {
 		})
 	}
 
-	var locations []Point
+	var locations []types.TransformedServiceData
 
 	for _, location := range result {
-		lat, long := utils.LatlongExtractor(location.Point)
-		point := Point{
-			OwnerId:   location.OwnerId,
-			Address:   location.Address,
-			Latitude:  lat,
-			Longitude: long,
+		lat, long := utils.LatlongExtractor(location.Location)
+		point := types.TransformedServiceData{
+			Vendor:      location.Vendor,
+			Title:       location.Title,
+			Description: location.Description,
+			Rate:        location.Rate,
+			Latitude:    lat,
+			Longitude:   long,
 		}
 		locations = append(locations, point)
 	}

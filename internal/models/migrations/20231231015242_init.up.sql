@@ -34,11 +34,10 @@ CREATE TABLE IF NOT EXISTS Service (
     title Varchar(255) NOT NULL,
     description Varchar(255) NOT NULL,
     rate Double NOT NULL,
-    location Int NOT NULL,
+    location Geometry NOT NULL SRID 4326,
     category  Int NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
-    FOREIGN KEY(location) REFERENCES Location(id),
     FOREIGN KEY(category) REFERENCES Category(id)
 );
