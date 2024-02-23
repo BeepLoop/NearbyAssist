@@ -1,7 +1,7 @@
-package location
+package service
 
 import (
-	"nearbyassist/internal/db/query/location"
+	"nearbyassist/internal/db/query/service"
 	"nearbyassist/internal/types"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterLocation(c echo.Context) error {
+func RegisterService(c echo.Context) error {
 	var service types.ServiceRegister
 	err := c.Bind(&service)
 	if err != nil {
@@ -25,7 +25,7 @@ func RegisterLocation(c echo.Context) error {
 		})
 	}
 
-    // construct point from given Latitude and Longitude
+	// construct point from given Latitude and Longitude
 	transfromedData, err := utils.TransformServiceData(service)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -33,7 +33,7 @@ func RegisterLocation(c echo.Context) error {
 		})
 	}
 
-	err = query.RegisterLocation(*transfromedData)
+	err = query.RegisterService(*transfromedData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

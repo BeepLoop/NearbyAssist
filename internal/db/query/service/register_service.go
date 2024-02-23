@@ -5,7 +5,7 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func RegisterLocation(service types.ServiceRegister) error {
+func RegisterService(service types.ServiceRegister) error {
 	query := `
 	        INSERT INTO
 	            Service

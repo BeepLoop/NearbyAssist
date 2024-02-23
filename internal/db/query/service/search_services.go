@@ -7,7 +7,7 @@ import (
 )
 
 // retrieves all services matching the query within location radius
-func SearchVicinity(params *types.SearchParams) ([]types.Service, error) {
+func SearchServices(params *types.SearchParams) ([]types.Service, error) {
 	query := fmt.Sprintf(`
         SELECT
             vendor, title, description, rate, ST_AsText(location) as location, category

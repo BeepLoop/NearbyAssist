@@ -1,7 +1,7 @@
-package location
+package service
 
 import (
-	"nearbyassist/internal/db/query/location"
+	"nearbyassist/internal/db/query/service"
 	"nearbyassist/internal/types"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func HandleVicinity(c echo.Context) error {
+func SearchService(c echo.Context) error {
 	params, err := utils.GetSearchParams(c)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -17,7 +17,7 @@ func HandleVicinity(c echo.Context) error {
 		})
 	}
 
-	result, err := query.SearchVicinity(params)
+	result, err := query.SearchServices(params)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

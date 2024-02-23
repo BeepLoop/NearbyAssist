@@ -6,7 +6,7 @@ import (
 )
 
 // Returns the first 10 locations and an error if any
-func GetLocations() ([]types.Location, error) {
+func GetServices() ([]types.Location, error) {
 	query := `
         SELECT
             address, ST_AsText(location) as location

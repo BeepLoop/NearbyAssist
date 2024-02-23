@@ -1,14 +1,14 @@
-package location
+package service
 
 import (
-	"nearbyassist/internal/db/query/location"
+	"nearbyassist/internal/db/query/service"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func HandleLocations(c echo.Context) error {
-	locations, err := query.GetLocations()
+func GetServices(c echo.Context) error {
+	locations, err := query.GetServices()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": err.Error(),
