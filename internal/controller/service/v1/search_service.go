@@ -24,20 +24,18 @@ func SearchService(c echo.Context) error {
 		})
 	}
 
-	var locations []types.TransformedServiceData
-
+	var services []types.TransformedServiceData
 	for _, location := range result {
 		lat, long := utils.LatlongExtractor(location.Location)
-		point := types.TransformedServiceData{
+		services = append(services, types.TransformedServiceData{
 			Vendor:      location.Vendor,
 			Title:       location.Title,
 			Description: location.Description,
 			Rate:        location.Rate,
 			Latitude:    lat,
 			Longitude:   long,
-		}
-		locations = append(locations, point)
+		})
 	}
 
-	return c.JSON(http.StatusOK, locations)
+	return c.JSON(http.StatusOK, services)
 }

@@ -6,17 +6,15 @@ import (
 )
 
 // Returns the first 10 locations and an error if any
-func GetServices() ([]types.Location, error) {
+func GetServices() ([]types.Service, error) {
 	query := `
         SELECT
-            address, ST_AsText(location) as location
+            vendor, title, description, rate, ST_AsText(location) as location, category
         FROM 
-            Location
-        LIMIT 
-            10
+            Service
     `
 
-	var locations []types.Location
+	var locations []types.Service
 	err := db.Connection.Select(&locations, query)
 	if err != nil {
 		return nil, err
