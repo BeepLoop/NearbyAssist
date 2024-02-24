@@ -14,9 +14,9 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
 
-	// e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-	// 	Format: "method=${method}, uri=${uri}, status=${status}\n",
-	// }))
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}\n",
+	}))
 	e.Use(middleware.Recover())
 	e.Use(middleware.RemoveTrailingSlash())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
