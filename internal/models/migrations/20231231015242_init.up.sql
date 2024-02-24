@@ -41,3 +41,16 @@ CREATE TABLE IF NOT EXISTS Service (
     PRIMARY KEY(id),
     FOREIGN KEY(category) REFERENCES Category(id)
 );
+
+CREATE TABLE IF NOT EXISTS Message (
+    id Int NOT NULL AUTO_INCREMENT,
+    sender Int NOT NULL,
+    reciever Int NOT NULL,
+    content Text NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(sender) REFERENCES User(id),
+    FOREIGN KEY(reciever) REFERENCES User(id)
+);
+
