@@ -3,6 +3,7 @@ package handlers
 import (
 	"nearbyassist/internal/controller/health"
 	"nearbyassist/internal/handlers/auth"
+	"nearbyassist/internal/handlers/message"
 	"nearbyassist/internal/handlers/service"
 	"nearbyassist/internal/handlers/user"
 
@@ -20,4 +21,7 @@ func RouteHandlerV1(r *echo.Group) {
 
 	userGroup := r.Group("/users")
 	user.UserHandler(userGroup)
+
+	messageGroup := r.Group("/messages")
+	message.MessageHandler(messageGroup)
 }
