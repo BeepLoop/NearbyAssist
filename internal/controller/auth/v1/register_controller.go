@@ -42,7 +42,12 @@ func HandleRegister(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{
-		"status": "ok",
-	})
+	user, err := query.GetUserByEmail(u.Email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, user)
 }
