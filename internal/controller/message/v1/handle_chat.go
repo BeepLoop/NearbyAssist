@@ -2,6 +2,8 @@ package message
 
 import (
 	"encoding/json"
+	"fmt"
+	query "nearbyassist/internal/db/query/message"
 	"nearbyassist/internal/types"
 	"net/http"
 
@@ -34,6 +36,11 @@ func HandleChat(c echo.Context) error {
 		err = json.Unmarshal(bytes, message)
 		if err != nil {
 			c.Logger().Error(err)
+		}
+
+		err = query.NewMessage(*message)
+		if err != nil {
+			fmt.Printf("error inserting message to db: %v\n", err.Error())
 		}
 
 		err = conn.WriteMessage(websocket.TextMessage, bytes)
