@@ -11,4 +11,5 @@ func MessageHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck)
 
 	r.GET("/conversations", message.GetMessages)
+	r.GET("/chat", message.HandleChat)
 }
