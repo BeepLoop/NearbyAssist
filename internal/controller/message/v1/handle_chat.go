@@ -1,9 +1,9 @@
 package message
 
 import (
-	"fmt"
+	"encoding/json"
+	"nearbyassist/internal/types"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -24,17 +24,22 @@ func HandleChat(c echo.Context) error {
 	}
 	defer conn.Close()
 
-	count := 1
 	for {
-		message := fmt.Sprintf("hello from server: %v", count)
-		err := conn.WriteMessage(websocket.TextMessage, []byte(message))
+		_, bytes, err := conn.ReadMessage()
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": err.Error(),
-			})
+			c.Logger().Error(err)
 		}
 
-		count++
-		time.Sleep(time.Second)
+		message := new(types.Message)
+		err = json.Unmarshal(bytes, message)
+		if err != nil {
+			c.Logger().Error(err)
+		}
+
+		err = conn.WriteMessage(websocket.TextMessage, bytes)
+		if err != nil {
+			c.Logger().Error(err)
+		}
+
 	}
 }
