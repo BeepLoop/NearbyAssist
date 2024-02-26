@@ -1,15 +1,17 @@
 package message
 
 import (
-	"encoding/json"
 	"fmt"
 	query "nearbyassist/internal/db/query/message"
 	"nearbyassist/internal/types"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
+
+var clients = make(map[int]*websocket.Conn)
 
 func HandleChat(c echo.Context) error {
 	upgrader := websocket.Upgrader{
@@ -26,31 +28,48 @@ func HandleChat(c echo.Context) error {
 	}
 	defer conn.Close()
 
-	client := c.Request().RemoteAddr
-	fmt.Printf("%s connected\n", client)
+	user := c.QueryParam("userId")
+	if user == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "missing data",
+		})
+	}
+
+	userId, err := strconv.Atoi(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid user id",
+		})
+	}
+
+	clients[userId] = conn
+	fmt.Printf("userId: %d connected\n", userId)
 
 	for {
-		_, bytes, err := conn.ReadMessage()
+		message := new(types.Message)
+		err := conn.ReadJSON(message)
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				fmt.Println("client disconnected")
+				fmt.Printf("client: %d disconnected\n", userId)
+				delete(clients, userId)
 				return nil
 			}
-			fmt.Println("error reading message")
-		}
-
-		message := new(types.Message)
-		err = json.Unmarshal(bytes, message)
-		if err != nil {
-			fmt.Println("error unmarshalling message")
+			fmt.Printf("error reading message: %s\n", err.Error())
 		}
 
 		err = query.NewMessage(*message)
 		if err != nil {
-			fmt.Println("error saving message")
+			fmt.Printf("error saving message: %s\n", err.Error())
 		}
 
-		err = conn.WriteMessage(websocket.TextMessage, bytes)
+		if socket, ok := clients[message.Reciever]; ok {
+			err := socket.WriteJSON(message)
+			if err != nil {
+				fmt.Printf("error sending message to recipient: %s\n", err.Error())
+			}
+		}
+
+		err = conn.WriteJSON(message)
 		if err != nil {
 			fmt.Println("error sending message")
 		}
