@@ -26,26 +26,33 @@ func HandleChat(c echo.Context) error {
 	}
 	defer conn.Close()
 
+	client := c.Request().RemoteAddr
+	fmt.Printf("%s connected\n", client)
+
 	for {
 		_, bytes, err := conn.ReadMessage()
 		if err != nil {
-			c.Logger().Error(err)
+			if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				fmt.Println("client disconnected")
+				return nil
+			}
+			fmt.Println("error reading message")
 		}
 
 		message := new(types.Message)
 		err = json.Unmarshal(bytes, message)
 		if err != nil {
-			c.Logger().Error(err)
+			fmt.Println("error unmarshalling message")
 		}
 
 		err = query.NewMessage(*message)
 		if err != nil {
-			fmt.Printf("error inserting message to db: %v\n", err.Error())
+			fmt.Println("error saving message")
 		}
 
 		err = conn.WriteMessage(websocket.TextMessage, bytes)
 		if err != nil {
-			c.Logger().Error(err)
+			fmt.Println("error sending message")
 		}
 
 	}
