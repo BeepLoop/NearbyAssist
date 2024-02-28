@@ -49,7 +49,7 @@ func HandleChat(c echo.Context) error {
 		message := new(types.Message)
 		err := conn.ReadJSON(message)
 		if err != nil {
-			if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				fmt.Printf("client: %d disconnected\n", userId)
 				delete(clients, userId)
 				return nil
