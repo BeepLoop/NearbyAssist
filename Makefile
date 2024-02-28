@@ -43,10 +43,10 @@ watch:
 
 migrate-up:
 	@echo "running up migration..."
-	@migrate -database ${mysql_conn}/nearby_assist -path internal/models/migrations up
+	@migrate -database ${mysql_conn}/nearby_assist -path internal/db/migrations up
 	@echo "done"
 
 migrate-down:
 	@echo "running down migration..."
-	@migrate -database ${mysql_conn}/nearby_assist -path internal/models/migrations down
+	@migrate -database ${mysql_conn}/nearby_assist -path internal/db/migrations down
 	@echo "done"
