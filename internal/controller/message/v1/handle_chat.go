@@ -63,15 +63,17 @@ func HandleChat(c echo.Context) error {
 		}
 
 		if socket, ok := clients[message.Reciever]; ok {
+			// forward message to reciever
 			err := socket.WriteJSON(message)
 			if err != nil {
 				fmt.Printf("error sending message to recipient: %s\n", err.Error())
 			}
-		}
 
-		err = conn.WriteJSON(message)
-		if err != nil {
-			fmt.Println("error sending message")
+			// forward message to sender
+			err = socket.WriteJSON(message)
+			if err != nil {
+				fmt.Printf("error sending message to recipient: %s\n", err.Error())
+			}
 		}
 
 	}
