@@ -42,3 +42,10 @@ CREATE TABLE IF NOT EXISTS Message (
     FOREIGN KEY(reciever) REFERENCES User(id)
 );
 
+create table if not exists Vendor (
+    id Int NOT NULL AUTO_INCREMENT,
+    vendorId Int NOT NULL,
+    rating Double NOT NULL DEFAULT 0,
+    PRIMARY KEY(id),
+    FOREIGN KEY(vendorId) REFERENCES User(id)
+);
