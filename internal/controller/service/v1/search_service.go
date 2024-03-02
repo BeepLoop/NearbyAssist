@@ -24,7 +24,7 @@ func SearchService(c echo.Context) error {
 		})
 	}
 
-	var services []types.TransformedServiceData
+	services := make([]types.TransformedServiceData, 0)
 	for _, location := range result {
 		lat, long := utils.LatlongExtractor(location.Location)
 		services = append(services, types.TransformedServiceData{
