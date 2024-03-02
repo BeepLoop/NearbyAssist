@@ -2,7 +2,6 @@ package message
 
 import (
 	"fmt"
-	query "nearbyassist/internal/db/query/message"
 	"nearbyassist/internal/types"
 	"net/http"
 	"strconv"
@@ -12,6 +11,8 @@ import (
 )
 
 var clients = make(map[int]*websocket.Conn)
+var messageChan = make(chan types.Message)
+var broadcastChan = make(chan types.Message)
 
 func HandleChat(c echo.Context) error {
 	upgrader := websocket.Upgrader{
@@ -55,26 +56,9 @@ func HandleChat(c echo.Context) error {
 				return nil
 			}
 			fmt.Printf("error reading message: %s\n", err.Error())
+			continue
 		}
 
-		err = query.NewMessage(*message)
-		if err != nil {
-			fmt.Printf("error saving message: %s\n", err.Error())
-		}
-
-		if socket, ok := clients[message.Reciever]; ok {
-			// forward message to reciever
-			err := socket.WriteJSON(message)
-			if err != nil {
-				fmt.Printf("error sending message to recipient: %s\n", err.Error())
-			}
-
-			// forward message to sender
-			err = socket.WriteJSON(message)
-			if err != nil {
-				fmt.Printf("error sending message to recipient: %s\n", err.Error())
-			}
-		}
-
+		messageChan <- *message
 	}
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"nearbyassist/internal/controller/health"
+	"nearbyassist/internal/controller/message/v1"
 	"nearbyassist/internal/handlers"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -26,6 +27,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 	e.GET("/health", health.HealthCheck)
 
 	handlers.RouteHandlerV1(e.Group("/v1"))
+
+	// Goroutine for saving messages
+	go message.MessageSavior()
+
+	// Goroutine for sending messages
+	go message.MessageForwarder()
 
 	return e
 }
