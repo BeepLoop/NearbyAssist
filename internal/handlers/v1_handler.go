@@ -3,6 +3,7 @@ package handlers
 import (
 	"nearbyassist/internal/controller/health"
 	"nearbyassist/internal/handlers/auth"
+	"nearbyassist/internal/handlers/category"
 	"nearbyassist/internal/handlers/message"
 	"nearbyassist/internal/handlers/service"
 	"nearbyassist/internal/handlers/service_vendor"
@@ -28,4 +29,7 @@ func RouteHandlerV1(r *echo.Group) {
 
 	vendorGroup := r.Group("/vendors")
 	service_vendor.VendorHandler(vendorGroup)
+
+	categoryGroup := r.Group("/categories")
+	category.CategoryHandler(categoryGroup)
 }
