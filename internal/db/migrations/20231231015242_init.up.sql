@@ -42,10 +42,12 @@ CREATE TABLE IF NOT EXISTS Message (
     FOREIGN KEY(reciever) REFERENCES User(id)
 );
 
-create table if not exists Vendor (
+CREATE TABLE IF NOT EXISTS Vendor (
     id Int NOT NULL AUTO_INCREMENT,
     vendorId Int NOT NULL,
     rating Double NOT NULL DEFAULT 0,
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES User(id)
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 );
