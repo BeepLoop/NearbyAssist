@@ -33,7 +33,7 @@ func RegisterService(c echo.Context) error {
 		})
 	}
 
-	err = query.RegisterService(*transfromedData)
+	err = service_query.RegisterService(*transfromedData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

@@ -22,7 +22,7 @@ func HandleLogin(c echo.Context) error {
 		})
 	}
 
-	exists, err := query.DoesUserExist(*u)
+	exists, err := user_query.DoesUserExist(*u)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": err.Error(),

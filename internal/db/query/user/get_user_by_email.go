@@ -1,4 +1,4 @@
-package query
+package user_query
 
 import (
 	"nearbyassist/internal/db"

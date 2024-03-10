@@ -1,7 +1,7 @@
 package service_vendor
 
 import (
-	query "nearbyassist/internal/db/query/user"
+	"nearbyassist/internal/db/query/user"
 	"net/http"
 	"strings"
 
@@ -17,7 +17,7 @@ func GetVendor(c echo.Context) error {
 	}
 	id := strings.ReplaceAll(vendorId, "/", "")
 
-	vendor, err := query.GetVendor(id)
+	vendor, err := user_query.GetVendor(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

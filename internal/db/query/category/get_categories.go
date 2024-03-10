@@ -1,4 +1,4 @@
-package query
+package category_query
 
 import (
 	"nearbyassist/internal/db"

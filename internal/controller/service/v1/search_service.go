@@ -17,7 +17,7 @@ func SearchService(c echo.Context) error {
 		})
 	}
 
-	result, err := query.SearchServices(params)
+	result, err := service_query.SearchServices(params)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

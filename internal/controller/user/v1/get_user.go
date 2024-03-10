@@ -1,7 +1,7 @@
 package user
 
 import (
-	query "nearbyassist/internal/db/query/user"
+	"nearbyassist/internal/db/query/user"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,7 +18,7 @@ func GetUser(c echo.Context) error {
 		})
 	}
 
-	user, err := query.GetUser(id)
+	user, err := user_query.GetUser(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

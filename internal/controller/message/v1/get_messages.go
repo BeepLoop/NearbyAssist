@@ -1,7 +1,7 @@
 package message
 
 import (
-	query "nearbyassist/internal/db/query/message"
+	"nearbyassist/internal/db/query/message"
 	"nearbyassist/internal/types"
 	"net/http"
 	"strconv"
@@ -37,7 +37,7 @@ func GetMessages(c echo.Context) error {
 		Reciever: to,
 	}
 
-	messages, err := query.GetMessages(msgParams)
+	messages, err := message_query.GetMessages(msgParams)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),

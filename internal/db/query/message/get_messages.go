@@ -1,4 +1,4 @@
-package query
+package message_query
 
 import (
 	"nearbyassist/internal/db"
