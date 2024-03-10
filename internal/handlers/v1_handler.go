@@ -34,6 +34,6 @@ func RouteHandlerV1(r *echo.Group) {
 	categoryGroup := r.Group("/categories")
 	category.CategoryHandler(categoryGroup)
 
-	uploadGroup := r.Group("/upload")
+	uploadGroup := r.Group("/uploads")
 	upload.UploadHandler(uploadGroup)
 }
