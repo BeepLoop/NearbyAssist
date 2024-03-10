@@ -41,6 +41,11 @@ watch:
 
 .PHONY: all build run test clean
 
+seed:
+	@echo "Seeding..."
+	@go run cmd/seeder/main.go
+	@echo "done"
+
 migrate-up:
 	@echo "running up migration..."
 	@migrate -database ${mysql_conn}/nearby_assist -path internal/db/migrations up
