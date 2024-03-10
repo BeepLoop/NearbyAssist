@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
@@ -15,6 +16,10 @@ func init() {
 
 	if err := db.Init(); err != nil {
 		log.Fatal("error initializing database connection: ", err)
+	}
+
+	if err := os.MkdirAll("store", 0777); err != nil {
+		log.Fatal("Unable to initialize file store: ", err)
 	}
 }
 
