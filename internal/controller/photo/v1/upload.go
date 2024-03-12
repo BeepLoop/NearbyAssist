@@ -2,14 +2,10 @@ package photo
 
 import (
 	"fmt"
-	"io"
 	photo_query "nearbyassist/internal/db/query/photo"
 	"nearbyassist/internal/types"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"os"
-	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -37,29 +33,8 @@ func UploadImage(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		src, err := file.Open()
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": err.Error(),
-			})
-		}
-		defer src.Close()
-
-		timestamp := time.Now().Format("2006-01-02_15:04:05")
-		mimeType := strings.Split(file.Header["Content-Type"][0], "/")[1]
-		distFilename := fmt.Sprintf("%d_%d_%s.%s", vendorId, serviceId, timestamp, mimeType)
-
-		// create the file in the server
-		dist, err := os.Create("store/" + distFilename)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": err.Error(),
-			})
-		}
-		defer dist.Close()
-
-		// copy the uploaded file to the opened file
-		_, err = io.Copy(dist, src)
+		// Save file to local storage
+		filename, err := utils.FileSaver(file, vendorId, serviceId)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": err.Error(),
@@ -70,7 +45,7 @@ func UploadImage(c echo.Context) error {
 		fileData := types.UploadData{
 			VendorId:  vendorId,
 			ServiceId: serviceId,
-			ImageUrl:  fmt.Sprintf("/resource/%s", distFilename),
+			ImageUrl:  fmt.Sprintf("/resource/%s", filename),
 		}
 		err = photo_query.UploadPhoto(fileData)
 		if err != nil {
