@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS Vendor (
     FOREIGN KEY(vendorId) REFERENCES User(id)
 );
 
-CREATE TABLE IF NOT EXISTS Photos (
+CREATE TABLE IF NOT EXISTS Photo (
     id Int NOT NULL AUTO_INCREMENT,
     service Int NOT NULL,
     vendor Int NOT NULL,

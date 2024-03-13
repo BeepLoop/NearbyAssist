@@ -8,7 +8,7 @@ import (
 func UploadPhoto(data types.UploadData) error {
 	query := `
         INSERT INTO
-            Photos (vendor, service, url)
+            Photo (vendor, service, url)
         VALUES 
             (:vendorId, :serviceId, :imageUrl)
     `
