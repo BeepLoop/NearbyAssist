@@ -26,3 +26,5 @@ tmp/
 
 *.csv
 store/*
+
+test_payload/

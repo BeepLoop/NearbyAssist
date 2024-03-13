@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/controller/health"
 	"nearbyassist/internal/handlers/auth"
 	"nearbyassist/internal/handlers/category"
+	"nearbyassist/internal/handlers/complaint"
 	"nearbyassist/internal/handlers/message"
 	"nearbyassist/internal/handlers/service"
 	"nearbyassist/internal/handlers/service_vendor"
@@ -36,4 +37,7 @@ func RouteHandlerV1(r *echo.Group) {
 
 	uploadGroup := r.Group("/uploads")
 	upload.UploadHandler(uploadGroup)
+
+	complaintGroup := r.Group("/complaints")
+	complaint.ComplaintsHandler(complaintGroup)
 }
