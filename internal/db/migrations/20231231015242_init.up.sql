@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS Photo (
     FOREIGN KEY(vendor) REFERENCES Vendor(id)
 );
 
-create table if not exists Complaint (
+CREATE TABLE IF NOT EXISTS Complaint (
     id Int NOT NULL AUTO_INCREMENT,
     vendorId Int NOT NULL,
     code Int NOT NULL,
