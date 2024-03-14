@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/handlers/category"
 	"nearbyassist/internal/handlers/complaint"
 	"nearbyassist/internal/handlers/message"
+	"nearbyassist/internal/handlers/review"
 	"nearbyassist/internal/handlers/service"
 	"nearbyassist/internal/handlers/service_vendor"
 	"nearbyassist/internal/handlers/upload"
@@ -40,4 +41,7 @@ func RouteHandlerV1(r *echo.Group) {
 
 	complaintGroup := r.Group("/complaints")
 	complaint.ComplaintsHandler(complaintGroup)
+
+    reviewGroup := r.Group("/reviews")
+    review.ReviewsHandler(reviewGroup)
 }
