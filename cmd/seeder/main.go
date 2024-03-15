@@ -117,4 +117,11 @@ func main() {
 	if err != nil {
 		panic("Error inserting vendors: " + err.Error())
 	}
+
+	// Seed reviews
+	_, err = db.Connection.NamedExec("INSERT INTO Review (vendorId, rating) values (:vendorId, :rating)", []types.Review{
+		{VendorId: 1, Rating: 5},
+		{VendorId: 1, Rating: 3},
+		{VendorId: 1, Rating: 3},
+	})
 }
