@@ -10,5 +10,6 @@ import (
 func ReviewsHandler(r *echo.Group) {
 
 	r.GET("/health", health.HealthCheck)
+	r.POST("/create", review.CreateReview)
 	r.GET(":vendorId", review.VendorReview)
 }
