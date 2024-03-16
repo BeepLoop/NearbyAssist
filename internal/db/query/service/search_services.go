@@ -10,7 +10,7 @@ import (
 func SearchServices(params *types.SearchParams) ([]types.Service, error) {
 	query := fmt.Sprintf(`
         SELECT
-            vendor, title, description, rate, ST_AsText(location) as location, category
+            id, vendor, title, description, rate, ST_AsText(location) as location, category
         FROM 
             Service
         WHERE

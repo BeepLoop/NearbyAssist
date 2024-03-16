@@ -1,6 +1,7 @@
 package types
 
 type Service struct {
+	Id          int     `db:"id"`
 	Vendor      int     `query:"vendor" db:"vendor"`
 	Title       string  `query:"title" db:"title"`
 	Description string  `query:"description" db:"description"`
@@ -10,6 +11,7 @@ type Service struct {
 }
 
 type TransformedServiceData struct {
+	Id          int
 	Vendor      int
 	Title       string
 	Description string

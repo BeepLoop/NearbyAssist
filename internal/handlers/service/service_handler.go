@@ -15,4 +15,6 @@ func ServiceHandler(r *echo.Group) {
 	r.POST("/register", service.RegisterService)
 
 	r.GET("/search", service.SearchService)
+
+	r.GET(":serviceId", service.GetServiceDetails)
 }

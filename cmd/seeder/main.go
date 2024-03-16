@@ -61,25 +61,25 @@ func main() {
 			VendorId:    1,
 			Title:       "Sugar & Leerd Bakery",
 			Description: "We bake the best cakes in town",
-			Rate:        100,
+			Rate:        100.00,
 			Latitude:    7.419594,
 			Longitude:   125.824616,
 			CategoryId:  1,
 		},
 		{
-			VendorId:    1,
+			VendorId:    2,
 			Title:       "11:11 Cafe",
 			Description: "We serve the best coffee in town",
-			Rate:        100,
+			Rate:        100.00,
 			Latitude:    7.422325,
 			Longitude:   125.824777,
 			CategoryId:  1,
 		},
 		{
-			VendorId:    1,
+			VendorId:    2,
 			Title:       "Minute Burger",
 			Description: "We serve the best burgers in town",
-			Rate:        100,
+			Rate:        100.00,
 			Latitude:    7.4234,
 			Longitude:   125.828901,
 			CategoryId:  1,
@@ -88,7 +88,7 @@ func main() {
 			VendorId:    1,
 			Title:       "Hugo Bistro",
 			Description: "We serve the best pizza in town",
-			Rate:        100,
+			Rate:        100.00,
 			Latitude:    7.424179,
 			Longitude:   125.829182,
 			CategoryId:  1,
@@ -121,8 +121,8 @@ func main() {
 
 	// Seed reviews
 	_, err = db.Connection.NamedExec("INSERT INTO Review (vendorId, rating) values (:vendorId, :rating)", []types.Review{
-		{VendorId: 1, Rating: 5},
-		{VendorId: 1, Rating: 3},
-		{VendorId: 1, Rating: 3},
+		{ServiceId: 1, Rating: 5},
+		{ServiceId: 1, Rating: 3},
+		{ServiceId: 1, Rating: 3},
 	})
 }

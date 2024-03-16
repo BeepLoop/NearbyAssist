@@ -5,20 +5,20 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func ReviewCount(vendorId string) (types.Count, error) {
+func ReviewCount(serviceId string) (types.Count, error) {
 	query := `
         SELECT 
             rating, COUNT(*) AS count 
         FROM 
             Review 
         WHERE 
-            vendorId = ?
+            serviceId = ?
         GROUP BY 
             rating;
     `
 
 	reviewCount := make([]types.ReviewCount, 0)
-	err := db.Connection.Select(&reviewCount, query, vendorId)
+	err := db.Connection.Select(&reviewCount, query, serviceId)
 	if err != nil {
 		return nil, err
 	}

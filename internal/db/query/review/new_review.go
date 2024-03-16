@@ -8,9 +8,9 @@ import (
 func CreateReview(review types.Review) error {
 	query := `
         INSERT INTO
-            Review (vendorId, rating) 
+            Review (serviceId, rating) 
         VALUES 
-            (:vendorId, :rating)
+            (:serviceId, :rating)
     `
 
 	_, err := db.Connection.NamedExec(query, review)
