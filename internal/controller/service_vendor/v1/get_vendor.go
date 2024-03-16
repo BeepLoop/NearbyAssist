@@ -1,6 +1,7 @@
 package service_vendor
 
 import (
+	review_query "nearbyassist/internal/db/query/review"
 	"nearbyassist/internal/db/query/user"
 	"net/http"
 	"strings"
@@ -23,6 +24,14 @@ func GetVendor(c echo.Context) error {
 			"error": err.Error(),
 		})
 	}
+
+	reviewCount, err := review_query.ReviewCount(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+	vendor.ReviewCount = reviewCount
 
 	return c.JSON(http.StatusOK, vendor)
 }

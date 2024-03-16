@@ -5,3 +5,8 @@ type Review struct {
 	VendorId int `db:"vendorId"`
 	Rating   int `db:"rating"`
 }
+
+type ReviewCount struct {
+	Rating string `db:"rating"`
+	Count  int    `db:"count"`
+}
