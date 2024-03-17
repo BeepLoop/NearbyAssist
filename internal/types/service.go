@@ -2,7 +2,7 @@ package types
 
 type Service struct {
 	Id          int     `db:"id"`
-	Vendor      int     `query:"vendor" db:"vendor"`
+	Vendor      int     `query:"vendorId" db:"vendorId"`
 	Title       string  `query:"title" db:"title"`
 	Description string  `query:"description" db:"description"`
 	Rate        float64 `query:"rate" db:"rate"`

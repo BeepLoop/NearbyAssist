@@ -95,7 +95,7 @@ func main() {
 			panic("Error transforming service data: " + err.Error())
 		}
 
-		_, err = db.Connection.NamedExec("INSERT INTO Service (vendor, title, description, rate, location, category) values (:vendorId, :title, :description, :rate, ST_GeomFromText(:point, 4326), :categoryId)", data)
+		_, err = db.Connection.NamedExec("INSERT INTO Service (vendorId, title, description, rate, location, category) values (:vendorId, :title, :description, :rate, ST_GeomFromText(:point, 4326), :categoryId)", data)
 		if err != nil {
 			panic("Error inserting service: " + err.Error())
 		}

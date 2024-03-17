@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Category (
 
 CREATE TABLE IF NOT EXISTS Service (
     id Int NOT NULL AUTO_INCREMENT,
-    vendor Int NOT NULL,
+    vendorId Int NOT NULL,
     title Varchar(255) NOT NULL,
     description Varchar(255) NOT NULL,
     rate Double NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Service (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
-    FOREIGN KEY(vendor) REFERENCES User(id),
+    FOREIGN KEY(vendorId) REFERENCES User(id),
     FOREIGN KEY(category) REFERENCES Category(id)
 );
 
@@ -102,5 +102,5 @@ BEGIN
     -- Update the rating field in the Vendor table
     UPDATE Vendor
     SET rating = avg_rating
-    WHERE vendorId = (SELECT vendor FROM Service WHERE id = NEW.serviceId);
+    WHERE vendorId = (SELECT vendorId FROM Service WHERE id = NEW.serviceId);
 END;

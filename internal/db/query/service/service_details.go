@@ -9,7 +9,7 @@ func GetServiceDetails(serviceId string) (*types.ServiceDetails, error) {
 	query := `
         SELECT 
             s.id,
-            vendorId,
+            s.vendorId,
             title,
             description,
             u.name,
@@ -19,8 +19,8 @@ func GetServiceDetails(serviceId string) (*types.ServiceDetails, error) {
             v.role as vendorRole
         FROM 
             Service s 
-            LEFT JOIN User u ON u.id = s.vendor 
-            LEFT JOIN Vendor v ON v.vendorId = s.vendor 
+            LEFT JOIN User u ON u.id = s.vendorId 
+            LEFT JOIN Vendor v ON v.vendorId = s.vendorId
         WHERE 
             s.id = ?
     `

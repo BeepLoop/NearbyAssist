@@ -9,7 +9,7 @@ import (
 func GetServices() ([]types.Service, error) {
 	query := `
         SELECT
-            vendor, title, description, rate, ST_AsText(location) as location, category
+            vendorId, title, description, rate, ST_AsText(location) as location, category
         FROM 
             Service
         LIMIT

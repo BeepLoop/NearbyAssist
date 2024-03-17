@@ -9,7 +9,7 @@ func RegisterService(service types.ServiceRegister) error {
 	query := `
 	        INSERT INTO
 	            Service
-	                (vendor, title, description, rate, location, category)
+	                (vendorId, title, description, rate, location, category)
 	        VALUES 
                 (
                     :vendorId,
