@@ -87,3 +87,20 @@ CREATE TABLE IF NOT EXISTS Review (
     PRIMARY KEY(id),
     FOREIGN KEY(serviceId) REFERENCES Service(id)
 );
+
+CREATE TRIGGER update_vendor_rating
+AFTER INSERT ON Review
+FOR EACH ROW
+BEGIN
+    DECLARE avg_rating DECIMAL(5,1);
+    
+    -- Compute the average rating for the given serviceId
+    SELECT ROUND(AVG(rating), 1) INTO avg_rating
+    FROM Review
+    WHERE serviceId = NEW.serviceId;
+
+    -- Update the rating field in the Vendor table
+    UPDATE Vendor
+    SET rating = avg_rating
+    WHERE vendorId = (SELECT vendor FROM Service WHERE id = NEW.serviceId);
+END;
