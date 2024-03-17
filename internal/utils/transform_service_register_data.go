@@ -5,7 +5,7 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func TransformServiceData(service types.ServiceRegister) (*types.ServiceRegister, error) {
+func TransformServiceData(service types.ServiceRegister) (types.ServiceRegister, error) {
 
 	point := fmt.Sprintf(
 		"POINT(%f %f)",
@@ -22,5 +22,5 @@ func TransformServiceData(service types.ServiceRegister) (*types.ServiceRegister
 		Point:     point,
 	}
 
-	return &transformedData, nil
+	return transformedData, nil
 }
