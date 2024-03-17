@@ -56,14 +56,14 @@ CREATE TABLE IF NOT EXISTS Vendor (
 
 CREATE TABLE IF NOT EXISTS Photo (
     id Int NOT NULL AUTO_INCREMENT,
-    service Int NOT NULL,
-    vendor Int NOT NULL,
+    serviceId Int NOT NULL,
+    vendorId Int NOT NULL,
     url Varchar(255) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
-    FOREIGN KEY(service) REFERENCES Service(id),
-    FOREIGN KEY(vendor) REFERENCES Vendor(id)
+    FOREIGN KEY(serviceId) REFERENCES Service(id),
+    FOREIGN KEY(vendorId) REFERENCES Vendor(id)
 );
 
 CREATE TABLE IF NOT EXISTS Complaint (
