@@ -12,6 +12,8 @@ func GetServices() ([]types.Service, error) {
             vendor, title, description, rate, ST_AsText(location) as location, category
         FROM 
             Service
+        LIMIT
+            10
     `
 
 	var locations []types.Service
