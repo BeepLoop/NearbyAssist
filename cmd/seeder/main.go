@@ -103,8 +103,8 @@ func main() {
 
 	// Seed vendors
 	_, err = db.Connection.NamedExec("INSERT INTO Vendor (vendorId, rating, role) values (:vendorId, :rating, :role)", []types.VendorData{
-		{VendorId: 1, Rating: 4.5, Role: "plumber"},
-		{VendorId: 2, Rating: 3.5, Role: "electrician"},
+		{VendorId: 1, Role: "plumber"},
+		{VendorId: 2, Role: "electrician"},
 	})
 	if err != nil {
 		panic("Error inserting vendors: " + err.Error())
