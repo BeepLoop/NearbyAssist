@@ -18,7 +18,7 @@ func GetServiceDetails(c echo.Context) error {
 	}
 	id := strings.ReplaceAll(serviceId, "/", "")
 
-	details, err := service_query.GetServiceDetails(id)
+	serviceDetails, err := service_query.GetServiceDetails(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
@@ -31,7 +31,15 @@ func GetServiceDetails(c echo.Context) error {
 			"error": err.Error(),
 		})
 	}
-	details.ReviewCount = reviewCount
+	serviceDetails.ReviewCount = reviewCount
 
-	return c.JSON(http.StatusOK, details)
+	servicePhotos, err := service_query.GetPhotos(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+	serviceDetails.Photos = servicePhotos
+
+	return c.JSON(http.StatusOK, serviceDetails)
 }

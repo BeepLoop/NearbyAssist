@@ -11,4 +11,5 @@ type ServiceDetails struct {
 	Rating      float32 `query:"rating" db:"rating"`
 	VendorRole  string  `query:"vendorRole" db:"vendorRole"`
 	ReviewCount Count
+	Photos      []Photo
 }
