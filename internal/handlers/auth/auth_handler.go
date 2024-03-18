@@ -12,5 +12,4 @@ func AuthHandler(r *echo.Group) {
 
 	r.POST("/", auth.AdminLogin)
 	r.POST("/login", auth.HandleLogin)
-	r.POST("/register", auth.HandleRegister)
 }
