@@ -8,6 +8,18 @@ CREATE TABLE IF NOT EXISTS User (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE IF NOT EXISTS Session (
+    id Int NOT NULL AUTO_INCREMENT,
+    userId Int NOT NULL,
+    token Text NOT NULL,
+    status Enum('online', 'offline') NOT NULL DEFAULT 'online',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(userId) REFERENCES User(id),
+    CONSTRAINT unique_userId_online UNIQUE (userId, (CASE WHEN status = 'online' THEN 1 ELSE NULL END))
+);
+
 CREATE TABLE IF NOT EXISTS Category (
     id Int NOT NULL AUTO_INCREMENT,
     title Varchar(255) NOT NULL,
