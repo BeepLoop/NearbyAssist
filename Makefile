@@ -48,10 +48,10 @@ seed:
 
 migrate-up:
 	@echo "running up migration..."
-	@migrate -database ${mysql_conn}/nearby_assist -path internal/db/migrations up
+	@go run internal/db/migrations/migration.go -up=true
 	@echo "done"
 
 migrate-down:
 	@echo "running down migration..."
-	@migrate -database ${mysql_conn}/nearby_assist -path internal/db/migrations down
+	@go run internal/db/migrations/migration.go -down=true
 	@echo "done"
