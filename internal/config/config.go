@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/labstack/gommon/log"
 )
 
 var Env *types.Config
@@ -19,7 +18,6 @@ func Init() error {
 	} else {
 		dsn = os.Getenv("DSN_PROD")
 	}
-	log.Info("DSN: ", dsn)
 
 	Env = &types.Config{
 		DSN: dsn,
