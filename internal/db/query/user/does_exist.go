@@ -18,7 +18,7 @@ func DoesUserExist(user types.User) (bool, error) {
     `
 
 	var count int
-	err := db.Connection.Get(count, query, user.Name, user.Email)
+	err := db.Connection.Get(&count, query, user.Name, user.Email)
 	if err != nil {
 		return false, err
 	}

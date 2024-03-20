@@ -1,8 +1,8 @@
 package auth
 
 import (
-	// "nearbyassist/internal/db/query/user"
 	session_query "nearbyassist/internal/db/query/session"
+	user_query "nearbyassist/internal/db/query/user"
 	"nearbyassist/internal/types"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -24,6 +24,22 @@ func HandleLogin(c echo.Context) error {
 		})
 	}
 
+	exists, err := user_query.DoesUserExist(*u)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "unable to check user",
+		})
+	}
+
+	if !exists {
+		err = user_query.RegisterUser(*u)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "unable to register user",
+			})
+		}
+	}
+
 	token, err := utils.GenerateJwt(*u)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -33,7 +49,7 @@ func HandleLogin(c echo.Context) error {
 
 	err = session_query.NewSession(u.Name, token)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "active session already exists",
 		})
 	}
