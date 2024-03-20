@@ -5,9 +5,18 @@ import (
 )
 
 func NewSession(username string, token string) error {
-
 	tx, err := db.Connection.Beginx()
 	if err != nil {
+		return err
+	}
+
+	var onlineCount int
+	err = tx.Get(&onlineCount, "SELECT COUNT(*) FROM Session WHERE userId = (SELECT id FROM User WHERE name = ?) AND status = 'online'", username)
+	if err != nil {
+		if rollbackError := tx.Rollback(); rollbackError != nil {
+			return rollbackError
+		}
+
 		return err
 	}
 

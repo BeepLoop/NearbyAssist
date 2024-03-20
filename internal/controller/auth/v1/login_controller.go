@@ -24,16 +24,17 @@ func HandleLogin(c echo.Context) error {
 		})
 	}
 
-	user, err := user_query.FindUser(u.Name, u.Email)
+	_, err := user_query.FindUser(u.Name, u.Email)
 	if err != nil {
 		id, err := user_query.RegisterUser(*u)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "unable to register user",
+				"error":   "unable to register user",
+				"message": err.Error(),
 			})
 		}
 
-		user.Id = id
+		u.Id = id
 	}
 
 	token, err := utils.GenerateJwt(*u)
@@ -46,12 +47,13 @@ func HandleLogin(c echo.Context) error {
 	err = session_query.NewSession(u.Name, token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "active session already exists",
+			"error":   "active session already exists",
+			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"userId": user.Id,
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"userId": u.Id,
 		"token":  token,
 	})
 }
