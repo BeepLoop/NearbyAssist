@@ -24,20 +24,16 @@ func HandleLogin(c echo.Context) error {
 		})
 	}
 
-	exists, err := user_query.DoesUserExist(*u)
+	user, err := user_query.FindUser(u.Name, u.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "unable to check user",
-		})
-	}
-
-	if !exists {
-		err = user_query.RegisterUser(*u)
+		id, err := user_query.RegisterUser(*u)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"error": "unable to register user",
 			})
 		}
+
+		user.Id = id
 	}
 
 	token, err := utils.GenerateJwt(*u)
@@ -54,8 +50,8 @@ func HandleLogin(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"status": "ok",
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"userId": user.Id,
 		"token":  token,
 	})
 }

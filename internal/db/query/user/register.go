@@ -5,7 +5,7 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func RegisterUser(user types.User) error {
+func RegisterUser(user types.User) (int, error) {
 	query := `
 	        INSERT INTO
 	            User (name, email, imageUrl)
@@ -13,10 +13,15 @@ func RegisterUser(user types.User) error {
                 (:name, :email, :imageUrl)
 	    `
 
-	_, err := db.Connection.NamedExec(query, user)
+	res, err := db.Connection.NamedExec(query, user)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
 }
