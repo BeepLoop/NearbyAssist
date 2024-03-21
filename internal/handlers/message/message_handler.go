@@ -12,4 +12,5 @@ func MessageHandler(r *echo.Group) {
 
 	r.GET("/conversations", message.GetMessages)
 	r.GET("/chat", message.HandleChat)
+	r.GET("/acquaintances", message.GetAcquaintances)
 }
