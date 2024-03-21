@@ -11,6 +11,8 @@ func MessageForwarder() {
 			if err != nil {
 				fmt.Printf("error sending message to recipient: %s\n", err.Error())
 			}
+		} else {
+			fmt.Printf("Reciever not found!\n")
 			continue
 		}
 
@@ -19,6 +21,8 @@ func MessageForwarder() {
 			if err != nil {
 				fmt.Printf("error sending message to sender: %s\n", err.Error())
 			}
+		} else {
+			fmt.Printf("Sender not found\n")
 			continue
 		}
 	}
