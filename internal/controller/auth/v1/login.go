@@ -24,7 +24,7 @@ func HandleLogin(c echo.Context) error {
 		})
 	}
 
-	_, err := user_query.FindUser(u.Name, u.Email)
+	user, err := user_query.FindUser(u.Name, u.Email)
 	if err != nil {
 		id, err := user_query.RegisterUser(*u)
 		if err != nil {
@@ -35,6 +35,8 @@ func HandleLogin(c echo.Context) error {
 		}
 
 		u.Id = id
+	} else {
+		u.Id = user.Id
 	}
 
 	token, err := utils.GenerateJwt(*u)
