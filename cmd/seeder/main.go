@@ -33,59 +33,42 @@ func main() {
 		{
 			Name:     "John Loyd Mulit",
 			Email:    "jlmulit@email.com",
-			ImageUrl: "https://dummyimage.com/400x400/000/fff",
-		},
-		{
-			Name:     "Cherry Lyn Burlat",
-			Email:    "clburlat@email.com",
-			ImageUrl: "https://dummyimage.com/400x400/000/fff",
-		},
-		{
-			Name:     "Adrian Juntilla",
-			Email:    "ajuntilla@email.com",
-			ImageUrl: "https://dummyimage.com/400x400/000/fff",
+			ImageUrl: "https://i.pravatar.cc/100",
 		},
 	})
 	if err != nil {
 		panic("Error inserting user: " + err.Error())
 	}
 
+	// Seed vendors
+	_, err = db.Connection.NamedExec("INSERT INTO Vendor (vendorId, role) values ((SELECT id FROM User WHERE name = :name), :role)", []struct {
+		Name string `db:"name"`
+		Role string `db:"role"`
+	}{
+		{Name: "John Loyd Mulit", Role: "Plumber"},
+	})
+	if err != nil {
+		panic("Error inserting vendors: " + err.Error())
+	}
+
 	// Seed sevices
 	services := []types.ServiceRegister{
 		{
 			VendorId:    1,
-			Title:       "Sugar & Leerd Bakery",
-			Description: "We bake the best cakes in town",
+			Title:       "Computer Repair & Maintenance",
+			Description: "We offer computer repair and maintenance services.",
 			Rate:        100.00,
-			Latitude:    7.419594,
-			Longitude:   125.824616,
-			CategoryId:  1,
-		},
-		{
-			VendorId:    2,
-			Title:       "11:11 Cafe",
-			Description: "We serve the best coffee in town",
-			Rate:        100.00,
-			Latitude:    7.422325,
-			Longitude:   125.824777,
-			CategoryId:  1,
-		},
-		{
-			VendorId:    2,
-			Title:       "Minute Burger",
-			Description: "We serve the best burgers in town",
-			Rate:        100.00,
-			Latitude:    7.4234,
-			Longitude:   125.828901,
+			Latitude:    7.422302,
+			Longitude:   125.824747,
 			CategoryId:  1,
 		},
 		{
 			VendorId:    1,
-			Title:       "Hugo Bistro",
-			Description: "We serve the best pizza in town",
+			Title:       "Plumbing Services",
+			Description: "We offer plumbing services.",
 			Rate:        100.00,
-			Latitude:    7.424179,
-			Longitude:   125.829182,
+			Latitude:    7.419594,
+			Longitude:   125.824616,
 			CategoryId:  1,
 		},
 	}
@@ -101,20 +84,12 @@ func main() {
 		}
 	}
 
-	// Seed vendors
-	_, err = db.Connection.NamedExec("INSERT INTO Vendor (vendorId, rating, role) values (:vendorId, :rating, :role)", []types.VendorData{
-		{VendorId: 1, Role: "plumber"},
-		{VendorId: 2, Role: "electrician"},
-	})
-	if err != nil {
-		panic("Error inserting vendors: " + err.Error())
-	}
-
 	// Seed reviews
 	_, err = db.Connection.NamedExec("INSERT INTO Review (serviceId, rating) values (:serviceId, :rating)", []types.Review{
 		{ServiceId: 1, Rating: 5},
 		{ServiceId: 1, Rating: 3},
 		{ServiceId: 1, Rating: 3},
+		{ServiceId: 1, Rating: 4},
 	})
 	if err != nil {
 		panic("Error inserting reviews: " + err.Error())
@@ -122,10 +97,8 @@ func main() {
 
 	// Seed service photos
 	_, err = db.Connection.NamedExec("INSERT INTO Photo (vendorId, serviceId, url) values (:vendorId, :serviceId, :url)", []types.Photo{
-		{ServiceId: 1, VendorId: 1, Url: "https://dummyimage.com/400x400/000/fff"},
-		{ServiceId: 1, VendorId: 1, Url: "https://dummyimage.com/400x400/000/fff"},
-		{ServiceId: 2, VendorId: 2, Url: "https://dummyimage.com/400x400/000/fff"},
-		{ServiceId: 2, VendorId: 2, Url: "https://dummyimage.com/400x400/000/fff"},
+		{ServiceId: 1, VendorId: 1, Url: "https://i.pravatar.cc/100"},
+		{ServiceId: 1, VendorId: 1, Url: "https://i.pravatar.cc/100"},
 	})
 	if err != nil {
 		panic("Error inserting photos: " + err.Error())
