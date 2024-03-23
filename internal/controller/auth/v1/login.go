@@ -44,7 +44,7 @@ func HandleLogin(c echo.Context) error {
 		})
 	}
 
-	err = session_query.NewSession(u.Name, token)
+	err = session_query.NewSession(u.Name, u.Email,  token)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error":   "active session already exists",
