@@ -32,7 +32,7 @@ func main() {
 	_, err = db.Connection.NamedExec("INSERT INTO User (name, email, imageUrl) values (:name, :email, :imageUrl)", []types.User{
 		{
 			Name:     "John Loyd Mulit",
-			Email:    "jlmulit@email.com",
+			Email:    "jlmulit68@gmail.com",
 			ImageUrl: "https://i.pravatar.cc/100",
 		},
 	})
