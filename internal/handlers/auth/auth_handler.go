@@ -8,9 +8,9 @@ import (
 )
 
 func AuthHandler(r *echo.Group) {
-	r.GET("/health", health.HealthCheck)
+	r.GET("/health", health.HealthCheck).Name = "auth route health check"
 
-	r.POST("/", auth.AdminLogin)
-	r.POST("/login", auth.HandleLogin)
-	r.POST("/logout", auth.HandlLogout)
+	r.POST("/", auth.AdminLogin).Name = "admin login"
+	r.POST("/login", auth.HandleLogin).Name = "client login"
+	r.POST("/logout", auth.HandlLogout).Name = "client logout"
 }

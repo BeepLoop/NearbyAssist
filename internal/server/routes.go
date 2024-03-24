@@ -27,10 +27,16 @@ func (s *Server) RegisterRoutes() http.Handler {
 	e.Validator = &utils.Validator{Validator: validator.New()}
 
 	// File server
-	e.Static("/resource", "store/")
+	e.Static("/resource", "store/").Name = "file resource"
 
 	// Routes
-	e.GET("/health", health.HealthCheck)
+	e.GET("/", func(c echo.Context) error {
+		routes := e.Routes()
+
+		return c.JSON(http.StatusOK, routes)
+	})
+
+	e.GET("/health", health.HealthCheck).Name = "health check"
 	handlers.RouteHandlerV1(e.Group("/v1"))
 
 	// Goroutine for saving messages

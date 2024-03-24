@@ -8,7 +8,7 @@ import (
 )
 
 func UserHandler(r *echo.Group) {
+	r.GET("/health", health.HealthCheck).Name = "user route health check"
 
-	r.GET("/health", health.HealthCheck)
-	r.GET(":userId", user.GetUser)
+	r.GET(":userId", user.GetUser).Name = "get user details"
 }

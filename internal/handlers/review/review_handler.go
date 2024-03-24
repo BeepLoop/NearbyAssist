@@ -8,8 +8,8 @@ import (
 )
 
 func ReviewsHandler(r *echo.Group) {
+	r.GET("/health", health.HealthCheck).Name = "review route health check"
 
-	r.GET("/health", health.HealthCheck)
-	r.POST("/create", review.CreateReview)
-	r.GET(":vendorId", review.VendorReview)
+	r.POST("/create", review.CreateReview).Name = "post a review"
+	r.GET(":vendorId", review.VendorReview).Name = "get vendor reviews"
 }

@@ -8,13 +8,10 @@ import (
 )
 
 func ServiceHandler(r *echo.Group) {
-	r.GET("/health", health.HealthCheck)
+	r.GET("/health", health.HealthCheck).Name = "service route health check"
 
-	r.GET("/", service.GetServices)
-
-	r.POST("/register", service.RegisterService)
-
-	r.GET("/search", service.SearchService)
-
-	r.GET(":serviceId", service.GetServiceDetails)
+	r.GET("/", service.GetServices).Name = "get all services"
+	r.POST("/register", service.RegisterService).Name = "register service"
+	r.GET("/search", service.SearchService).Name = "search service"
+	r.GET(":serviceId", service.GetServiceDetails).Name = "get service details"
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func CategoryHandler(r *echo.Group) {
-	r.GET("/health", health.HealthCheck)
+	r.GET("/health", health.HealthCheck).Name = "category route health check"
 
-	r.GET("/", category.GetCategories)
+	r.GET("/", category.GetCategories).Name = "get all categories"
 }

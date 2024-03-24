@@ -8,6 +8,7 @@ import (
 )
 
 func UploadHandler(r *echo.Group) {
-	r.GET("/health", health.HealthCheck)
-	r.POST("/upload", photo.UploadImage)
+	r.GET("/health", health.HealthCheck).Name = "upload route health check"
+
+	r.POST("/upload", photo.UploadImage).Name = "upload image"
 }

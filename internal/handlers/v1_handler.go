@@ -16,7 +16,7 @@ import (
 )
 
 func RouteHandlerV1(r *echo.Group) {
-	r.GET("/health", health.HealthCheck)
+	r.GET("/health", health.HealthCheck).Name = "v1 route health check"
 
 	authGroup := r.Group("/auth")
 	auth.AuthHandler(authGroup)
@@ -42,6 +42,6 @@ func RouteHandlerV1(r *echo.Group) {
 	complaintGroup := r.Group("/complaints")
 	complaint.ComplaintsHandler(complaintGroup)
 
-    reviewGroup := r.Group("/reviews")
-    review.ReviewsHandler(reviewGroup)
+	reviewGroup := r.Group("/reviews")
+	review.ReviewsHandler(reviewGroup)
 }
