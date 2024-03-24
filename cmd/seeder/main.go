@@ -60,7 +60,7 @@ func main() {
 			Rate:        100.00,
 			Latitude:    7.422302,
 			Longitude:   125.824747,
-			CategoryId:  1,
+			CategoryId:  2,
 		},
 		{
 			VendorId:    1,
@@ -69,7 +69,7 @@ func main() {
 			Rate:        100.00,
 			Latitude:    7.419594,
 			Longitude:   125.824616,
-			CategoryId:  1,
+			CategoryId:  2,
 		},
 	}
 	for _, service := range services {
