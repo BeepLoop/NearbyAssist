@@ -20,7 +20,7 @@ func GetVendor(c echo.Context) error {
 
 	vendor, err := user_query.GetVendor(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.JSON(http.StatusNoContent, map[string]string{
 			"error": err.Error(),
 		})
 	}
