@@ -14,4 +14,5 @@ func ServiceHandler(r *echo.Group) {
 	r.POST("/register", service.RegisterService).Name = "register service"
 	r.GET("/search", service.SearchService).Name = "search service"
 	r.GET(":serviceId", service.GetServiceDetails).Name = "get service details"
+    r.GET("/owner/:ownerId", service.GetOwnerServices).Name = "get owner services"
 }
