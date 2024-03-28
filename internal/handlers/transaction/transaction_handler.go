@@ -12,4 +12,6 @@ func TransactionsHandler(r *echo.Group) {
 
 	r.GET("/ongoing/client/:userId", transaction.OngoingClientTransactions).Name = "get client ongoing transactions"
 	r.GET("/ongoing/vendor/:userId", transaction.OngoingVendorTransactions).Name = "get vendor ongoing transactions"
+	r.GET("/history/client/:userId", transaction.GetClientTransactionHistory).Name = "get client transaction history"
+	r.GET("/history/vendor/:userId", transaction.GetVendorTransactionHistory).Name = "get vendor transaction history"
 }

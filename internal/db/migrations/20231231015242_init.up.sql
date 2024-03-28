@@ -120,8 +120,7 @@ CREATE TABLE IF NOT EXISTS Transaction (
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES Vendor(id),
     FOREIGN KEY(serviceId) REFERENCES Service(id),
-    FOREIGN KEY(clientId) REFERENCES User(id),
-    CONSTRAINT unique_vendor_client UNIQUE (vendorId, clientId)
+    FOREIGN KEY(clientId) REFERENCES User(id)
 );
 
 CREATE TRIGGER update_vendor_rating
