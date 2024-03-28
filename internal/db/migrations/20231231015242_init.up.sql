@@ -109,6 +109,21 @@ CREATE TABLE IF NOT EXISTS Review (
     INDEX(id, serviceId)
 );
 
+CREATE TABLE IF NOT EXISTS Transaction (
+    id INT NOT NULL AUTO_INCREMENT,
+    vendorId INT NOT NULL,
+    clientId INT NOT NULL,
+    serviceId INT NOT NULL,
+    status Enum('ongoing', 'done', 'cancelled') NOT NULL DEFAULT 'ongoing',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(vendorId) REFERENCES Vendor(id),
+    FOREIGN KEY(serviceId) REFERENCES Service(id),
+    FOREIGN KEY(clientId) REFERENCES User(id),
+    CONSTRAINT unique_vendor_client UNIQUE (vendorId, clientId)
+);
+
 CREATE TRIGGER update_vendor_rating
 AFTER INSERT ON Review
 FOR EACH ROW

@@ -9,6 +9,7 @@ import (
 	"nearbyassist/internal/handlers/review"
 	"nearbyassist/internal/handlers/service"
 	"nearbyassist/internal/handlers/service_vendor"
+	"nearbyassist/internal/handlers/transaction"
 	"nearbyassist/internal/handlers/upload"
 	"nearbyassist/internal/handlers/user"
 
@@ -44,4 +45,7 @@ func RouteHandlerV1(r *echo.Group) {
 
 	reviewGroup := r.Group("/reviews")
 	review.ReviewsHandler(reviewGroup)
+
+	transactionGroup := r.Group("/transactions")
+	transaction.TransactionsHandler(transactionGroup)
 }
