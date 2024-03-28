@@ -4,18 +4,18 @@ import (
 	"nearbyassist/internal/db/query/user"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetUser(c echo.Context) error {
 	userId := c.Param("userId")
-	id, err := strconv.Atoi(strings.ReplaceAll(userId, "/", ""))
+	if userId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "missing user ID")
+	}
+	id, err := strconv.Atoi(userId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
 	user, err := user_query.GetUser(id)

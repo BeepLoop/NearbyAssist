@@ -5,7 +5,6 @@ import (
 	service_query "nearbyassist/internal/db/query/service"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -17,7 +16,7 @@ func GetServiceDetails(c echo.Context) error {
 			"error": "serviceId is required",
 		})
 	}
-	id, err := strconv.Atoi(strings.ReplaceAll(serviceId, "/", ""))
+	id, err := strconv.Atoi(serviceId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "service ID must be a number",

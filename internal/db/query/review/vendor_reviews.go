@@ -8,11 +8,11 @@ import (
 func VendorReview(vendorId int) ([]types.Review, error) {
 	query := `
         SELECT 
-            id, vendorId, rating
+            id, serviceId, rating
         FROM 
             Review 
         WHERE
-            vendorId = ?
+            serviceId = ?
     `
 
 	reviews := make([]types.Review, 0)

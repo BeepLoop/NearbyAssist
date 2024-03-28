@@ -5,7 +5,6 @@ import (
 	"nearbyassist/internal/db/query/user"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -17,7 +16,7 @@ func GetVendor(c echo.Context) error {
 			"error": "vendorId is required",
 		})
 	}
-	id, err := strconv.Atoi(strings.ReplaceAll(vendorId, "/", ""))
+	id, err := strconv.Atoi(vendorId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "vendor ID must be a number",

@@ -10,5 +10,5 @@ import (
 func VendorHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck).Name = "vendor route health check"
 
-	r.GET(":vendorId", service_vendor.GetVendor).Name = "get vendor details"
+	r.GET("/:vendorId", service_vendor.GetVendor).Name = "get vendor details"
 }
