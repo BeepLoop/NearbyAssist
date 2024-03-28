@@ -13,32 +13,24 @@ import (
 func UploadImage(c echo.Context) error {
 	vendorId, serviceId, err := utils.GetUploadParams(c)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	form, err := c.MultipartForm()
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	files := form.File["files"]
 	if len(files) == 0 {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "no files attached",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "no files attached")
 	}
 
 	for _, file := range files {
 		// Save file to local storage
 		filename, err := utils.FileSaver(file, vendorId, serviceId)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": err.Error(),
-			})
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		// Save file location to database
@@ -49,9 +41,7 @@ func UploadImage(c echo.Context) error {
 		}
 		err = photo_query.UploadPhoto(fileData)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": err.Error(),
-			})
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 

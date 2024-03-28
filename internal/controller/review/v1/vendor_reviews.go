@@ -11,22 +11,17 @@ import (
 func VendorReview(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	if vendorId == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "vendorId required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "missing vendor ID")
 	}
+
 	id, err := strconv.Atoi(vendorId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "vendor ID must be a number",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
 	reviews, err := review_query.VendorReview(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, reviews)

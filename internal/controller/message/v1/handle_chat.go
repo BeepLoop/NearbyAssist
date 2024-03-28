@@ -23,24 +23,18 @@ func HandleChat(c echo.Context) error {
 
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	defer conn.Close()
 
 	user := c.QueryParam("userId")
 	if user == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "missing data",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "missing user ID")
 	}
 
 	userId, err := strconv.Atoi(user)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid user id",
-		})
+        return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
 	clients[userId] = conn

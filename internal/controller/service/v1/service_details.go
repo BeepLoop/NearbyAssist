@@ -12,37 +12,28 @@ import (
 func GetServiceDetails(c echo.Context) error {
 	serviceId := c.Param("serviceId")
 	if serviceId == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "serviceId is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "missing service ID")
 	}
+
 	id, err := strconv.Atoi(serviceId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "service ID must be a number",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
 	serviceDetails, err := service_query.GetServiceDetails(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	reviewCount, err := review_query.ReviewCount(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	serviceDetails.ReviewCount = reviewCount
 
 	servicePhotos, err := service_query.GetPhotos(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	serviceDetails.Photos = servicePhotos
 

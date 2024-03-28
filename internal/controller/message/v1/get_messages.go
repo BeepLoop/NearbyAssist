@@ -13,23 +13,17 @@ func GetMessages(c echo.Context) error {
 	fromId := c.QueryParam("from")
 	toId := c.QueryParam("to")
 	if fromId == "" || toId == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "required params field missing")
 	}
 
 	from, err := strconv.Atoi(fromId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "from ID must be a number")
 	}
 
 	to, err := strconv.Atoi(toId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "to ID must be a number")
 	}
 
 	msgParams := types.Message{
@@ -39,9 +33,7 @@ func GetMessages(c echo.Context) error {
 
 	messages, err := message_query.GetMessages(msgParams)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, messages)

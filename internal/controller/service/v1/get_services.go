@@ -12,9 +12,7 @@ import (
 func GetServices(c echo.Context) error {
 	results, err := service_query.GetServices()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	var services []types.TransformedServiceData

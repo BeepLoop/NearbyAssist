@@ -12,23 +12,17 @@ func CreateComplaint(c echo.Context) error {
 	complaint := new(types.Complaint)
 	err := c.Bind(complaint)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err = c.Validate(complaint)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid fields",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err = complaint_query.CreateComplaint(*complaint)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, map[string]string{

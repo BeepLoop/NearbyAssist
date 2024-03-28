@@ -12,29 +12,22 @@ import (
 func GetVendor(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	if vendorId == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "vendorId is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "missing vendor ID")
 	}
+
 	id, err := strconv.Atoi(vendorId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "vendor ID must be a number",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
 	vendor, err := user_query.GetVendor(id)
 	if err != nil {
-		return c.JSON(http.StatusNoContent, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	reviewCount, err := review_query.ReviewCount(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	vendor.ReviewCount = reviewCount
 

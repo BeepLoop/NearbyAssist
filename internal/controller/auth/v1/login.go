@@ -13,25 +13,18 @@ import (
 func HandleLogin(c echo.Context) error {
 	u := new(types.User)
 	if err := c.Bind(u); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request data",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	if err := c.Validate(u); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request data",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	user, err := user_query.FindUser(u.Name, u.Email)
 	if err != nil {
 		id, err := user_query.RegisterUser(*u)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error":   "unable to register user",
-				"message": err.Error(),
-			})
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		u.Id = id
@@ -41,17 +34,12 @@ func HandleLogin(c echo.Context) error {
 
 	token, err := utils.GenerateJwt(*u)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	err = session_query.NewSession(u.Name, u.Email, token)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": "could not start a new session",
-			"error":   err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{

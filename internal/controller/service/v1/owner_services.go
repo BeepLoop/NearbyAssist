@@ -4,7 +4,6 @@ import (
 	service_query "nearbyassist/internal/db/query/service"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -12,22 +11,17 @@ import (
 func GetOwnerServices(c echo.Context) error {
 	ownerId := c.Param("ownerId")
 	if ownerId == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "owner ID missing",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "missing owner ID")
 	}
-	id, err := strconv.Atoi(strings.ReplaceAll(ownerId, "/", ""))
+
+	id, err := strconv.Atoi(ownerId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "owner ID must be a number",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "owner ID must be a number")
 	}
 
 	services, err := service_query.GetOwnerServices(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, services)

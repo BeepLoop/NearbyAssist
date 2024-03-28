@@ -11,18 +11,18 @@ import (
 func OngoingVendorTransactions(c echo.Context) error {
 	userId := c.Param("userId")
 	if userId == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "missing user ID",
-		})
-	}
-	id, err := strconv.Atoi(userId)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "user ID must be a number",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "missing user ID")
 	}
 
-    transactions, err := transaction_query.VendorOngoingTransactions(id)
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+	}
+
+	transactions, err := transaction_query.VendorOngoingTransactions(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, transactions)
 }

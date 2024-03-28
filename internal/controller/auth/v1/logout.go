@@ -12,16 +12,12 @@ func HandlLogout(c echo.Context) error {
 	u := new(types.User)
 	err := c.Bind(u)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "invalid request data",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err = session_query.LogoutSession(u.Name, u.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "unable to logout",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{

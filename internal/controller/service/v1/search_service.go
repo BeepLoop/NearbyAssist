@@ -12,16 +12,12 @@ import (
 func SearchService(c echo.Context) error {
 	params, err := utils.GetSearchParams(c)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	result, err := service_query.SearchServices(params)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	services := make([]types.TransformedServiceData, 0)
