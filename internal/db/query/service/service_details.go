@@ -5,7 +5,7 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func GetServiceDetails(serviceId string) (*types.ServiceDetails, error) {
+func GetServiceDetails(serviceId int) (*types.ServiceDetails, error) {
 	query := `
         SELECT 
             s.id,

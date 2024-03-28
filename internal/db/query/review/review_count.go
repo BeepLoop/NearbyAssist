@@ -5,7 +5,7 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func ReviewCount(serviceId string) (types.Count, error) {
+func ReviewCount(serviceId int) (types.Count, error) {
 	query := `
         SELECT 
             rating, COUNT(*) AS count 

@@ -5,7 +5,7 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func VendorReview(vendorId string) ([]types.Review, error) {
+func VendorReview(vendorId int) ([]types.Review, error) {
 	query := `
         SELECT 
             id, vendorId, rating

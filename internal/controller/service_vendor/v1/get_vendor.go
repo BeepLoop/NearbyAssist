@@ -4,6 +4,7 @@ import (
 	review_query "nearbyassist/internal/db/query/review"
 	"nearbyassist/internal/db/query/user"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -16,7 +17,12 @@ func GetVendor(c echo.Context) error {
 			"error": "vendorId is required",
 		})
 	}
-	id := strings.ReplaceAll(vendorId, "/", "")
+	id, err := strconv.Atoi(strings.ReplaceAll(vendorId, "/", ""))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "vendor ID must be a number",
+		})
+	}
 
 	vendor, err := user_query.GetVendor(id)
 	if err != nil {

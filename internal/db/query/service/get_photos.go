@@ -5,7 +5,7 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func GetPhotos(serviceId string) ([]types.Photo, error) {
+func GetPhotos(serviceId int) ([]types.Photo, error) {
 	query := `
         SELECT 
             serviceId, vendorId, url 

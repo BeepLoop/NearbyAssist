@@ -5,7 +5,7 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func GetVendor(vendorId string) (*types.VendorData, error) {
+func GetVendor(vendorId int) (*types.VendorData, error) {
 	query := `
         SELECT
             v.vendorId, v.rating, u.name, role
