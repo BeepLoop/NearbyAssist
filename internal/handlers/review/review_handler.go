@@ -10,6 +10,6 @@ import (
 func ReviewsHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck).Name = "review route health check"
 
-	r.POST("/create", review.CreateReview).Name = "post a review"
+	r.PUT("/create", review.CreateReview).Name = "post a review"
 	r.GET("/:vendorId", review.VendorReview).Name = "get vendor reviews"
 }

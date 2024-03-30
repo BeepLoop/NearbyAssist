@@ -10,5 +10,5 @@ import (
 func UploadHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck).Name = "upload route health check"
 
-	r.POST("/upload", photo.UploadImage).Name = "upload image"
+	r.PUT("/upload", photo.UploadImage).Name = "upload image"
 }

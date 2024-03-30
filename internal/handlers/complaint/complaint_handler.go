@@ -10,5 +10,5 @@ import (
 func ComplaintsHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck).Name = "complaint route health check"
 
-	r.POST("/create", complaint.CreateComplaint).Name = "file a complaint"
+	r.PUT("/create", complaint.CreateComplaint).Name = "file a complaint"
 }
