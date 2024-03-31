@@ -11,4 +11,5 @@ func ComplaintsHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck).Name = "complaint route health check"
 
 	r.PUT("/create", complaint.CreateComplaint).Name = "file a complaint"
+	r.GET("/count", complaint.CountComplaints).Name = "get number of complaints"
 }
