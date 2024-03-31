@@ -7,13 +7,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CancelledTransactions(c echo.Context) error {
-	transactions, err := transaction_query.CancelledTransactions()
+func CountCompletedTransactions(c echo.Context) error {
+	transactions, err := transaction_query.CountCompletedTransactions()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"cancelled": transactions,
+		"completed": transactions,
 	})
 }

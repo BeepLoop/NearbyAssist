@@ -2,21 +2,21 @@ package transaction_query
 
 import "nearbyassist/internal/db"
 
-func CancelledTransactions() (int, error) {
+func CountCompletedTransactions() (int, error) {
 	query := `
         SELECT 
             COUNT(*)
         FROM 
             Transaction 
         WHERE
-            status = 'cancelled'
+            status = 'done'
     `
 
-	cancelled := 0
-	err := db.Connection.Get(&cancelled, query)
+	completed := 0
+	err := db.Connection.Get(&completed, query)
 	if err != nil {
 		return 0, err
 	}
 
-	return cancelled, nil
+	return completed, nil
 }

@@ -7,13 +7,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CompletedTransactions(c echo.Context) error {
-	transactions, err := transaction_query.CompletedTransactions()
+func CountOngoingTransactions(c echo.Context) error {
+	transactions, err := transaction_query.CountOngoingTransactions()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"completed": transactions,
+		"ongoing": transactions,
 	})
 }

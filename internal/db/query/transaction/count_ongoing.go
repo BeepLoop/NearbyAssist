@@ -2,7 +2,7 @@ package transaction_query
 
 import "nearbyassist/internal/db"
 
-func OngoingTransactions() (int, error) {
+func CountOngoingTransactions() (int, error) {
 	query := `
         SELECT 
             COUNT(*)
