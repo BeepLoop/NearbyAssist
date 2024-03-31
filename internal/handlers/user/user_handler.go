@@ -10,5 +10,6 @@ import (
 func UserHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck).Name = "user route health check"
 
+	r.GET("/count", user.CountUsers).Name = "get number of users"
 	r.GET("/:userId", user.GetUser).Name = "get user details"
 }
