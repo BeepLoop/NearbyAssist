@@ -123,6 +123,16 @@ CREATE TABLE IF NOT EXISTS Transaction (
     FOREIGN KEY(clientId) REFERENCES User(id)
 );
 
+create table if not exists Application (
+    id INT NOT NULL AUTO_INCREMENT,
+    applicantId INT NOT NULL,
+    status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(applicantId) REFERENCES User(id)
+);
+
 CREATE TRIGGER update_vendor_rating
 AFTER INSERT ON Review
 FOR EACH ROW
