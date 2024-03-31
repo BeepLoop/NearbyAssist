@@ -3,6 +3,7 @@ package service_vendor
 import (
 	review_query "nearbyassist/internal/db/query/review"
 	vendor_query "nearbyassist/internal/db/query/service_vendor"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -22,6 +23,10 @@ func GetVendor(c echo.Context) error {
 
 	vendor, err := vendor_query.GetVendor(id)
 	if err != nil {
+		if utils.DetermineNoRowsError(err) {
+			return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

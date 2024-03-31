@@ -2,6 +2,7 @@ package user
 
 import (
 	"nearbyassist/internal/db/query/user"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -21,6 +22,10 @@ func GetUser(c echo.Context) error {
 
 	user, err := user_query.GetUser(id)
 	if err != nil {
+		if utils.DetermineNoRowsError(err) {
+			return echo.NewHTTPError(http.StatusNotFound, "user not found")
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

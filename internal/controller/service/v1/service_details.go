@@ -3,6 +3,7 @@ package service
 import (
 	review_query "nearbyassist/internal/db/query/review"
 	service_query "nearbyassist/internal/db/query/service"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -22,6 +23,10 @@ func GetServiceDetails(c echo.Context) error {
 
 	serviceDetails, err := service_query.GetServiceDetails(id)
 	if err != nil {
+		if utils.DetermineNoRowsError(err) {
+			return echo.NewHTTPError(http.StatusNotFound, "service not found")
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
