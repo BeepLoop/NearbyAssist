@@ -2,7 +2,7 @@ package service_vendor
 
 import (
 	review_query "nearbyassist/internal/db/query/review"
-	"nearbyassist/internal/db/query/user"
+	vendor_query "nearbyassist/internal/db/query/service_vendor"
 	"net/http"
 	"strconv"
 
@@ -20,7 +20,7 @@ func GetVendor(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	vendor, err := user_query.GetVendor(id)
+	vendor, err := vendor_query.GetVendor(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
