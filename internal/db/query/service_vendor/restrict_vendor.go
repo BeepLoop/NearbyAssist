@@ -9,7 +9,7 @@ func RestrictVendor(vendorId int) error {
         SET 
             restricted = 1
         WHERE 
-            id = ?
+            vendorId = ?
     `
 
 	_, err := db.Connection.Exec(query, vendorId)
