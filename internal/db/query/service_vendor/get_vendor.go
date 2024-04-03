@@ -8,7 +8,7 @@ import (
 func GetVendor(vendorId int) (*types.VendorData, error) {
 	query := `
         SELECT
-            v.vendorId, v.rating, u.name, role
+            v.vendorId, v.rating, u.name, job 
         FROM
             Vendor v
         LEFT JOIN User u on u.id = v.vendorId

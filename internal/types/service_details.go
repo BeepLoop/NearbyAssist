@@ -9,7 +9,7 @@ type ServiceDetails struct {
 	VendorImage string `query:"imageUrl" db:"imageUrl"`
 	Rate        string `query:"rate" db:"rate"`
 	Rating      string `query:"rating" db:"rating"`
-	VendorRole  string `query:"vendorRole" db:"vendorRole"`
+	Job         string `query:"job" db:"job"`
 	ReviewCount Count
 	Photos      []Photo
 }

@@ -64,13 +64,13 @@ CREATE TABLE IF NOT EXISTS Vendor (
     id Int NOT NULL AUTO_INCREMENT,
     vendorId Int NOT NULL,
     rating Decimal(5,1) NOT NULL DEFAULT 0.0,
-    role Varchar(255) NOT NULL,
+    job Varchar(255) NOT NULL,
     restricted TINYINT(1) NOT NULL DEFAULT 0,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES User(id),
-    INDEX(id, vendorId, role)
+    INDEX(id, vendorId, job)
 );
 
 CREATE TABLE IF NOT EXISTS Photo (

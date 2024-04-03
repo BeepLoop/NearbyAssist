@@ -41,11 +41,11 @@ func main() {
 	}
 
 	// Seed vendors
-	_, err = db.Connection.NamedExec("INSERT INTO Vendor (vendorId, role) values ((SELECT id FROM User WHERE name = :name), :role)", []struct {
+	_, err = db.Connection.NamedExec("INSERT INTO Vendor (vendorId, job) values ((SELECT id FROM User WHERE name = :name), :job)", []struct {
 		Name string `db:"name"`
-		Role string `db:"role"`
+		Job  string `db:"job"`
 	}{
-		{Name: "John Loyd Mulit", Role: "Plumber"},
+		{Name: "John Loyd Mulit", Job: "Plumber"},
 	})
 	if err != nil {
 		panic("Error inserting vendors: " + err.Error())

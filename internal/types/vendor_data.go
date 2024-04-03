@@ -4,7 +4,7 @@ type VendorData struct {
 	VendorId    int     `db:"vendorId"`
 	Name        string  `db:"name"`
 	Rating      float64 `db:"rating"`
-	Role        string  `db:"role"`
+	Job         string  `db:"job"`
 	ReviewCount Count
 }
 

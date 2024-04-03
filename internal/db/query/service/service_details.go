@@ -16,7 +16,7 @@ func GetServiceDetails(serviceId int) (*types.ServiceDetails, error) {
             u.imageUrl,
             format(s.rate, 2) as rate,
             v.rating,
-            v.role as vendorRole
+            v.job as job 
         FROM 
             Service s 
             LEFT JOIN User u ON u.id = s.vendorId 
