@@ -5,10 +5,10 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func UploadPhoto(data types.UploadData) error {
+func UploadServicePhoto(data types.UploadData) error {
 	query := `
         INSERT INTO
-            Photo (vendorId, serviceId, url)
+            ServicePhoto (vendorId, serviceId, url)
         VALUES 
             (:vendorId, :serviceId, :imageUrl)
     `

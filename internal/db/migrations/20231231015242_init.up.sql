@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS Vendor (
     INDEX(id, vendorId, job)
 );
 
-CREATE TABLE IF NOT EXISTS Photo (
+CREATE TABLE IF NOT EXISTS ServicePhoto (
     id Int NOT NULL AUTO_INCREMENT,
     serviceId Int NOT NULL,
     vendorId Int NOT NULL,

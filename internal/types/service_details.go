@@ -11,5 +11,5 @@ type ServiceDetails struct {
 	Rating      string `query:"rating" db:"rating"`
 	Job         string `query:"job" db:"job"`
 	ReviewCount Count
-	Photos      []Photo
+	Photos      []ServicePhoto
 }

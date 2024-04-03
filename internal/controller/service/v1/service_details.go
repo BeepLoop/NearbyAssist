@@ -36,7 +36,7 @@ func GetServiceDetails(c echo.Context) error {
 	}
 	serviceDetails.ReviewCount = reviewCount
 
-	servicePhotos, err := service_query.GetPhotos(id)
+	servicePhotos, err := service_query.GetServicePhotos(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

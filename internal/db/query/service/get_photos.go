@@ -5,17 +5,17 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func GetPhotos(serviceId int) ([]types.Photo, error) {
+func GetServicePhotos(serviceId int) ([]types.ServicePhoto, error) {
 	query := `
         SELECT 
             serviceId, vendorId, url 
         FROM
-            Photo 
+            ServicePhoto 
         WHERE
             serviceId = ?
     `
 
-	photos := make([]types.Photo, 0)
+	photos := make([]types.ServicePhoto, 0)
 	err := db.Connection.Select(&photos, query, serviceId)
 	if err != nil {
 		return nil, err

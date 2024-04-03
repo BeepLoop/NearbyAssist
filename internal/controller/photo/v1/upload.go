@@ -39,7 +39,7 @@ func UploadImage(c echo.Context) error {
 			ServiceId: serviceId,
 			ImageUrl:  fmt.Sprintf("/resource/%s", filename),
 		}
-		err = photo_query.UploadPhoto(fileData)
+		err = photo_query.UploadServicePhoto(fileData)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

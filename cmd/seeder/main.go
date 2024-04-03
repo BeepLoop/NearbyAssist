@@ -96,7 +96,7 @@ func main() {
 	}
 
 	// Seed service photos
-	_, err = db.Connection.NamedExec("INSERT INTO Photo (vendorId, serviceId, url) values (:vendorId, :serviceId, :url)", []types.Photo{
+	_, err = db.Connection.NamedExec("INSERT INTO ServicePhoto (vendorId, serviceId, url) values (:vendorId, :serviceId, :url)", []types.ServicePhoto{
 		{ServiceId: 1, VendorId: 1, Url: "https://i.pravatar.cc/100"},
 		{ServiceId: 1, VendorId: 1, Url: "https://i.pravatar.cc/100"},
 	})
