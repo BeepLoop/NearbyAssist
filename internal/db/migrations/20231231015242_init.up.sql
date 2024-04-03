@@ -127,6 +127,9 @@ CREATE TABLE IF NOT EXISTS Transaction (
 create table if not exists Application (
     id INT NOT NULL AUTO_INCREMENT,
     applicantId INT NOT NULL,
+    job Varchar(255) NOT NULL,
+    latitude Double NOT NULL,
+    longitude Double NOT NULL,
     status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
