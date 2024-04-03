@@ -14,6 +14,6 @@ func VendorHandler(r *echo.Group) {
 	r.GET("/vendor/:vendorId", service_vendor.GetVendor).Name = "get vendor details"
 	r.PATCH("/restrict/:vendorId", service_vendor.RestrictVendor).Name = "restrict vendor"
 	r.PATCH("/unrestrict/:vendorId", service_vendor.UnrestrictVendor).Name = "unrestrict vendor"
-	// TODO: vendor application endpoint
+	r.PUT("/application", service_vendor.VendorApplication).Name = "vendor application"
 	r.GET("/application/count", service_vendor.CountPendingApplications).Name = "get number of vendor applications"
 }
