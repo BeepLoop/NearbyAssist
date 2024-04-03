@@ -14,7 +14,7 @@ func GetAcquaintances(userId int) ([]types.Acquaintance, error) {
         FROM 
             User u 
         JOIN 
-            Message m ON u.id = m.sender OR u.id = m.reciever
+            Message m ON u.id = m.sender OR u.id = m.receiver
         WHERE
             u.id <> ?
     `

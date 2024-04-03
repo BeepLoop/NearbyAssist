@@ -10,7 +10,7 @@ import (
 func MessageHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck).Name = "message route health check"
 
-	r.GET("/conversations", message.GetMessages).Name = "get messages between sender and reciever"
+	r.GET("/conversations", message.GetMessages).Name = "get messages between sender and receiver"
 	r.GET("/chat", message.HandleChat).Name = "websocket route for chat"
 	r.GET("/acquaintances", message.GetAcquaintances).Name = "get all users you chatted with"
 }

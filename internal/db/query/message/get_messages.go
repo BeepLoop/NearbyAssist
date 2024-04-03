@@ -8,13 +8,13 @@ import (
 func GetMessages(message types.Message) ([]types.Message, error) {
 	query := `
         SELECT
-            id, sender, reciever, content
+            id, sender, receiver, content
         FROM 
             Message
         WHERE
-            sender = ? AND reciever = ? 
+            sender = ? AND receiver = ? 
         OR
-            sender = ? AND reciever = ?
+            sender = ? AND receiver = ?
         ORDER BY
             createdAt
     `
@@ -24,8 +24,8 @@ func GetMessages(message types.Message) ([]types.Message, error) {
 		&messages,
 		query,
 		message.Sender,
-		message.Reciever,
-		message.Reciever,
+		message.Receiver,
+		message.Receiver,
 		message.Sender,
 	)
 	if err != nil {

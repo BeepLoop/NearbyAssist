@@ -3,6 +3,6 @@ package types
 type Message struct {
 	Id       int    `query:"id" db:"id"`
 	Sender   int    `query:"sender" db:"sender"`
-	Reciever int    `query:"reciever" db:"reciever"`
+	Receiver int    `query:"receiver" db:"receiver"`
 	Content  string `query:"content" db:"content"`
 }

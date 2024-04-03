@@ -6,13 +6,13 @@ func MessageForwarder() {
 	for {
 		message := <-broadcastChan
 
-		if socket, ok := clients[message.Reciever]; ok {
+		if socket, ok := clients[message.Receiver]; ok {
 			err := socket.WriteJSON(message)
 			if err != nil {
 				fmt.Printf("error sending message to recipient: %s\n", err.Error())
 			}
 		} else {
-			fmt.Printf("Reciever not found!\n")
+			fmt.Printf("Receiver not found!\n")
 			continue
 		}
 

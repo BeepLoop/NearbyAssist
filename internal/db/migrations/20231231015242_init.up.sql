@@ -50,14 +50,14 @@ CREATE TABLE IF NOT EXISTS Service (
 CREATE TABLE IF NOT EXISTS Message (
     id Int NOT NULL AUTO_INCREMENT,
     sender Int NOT NULL,
-    reciever Int NOT NULL,
+    receiver Int NOT NULL,
     content Text NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(sender) REFERENCES User(id),
-    FOREIGN KEY(reciever) REFERENCES User(id),
-    INDEX(id, sender, reciever)
+    FOREIGN KEY(receiver) REFERENCES User(id),
+    INDEX(id, sender, receiver)
 );
 
 CREATE TABLE IF NOT EXISTS Vendor (

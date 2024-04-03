@@ -28,7 +28,7 @@ func GetMessages(c echo.Context) error {
 
 	msgParams := types.Message{
 		Sender:   from,
-		Reciever: to,
+		Receiver: to,
 	}
 
 	messages, err := message_query.GetMessages(msgParams)

@@ -8,9 +8,9 @@ import (
 func NewMessage(message types.Message) (*types.Message, error) {
 	insertQuery := `
         INSERT INTO
-            Message (sender, reciever, content)
+            Message (sender, receiver, content)
         VALUES
-            (:sender, :reciever, :content)
+            (:sender, :receiver, :content)
     `
 
 	res, err := db.Connection.NamedExec(insertQuery, message)
@@ -24,7 +24,7 @@ func NewMessage(message types.Message) (*types.Message, error) {
 
 	retrieveQuery := `
         SELECT
-            id, sender, reciever, content 
+            id, sender, receiver, content 
         FROM
             Message 
         WHERE
