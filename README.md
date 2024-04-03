@@ -37,3 +37,18 @@ clean up binary from the last build
 ```bash
 make clean
 ```
+
+run migration file up
+```bash
+make migrate-up
+```
+
+run migration file down
+```bash
+make migrate-down
+```
+
+seed db
+```bash
+make seed
+```
