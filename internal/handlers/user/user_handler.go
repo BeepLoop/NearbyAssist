@@ -12,5 +12,4 @@ func UserHandler(r *echo.Group) {
 
 	r.GET("/count", user.CountUsers).Name = "get number of users"
 	r.GET("/:userId", user.GetUser).Name = "get user details"
-    // TODO: count restricted user accounts
 }
