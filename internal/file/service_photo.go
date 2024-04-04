@@ -12,7 +12,17 @@ import (
 type ServicePhoto struct {
 	VendorId  int
 	ServiceId int
+	Timestamp string
 	File      *multipart.FileHeader
+}
+
+func NewServicePhoto(vendorId int, serviceId int, file *multipart.FileHeader) *ServicePhoto {
+	return &ServicePhoto{
+		VendorId:  vendorId,
+		ServiceId: serviceId,
+		Timestamp: time.Now().Format("2006-01-02_15:04:05"),
+		File:      file,
+	}
 }
 
 func (s *ServicePhoto) SavePhoto() (string, error) {
@@ -22,9 +32,8 @@ func (s *ServicePhoto) SavePhoto() (string, error) {
 	}
 	defer src.Close()
 
-	timestamp := time.Now().Format("2006-01-02_15:04:05")
 	mimeType := strings.Split(s.File.Header["Content-Type"][0], "/")[1]
-	filename := fmt.Sprintf("%d_%d_%s.%s", s.VendorId, s.ServiceId, timestamp, mimeType)
+	filename := fmt.Sprintf("%d_%d_%s.%s", s.VendorId, s.ServiceId, s.Timestamp, mimeType)
 
 	// create the file in the server
 	dist, err := os.Create("store/service/" + filename)
