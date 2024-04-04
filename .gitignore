@@ -29,3 +29,4 @@ store/*
 *.txt
 
 test_payload/
+test/

@@ -1,17 +1,15 @@
-package photo
+package upload
 
 import (
-	"fmt"
-	photo_query "nearbyassist/internal/db/query/photo"
-	"nearbyassist/internal/types"
+	filehandler "nearbyassist/internal/file"
 	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func UploadImage(c echo.Context) error {
-	vendorId, serviceId, err := utils.GetUploadParams(c)
+func ServicePhoto(c echo.Context) error {
+	params, err := utils.GetUploadParams(c, "vendorId", "serviceId")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -27,19 +25,8 @@ func UploadImage(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		// Save file to local storage
-		filename, err := utils.FileSaver(file, vendorId, serviceId)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		// Save file location to database
-		fileData := types.UploadData{
-			VendorId:  vendorId,
-			ServiceId: serviceId,
-			ImageUrl:  fmt.Sprintf("/resource/%s", filename),
-		}
-		err = photo_query.UploadServicePhoto(fileData)
+		handler := filehandler.NewServicePhoto(params["vendorId"], params["serviceId"], file)
+		err := handler.Upload()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

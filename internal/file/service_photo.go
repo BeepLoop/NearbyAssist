@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	photo_query "nearbyassist/internal/db/query/photo"
+	"nearbyassist/internal/types"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type ServicePhoto struct {
@@ -25,7 +29,7 @@ func NewServicePhoto(vendorId int, serviceId int, file *multipart.FileHeader) *S
 	}
 }
 
-func (s *ServicePhoto) SavePhoto() (string, error) {
+func (s *ServicePhoto) SavePhoto(uuid string) (string, error) {
 	src, err := s.File.Open()
 	if err != nil {
 		return "", err
@@ -33,7 +37,7 @@ func (s *ServicePhoto) SavePhoto() (string, error) {
 	defer src.Close()
 
 	mimeType := strings.Split(s.File.Header["Content-Type"][0], "/")[1]
-	filename := fmt.Sprintf("%d_%d_%s.%s", s.VendorId, s.ServiceId, s.Timestamp, mimeType)
+	filename := fmt.Sprintf("%s.%s", uuid, mimeType)
 
 	// create the file in the server
 	dist, err := os.Create("store/service/" + filename)
@@ -49,4 +53,21 @@ func (s *ServicePhoto) SavePhoto() (string, error) {
 	}
 
 	return filename, nil
+}
+
+func (s *ServicePhoto) Upload() error {
+	uuid := uuid.New()
+	filename, err := s.SavePhoto(uuid.String())
+
+	fileData := types.UploadData{
+		VendorId:  s.VendorId,
+		ServiceId: s.ServiceId,
+		ImageUrl:  fmt.Sprintf("/resource/%s", filename),
+	}
+	err = photo_query.UploadServicePhoto(fileData)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
