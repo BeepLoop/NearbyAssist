@@ -7,23 +7,25 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type applicationProof struct {
+type ApplicationProof struct {
 	ApplicantId int
 	Timestamp   string
 	File        *multipart.FileHeader
 }
 
-func NewApplicationProof(applicantId int, file *multipart.FileHeader) *applicationProof {
-	return &applicationProof{
+func NewApplicationProof(applicantId int, file *multipart.FileHeader) *ApplicationProof {
+	return &ApplicationProof{
 		ApplicantId: applicantId,
 		Timestamp:   time.Now().Format("2006-01-02_15:04:05"),
 		File:        file,
 	}
 }
 
-func (a *applicationProof) SavePhoto() (string, error) {
+func (a *ApplicationProof) SavePhoto(uuid string) (string, error) {
 	src, err := a.File.Open()
 	if err != nil {
 		return "", err
@@ -31,7 +33,7 @@ func (a *applicationProof) SavePhoto() (string, error) {
 	defer src.Close()
 
 	mimeType := strings.Split(a.File.Header["Content-Type"][0], "/")[1]
-	filename := fmt.Sprintf("%d_%s.%s", a.ApplicantId, a.Timestamp, mimeType)
+	filename := fmt.Sprintf("%s.%s", uuid, mimeType)
 
 	// create the file in the server
 	dist, err := os.Create("store/application/" + filename)
@@ -47,4 +49,16 @@ func (a *applicationProof) SavePhoto() (string, error) {
 	}
 
 	return filename, nil
+}
+
+func (a *ApplicationProof) Upload() error {
+	uuid := uuid.New()
+	_, err := a.SavePhoto(uuid.String())
+	if err != nil {
+		return err
+	}
+
+	// TODO: save the file to database
+
+	return nil
 }
