@@ -14,14 +14,11 @@ func ServicePhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	form, err := c.MultipartForm()
+	// TODO: validate if vendorID and serviceId exists
+
+	files, err := filehandler.FormParser(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	files := form.File["files"]
-	if len(files) == 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, "no files attached")
 	}
 
 	var uploadId int
