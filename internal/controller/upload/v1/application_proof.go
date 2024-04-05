@@ -1,6 +1,7 @@
 package upload
 
 import (
+	vendor_query "nearbyassist/internal/db/query/service_vendor"
 	filehandler "nearbyassist/internal/file"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -14,7 +15,10 @@ func VendorApplicationProof(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// TODO: validate if applicationID and applicantID exists
+	doesApplicationExists := vendor_query.DoesApplicationExists(params["applicationId"], params["applicantId"])
+	if !doesApplicationExists {
+		return echo.NewHTTPError(http.StatusBadRequest, "application not found")
+	}
 
 	files, err := filehandler.FormParser(c)
 	if err != nil {

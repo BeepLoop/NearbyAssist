@@ -1,6 +1,7 @@
 package upload
 
 import (
+	service_query "nearbyassist/internal/db/query/service"
 	filehandler "nearbyassist/internal/file"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -14,7 +15,10 @@ func ServicePhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// TODO: validate if vendorID and serviceId exists
+	doesVendorExists := service_query.DoesServiceExists(params["serviceId"], params["vendorId"])
+	if !doesVendorExists {
+		return echo.NewHTTPError(http.StatusBadRequest, "vendor not found")
+	}
 
 	files, err := filehandler.FormParser(c)
 	if err != nil {
