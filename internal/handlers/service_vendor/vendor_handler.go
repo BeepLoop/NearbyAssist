@@ -21,6 +21,7 @@ func VendorHandler(r *echo.Group) {
 	r.PUT("/application", service_vendor.VendorApplication).Name = "vendor application"
 	r.GET("/application", service_vendor.GetApplicants).Name = "get all vendor applications"
 	r.PATCH("/application/approve/:applicationId", service_vendor.ApproveApplication).Name = "approve vendor application"
+	r.PATCH("/application/reject/:applicationId", service_vendor.RejectApplication).Name = "reject vendor application"
 	r.PUT("/application/proof/upload", upload.VendorApplicationProof).Name = "upload vendor application proof"
 	r.GET("/application/count", service_vendor.CountPendingApplications).Name = "get number of vendor applications"
 }
