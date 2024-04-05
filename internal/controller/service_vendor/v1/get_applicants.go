@@ -8,7 +8,9 @@ import (
 )
 
 func GetApplicants(c echo.Context) error {
-	applicants, err := vendor_query.GetApplicants()
+	filter := c.QueryParam("filter")
+
+	applicants, err := vendor_query.GetApplicants(filter)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
