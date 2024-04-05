@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	photo_query "nearbyassist/internal/db/query/photo"
+	upload_query "nearbyassist/internal/db/query/upload"
 	"nearbyassist/internal/types"
 	"os"
 	"strings"
@@ -64,7 +64,7 @@ func (s *ServicePhoto) Upload() error {
 		ServiceId: s.ServiceId,
 		ImageUrl:  fmt.Sprintf("/resource/%s", filename),
 	}
-	err = photo_query.UploadServicePhoto(fileData)
+	err = upload_query.UploadServicePhoto(fileData)
 	if err != nil {
 		return err
 	}

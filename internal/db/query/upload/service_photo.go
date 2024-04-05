@@ -1,4 +1,4 @@
-package photo_query
+package upload_query
 
 import (
 	"nearbyassist/internal/db"
