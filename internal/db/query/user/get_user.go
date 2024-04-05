@@ -8,7 +8,7 @@ import (
 func GetUser(userId int) (*types.User, error) {
 	query := `
         SELECT
-            name, email, imageUrl
+            id, name, email, imageUrl
         FROM 
             User 
         WHERE
