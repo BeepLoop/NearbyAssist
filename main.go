@@ -18,7 +18,11 @@ func init() {
 		log.Fatal("error initializing database connection: ", err)
 	}
 
-	if err := os.MkdirAll("store", 0777); err != nil {
+	if err := os.MkdirAll("store/application", 0777); err != nil {
+		log.Fatal("Unable to initialize file store: ", err)
+	}
+
+	if err := os.MkdirAll("store/service", 0777); err != nil {
 		log.Fatal("Unable to initialize file store: ", err)
 	}
 }
