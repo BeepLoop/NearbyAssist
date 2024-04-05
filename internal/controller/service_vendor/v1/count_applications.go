@@ -2,46 +2,43 @@ package service_vendor
 
 import (
 	vendor_query "nearbyassist/internal/db/query/service_vendor"
-	"nearbyassist/internal/types"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func GetApplicants(c echo.Context) error {
+func CountApplications(c echo.Context) error {
 	filter := c.QueryParam("filter")
 
-	applications := make([]types.Application, 0)
+	var applicationCount int
 	switch filter {
-	case "pending":
-		result, err := vendor_query.GetPendingApplicants()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		applications = result
-
 	case "approved":
-		result, err := vendor_query.GetApprovedApplicants()
+		count, err := vendor_query.CountApprovedApplications()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		applications = result
-
+		applicationCount = count
 	case "rejected":
-		result, err := vendor_query.GetRejectedApplicants()
+		count, err := vendor_query.CountRejectedApplications()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		applications = result
-
+		applicationCount = count
+	case "pending":
+		count, err := vendor_query.CountPendingApplications()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		applicationCount = count
 	default:
-		result, err := vendor_query.GetAllApplicants()
+		count, err := vendor_query.CountAllApplications()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-
-		applications = result
+		applicationCount = count
 	}
 
-	return c.JSON(http.StatusOK, applications)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"applicationCount": applicationCount,
+	})
 }

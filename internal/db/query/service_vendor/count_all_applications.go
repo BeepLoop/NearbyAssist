@@ -2,14 +2,12 @@ package vendor_query
 
 import "nearbyassist/internal/db"
 
-func CountPendingApplications() (int, error) {
+func CountAllApplications() (int, error) {
 	query := `
-        SELECT 
+        SELECT
             COUNT(*)
         FROM
-            Application
-        WHERE
-            status = 'pending'
+            Application 
     `
 
 	count := 0
