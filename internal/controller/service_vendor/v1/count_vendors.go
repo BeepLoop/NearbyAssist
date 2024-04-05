@@ -11,7 +11,6 @@ func CountVendors(c echo.Context) error {
 	filter := c.QueryParam("filter")
 
 	var vendorCount int
-
 	switch filter {
 	case "restricted":
 		count, err := vendor_query.CountRestrictedVendors()
