@@ -24,15 +24,16 @@ func ServicePhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "no files attached")
 	}
 
+	var uploadId int
 	for _, file := range files {
 		handler := filehandler.NewServicePhoto(params["vendorId"], params["serviceId"], file)
-		err := handler.Upload()
+		uploadId, err = handler.Upload()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{
-		"message": "upload successful",
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"uploadId": uploadId,
 	})
 }

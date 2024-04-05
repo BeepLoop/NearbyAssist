@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	upload_query "nearbyassist/internal/db/query/upload"
+	"nearbyassist/internal/types"
 	"os"
 	"strings"
 	"time"
@@ -12,16 +14,18 @@ import (
 )
 
 type ApplicationProof struct {
-	ApplicantId int
-	Timestamp   string
-	File        *multipart.FileHeader
+	ApplicationId int
+	ApplicantId   int
+	Timestamp     string
+	File          *multipart.FileHeader
 }
 
-func NewApplicationProof(applicantId int, file *multipart.FileHeader) *ApplicationProof {
+func NewApplicationProof(applicationId, applicantId int, file *multipart.FileHeader) *ApplicationProof {
 	return &ApplicationProof{
-		ApplicantId: applicantId,
-		Timestamp:   time.Now().Format("2006-01-02_15:04:05"),
-		File:        file,
+		ApplicationId: applicationId,
+		ApplicantId:   applicantId,
+		Timestamp:     time.Now().Format("2006-01-02_15:04:05"),
+		File:          file,
 	}
 }
 
@@ -51,14 +55,22 @@ func (a *ApplicationProof) SavePhoto(uuid string) (string, error) {
 	return filename, nil
 }
 
-func (a *ApplicationProof) Upload() error {
+func (a *ApplicationProof) Upload() (int, error) {
 	uuid := uuid.New()
-	_, err := a.SavePhoto(uuid.String())
+	filename, err := a.SavePhoto(uuid.String())
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	// TODO: save the file to database
+	fileData := types.ApplicationProof{
+		ApplicationId: a.ApplicationId,
+		ApplicantId:   a.ApplicantId,
+		Url:           fmt.Sprintf("/resource/application/%s", filename),
+	}
+	id, err := upload_query.UploadApplicationProof(fileData)
+	if err != nil {
+		return 0, err
+	}
 
-	return nil
+	return int(id), nil
 }

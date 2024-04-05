@@ -13,3 +13,19 @@ func TestCreateServicePhotoTimestamp(t *testing.T) {
 		t.Fatalf("Expected %s but got %s", expected, result.Timestamp)
 	}
 }
+
+func TestCreateServicePhoto(t *testing.T) {
+	result := NewServicePhoto(1, 1, nil)
+
+	if result.VendorId != 1 {
+		t.Fatalf("Expected 1 but got %d", result.VendorId)
+	}
+
+	if result.ServiceId != 1 {
+		t.Fatalf("Expected 1 but got %d", result.ServiceId)
+	}
+
+	if result.File != nil {
+		t.Fatalf("Expected nil but got %v", result.File)
+	}
+}

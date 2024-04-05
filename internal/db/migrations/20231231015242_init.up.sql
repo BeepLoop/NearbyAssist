@@ -137,6 +137,18 @@ create table if not exists Application (
     FOREIGN KEY(applicantId) REFERENCES User(id)
 );
 
+create table if not exists ApplicationProof (
+    id INT NOT NULL AUTO_INCREMENT,
+    applicationId INT NOT NULL,
+    applicantId INT NOT NULL,
+    url Varchar(255) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(applicationId) REFERENCES Application(id),
+    FOREIGN KEY(applicantId) REFERENCES Application(applicantId)
+);
+
 CREATE TRIGGER update_vendor_rating
 AFTER INSERT ON Review
 FOR EACH ROW

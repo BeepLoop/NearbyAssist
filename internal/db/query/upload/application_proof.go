@@ -5,12 +5,12 @@ import (
 	"nearbyassist/internal/types"
 )
 
-func UploadServicePhoto(data types.ServicePhoto) (int, error) {
+func UploadApplicationProof(data types.ApplicationProof) (int, error) {
 	query := `
         INSERT INTO
-            ServicePhoto (vendorId, serviceId, url)
-        VALUES 
-            (:vendorId, :serviceId, :url)
+            ApplicationProof (applicationId, applicantId, url)
+        VALUES
+            (:applicationId, :applicantId, :url)
     `
 
 	res, err := db.Connection.NamedExec(query, data)

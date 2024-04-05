@@ -55,19 +55,22 @@ func (s *ServicePhoto) SavePhoto(uuid string) (string, error) {
 	return filename, nil
 }
 
-func (s *ServicePhoto) Upload() error {
+func (s *ServicePhoto) Upload() (int, error) {
 	uuid := uuid.New()
 	filename, err := s.SavePhoto(uuid.String())
+	if err != nil {
+		return 0, err
+	}
 
-	fileData := types.UploadData{
+	fileData := types.ServicePhoto{
 		VendorId:  s.VendorId,
 		ServiceId: s.ServiceId,
-		ImageUrl:  fmt.Sprintf("/resource/%s", filename),
+		Url:       fmt.Sprintf("/resource/service/%s", filename),
 	}
-	err = upload_query.UploadServicePhoto(fileData)
+	id, err := upload_query.UploadServicePhoto(fileData)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return int(id), nil
 }
