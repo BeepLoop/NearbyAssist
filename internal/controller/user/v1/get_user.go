@@ -1,8 +1,6 @@
 package user
 
 import (
-	// "nearbyassist/internal/db/query/user"
-	// "nearbyassist/internal/utils"
 	"nearbyassist/internal/db/models"
 	"net/http"
 	"strconv"
