@@ -1,19 +1,21 @@
 package complaint
 
 import (
-	complaint_query "nearbyassist/internal/db/query/complaint"
+	"nearbyassist/internal/db/models"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func CountComplaints(c echo.Context) error {
-	complaints, err := complaint_query.CountComplaints()
+	model := models.NewComplaintModel()
+
+	count, err := model.Count()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"complaints": complaints,
+		"complaintsCount": count,
 	})
 }
