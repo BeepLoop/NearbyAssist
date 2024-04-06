@@ -1,7 +1,7 @@
 package service_vendor
 
 import (
-	vendor_query "nearbyassist/internal/db/query/service_vendor"
+	"nearbyassist/internal/db/models"
 	"net/http"
 	"strconv"
 
@@ -15,10 +15,15 @@ func RejectApplication(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	err = vendor_query.RejectApplication(id)
+	model := models.NewApplicationModel()
+
+	err = model.Reject(id)
 	if err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, "reject application")
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":       "Application rejected successfully",
+		"applicationId": id,
+	})
 }
