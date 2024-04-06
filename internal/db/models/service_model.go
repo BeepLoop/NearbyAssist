@@ -53,7 +53,7 @@ func (s *ServiceModel) Create() (int, error) {
 
 	ConstructLocationFromLatLong(&s.GeoSpatialModel)
 
-	res, err := db.Connection.NamedExec(query, s)
+	res, err := db.Connection.NamedExecContext(ctx, query, s)
 	if err != nil {
 		return 0, err
 	}
@@ -92,7 +92,7 @@ func (s *ServiceModel) FindAll() ([]*ServiceModel, error) {
     `
 
 	services := make([]*ServiceModel, 0)
-	err := db.Connection.Select(&services, query)
+	err := db.Connection.SelectContext(ctx, &services, query)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (s *ServiceModel) FindById(id int) (*ServiceModel, error) {
     `
 
 	service := new(ServiceModel)
-	err := db.Connection.Get(service, query, id)
+	err := db.Connection.GetContext(ctx, service, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (s *ServiceModel) FindByVendorId(vendorId int) ([]*ServiceModel, error) {
     `
 
 	services := make([]*ServiceModel, 0)
-	err := db.Connection.Select(&services, query, vendorId)
+	err := db.Connection.SelectContext(ctx, &services, query, vendorId)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func (s *ServiceModel) GeoSpatialSearch(searchTerm string, radius float64) ([]*S
     `, searchTerm, s.Latitude, s.Longitude)
 
 	services := make([]*ServiceModel, 0)
-	err := db.Connection.Select(&services, query, radius)
+	err := db.Connection.SelectContext(ctx, &services, query, radius)
 	if err != nil {
 		return nil, err
 	}

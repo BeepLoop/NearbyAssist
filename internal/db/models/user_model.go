@@ -29,7 +29,7 @@ func (u *UserModel) Create() (int, error) {
             (:name, :email, :imageUrl)
     `
 
-	res, err := db.Connection.NamedExec(query, u)
+	res, err := db.Connection.NamedExecContext(ctx, query, u)
 	if err != nil {
 		return 0, err
 	}
@@ -68,7 +68,7 @@ func (u *UserModel) FindById(id int) (*UserModel, error) {
     `
 
 	user := new(UserModel)
-	err := db.Connection.Get(user, query, id)
+	err := db.Connection.GetContext(ctx, user, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (u *UserModel) FindAll() ([]UserModel, error) {
     `
 
 	users := make([]UserModel, 0)
-	err := db.Connection.Select(&users, query)
+	err := db.Connection.SelectContext(ctx, &users, query)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (u *UserModel) FindByEmail(email string) (*UserModel, error) {
     `
 
 	user := new(UserModel)
-	err := db.Connection.Get(user, query, email)
+	err := db.Connection.GetContext(ctx, user, query, email)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (u *UserModel) Count() (int, error) {
     `
 
 	count := 0
-	err := db.Connection.Get(&count, query)
+	err := db.Connection.GetContext(ctx, &count, query)
 	if err != nil {
 		return 0, err
 	}
