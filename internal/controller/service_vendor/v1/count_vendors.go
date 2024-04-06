@@ -1,7 +1,7 @@
 package service_vendor
 
 import (
-	vendor_query "nearbyassist/internal/db/query/service_vendor"
+	"nearbyassist/internal/db/models"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -10,32 +10,14 @@ import (
 func CountVendors(c echo.Context) error {
 	filter := c.QueryParam("filter")
 
-	var vendorCount int
-	switch filter {
-	case "restricted":
-		count, err := vendor_query.CountRestrictedVendors()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
+	model := models.NewVendorModel()
 
-		vendorCount = count
-	case "unrestricted":
-		count, err := vendor_query.CountUnrestrictedVendors()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		vendorCount = count
-	default:
-		count, err := vendor_query.CountVendors()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		vendorCount = count
+	count, err := model.Count(filter)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"vendorCount": vendorCount,
+		"vendorCount": count,
 	})
 }
