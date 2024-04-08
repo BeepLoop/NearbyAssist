@@ -1,5 +1,12 @@
 package models
 
+import "mime/multipart"
+
+type FileModelInterface interface {
+	SaveToDisk(uuid string, file *multipart.FileHeader) (string, error)
+	SaveToDb(filename string) (int, error)
+}
+
 type ModelOperation interface {
 	Create() (int, error)
 	Update(id int) error

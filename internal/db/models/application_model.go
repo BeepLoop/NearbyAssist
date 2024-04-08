@@ -89,6 +89,32 @@ func (a *ApplicationModel) FindAll(filter string) ([]*ApplicationModel, error) {
 	return applications, nil
 }
 
+func (a *ApplicationModel) FindById(applicationId int) (*ApplicationModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT 
+            id, applicantId, job, status, latitude, longitude
+        FROM
+            Application
+        WHERE
+            id = ?
+    `
+
+	application := new(ApplicationModel)
+	err := db.Connection.GetContext(ctx, application, query, applicationId)
+	if err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return application, nil
+}
+
 func (a *ApplicationModel) Approve(applicationId int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
