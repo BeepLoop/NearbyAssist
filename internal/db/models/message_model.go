@@ -11,7 +11,6 @@ import (
 
 type MessageModel struct {
 	Model
-	UpdateableModel
 	Sender   int    `json:"sender" db:"sender"`
 	Receiver int    `json:"receiver" db:"receiver"`
 	Content  string `json:"content" db:"content"`
@@ -63,6 +62,38 @@ func (m *MessageModel) Update(id int) error {
 func (m *MessageModel) Delete(id int) error {
 	return nil
 }
+
+func (m *MessageModel) Save() error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        INSERT INTO
+            Message (sender, receiver, content)
+        VALUES
+            (:sender, :receiver, :content)
+    `
+
+	res, err := db.Connection.NamedExecContext(ctx, query, m)
+	if err != nil {
+		return err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	m.Id = int(id)
+	m.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (m *MessageModel) GetMessages() ([]MessageModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

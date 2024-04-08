@@ -2,7 +2,7 @@ package message
 
 import (
 	"fmt"
-	"nearbyassist/internal/types"
+	"nearbyassist/internal/db/models"
 	"net/http"
 	"strconv"
 
@@ -11,44 +11,35 @@ import (
 )
 
 var clients = make(map[int]*websocket.Conn)
-var messageChan = make(chan types.Message)
-var broadcastChan = make(chan types.Message)
+var messageChan = make(chan models.MessageModel)
+var broadcastChan = make(chan models.MessageModel)
 
 func HandleChat(c echo.Context) error {
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-
-	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
+	conn, err := websocketUpgrader(c)
 	defer conn.Close()
 
 	user := c.QueryParam("userId")
-	if user == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing user ID")
-	}
-
 	userId, err := strconv.Atoi(user)
 	if err != nil {
-        return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
 	clients[userId] = conn
 	fmt.Printf("userId: %d connected\n", userId)
 
 	for {
-		message := new(types.Message)
+		message := models.NewMessageModel()
 		err := conn.ReadJSON(message)
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				if _, ok := clients[userId]; ok {
+					delete(clients, userId)
+				}
+
 				fmt.Printf("client: %d disconnected\n", userId)
-				delete(clients, userId)
 				return nil
 			}
+
 			fmt.Printf("error reading message: %s\n", err.Error())
 			continue
 		}
