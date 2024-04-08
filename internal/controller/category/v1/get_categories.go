@@ -1,14 +1,16 @@
 package category
 
 import (
-	"nearbyassist/internal/db/query/category"
+	"nearbyassist/internal/db/models"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetCategories(c echo.Context) error {
-	categories, err := category_query.GetCategories()
+	model := models.NewCategoryModel()
+
+	categories, err := model.FindAll()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

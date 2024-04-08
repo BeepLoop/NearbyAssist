@@ -1,4 +1,4 @@
-package service_vendor
+package transaction
 
 import (
 	"nearbyassist/internal/db/models"
@@ -7,17 +7,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CountApplications(c echo.Context) error {
-	filter := c.QueryParam("filter")
+func CountTransactions(c echo.Context) error {
+	status := c.QueryParam("status")
 
-	model := models.NewApplicationModel()
+	model := models.NewTransactionModel()
 
-	count, err := model.Count(filter)
+	count, err := model.Count(status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"applicationCount": count,
+		"transactionCount": count,
 	})
 }

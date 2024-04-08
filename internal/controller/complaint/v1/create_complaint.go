@@ -1,31 +1,31 @@
 package complaint
 
 import (
-	complaint_query "nearbyassist/internal/db/query/complaint"
-	"nearbyassist/internal/types"
+	"nearbyassist/internal/db/models"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func CreateComplaint(c echo.Context) error {
-	complaint := new(types.Complaint)
-	err := c.Bind(complaint)
+	model := models.NewComplaintModel()
+	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = c.Validate(complaint)
+	err = c.Validate(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = complaint_query.CreateComplaint(*complaint)
+	complaintId, err := model.Create()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{
-		"message": "complaint created successfully",
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message":     "complaint created successfully",
+		"complaintId": complaintId,
 	})
 }

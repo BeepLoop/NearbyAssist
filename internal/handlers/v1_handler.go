@@ -10,6 +10,7 @@ import (
 	"nearbyassist/internal/handlers/service"
 	"nearbyassist/internal/handlers/service_vendor"
 	"nearbyassist/internal/handlers/transaction"
+	"nearbyassist/internal/handlers/upload"
 	"nearbyassist/internal/handlers/user"
 
 	"github.com/labstack/echo/v4"
@@ -27,7 +28,7 @@ func RouteHandlerV1(r *echo.Group) {
 	userGroup := r.Group("/users")
 	user.UserHandler(userGroup)
 
-	messageGroup := r.Group("/messages")
+	messageGroup := r.Group("/chat")
 	message.MessageHandler(messageGroup)
 
 	vendorGroup := r.Group("/vendors")
@@ -44,4 +45,7 @@ func RouteHandlerV1(r *echo.Group) {
 
 	transactionGroup := r.Group("/transactions")
 	transaction.TransactionsHandler(transactionGroup)
+
+	uploadGroup := r.Group("/upload")
+	upload.UploadHandler(uploadGroup)
 }

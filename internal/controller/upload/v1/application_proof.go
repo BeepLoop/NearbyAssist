@@ -1,7 +1,7 @@
 package upload
 
 import (
-	vendor_query "nearbyassist/internal/db/query/service_vendor"
+	"nearbyassist/internal/db/models"
 	filehandler "nearbyassist/internal/file"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -15,9 +15,9 @@ func VendorApplicationProof(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	doesApplicationExists := vendor_query.DoesApplicationExists(params["applicationId"], params["applicantId"])
-	if !doesApplicationExists {
-		return echo.NewHTTPError(http.StatusBadRequest, "application not found")
+	model := models.NewApplicationModel()
+	if application, _ := model.FindById(params["applicationId"]); application == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Application not found")
 	}
 
 	files, err := filehandler.FormParser(c)
@@ -25,16 +25,17 @@ func VendorApplicationProof(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	var uploadId int
 	for _, file := range files {
-		handler := filehandler.NewApplicationProof(params["applicationId"], params["applicantId"], file)
-		uploadId, err = handler.Upload()
+		model := models.NewApplicationProofModel(params["applicationId"], params["applicantId"])
+		handler := filehandler.NewFileHandler(model)
+
+		_, err := handler.SaveFile(file)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"uploadId": uploadId,
+		"message": "File uploaded successfully",
 	})
 }

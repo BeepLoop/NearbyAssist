@@ -8,7 +8,7 @@ import (
 func GetOwnerServices(ownerId int) ([]types.Service, error) {
 	query := `
         SELECT 
-            id, title, description, format(rate, 2) as rate, category
+            id, title, description, format(rate, 2) as rate, categoryId as category
         FROM 
             Service 
         WHERE

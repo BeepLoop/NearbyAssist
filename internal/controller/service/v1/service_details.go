@@ -1,9 +1,7 @@
 package service
 
 import (
-	review_query "nearbyassist/internal/db/query/review"
-	service_query "nearbyassist/internal/db/query/service"
-	"nearbyassist/internal/utils"
+	"nearbyassist/internal/db/models"
 	"net/http"
 	"strconv"
 
@@ -12,35 +10,21 @@ import (
 
 func GetServiceDetails(c echo.Context) error {
 	serviceId := c.Param("serviceId")
-	if serviceId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing service ID")
-	}
-
 	id, err := strconv.Atoi(serviceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	serviceDetails, err := service_query.GetServiceDetails(id)
-	if err != nil {
-		if utils.DetermineNoRowsError(err) {
-			return echo.NewHTTPError(http.StatusNotFound, "service not found")
-		}
+	model := models.NewServiceModel()
 
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	reviewCount, err := review_query.ReviewCount(id)
+	service, err := model.FindById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	serviceDetails.ReviewCount = reviewCount
 
-	servicePhotos, err := service_query.GetServicePhotos(id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	serviceDetails.Photos = servicePhotos
+	// TODO: retrieve review count
 
-	return c.JSON(http.StatusOK, serviceDetails)
+	// TODO: retrieve photos associated with a given service
+
+	return c.JSON(http.StatusOK, service)
 }

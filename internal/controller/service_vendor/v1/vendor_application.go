@@ -1,26 +1,25 @@
 package service_vendor
 
 import (
-	vendor_query "nearbyassist/internal/db/query/service_vendor"
-	"nearbyassist/internal/types"
+	"nearbyassist/internal/db/models"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func VendorApplication(c echo.Context) error {
-	applicantData := new(types.VendorApplication)
-	err := c.Bind(applicantData)
+	model := models.NewApplicationModel()
+	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "unable to process data provided")
 	}
 
-	err = c.Validate(applicantData)
+	err = c.Validate(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
-	applicationId, err := vendor_query.VendorApplication(*applicantData)
+	applicationId, err := model.Create()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

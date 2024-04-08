@@ -11,4 +11,5 @@ func CategoryHandler(r *echo.Group) {
 	r.GET("/health", health.HealthCheck).Name = "category route health check"
 
 	r.GET("/", category.GetCategories).Name = "get all categories"
+	r.GET("", category.GetCategories).Name = "get all categories"
 }

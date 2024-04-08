@@ -1,31 +1,31 @@
 package transaction
 
 import (
-	transaction_query "nearbyassist/internal/db/query/transaction"
-	"nearbyassist/internal/types"
+	"nearbyassist/internal/db/models"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func NewTransaction(c echo.Context) error {
-	transaction := new(types.NewTransaction)
-	err := c.Bind(&transaction)
+	model := models.NewTransactionModel()
+	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
-	err = c.Validate(transaction)
+	err = c.Validate(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	transactionId, err := transaction_query.NewTransaction(*transaction)
+	transactionId, err := model.Create()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":       "transaction created successfully",
 		"transactionId": transactionId,
 	})
 }

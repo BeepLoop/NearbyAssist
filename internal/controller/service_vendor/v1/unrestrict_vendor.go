@@ -1,7 +1,7 @@
 package service_vendor
 
 import (
-	vendor_query "nearbyassist/internal/db/query/service_vendor"
+	"nearbyassist/internal/db/models"
 	"net/http"
 	"strconv"
 
@@ -10,16 +10,14 @@ import (
 
 func UnrestrictVendor(c echo.Context) error {
 	vendorId := c.Param("vendorId")
-	if vendorId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing vendor ID")
-	}
-
 	id, err := strconv.Atoi(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	err = vendor_query.UnrestrictVendor(id)
+    model := models.NewVendorModel()
+
+	err = model.UnrestrictAccount(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

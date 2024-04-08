@@ -1,9 +1,7 @@
 package service_vendor
 
 import (
-	review_query "nearbyassist/internal/db/query/review"
-	vendor_query "nearbyassist/internal/db/query/service_vendor"
-	"nearbyassist/internal/utils"
+	"nearbyassist/internal/db/models"
 	"net/http"
 	"strconv"
 
@@ -12,29 +10,19 @@ import (
 
 func GetVendor(c echo.Context) error {
 	vendorId := c.Param("vendorId")
-	if vendorId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing vendor ID")
-	}
-
 	id, err := strconv.Atoi(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	vendor, err := vendor_query.GetVendor(id)
-	if err != nil {
-		if utils.DetermineNoRowsError(err) {
-			return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
-		}
+	model := models.NewVendorModel()
 
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	reviewCount, err := review_query.ReviewCount(id)
+	vendor, err := model.FindById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	vendor.ReviewCount = reviewCount
+
+	// TODO: retrieve review count
 
 	return c.JSON(http.StatusOK, vendor)
 }

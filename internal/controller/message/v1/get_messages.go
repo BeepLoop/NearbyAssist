@@ -1,37 +1,21 @@
 package message
 
 import (
-	"nearbyassist/internal/db/query/message"
-	"nearbyassist/internal/types"
+	"nearbyassist/internal/db/models"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetMessages(c echo.Context) error {
-	fromId := c.QueryParam("from")
-	toId := c.QueryParam("to")
-	if fromId == "" || toId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "required params field missing")
-	}
+	params := c.QueryString()
 
-	from, err := strconv.Atoi(fromId)
+	model, err := models.MessageModelFactory(params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "from ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	to, err := strconv.Atoi(toId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "to ID must be a number")
-	}
-
-	msgParams := types.Message{
-		Sender:   from,
-		Receiver: to,
-	}
-
-	messages, err := message_query.GetMessages(msgParams)
+	messages, err := model.GetMessages()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

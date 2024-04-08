@@ -38,13 +38,13 @@ CREATE TABLE IF NOT EXISTS Service (
     description Varchar(255) NOT NULL,
     rate Double NOT NULL,
     location Geometry NOT NULL SRID 4326,
-    category  Int NOT NULL,
+    categoryId  Int NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES User(id),
-    FOREIGN KEY(category) REFERENCES Category(id),
-    INDEX(id, vendorId, category)
+    FOREIGN KEY(categoryId) REFERENCES Category(id),
+    INDEX(id, vendorId, categoryId)
 );
 
 CREATE TABLE IF NOT EXISTS Message (

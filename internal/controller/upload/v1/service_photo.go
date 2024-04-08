@@ -1,7 +1,7 @@
 package upload
 
 import (
-	service_query "nearbyassist/internal/db/query/service"
+	"nearbyassist/internal/db/models"
 	filehandler "nearbyassist/internal/file"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -15,9 +15,9 @@ func ServicePhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	doesVendorExists := service_query.DoesServiceExists(params["serviceId"], params["vendorId"])
-	if !doesVendorExists {
-		return echo.NewHTTPError(http.StatusBadRequest, "vendor not found")
+	model := models.NewServiceModel()
+	if service, _ := model.FindById(params["serviceId"]); service == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Service not found")
 	}
 
 	files, err := filehandler.FormParser(c)
@@ -25,16 +25,17 @@ func ServicePhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	var uploadId int
 	for _, file := range files {
-		handler := filehandler.NewServicePhoto(params["vendorId"], params["serviceId"], file)
-		uploadId, err = handler.Upload()
+		model := models.NewServicePhotoModel(params["vendorId"], params["serviceId"])
+		handler := filehandler.NewFileHandler(model)
+
+		_, err := handler.SaveFile(file)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"uploadId": uploadId,
+		"message": "File uploaded successfully",
 	})
 }
