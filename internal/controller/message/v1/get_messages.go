@@ -11,6 +11,9 @@ func GetMessages(c echo.Context) error {
 	params := c.QueryString()
 
 	model, err := models.MessageModelFactory(params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
 	messages, err := model.GetMessages()
 	if err != nil {
