@@ -15,7 +15,7 @@ run:
 test:
 	@echo "Testing..."
 	@go clean -testcache
-	@go test ./...
+	@grc go test -v ./...
 
 # Clean the binary
 clean:
