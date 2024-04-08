@@ -27,7 +27,7 @@ func RouteHandlerV1(r *echo.Group) {
 	userGroup := r.Group("/users")
 	user.UserHandler(userGroup)
 
-	messageGroup := r.Group("/messages")
+	messageGroup := r.Group("/chat")
 	message.MessageHandler(messageGroup)
 
 	vendorGroup := r.Group("/vendors")
