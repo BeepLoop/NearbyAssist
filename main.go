@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/controller/message/v1"
 	"nearbyassist/internal/db"
+	"nearbyassist/internal/routes"
 	"nearbyassist/internal/server"
 )
 
@@ -31,12 +31,12 @@ func init() {
 func main() {
 	server := server.NewServer()
 
-	go message.MessageSavior()
-	go message.MessageForwarder()
+	routes.RegisterRoutes(server)
 
-	log.Println("starting server ", server.Addr)
-	err := server.ListenAndServe()
-	if err != nil {
-		panic("cannot start server")
+	go server.Websocket.SaveMessages()
+	go server.Websocket.ForwardMessages()
+
+	if err := server.Start(":8080"); err != nil {
+		log.Fatal(err)
 	}
 }

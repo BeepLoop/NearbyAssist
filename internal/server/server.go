@@ -1,31 +1,28 @@
 package server
 
 import (
-	"fmt"
-	"net/http"
-	"time"
+	"nearbyassist/internal/websocket"
+
+	"github.com/labstack/echo/v4"
 )
 
-var port = 8080
-
 type Server struct {
-	port int
+	Echo      *echo.Echo
+	Websocket *websocket.Websocket
 }
 
-func NewServer() *http.Server {
+func NewServer() *Server {
+
+	ws := websocket.NewWebsocket()
 
 	NewServer := &Server{
-		port: port,
+		Echo:      echo.New(),
+		Websocket: ws,
 	}
 
-	// Declare Server config
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
+	return NewServer
+}
 
-	return server
+func (s *Server) Start(listenAddr string) error {
+	return s.Echo.Start(listenAddr)
 }
