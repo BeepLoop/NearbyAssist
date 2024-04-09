@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"nearbyassist/internal/config"
+	"nearbyassist/internal/controller/message/v1"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/server"
 )
@@ -28,8 +29,10 @@ func init() {
 }
 
 func main() {
-
 	server := server.NewServer()
+
+	go message.MessageSavior()
+	go message.MessageForwarder()
 
 	log.Println("starting server ", server.Addr)
 	err := server.ListenAndServe()
