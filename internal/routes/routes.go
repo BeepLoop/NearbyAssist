@@ -3,38 +3,23 @@ package routes
 import (
 	"nearbyassist/internal/handlers"
 	"nearbyassist/internal/server"
-	"nearbyassist/internal/utils"
-
-	"github.com/go-playground/validator"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func RegisterRoutes(s *server.Server) {
-	// Middlewares
-	s.Echo.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n",
-	}))
-	s.Echo.Use(middleware.Recover())
-	s.Echo.Use(middleware.RemoveTrailingSlash())
-	s.Echo.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
-
-	// Custom validator
-	s.Echo.Validator = &utils.Validator{Validator: validator.New()}
-
 	// File server
 	s.Echo.Static("/resource", "store/").Name = "file resource"
 
 	// Routes
 	healthHandler := handlers.NewHealthHandler(s)
 
-	handler := handlers.NewHandler(s)
-	s.Echo.GET("/", handler.HandleRoot).Name = "root route"
-	s.Echo.GET("/health", healthHandler.HandleHealthCheck).Name = "health check"
+	rootHandler := handlers.NewHandler(s)
+	s.Echo.GET("/", rootHandler.HandleRoot).Name = "base route"
+	s.Echo.GET("/health", healthHandler.HandleHealthCheck).Name = "base route health check"
 
 	// V1 routes
 	v1 := s.Echo.Group("/v1")
 	{
-		v1.GET("/health", healthHandler.HandleHealthCheck)
+		v1.GET("/health", healthHandler.HandleHealthCheck).Name = "v1 route health check"
 
 		// Auth Routes
 		auth := v1.Group("/auth")
@@ -121,7 +106,7 @@ func RegisterRoutes(s *server.Server) {
 		application := v1.Group("/application")
 		{
 			handler := handlers.NewApplicationHandler(s)
-			application.GET("/health", healthHandler.HandleHealthCheck)
+			application.GET("/health", healthHandler.HandleHealthCheck).Name = "application route health check"
 			application.PUT("", handler.HandleNewApplication).Name = "vendor application"
 			application.GET("", handler.HandleGetApplicants).Name = "get all vendor applications"
 			application.GET("/count", handler.HandleCount).Name = "get number of vendor applications"
@@ -142,7 +127,7 @@ func RegisterRoutes(s *server.Server) {
 		upload := v1.Group("/upload")
 		{
 			handler := handlers.NewUploadHandler(s)
-			upload.GET("/health", healthHandler.HandleHealthCheck)
+			upload.GET("/health", healthHandler.HandleHealthCheck).Name = "upload route health check"
 			upload.PUT("/service", handler.HandleNewServicePhoto).Name = "upload service image"
 			upload.PUT("/proof", handler.HandleNewProofPhoto).Name = "upload vendor application proof"
 		}
