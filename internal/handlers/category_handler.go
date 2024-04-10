@@ -19,7 +19,7 @@ func NewCategoryHandler(server *server.Server) *categoryHandler {
 }
 
 func (h *categoryHandler) HandleCategories(c echo.Context) error {
-	model := models.NewCategoryModel()
+	model := models.NewCategoryModel(h.server.DB)
 
 	categories, err := model.FindAll()
 	if err != nil {

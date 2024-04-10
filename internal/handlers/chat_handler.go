@@ -51,7 +51,7 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	fmt.Printf("userId: %d connected\n", userId)
 
 	for {
-		message := models.NewMessageModel()
+		message := models.NewMessageModel(h.server.DB)
 		err := conn.ReadJSON(message)
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {

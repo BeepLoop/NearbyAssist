@@ -13,8 +13,10 @@ type ReviewModel struct {
 	Rating    string `json:"rating" db:"rating"`
 }
 
-func NewReviewModel() *ReviewModel {
-	return &ReviewModel{}
+func NewReviewModel(db *db.DB) *ReviewModel {
+	return &ReviewModel{
+		Model: Model{Db: db},
+	}
 }
 
 func (r *ReviewModel) Create() (int, error) {
@@ -28,7 +30,7 @@ func (r *ReviewModel) Create() (int, error) {
             (:serviceId, :rating)
     `
 
-	res, err := db.Connection.NamedExecContext(ctx, query, r)
+	res, err := r.Db.Conn.NamedExecContext(ctx, query, r)
 	if err != nil {
 		return 0, err
 	}
@@ -67,7 +69,7 @@ func (r *ReviewModel) FindById(id int) (*ReviewModel, error) {
     `
 
 	review := new(ReviewModel)
-	err := db.Connection.GetContext(ctx, review, query, id)
+	err := r.Db.Conn.GetContext(ctx, review, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +91,7 @@ func (r *ReviewModel) FindByService(serviceId int) ([]*ReviewModel, error) {
     `
 
 	reviews := make([]*ReviewModel, 0)
-	err := db.Connection.SelectContext(ctx, &reviews, query, serviceId)
+	err := r.Db.Conn.SelectContext(ctx, &reviews, query, serviceId)
 	if err != nil {
 		return nil, err
 	}

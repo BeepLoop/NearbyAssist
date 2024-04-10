@@ -21,7 +21,7 @@ func NewServiceHandler(server *server.Server) *serviceHandler {
 }
 
 func (h *serviceHandler) HandleGetServices(c echo.Context) error {
-	model := models.NewServiceModel()
+	model := models.NewServiceModel(h.server.DB)
 
 	services, err := model.FindAll()
 	if err != nil {
@@ -32,7 +32,7 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 }
 
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
-	model := models.NewServiceModel()
+	model := models.NewServiceModel(h.server.DB)
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -76,7 +76,7 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	model := models.NewServiceModel()
+	model := models.NewServiceModel(h.server.DB)
 
 	service, err := model.FindById(id)
 	if err != nil {
@@ -97,7 +97,7 @@ func (h *serviceHandler) HandleGetByOwner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "owner ID must be a number")
 	}
 
-	model := models.NewServiceModel()
+	model := models.NewServiceModel(h.server.DB)
 
 	services, err := model.FindByVendorId(id)
 	if err != nil {

@@ -14,8 +14,10 @@ type ComplaintModel struct {
 	Content string `json:"content" db:"content"`
 }
 
-func NewComplaintModel() *ComplaintModel {
-	return &ComplaintModel{}
+func NewComplaintModel(db *db.DB) *ComplaintModel {
+	return &ComplaintModel{
+		Model: Model{Db: db},
+	}
 }
 
 func (c *ComplaintModel) Create() (int, error) {
@@ -29,7 +31,7 @@ func (c *ComplaintModel) Create() (int, error) {
             (:vendorId, :code, :title, :content)
     `
 
-	res, err := db.Connection.NamedExecContext(ctx, query, c)
+	res, err := c.Db.Conn.NamedExecContext(ctx, query, c)
 	if err != nil {
 		return 0, err
 	}
@@ -66,7 +68,7 @@ func (c *ComplaintModel) Count() (int, error) {
     `
 
 	count := 0
-	err := db.Connection.GetContext(ctx, &count, query)
+	err := c.Db.Conn.GetContext(ctx, &count, query)
 	if err != nil {
 		return 0, err
 	}

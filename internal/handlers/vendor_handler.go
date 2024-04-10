@@ -20,7 +20,7 @@ func NewVendorHandler(server *server.Server) *vendorHandler {
 func (h *vendorHandler) HandleCount(c echo.Context) error {
 	filter := c.QueryParam("filter")
 
-	model := models.NewVendorModel()
+	model := models.NewVendorModel(h.server.DB)
 
 	count, err := model.Count(filter)
 	if err != nil {
@@ -39,7 +39,7 @@ func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	model := models.NewVendorModel()
+	model := models.NewVendorModel(h.server.DB)
 
 	vendor, err := model.FindById(id)
 	if err != nil {
@@ -58,7 +58,7 @@ func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	model := models.NewVendorModel()
+	model := models.NewVendorModel(h.server.DB)
 
 	err = model.RestrictAccount(id)
 	if err != nil {
@@ -70,7 +70,6 @@ func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 	})
 }
 
-
 func (h *vendorHandler) HandleUnrestrict(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	id, err := strconv.Atoi(vendorId)
@@ -78,7 +77,7 @@ func (h *vendorHandler) HandleUnrestrict(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-    model := models.NewVendorModel()
+	model := models.NewVendorModel(h.server.DB)
 
 	err = model.UnrestrictAccount(id)
 	if err != nil {

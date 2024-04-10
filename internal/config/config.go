@@ -1,15 +1,19 @@
 package config
 
 import (
-	"nearbyassist/internal/types"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
-var Env *types.Config
+type Config struct {
+	DSN                      string
+	Port                     string
+	ApplicationProofLocation string
+	ServicePhotoLocation     string
+}
 
-func Init() error {
+func LoadConfig() *Config {
 	godotenv.Load()
 	var dsn string
 
@@ -19,9 +23,10 @@ func Init() error {
 		dsn = os.Getenv("DSN_PROD")
 	}
 
-	Env = &types.Config{
-		DSN: dsn,
+	return &Config{
+		DSN:                      dsn,
+		Port:                     os.Getenv("PORT"),
+		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
+		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),
 	}
-
-	return nil
 }

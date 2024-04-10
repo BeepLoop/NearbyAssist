@@ -22,7 +22,7 @@ func NewApplicationHandler(server *server.Server) *applicationHandler {
 func (h *applicationHandler) HandleCount(c echo.Context) error {
 	filter := c.QueryParam("filter")
 
-	model := models.NewApplicationModel()
+	model := models.NewApplicationModel(h.server.DB)
 
 	count, err := model.Count(filter)
 	if err != nil {
@@ -35,7 +35,7 @@ func (h *applicationHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
-	model := models.NewApplicationModel()
+	model := models.NewApplicationModel(h.server.DB)
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "unable to process data provided")
@@ -59,7 +59,7 @@ func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
 func (h *applicationHandler) HandleGetApplicants(c echo.Context) error {
 	filter := c.QueryParam("filter")
 
-	model := models.NewApplicationModel()
+	model := models.NewApplicationModel(h.server.DB)
 
 	applications, err := model.FindAll(filter)
 	if err != nil {
@@ -76,7 +76,7 @@ func (h *applicationHandler) HandleApprove(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	model := models.NewApplicationModel()
+	model := models.NewApplicationModel(h.server.DB)
 
 	err = model.Approve(id)
 	if err != nil {
@@ -96,7 +96,7 @@ func (h *applicationHandler) HandleReject(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	model := models.NewApplicationModel()
+	model := models.NewApplicationModel(h.server.DB)
 
 	err = model.Reject(id)
 	if err != nil {

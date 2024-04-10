@@ -14,8 +14,10 @@ type UserModel struct {
 	ImageUrl string `json:"imageUrl" db:"imageUrl"`
 }
 
-func NewUserModel() *UserModel {
-	return &UserModel{}
+func NewUserModel(db *db.DB) *UserModel {
+	return &UserModel{
+		Model: Model{Db: db},
+	}
 }
 
 func (u *UserModel) Create() (int, error) {
@@ -29,7 +31,7 @@ func (u *UserModel) Create() (int, error) {
             (:name, :email, :imageUrl)
     `
 
-	res, err := db.Connection.NamedExecContext(ctx, query, u)
+	res, err := u.Db.Conn.NamedExecContext(ctx, query, u)
 	if err != nil {
 		return 0, err
 	}
@@ -68,7 +70,7 @@ func (u *UserModel) FindById(id int) (*UserModel, error) {
     `
 
 	user := new(UserModel)
-	err := db.Connection.GetContext(ctx, user, query, id)
+	err := u.Db.Conn.GetContext(ctx, user, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +94,7 @@ func (u *UserModel) FindAll() ([]UserModel, error) {
     `
 
 	users := make([]UserModel, 0)
-	err := db.Connection.SelectContext(ctx, &users, query)
+	err := u.Db.Conn.SelectContext(ctx, &users, query)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +120,7 @@ func (u *UserModel) FindByEmail(email string) (*UserModel, error) {
     `
 
 	user := new(UserModel)
-	err := db.Connection.GetContext(ctx, user, query, email)
+	err := u.Db.Conn.GetContext(ctx, user, query, email)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +144,7 @@ func (u *UserModel) Count() (int, error) {
     `
 
 	count := 0
-	err := db.Connection.GetContext(ctx, &count, query)
+	err := u.Db.Conn.GetContext(ctx, &count, query)
 	if err != nil {
 		return 0, err
 	}

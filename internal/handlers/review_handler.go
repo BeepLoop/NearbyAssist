@@ -20,7 +20,7 @@ func NewReviewHandler(server *server.Server) *reviewHandler {
 }
 
 func (h *reviewHandler) HandleNewReview(c echo.Context) error {
-	model := models.NewReviewModel()
+	model := models.NewReviewModel(h.server.DB)
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -49,7 +49,7 @@ func (h *reviewHandler) HandleServiceReview(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	model := models.NewReviewModel()
+	model := models.NewReviewModel(h.server.DB)
 
 	reviews, err := model.FindByService(id)
 	if err != nil {

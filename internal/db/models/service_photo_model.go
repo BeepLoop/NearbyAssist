@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/db"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -19,8 +20,9 @@ type ServicePhotoModel struct {
 	Url       string `json:"url" db:"url"`
 }
 
-func NewServicePhotoModel(vendorId, serviceId int) *ServicePhotoModel {
+func NewServicePhotoModel(vendorId, serviceId int, db *db.DB) *ServicePhotoModel {
 	return &ServicePhotoModel{
+		Model:     Model{Db: db},
 		ServiceId: serviceId,
 		VendorId:  vendorId,
 	}
@@ -51,7 +53,10 @@ func (s *ServicePhotoModel) SaveToDisk(uuid string, file *multipart.FileHeader) 
 	mimeType := strings.Split(file.Header["Content-Type"][0], "/")[1]
 	filename := fmt.Sprintf("%s.%s", uuid, mimeType)
 
-	dist, err := os.Create("store/service/" + filename)
+	storageDir := s.Disk.ServicePhotoLocation
+	path := filepath.Join(storageDir, filename)
+
+	dist, err := os.Create(path)
 	if err != nil {
 		return "", err
 	}
@@ -82,7 +87,7 @@ func (s *ServicePhotoModel) SaveToDb(filename string) (int, error) {
             (:vendorId, :serviceId, :url)
     `
 
-	res, err := db.Connection.NamedExecContext(ctx, query, s)
+	res, err := s.Db.Conn.NamedExecContext(ctx, query, s)
 	if err != nil {
 		return 0, err
 	}

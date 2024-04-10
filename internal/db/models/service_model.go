@@ -19,8 +19,10 @@ type ServiceModel struct {
 	CategoryId  int    `json:"categoryId" db:"categoryId" validate:"required"`
 }
 
-func NewServiceModel() *ServiceModel {
-	return &ServiceModel{}
+func NewServiceModel(db *db.DB) *ServiceModel {
+	return &ServiceModel{
+		Model: Model{Db: db},
+	}
 }
 
 func NewServiceModelWithLocation(latitude, longitude float64) *ServiceModel {
@@ -53,7 +55,7 @@ func (s *ServiceModel) Create() (int, error) {
 
 	ConstructLocationFromLatLong(&s.GeoSpatialModel)
 
-	res, err := db.Connection.NamedExecContext(ctx, query, s)
+	res, err := s.Db.Conn.NamedExecContext(ctx, query, s)
 	if err != nil {
 		return 0, err
 	}
@@ -92,7 +94,7 @@ func (s *ServiceModel) FindAll() ([]*ServiceModel, error) {
     `
 
 	services := make([]*ServiceModel, 0)
-	err := db.Connection.SelectContext(ctx, &services, query)
+	err := s.Db.Conn.SelectContext(ctx, &services, query)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +127,7 @@ func (s *ServiceModel) FindById(id int) (*ServiceModel, error) {
     `
 
 	service := new(ServiceModel)
-	err := db.Connection.GetContext(ctx, service, query, id)
+	err := s.Db.Conn.GetContext(ctx, service, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +158,7 @@ func (s *ServiceModel) FindByVendorId(vendorId int) ([]*ServiceModel, error) {
     `
 
 	services := make([]*ServiceModel, 0)
-	err := db.Connection.SelectContext(ctx, &services, query, vendorId)
+	err := s.Db.Conn.SelectContext(ctx, &services, query, vendorId)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +200,7 @@ func (s *ServiceModel) GeoSpatialSearch(searchTerm string, radius float64) ([]*S
     `, searchTerm, s.Latitude, s.Longitude)
 
 	services := make([]*ServiceModel, 0)
-	err := db.Connection.SelectContext(ctx, &services, query, radius)
+	err := s.Db.Conn.SelectContext(ctx, &services, query, radius)
 	if err != nil {
 		return nil, err
 	}

@@ -16,8 +16,10 @@ type MessageModel struct {
 	Content  string `json:"content" db:"content"`
 }
 
-func NewMessageModel() *MessageModel {
-	return &MessageModel{}
+func NewMessageModel(db *db.DB) *MessageModel {
+	return &MessageModel{
+        Model: Model{Db: db},
+    }
 }
 
 func MessageModelFactory(queryParam string) (*MessageModel, error) {
@@ -74,7 +76,7 @@ func (m *MessageModel) Save() error {
             (:sender, :receiver, :content)
     `
 
-	res, err := db.Connection.NamedExecContext(ctx, query, m)
+	res, err := m.Db.Conn.NamedExecContext(ctx, query, m)
 	if err != nil {
 		return err
 	}
@@ -112,7 +114,7 @@ func (m *MessageModel) GetMessages() ([]MessageModel, error) {
     `
 
 	messages := make([]MessageModel, 0)
-	err := db.Connection.SelectContext(
+	err := m.Db.Conn.SelectContext(
 		ctx,
 		&messages,
 		query,
@@ -150,7 +152,7 @@ func (m *MessageModel) GetConversations(userId int) ([]UserModel, error) {
     `
 
 	acquaintances := make([]UserModel, 0)
-	err := db.Connection.SelectContext(ctx, &acquaintances, query, userId)
+	err := m.Db.Conn.SelectContext(ctx, &acquaintances, query, userId)
 	if err != nil {
 		return nil, err
 	}

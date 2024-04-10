@@ -24,8 +24,10 @@ type TransactionModel struct {
 	Status    string `json:"status" db:"status"`
 }
 
-func NewTransactionModel() *TransactionModel {
-	return &TransactionModel{}
+func NewTransactionModel(db *db.DB) *TransactionModel {
+	return &TransactionModel{
+		Model: Model{Db: db},
+	}
 }
 
 func (t *TransactionModel) Create() (int, error) {
@@ -39,7 +41,7 @@ func (t *TransactionModel) Create() (int, error) {
             (:vendorId, :clientId, :serviceId)
     `
 
-	res, err := db.Connection.NamedExecContext(ctx, query, t)
+	res, err := t.Db.Conn.NamedExecContext(ctx, query, t)
 	if err != nil {
 		return 0, err
 	}
@@ -85,7 +87,7 @@ func (t *TransactionModel) Count(status string) (int, error) {
 	}
 
 	count := 0
-	err := db.Connection.GetContext(ctx, &count, query)
+	err := t.Db.Conn.GetContext(ctx, &count, query)
 	if err != nil {
 		return 0, err
 	}
@@ -118,7 +120,7 @@ func (t *TransactionModel) GetClientOngoing(clientId int) ([]NamedTransactionMod
     `
 
 	transactions := make([]NamedTransactionModel, 0)
-	err := db.Connection.SelectContext(ctx, &transactions, query, clientId)
+	err := t.Db.Conn.SelectContext(ctx, &transactions, query, clientId)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +153,7 @@ func (t *TransactionModel) GetVendorOngoing(clientId int) ([]NamedTransactionMod
     `
 
 	transactions := make([]NamedTransactionModel, 0)
-	err := db.Connection.SelectContext(ctx, &transactions, query, clientId)
+	err := t.Db.Conn.SelectContext(ctx, &transactions, query, clientId)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +188,7 @@ func (t *TransactionModel) ClientHistory(clientId int) ([]NamedTransactionModel,
     `
 
 	transactions := make([]NamedTransactionModel, 0)
-	err := db.Connection.SelectContext(ctx, &transactions, query, clientId)
+	err := t.Db.Conn.SelectContext(ctx, &transactions, query, clientId)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +221,7 @@ func (t *TransactionModel) VendorHistory(vendorId int) ([]NamedTransactionModel,
     `
 
 	transactions := make([]NamedTransactionModel, 0)
-	err := db.Connection.SelectContext(ctx, &transactions, query, vendorId)
+	err := t.Db.Conn.SelectContext(ctx, &transactions, query, vendorId)
 	if err != nil {
 		return nil, err
 	}

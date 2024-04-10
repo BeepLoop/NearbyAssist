@@ -12,8 +12,10 @@ type CategoryModel struct {
 	Title string `json:"title" db:"title"`
 }
 
-func NewCategoryModel() *CategoryModel {
-	return &CategoryModel{}
+func NewCategoryModel(db *db.DB) *CategoryModel {
+	return &CategoryModel{
+		Model: Model{Db: db},
+	}
 }
 
 func (c *CategoryModel) Create() (int, error) {
@@ -40,7 +42,7 @@ func (c *CategoryModel) FindAll() ([]*CategoryModel, error) {
     `
 
 	categories := make([]*CategoryModel, 0)
-	err := db.Connection.SelectContext(ctx, &categories, query)
+	err := c.Db.Conn.SelectContext(ctx, &categories, query)
 	if err != nil {
 		return nil, err
 	}

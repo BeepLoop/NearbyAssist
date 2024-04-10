@@ -16,8 +16,10 @@ type ApplicationModel struct {
 	Status      string `json:"status" db:"status"`
 }
 
-func NewApplicationModel() *ApplicationModel {
-	return &ApplicationModel{}
+func NewApplicationModel(db *db.DB) *ApplicationModel {
+	return &ApplicationModel{
+		Model: Model{Db: db},
+	}
 }
 
 func (a *ApplicationModel) Create() (int, error) {
@@ -31,7 +33,7 @@ func (a *ApplicationModel) Create() (int, error) {
             (:applicantId, :job, :latitude, :longitude)
     `
 
-	res, err := db.Connection.NamedExecContext(ctx, query, a)
+	res, err := a.Db.Conn.NamedExecContext(ctx, query, a)
 	if err != nil {
 		return 0, err
 	}
@@ -77,7 +79,7 @@ func (a *ApplicationModel) FindAll(filter string) ([]*ApplicationModel, error) {
 	}
 
 	applications := make([]*ApplicationModel, 0)
-	err := db.Connection.SelectContext(ctx, &applications, query)
+	err := a.Db.Conn.SelectContext(ctx, &applications, query)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +105,7 @@ func (a *ApplicationModel) FindById(applicationId int) (*ApplicationModel, error
     `
 
 	application := new(ApplicationModel)
-	err := db.Connection.GetContext(ctx, application, query, applicationId)
+	err := a.Db.Conn.GetContext(ctx, application, query, applicationId)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +121,7 @@ func (a *ApplicationModel) Approve(applicationId int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	tx, err := db.Connection.Beginx()
+	tx, err := a.Db.Conn.Beginx()
 	if err != nil {
 		return err
 	}
@@ -190,7 +192,7 @@ func (a *ApplicationModel) Reject(applicationId int) error {
             id = ?
     `
 
-	_, err := db.Connection.ExecContext(ctx, query, applicationId)
+	_, err := a.Db.Conn.ExecContext(ctx, query, applicationId)
 	if err != nil {
 		return err
 	}
@@ -223,7 +225,7 @@ func (a *ApplicationModel) Count(filter string) (int, error) {
 	}
 
 	count := 0
-	err := db.Connection.GetContext(ctx, &count, query)
+	err := a.Db.Conn.GetContext(ctx, &count, query)
 	if err != nil {
 		return 0, err
 	}

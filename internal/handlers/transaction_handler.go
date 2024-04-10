@@ -20,7 +20,7 @@ func NewTransactionHandler(server *server.Server) *transactionHandler {
 }
 
 func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
-	model := models.NewTransactionModel()
+	model := models.NewTransactionModel(h.server.DB)
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
@@ -45,7 +45,7 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 func (h *transactionHandler) HandleCount(c echo.Context) error {
 	status := c.QueryParam("status")
 
-	model := models.NewTransactionModel()
+	model := models.NewTransactionModel(h.server.DB)
 
 	count, err := model.Count(status)
 	if err != nil {
@@ -64,7 +64,7 @@ func (h *transactionHandler) HandleClientOngoingTransaction(c echo.Context) erro
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	model := models.NewTransactionModel()
+	model := models.NewTransactionModel(h.server.DB)
 
 	transactions, err := model.GetClientOngoing(id)
 	if err != nil {
@@ -81,7 +81,7 @@ func (h *transactionHandler) HandleVendorOngoingTransaction(c echo.Context) erro
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	model := models.NewTransactionModel()
+	model := models.NewTransactionModel(h.server.DB)
 
 	transactions, err := model.GetVendorOngoing(id)
 	if err != nil {
@@ -98,7 +98,7 @@ func (h *transactionHandler) HandleClientHistory(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	model := models.NewTransactionModel()
+	model := models.NewTransactionModel(h.server.DB)
 
 	history, err := model.VendorHistory(id)
 	if err != nil {
@@ -115,7 +115,7 @@ func (h *transactionHandler) HandleVendorHistory(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	model := models.NewTransactionModel()
+	model := models.NewTransactionModel(h.server.DB)
 
 	history, err := model.VendorHistory(id)
 	if err != nil {

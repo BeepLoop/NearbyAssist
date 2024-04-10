@@ -19,7 +19,7 @@ func NewComplaintServer(server *server.Server) *complaintHandler {
 }
 
 func (h *complaintHandler) HandleCount(c echo.Context) error {
-	model := models.NewComplaintModel()
+	model := models.NewComplaintModel(h.server.DB)
 
 	count, err := model.Count()
 	if err != nil {
@@ -32,7 +32,7 @@ func (h *complaintHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *complaintHandler) HandleNewComplaint(c echo.Context) error {
-	model := models.NewComplaintModel()
+	model := models.NewComplaintModel(h.server.DB)
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

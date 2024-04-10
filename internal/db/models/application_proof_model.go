@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/db"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -19,8 +20,9 @@ type ApplicationProofModel struct {
 	Url           string `json:"url" db:"url"`
 }
 
-func NewApplicationProofModel(applicationId, applicantId int) *ApplicationProofModel {
+func NewApplicationProofModel(applicationId, applicantId int, db *db.DB) *ApplicationProofModel {
 	return &ApplicationProofModel{
+		Model:         Model{Db: db},
 		ApplicationId: applicationId,
 		ApplicantId:   applicantId,
 	}
@@ -51,7 +53,10 @@ func (a *ApplicationProofModel) SaveToDisk(uuid string, file *multipart.FileHead
 	mimeType := strings.Split(file.Header["Content-Type"][0], "/")[1]
 	filename := fmt.Sprintf("%s.%s", uuid, mimeType)
 
-	dist, err := os.Create("store/application/" + filename)
+	storageDir := a.Disk.ApplicationProofLocation
+	path := filepath.Join(storageDir, filename)
+
+	dist, err := os.Create(path)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +88,7 @@ func (a *ApplicationProofModel) SaveToDb(filename string) (int, error) {
             (:applicationId, :applicantId, :url)
     `
 
-	res, err := db.Connection.NamedExec(query, a)
+	res, err := a.Db.Conn.NamedExec(query, a)
 	if err != nil {
 		return 0, err
 	}

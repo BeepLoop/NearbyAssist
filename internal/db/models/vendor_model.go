@@ -15,8 +15,10 @@ type VendorModel struct {
 	Restricted int    `json:"restricted" db:"restricted"`
 }
 
-func NewVendorModel() *VendorModel {
-	return &VendorModel{}
+func NewVendorModel(db *db.DB) *VendorModel {
+	return &VendorModel{
+		Model: Model{Db: db},
+    }
 }
 
 func (v *VendorModel) Create() (int, error) {
@@ -45,7 +47,7 @@ func (v *VendorModel) FindById(id int) (*VendorModel, error) {
     `
 
 	vendor := new(VendorModel)
-	err := db.Connection.GetContext(ctx, vendor, query, id)
+	err := v.Db.Conn.GetContext(ctx, vendor, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +68,7 @@ func (v *VendorModel) RestrictAccount(vendorId int) error {
             vendorId = ?
     `
 
-	_, err := db.Connection.ExecContext(ctx, query, vendorId)
+	_, err := v.Db.Conn.ExecContext(ctx, query, vendorId)
 	if err != nil {
 		return err
 	}
@@ -91,7 +93,7 @@ func (v *VendorModel) UnrestrictAccount(vendorId int) error {
             vendorId = ?
     `
 
-	_, err := db.Connection.ExecContext(ctx, query, vendorId)
+	_, err := v.Db.Conn.ExecContext(ctx, query, vendorId)
 	if err != nil {
 		return err
 	}
@@ -122,7 +124,7 @@ func (v *VendorModel) Count(filter string) (int, error) {
 	}
 
 	count := 0
-	err := db.Connection.GetContext(ctx, &count, query)
+	err := v.Db.Conn.GetContext(ctx, &count, query)
 	if err != nil {
 		return 0, err
 	}

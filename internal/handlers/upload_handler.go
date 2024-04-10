@@ -26,7 +26,7 @@ func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	model := models.NewServiceModel()
+	model := models.NewServiceModel(h.server.DB)
 	if service, _ := model.FindById(params["serviceId"]); service == nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Service not found")
 	}
@@ -37,7 +37,7 @@ func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		model := models.NewServicePhotoModel(params["vendorId"], params["serviceId"])
+		model := models.NewServicePhotoModel(params["vendorId"], params["serviceId"], h.server.DB)
 		handler := filehandler.NewFileHandler(model)
 
 		_, err := handler.SaveFile(file)
@@ -57,7 +57,7 @@ func (h *uploadHandler) HandleNewProofPhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	model := models.NewApplicationModel()
+	model := models.NewApplicationModel(h.server.DB)
 	if application, _ := model.FindById(params["applicationId"]); application == nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Application not found")
 	}
@@ -68,7 +68,7 @@ func (h *uploadHandler) HandleNewProofPhoto(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		model := models.NewApplicationProofModel(params["applicationId"], params["applicantId"])
+		model := models.NewApplicationProofModel(params["applicationId"], params["applicantId"], h.server.DB)
 		handler := filehandler.NewFileHandler(model)
 
 		_, err := handler.SaveFile(file)

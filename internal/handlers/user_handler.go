@@ -26,7 +26,7 @@ func (h *userHandler) HandleGetUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	userModel := models.NewUserModel()
+	userModel := models.NewUserModel(h.server.DB)
 	user, err := userModel.FindById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -36,7 +36,7 @@ func (h *userHandler) HandleGetUser(c echo.Context) error {
 }
 
 func (h *userHandler) HandleCount(c echo.Context) error {
-	model := models.NewUserModel()
+	model := models.NewUserModel(h.server.DB)
 
 	count, err := model.Count()
 	if err != nil {
