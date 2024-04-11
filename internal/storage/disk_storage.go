@@ -12,11 +12,6 @@ import (
 	"time"
 )
 
-type Storage interface {
-	SaveServicePhoto(uuid string, file *multipart.FileHeader) (string, error)
-	SaveApplicationProof(uuid string, file *multipart.FileHeader) (string, error)
-}
-
 type DiskStorage struct {
 	ApplicationProofLocation string
 	ServicePhotoLocation     string
