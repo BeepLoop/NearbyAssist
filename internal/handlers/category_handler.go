@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"nearbyassist/internal/db/models"
 	"nearbyassist/internal/server"
 	"net/http"
 
@@ -19,9 +18,7 @@ func NewCategoryHandler(server *server.Server) *categoryHandler {
 }
 
 func (h *categoryHandler) HandleCategories(c echo.Context) error {
-	model := models.NewCategoryModel(h.server.DB)
-
-	categories, err := model.FindAll()
+	categories, err := h.server.DB.FindAllCategory()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

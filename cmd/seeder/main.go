@@ -2,14 +2,14 @@ package main
 
 import (
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/db"
+	"nearbyassist/internal/db/mysql"
 	"nearbyassist/internal/types"
 	"nearbyassist/internal/utils"
 )
 
 func main() {
 	conf := config.LoadConfig()
-	db := db.NewDatabase(conf)
+	db := mysql.NewMysqlDatabase(conf)
 
 	// Seed categories
 	_, err := db.Conn.NamedExec("INSERT INTO Category (title) values (:title)", []types.Category{

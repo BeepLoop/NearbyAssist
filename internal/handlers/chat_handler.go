@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	"nearbyassist/internal/db/models"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"net/http"
 	"strconv"
@@ -24,12 +24,12 @@ func NewChatHandler(server *server.Server) *chatHandler {
 func (h *chatHandler) HandleGetMessages(c echo.Context) error {
 	params := c.QueryString()
 
-	model, err := models.MessageModelFactory(params)
+	values, err := models.MessageValueMapFactory(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	messages, err := model.GetMessages()
+	messages, err := h.server.DB.GetMessages(values["sender"], values["receiver"])
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -51,7 +51,7 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	fmt.Printf("userId: %d connected\n", userId)
 
 	for {
-		message := models.NewMessageModel(h.server.DB)
+		message := models.NewMessageModel()
 		err := conn.ReadJSON(message)
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -69,4 +69,19 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 
 		h.server.Websocket.MessageChan <- *message
 	}
+}
+
+func (h *chatHandler) HandleGetConversations(c echo.Context) error {
+	userId := c.QueryParam("userId")
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+	}
+
+	conversations, err := h.server.DB.GetAllUserConversations(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, conversations)
 }

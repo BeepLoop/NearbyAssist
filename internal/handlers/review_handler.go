@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"nearbyassist/internal/db/models"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"net/http"
 	"strconv"
@@ -20,7 +20,7 @@ func NewReviewHandler(server *server.Server) *reviewHandler {
 }
 
 func (h *reviewHandler) HandleNewReview(c echo.Context) error {
-	model := models.NewReviewModel(h.server.DB)
+	model := models.NewReviewModel()
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -31,7 +31,7 @@ func (h *reviewHandler) HandleNewReview(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	reviewId, err := model.Create()
+	reviewId, err := h.server.DB.CreateReview(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -42,6 +42,21 @@ func (h *reviewHandler) HandleNewReview(c echo.Context) error {
 	})
 }
 
+func (h *reviewHandler) HandleGetReview(c echo.Context) error {
+	reviewId := c.Param("reviewId")
+	id, err := strconv.Atoi(reviewId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "review ID must be a number")
+	}
+
+	review, err := h.server.DB.FindReviewById(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, review)
+}
+
 func (h *reviewHandler) HandleServiceReview(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	id, err := strconv.Atoi(vendorId)
@@ -49,9 +64,7 @@ func (h *reviewHandler) HandleServiceReview(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	model := models.NewReviewModel(h.server.DB)
-
-	reviews, err := model.FindByService(id)
+	reviews, err := h.server.DB.FindAllReviewByService(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

@@ -4,10 +4,11 @@ import (
 	"log"
 
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/db"
+	"nearbyassist/internal/db/mysql"
 	"nearbyassist/internal/routes"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/storage"
+	"nearbyassist/internal/websocket"
 )
 
 func main() {
@@ -15,14 +16,16 @@ func main() {
 	config := config.LoadConfig()
 
 	// Load file store
-	store := storage.NewStorage(config)
+	store := storage.NewDiskStorage(config)
 	store.CreateDirectories()
 
 	// Load database configuration
-	db := db.NewDatabase(config)
+	db := mysql.NewMysqlDatabase(config)
+
+	ws := websocket.NewWebsocket(db)
 
 	// Create and start the server
-	server := server.NewServer(config, db, store)
+	server := server.NewServer(config, ws, db, store)
 	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"nearbyassist/internal/db/models"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"net/http"
 	"strconv"
@@ -21,10 +21,9 @@ func NewApplicationHandler(server *server.Server) *applicationHandler {
 
 func (h *applicationHandler) HandleCount(c echo.Context) error {
 	filter := c.QueryParam("filter")
+	status := models.ApplicationStatus(filter)
 
-	model := models.NewApplicationModel(h.server.DB)
-
-	count, err := model.Count(filter)
+	count, err := h.server.DB.CountApplication(status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -35,7 +34,7 @@ func (h *applicationHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
-	model := models.NewApplicationModel(h.server.DB)
+	model := models.NewApplicationModel()
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "unable to process data provided")
@@ -46,7 +45,7 @@ func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
-	applicationId, err := model.Create()
+	applicationId, err := h.server.DB.CreateApplication(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -56,12 +55,11 @@ func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
 	})
 }
 
-func (h *applicationHandler) HandleGetApplicants(c echo.Context) error {
+func (h *applicationHandler) HandleGetApplications(c echo.Context) error {
 	filter := c.QueryParam("filter")
+	status := models.ApplicationStatus(filter)
 
-	model := models.NewApplicationModel(h.server.DB)
-
-	applications, err := model.FindAll(filter)
+	applications, err := h.server.DB.FindAllApplication(status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -76,9 +74,7 @@ func (h *applicationHandler) HandleApprove(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	model := models.NewApplicationModel(h.server.DB)
-
-	err = model.Approve(id)
+	err = h.server.DB.ApproveApplication(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -96,9 +92,7 @@ func (h *applicationHandler) HandleReject(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	model := models.NewApplicationModel(h.server.DB)
-
-	err = model.Reject(id)
+	err = h.server.DB.RejectApplication(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

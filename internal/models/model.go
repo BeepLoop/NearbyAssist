@@ -2,8 +2,6 @@ package models
 
 import (
 	"mime/multipart"
-	"nearbyassist/internal/db"
-	"nearbyassist/internal/storage"
 )
 
 type FileModelInterface interface {
@@ -24,8 +22,6 @@ type Locatable interface {
 type Model struct {
 	Id        int    `json:"id" db:"id"`
 	CreatedAt string `json:"createdAt" db:"createdAt"`
-	Db        *db.DB
-	Disk      *storage.Storage
 }
 
 type UpdateableModel struct {

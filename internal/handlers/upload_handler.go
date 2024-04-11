@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"nearbyassist/internal/db/models"
 	filehandler "nearbyassist/internal/file"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -26,8 +26,7 @@ func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	model := models.NewServiceModel(h.server.DB)
-	if service, _ := model.FindById(params["serviceId"]); service == nil {
+	if service, _ := h.server.DB.FindServiceById(params["serviceId"]); service == nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Service not found")
 	}
 
@@ -37,10 +36,14 @@ func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		model := models.NewServicePhotoModel(params["vendorId"], params["serviceId"], h.server.DB)
-		handler := filehandler.NewFileHandler(model)
+		handler := filehandler.NewFileHandler(h.server.Storage)
+		filename, err := handler.SaveServicePhoto(file)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 
-		_, err := handler.SaveFile(file)
+		uploadData := models.NewServicePhotoModel(params["vendorId"], params["serviceId"], filename)
+		_, err = h.server.DB.NewServicePhoto(uploadData)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -57,8 +60,7 @@ func (h *uploadHandler) HandleNewProofPhoto(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	model := models.NewApplicationModel(h.server.DB)
-	if application, _ := model.FindById(params["applicationId"]); application == nil {
+	if application, _ := h.server.DB.FindApplicationById(params["applicationId"]); application == nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Application not found")
 	}
 
@@ -68,10 +70,14 @@ func (h *uploadHandler) HandleNewProofPhoto(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		model := models.NewApplicationProofModel(params["applicationId"], params["applicantId"], h.server.DB)
-		handler := filehandler.NewFileHandler(model)
+		handler := filehandler.NewFileHandler(h.server.Storage)
+		filename, err := handler.SaveApplicationProof(file)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 
-		_, err := handler.SaveFile(file)
+		uploadData := models.NewApplicationProofModel(params["applicationId"], params["applicantId"], filename)
+		_, err = h.server.DB.NewApplicationProof(uploadData)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}

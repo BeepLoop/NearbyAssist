@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"nearbyassist/internal/db/models"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"net/http"
 	"strconv"
@@ -18,11 +18,9 @@ func NewVendorHandler(server *server.Server) *vendorHandler {
 }
 
 func (h *vendorHandler) HandleCount(c echo.Context) error {
-	filter := c.QueryParam("filter")
+	status := models.VendorStatus(c.QueryParam("status"))
 
-	model := models.NewVendorModel(h.server.DB)
-
-	count, err := model.Count(filter)
+	count, err := h.server.DB.CountVendor(status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -39,9 +37,7 @@ func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	model := models.NewVendorModel(h.server.DB)
-
-	vendor, err := model.FindById(id)
+	vendor, err := h.server.DB.FindUserById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -58,9 +54,7 @@ func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	model := models.NewVendorModel(h.server.DB)
-
-	err = model.RestrictAccount(id)
+	err = h.server.DB.RestrictVendor(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -77,9 +71,7 @@ func (h *vendorHandler) HandleUnrestrict(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	model := models.NewVendorModel(h.server.DB)
-
-	err = model.UnrestrictAccount(id)
+	err = h.server.DB.UnrestrictVendor(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

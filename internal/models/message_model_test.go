@@ -54,18 +54,18 @@ func TestMessageModelFactory(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		model, _ := MessageModelFactory(test.query)
+		values, _ := MessageValueMapFactory(test.query)
 
-		if model != nil && test.expected == nil {
+		if values != nil && test.expected == nil {
 			t.Logf("Expected: %v \n", test.expected)
-			t.Logf("Got: %v \n", model)
+			t.Logf("Got: %v \n", values)
 			t.Logf("Test case: %s\n", test.query)
 			t.FailNow()
 		}
 
-		if reflect.DeepEqual(model, test.expected) == false {
+		if reflect.DeepEqual(values, test.expected) == false {
 			t.Logf("Expected: %v \n", test.expected)
-			t.Logf("Got: %v \n", model)
+			t.Logf("Got: %v \n", values)
 			t.Logf("Test case: %s\n", test.query)
 			t.FailNow()
 		}

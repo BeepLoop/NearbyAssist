@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"nearbyassist/internal/db/models"
 	"nearbyassist/internal/server"
 	"net/http"
 	"strconv"
@@ -26,8 +25,7 @@ func (h *userHandler) HandleGetUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	userModel := models.NewUserModel(h.server.DB)
-	user, err := userModel.FindById(id)
+	user, err := h.server.DB.FindUserById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -36,9 +34,7 @@ func (h *userHandler) HandleGetUser(c echo.Context) error {
 }
 
 func (h *userHandler) HandleCount(c echo.Context) error {
-	model := models.NewUserModel(h.server.DB)
-
-	count, err := model.Count()
+	count, err := h.server.DB.CountUser()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

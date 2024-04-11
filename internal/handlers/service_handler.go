@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"nearbyassist/internal/db/models"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -21,9 +21,7 @@ func NewServiceHandler(server *server.Server) *serviceHandler {
 }
 
 func (h *serviceHandler) HandleGetServices(c echo.Context) error {
-	model := models.NewServiceModel(h.server.DB)
-
-	services, err := model.FindAll()
+	services, err := h.server.DB.FindAllService()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -32,7 +30,7 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 }
 
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
-	model := models.NewServiceModel(h.server.DB)
+	model := models.NewServiceModel()
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -43,7 +41,7 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	insertId, err := model.Create()
+	insertId, err := h.server.DB.RegisterService(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -59,9 +57,7 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	model := models.NewServiceModelWithLocation(params.Latitude, params.Longitude)
-
-	services, err := model.GeoSpatialSearch(params.Query, params.Radius)
+	services, err := h.server.DB.GeoSpatialSearch(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -76,9 +72,7 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	model := models.NewServiceModel(h.server.DB)
-
-	service, err := model.FindById(id)
+	service, err := h.server.DB.FindServiceById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -90,16 +84,14 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	return c.JSON(http.StatusOK, service)
 }
 
-func (h *serviceHandler) HandleGetByOwner(c echo.Context) error {
-	ownerId := c.Param("ownerId")
-	id, err := strconv.Atoi(ownerId)
+func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
+	vendorId := c.Param("vendorId")
+	id, err := strconv.Atoi(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "owner ID must be a number")
 	}
 
-	model := models.NewServiceModel(h.server.DB)
-
-	services, err := model.FindByVendorId(id)
+	services, err := h.server.DB.FindServiceByVendor(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

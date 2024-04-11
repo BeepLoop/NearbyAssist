@@ -14,14 +14,12 @@ import (
 type Server struct {
 	Echo      *echo.Echo
 	Websocket *websocket.Websocket
-	DB        *db.DB
-	Storage   *storage.Storage
+	DB        db.Database
+	Storage   storage.Storage
 	Port      string
 }
 
-func NewServer(conf *config.Config, db *db.DB, storage *storage.Storage) *Server {
-	ws := websocket.NewWebsocket()
-
+func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage) *Server {
 	NewServer := &Server{
 		Echo:      echo.New(),
 		Websocket: ws,

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"nearbyassist/internal/db/models"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"net/http"
 	"strconv"
@@ -19,8 +19,21 @@ func NewTransactionHandler(server *server.Server) *transactionHandler {
 	}
 }
 
+func (h *transactionHandler) HandleCount(c echo.Context) error {
+	status := models.TransactionStatus(c.QueryParam("status"))
+
+	count, err := h.server.DB.CountTransaction(status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"transactionCount": count,
+	})
+}
+
 func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
-	model := models.NewTransactionModel(h.server.DB)
+	model := models.NewTransactionModel()
 	err := c.Bind(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
@@ -31,7 +44,7 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	transactionId, err := model.Create()
+	transactionId, err := h.server.DB.CreateTransaction(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -42,31 +55,17 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 	})
 }
 
-func (h *transactionHandler) HandleCount(c echo.Context) error {
-	status := c.QueryParam("status")
-
-	model := models.NewTransactionModel(h.server.DB)
-
-	count, err := model.Count(status)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"transactionCount": count,
-	})
-}
-
-func (h *transactionHandler) HandleClientOngoingTransaction(c echo.Context) error {
+func (h *transactionHandler) HandleOngoingTransaction(c echo.Context) error {
 	userId := c.Param("userId")
 	id, err := strconv.Atoi(userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	model := models.NewTransactionModel(h.server.DB)
+	param := c.QueryParam("filter")
+	filter := models.TransactionFilter(param)
 
-	transactions, err := model.GetClientOngoing(id)
+	transactions, err := h.server.DB.FindAllOngoingTransaction(id, filter)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -74,50 +73,17 @@ func (h *transactionHandler) HandleClientOngoingTransaction(c echo.Context) erro
 	return c.JSON(http.StatusOK, transactions)
 }
 
-func (h *transactionHandler) HandleVendorOngoingTransaction(c echo.Context) error {
+func (h *transactionHandler) HandleHistory(c echo.Context) error {
 	userId := c.Param("userId")
 	id, err := strconv.Atoi(userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	model := models.NewTransactionModel(h.server.DB)
+	param := c.QueryParam("filter")
+	filter := models.TransactionFilter(param)
 
-	transactions, err := model.GetVendorOngoing(id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, transactions)
-}
-
-func (h *transactionHandler) HandleClientHistory(c echo.Context) error {
-	userId := c.Param("userId")
-	id, err := strconv.Atoi(userId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
-	}
-
-	model := models.NewTransactionModel(h.server.DB)
-
-	history, err := model.VendorHistory(id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, history)
-}
-
-func (h *transactionHandler) HandleVendorHistory(c echo.Context) error {
-	userId := c.Param("userId")
-	id, err := strconv.Atoi(userId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
-	}
-
-	model := models.NewTransactionModel(h.server.DB)
-
-	history, err := model.VendorHistory(id)
+	history, err := h.server.DB.GetTransactionHistory(id, filter)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

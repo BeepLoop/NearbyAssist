@@ -17,7 +17,7 @@ func NewHandler(server *server.Server) *handler {
 	}
 }
 
-func (h *handler) HandleRoot(c echo.Context) error {
+func (h *handler) HandleBaseRoute(c echo.Context) error {
 	routes := h.server.Echo.Routes()
 	return c.JSON(http.StatusOK, routes)
 }
