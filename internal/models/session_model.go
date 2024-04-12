@@ -8,6 +8,9 @@ type SessionModel struct {
 	Token  string `json:"token" db:"token"`
 }
 
-func NewSessionModel() *SessionModel {
-	return &SessionModel{}
+func NewSessionModel(userId int, token string) *SessionModel {
+	return &SessionModel{
+		UserId: userId,
+		Token:  token,
+	}
 }
