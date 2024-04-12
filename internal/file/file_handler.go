@@ -2,26 +2,39 @@ package filehandler
 
 import (
 	"mime/multipart"
-	"nearbyassist/internal/db/models"
+	"nearbyassist/internal/storage"
 
 	"github.com/google/uuid"
 )
 
 type FileHandler struct {
-	model models.FileModelInterface
+	storage storage.Storage
 }
 
-func NewFileHandler(model models.FileModelInterface) *FileHandler {
-	return &FileHandler{model: model}
+func NewFileHandler(storage storage.Storage) *FileHandler {
+	return &FileHandler{
+		storage: storage,
+	}
 }
 
-func (f *FileHandler) SaveFile(file *multipart.FileHeader) (int, error) {
+func (f *FileHandler) SaveServicePhoto(file *multipart.FileHeader) (string, error) {
 	uuid := uuid.New().String()
 
-	filename, err := f.model.SaveToDisk(uuid, file)
+	filename, err := f.storage.SaveServicePhoto(uuid, file)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return f.model.SaveToDb(filename)
+	return filename, nil
+}
+
+func (f *FileHandler) SaveApplicationProof(file *multipart.FileHeader) (string, error) {
+	uuid := uuid.New().String()
+
+	filename, err := f.storage.SaveApplicationProof(uuid, file)
+	if err != nil {
+		return "", err
+	}
+
+	return filename, nil
 }

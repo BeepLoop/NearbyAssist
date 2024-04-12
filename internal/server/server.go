@@ -1,31 +1,43 @@
 package server
 
 import (
-	"fmt"
-	"net/http"
-	"time"
+	"nearbyassist/internal/config"
+	"nearbyassist/internal/db"
+	"nearbyassist/internal/storage"
+	"nearbyassist/internal/utils"
+	"nearbyassist/internal/websocket"
+
+	"github.com/go-playground/validator"
+	"github.com/labstack/echo/v4"
 )
 
-var port = 8080
-
 type Server struct {
-	port int
+	Echo      *echo.Echo
+	Websocket *websocket.Websocket
+	DB        db.Database
+	Storage   storage.Storage
+	Port      string
 }
 
-func NewServer() *http.Server {
-
+func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage) *Server {
 	NewServer := &Server{
-		port: port,
+		Echo:      echo.New(),
+		Websocket: ws,
+		DB:        db,
+		Storage:   storage,
+		Port:      conf.Port,
 	}
 
-	// Declare Server config
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
+	return NewServer
+}
 
-	return server
+func (s *Server) configure() {
+	s.Echo.Validator = &utils.Validator{Validator: validator.New()}
+}
+
+func (s *Server) Start() error {
+	s.configure()
+	s.registerMiddleware()
+
+	return s.Echo.Start(":" + s.Port)
 }

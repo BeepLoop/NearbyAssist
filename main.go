@@ -2,38 +2,36 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/db"
+	"nearbyassist/internal/db/mysql"
+	"nearbyassist/internal/routes"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/storage"
+	"nearbyassist/internal/websocket"
 )
 
-func init() {
-	if err := config.Init(); err != nil {
-		log.Fatal("error reading environment variables: ", err)
-	}
-
-	if err := db.Init(); err != nil {
-		log.Fatal("error initializing database connection: ", err)
-	}
-
-	if err := os.MkdirAll("store/application", 0777); err != nil {
-		log.Fatal("Unable to initialize file store: ", err)
-	}
-
-	if err := os.MkdirAll("store/service", 0777); err != nil {
-		log.Fatal("Unable to initialize file store: ", err)
-	}
-}
-
 func main() {
+	// Load configuration file
+	config := config.LoadConfig()
 
-	server := server.NewServer()
+	// Load file store
+	store := storage.NewStorage(config)
+	store.Initialize()
 
-	log.Println("starting server ", server.Addr)
-	err := server.ListenAndServe()
-	if err != nil {
-		panic("cannot start server")
+	// Load database configuration
+	db := mysql.NewMysqlDatabase(config)
+
+	ws := websocket.NewWebsocket(db)
+
+	// Create and start the server
+	server := server.NewServer(config, ws, db, store)
+	routes.RegisterRoutes(server)
+
+	go server.Websocket.SaveMessages()
+	go server.Websocket.ForwardMessages()
+
+	if err := server.Start(); err != nil {
+		log.Fatal(err)
 	}
 }

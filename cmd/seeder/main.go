@@ -1,26 +1,18 @@
 package main
 
 import (
-	"log"
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/db"
+	"nearbyassist/internal/db/mysql"
 	"nearbyassist/internal/types"
 	"nearbyassist/internal/utils"
 )
 
-func init() {
-	if err := config.Init(); err != nil {
-		log.Fatal("Error initializing config: ", err)
-	}
-
-	if err := db.Init(); err != nil {
-		log.Fatal("Error initializing database: ", err)
-	}
-}
-
 func main() {
+	conf := config.LoadConfig()
+	db := mysql.NewMysqlDatabase(conf)
+
 	// Seed categories
-	_, err := db.Connection.NamedExec("INSERT INTO Category (title) values (:title)", []types.Category{
+	_, err := db.Conn.NamedExec("INSERT INTO Category (title) values (:title)", []types.Category{
 		{Title: "food"},
 		{Title: "service"},
 	})
@@ -29,7 +21,7 @@ func main() {
 	}
 
 	// Seed users
-	_, err = db.Connection.NamedExec("INSERT INTO User (name, email, imageUrl) values (:name, :email, :imageUrl)", []types.User{
+	_, err = db.Conn.NamedExec("INSERT INTO User (name, email, imageUrl) values (:name, :email, :imageUrl)", []types.User{
 		{
 			Name:     "John Loyd Mulit",
 			Email:    "jlmulit68@gmail.com",
@@ -41,7 +33,7 @@ func main() {
 	}
 
 	// Seed vendors
-	_, err = db.Connection.NamedExec("INSERT INTO Vendor (vendorId, job) values ((SELECT id FROM User WHERE name = :name), :job)", []struct {
+	_, err = db.Conn.NamedExec("INSERT INTO Vendor (vendorId, job) values ((SELECT id FROM User WHERE name = :name), :job)", []struct {
 		Name string `db:"name"`
 		Job  string `db:"job"`
 	}{
@@ -78,14 +70,14 @@ func main() {
 			panic("Error transforming service data: " + err.Error())
 		}
 
-		_, err = db.Connection.NamedExec("INSERT INTO Service (vendorId, title, description, rate, location, categoryId) values (:vendorId, :title, :description, :rate, ST_GeomFromText(:point, 4326), :categoryId)", data)
+		_, err = db.Conn.NamedExec("INSERT INTO Service (vendorId, title, description, rate, location, categoryId) values (:vendorId, :title, :description, :rate, ST_GeomFromText(:point, 4326), :categoryId)", data)
 		if err != nil {
 			panic("Error inserting service: " + err.Error())
 		}
 	}
 
 	// Seed reviews
-	_, err = db.Connection.NamedExec("INSERT INTO Review (serviceId, rating) values (:serviceId, :rating)", []types.Review{
+	_, err = db.Conn.NamedExec("INSERT INTO Review (serviceId, rating) values (:serviceId, :rating)", []types.Review{
 		{ServiceId: 1, Rating: 5},
 		{ServiceId: 1, Rating: 3},
 		{ServiceId: 1, Rating: 3},
@@ -96,7 +88,7 @@ func main() {
 	}
 
 	// Seed service photos
-	_, err = db.Connection.NamedExec("INSERT INTO ServicePhoto (vendorId, serviceId, url) values (:vendorId, :serviceId, :url)", []types.ServicePhoto{
+	_, err = db.Conn.NamedExec("INSERT INTO ServicePhoto (vendorId, serviceId, url) values (:vendorId, :serviceId, :url)", []types.ServicePhoto{
 		{ServiceId: 1, VendorId: 1, Url: "https://i.pravatar.cc/100"},
 		{ServiceId: 1, VendorId: 1, Url: "https://i.pravatar.cc/100"},
 	})

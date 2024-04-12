@@ -1,27 +1,43 @@
 package config
 
 import (
-	"nearbyassist/internal/types"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
-var Env *types.Config
+type StorageType string
 
-func Init() error {
+const (
+	STORAGE_DISK  StorageType = "disk"
+	STORAGE_DUMMY StorageType = "dummy"
+)
+
+type Config struct {
+	DSN                      string
+	Port                     string
+	StorageType              StorageType
+	ApplicationProofLocation string
+	ServicePhotoLocation     string
+}
+
+func LoadConfig() *Config {
 	godotenv.Load()
-	var dsn string
 
-	if os.Getenv("GO_ENV") == "development" {
+	environment := os.Getenv("GO_ENV")
+
+	var dsn string
+	if environment == "development" {
 		dsn = os.Getenv("DSN_DEV")
 	} else {
 		dsn = os.Getenv("DSN_PROD")
 	}
 
-	Env = &types.Config{
-		DSN: dsn,
+	return &Config{
+		DSN:                      dsn,
+		Port:                     os.Getenv("PORT"),
+		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),
+		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
+		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),
 	}
-
-	return nil
 }
