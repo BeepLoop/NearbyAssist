@@ -3,6 +3,7 @@ package handlers
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -17,6 +18,12 @@ func NewTransactionHandler(server *server.Server) *transactionHandler {
 	return &transactionHandler{
 		server: server,
 	}
+}
+
+func (h *transactionHandler) HandleBaseRoute(c echo.Context) error {
+    return c.JSON(http.StatusOK, utils.Mapper{
+        "message": "Transaction base route",
+    })
 }
 
 func (h *transactionHandler) HandleCount(c echo.Context) error {

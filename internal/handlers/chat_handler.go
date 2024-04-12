@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -19,6 +20,12 @@ func NewChatHandler(server *server.Server) *chatHandler {
 	return &chatHandler{
 		server: server,
 	}
+}
+
+func (h *chatHandler) HandleBaseRoute(c echo.Context) error {
+    return c.JSON(http.StatusOK, utils.Mapper{
+        "message": "Chat base route",
+    })
 }
 
 func (h *chatHandler) HandleGetMessages(c echo.Context) error {

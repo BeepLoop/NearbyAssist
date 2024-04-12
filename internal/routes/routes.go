@@ -21,6 +21,7 @@ func RegisterRoutes(s *server.Server) {
 	{
 		// TODO: Add base route
 		v1.GET("/health", healthHandler.HandleHealthCheck).Name = "v1 route health check"
+		v1.GET("", rootHandler.HandleV1BaseRoute).Name = "v1 base route"
 
 		// Auth Routes
 		auth := v1.Group("/auth")
@@ -48,7 +49,7 @@ func RegisterRoutes(s *server.Server) {
 		{
 			handler := handlers.NewUserHandler(s)
 			user.GET("/health", healthHandler.HandleHealthCheck).Name = "user route health check"
-			// TODO: Add base route
+			user.GET("", handler.HandleBaseRoute).Name = "user base route"
 			user.GET("/count", handler.HandleCount).Name = "get number of users"
 			user.GET("/:userId", handler.HandleGetUser).Name = "get user details"
 		}
@@ -58,7 +59,7 @@ func RegisterRoutes(s *server.Server) {
 		{
 			handler := handlers.NewVendorHandler(s)
 			vendor.GET("/health", healthHandler.HandleHealthCheck).Name = "vendor route health check"
-			// TODO: Add base route
+			vendor.GET("", handler.HandleBaseRoute).Name = "vendor base route"
 			vendor.GET("/count", handler.HandleCount).Name = "get number of vendors"
 			vendor.GET("/:vendorId", handler.HandleGetVendor).Name = "get vendor details"
 			vendor.PATCH("/restrict/:vendorId", handler.HandleRestrict).Name = "restrict vendor"
@@ -90,7 +91,7 @@ func RegisterRoutes(s *server.Server) {
 		{
 			handler := handlers.NewComplaintServer(s)
 			complaint.GET("/health", healthHandler.HandleHealthCheck).Name = "complaint route health check"
-			// TODO: Add base route
+			complaint.GET("", handler.HandleBaseRoute).Name = "complaint base route"
 			complaint.GET("/count", handler.HandleCount).Name = "get number of complaints"
 			complaint.PUT("/create", handler.HandleNewComplaint).Name = "file a complaint"
 		}
@@ -100,7 +101,7 @@ func RegisterRoutes(s *server.Server) {
 		{
 			handler := handlers.NewTransactionHandler(s)
 			transaction.GET("/health", healthHandler.HandleHealthCheck).Name = "health check for transactions route"
-			// TODO: Add base route
+			transaction.GET("", handler.HandleBaseRoute).Name = "transaction base route"
 			transaction.PUT("/create", handler.HandleNewTransaction).Name = "create new transaction"
 			transaction.GET("/count", handler.HandleCount).Name = "number of transactions, takes in a filter for status"
 			// TODO: maybe refactor this to be base route that takes in the following
@@ -128,7 +129,7 @@ func RegisterRoutes(s *server.Server) {
 		{
 			handler := handlers.NewReviewHandler(s)
 			review.GET("/health", healthHandler.HandleHealthCheck).Name = "review route health check"
-			// TODO: Add base route
+			review.GET("", handler.HandleBaseRoute).Name = "review base route"
 			review.GET("/:reviewId", handler.HandleGetReview).Name = "get review details"
 			review.PUT("/create", handler.HandleNewReview).Name = "post a review"
 			review.GET("/service/:serviceId", handler.HandleServiceReview).Name = "get reviews by service"
@@ -139,8 +140,7 @@ func RegisterRoutes(s *server.Server) {
 		{
 			handler := handlers.NewUploadHandler(s)
 			upload.GET("/health", healthHandler.HandleHealthCheck).Name = "upload route health check"
-			// TODO: Add base route
-
+			upload.GET("", handler.HandleBaseRoute).Name = "upload base route"
 			upload.PUT("/service", handler.HandleNewServicePhoto).Name = "upload service image"
 			upload.PUT("/proof", handler.HandleNewProofPhoto).Name = "upload vendor application proof"
 		}
@@ -150,7 +150,7 @@ func RegisterRoutes(s *server.Server) {
 		{
 			handler := handlers.NewChatHandler(s)
 			chat.GET("/health", healthHandler.HandleHealthCheck).Name = "message route health check"
-			// TODO: Add base route
+			chat.GET("", handler.HandleBaseRoute).Name = "chat base route"
 			chat.GET("/messages", handler.HandleGetMessages).Name = "get messages between sender and receiver"
 			chat.GET("/ws", handler.HandleWebsocket).Name = "websocket route for chat"
 			chat.GET("/conversations", handler.HandleGetConversations).Name = "get all users you chatted with"

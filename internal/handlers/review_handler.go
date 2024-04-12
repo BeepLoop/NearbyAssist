@@ -3,6 +3,7 @@ package handlers
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -17,6 +18,12 @@ func NewReviewHandler(server *server.Server) *reviewHandler {
 	return &reviewHandler{
 		server: server,
 	}
+}
+
+func (h *reviewHandler) HandleBaseRoute(c echo.Context) error {
+    return c.JSON(http.StatusOK, utils.Mapper{
+        "message": "Transaction base route",
+    })
 }
 
 func (h *reviewHandler) HandleNewReview(c echo.Context) error {

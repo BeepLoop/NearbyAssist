@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -16,6 +17,12 @@ func NewUserHandler(server *server.Server) *userHandler {
 	return &userHandler{
 		server: server,
 	}
+}
+
+func (h *userHandler) HandleBaseRoute(c echo.Context) error {
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "User base route",
+	})
 }
 
 func (h *userHandler) HandleGetUser(c echo.Context) error {

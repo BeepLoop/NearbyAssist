@@ -20,6 +20,12 @@ func NewUploadHandler(server *server.Server) *uploadHandler {
 	}
 }
 
+func (h *uploadHandler) HandleBaseRoute(c echo.Context) error {
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Transaction base route",
+	})
+}
+
 func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 	params, err := utils.GetUploadParams(c, "vendorId", "serviceId")
 	if err != nil {

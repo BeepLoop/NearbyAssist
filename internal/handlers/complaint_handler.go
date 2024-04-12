@@ -3,6 +3,7 @@ package handlers
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -16,6 +17,12 @@ func NewComplaintServer(server *server.Server) *complaintHandler {
 	return &complaintHandler{
 		server: server,
 	}
+}
+
+func (h *complaintHandler) HandleBaseRoute(c echo.Context) error {
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Vendor base route",
+	})
 }
 
 func (h *complaintHandler) HandleCount(c echo.Context) error {

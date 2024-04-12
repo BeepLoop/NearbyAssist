@@ -3,6 +3,7 @@ package handlers
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -15,6 +16,12 @@ type vendorHandler struct {
 
 func NewVendorHandler(server *server.Server) *vendorHandler {
 	return &vendorHandler{server}
+}
+
+func (h *vendorHandler) HandleBaseRoute(c echo.Context) error {
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Vendor base route",
+	})
 }
 
 func (h *vendorHandler) HandleCount(c echo.Context) error {
