@@ -21,9 +21,9 @@ func NewReviewHandler(server *server.Server) *reviewHandler {
 }
 
 func (h *reviewHandler) HandleBaseRoute(c echo.Context) error {
-    return c.JSON(http.StatusOK, utils.Mapper{
-        "message": "Transaction base route",
-    })
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Transaction base route",
+	})
 }
 
 func (h *reviewHandler) HandleNewReview(c echo.Context) error {
@@ -43,7 +43,7 @@ func (h *reviewHandler) HandleNewReview(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"message":  "Review created successfully!",
 		"reviewId": reviewId,
 	})
@@ -61,7 +61,9 @@ func (h *reviewHandler) HandleGetReview(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, review)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"review": review,
+	})
 }
 
 func (h *reviewHandler) HandleServiceReview(c echo.Context) error {
@@ -76,5 +78,7 @@ func (h *reviewHandler) HandleServiceReview(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, reviews)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"reviews": reviews,
+	})
 }

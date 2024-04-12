@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -18,14 +19,16 @@ func NewAuthHandler(server *server.Server) *authHandler {
 }
 
 func (h *authHandler) HandleBaseRoute(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"message": "Auth route is up and running!",
 	})
 }
 
 func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 	// TODO: Handle admin login
-	return c.JSON(http.StatusOK, "admin login")
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Admin login",
+	})
 }
 
 func (h *authHandler) HandleRegister(c echo.Context) error {
@@ -49,7 +52,7 @@ func (h *authHandler) HandleRegister(c echo.Context) error {
 
 	// TODO: Create new session
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, utils.Mapper{
 		"userId": userId,
 	})
 }
@@ -83,12 +86,14 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 
 	// TODO: Create new session
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, utils.Mapper{
 		"userId": model.Id,
 	})
 }
 
 func (h *authHandler) HandleLogout(c echo.Context) error {
 	// TODO: Handle logout
-	return c.JSON(http.StatusOK, "logout")
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Logout",
+	})
 }

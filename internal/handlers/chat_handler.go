@@ -23,9 +23,9 @@ func NewChatHandler(server *server.Server) *chatHandler {
 }
 
 func (h *chatHandler) HandleBaseRoute(c echo.Context) error {
-    return c.JSON(http.StatusOK, utils.Mapper{
-        "message": "Chat base route",
-    })
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Chat base route",
+	})
 }
 
 func (h *chatHandler) HandleGetMessages(c echo.Context) error {
@@ -41,7 +41,9 @@ func (h *chatHandler) HandleGetMessages(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, messages)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"messages": messages,
+	})
 }
 
 func (h *chatHandler) HandleWebsocket(c echo.Context) error {
@@ -90,5 +92,7 @@ func (h *chatHandler) HandleGetConversations(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, conversations)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"conversations": conversations,
+	})
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -23,5 +24,7 @@ func (h *categoryHandler) HandleCategories(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, categories)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"categories": categories,
+	})
 }

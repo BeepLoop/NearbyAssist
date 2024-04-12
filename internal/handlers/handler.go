@@ -20,7 +20,7 @@ func NewHandler(server *server.Server) *handler {
 
 func (h *handler) HandleBaseRoute(c echo.Context) error {
 	routes := h.server.Echo.Routes()
-	return c.JSON(http.StatusOK, routes)
+	return c.JSON(http.StatusOK, utils.Mapper{"routes": routes})
 }
 
 func (h *handler) HandleV1BaseRoute(c echo.Context) error {

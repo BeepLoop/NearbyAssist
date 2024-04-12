@@ -26,7 +26,9 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, services)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"services": services,
+	})
 }
 
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
@@ -46,7 +48,7 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, utils.Mapper{
 		"serviceId": insertId,
 	})
 }
@@ -62,7 +64,9 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, services)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"services": services,
+	})
 }
 
 func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
@@ -81,7 +85,9 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 
 	// TODO: retrieve photos associated with a given service
 
-	return c.JSON(http.StatusOK, service)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"service": service,
+	})
 }
 
 func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
@@ -96,5 +102,7 @@ func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, services)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"services": services,
+	})
 }

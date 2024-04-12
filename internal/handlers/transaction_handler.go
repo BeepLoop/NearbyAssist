@@ -21,9 +21,9 @@ func NewTransactionHandler(server *server.Server) *transactionHandler {
 }
 
 func (h *transactionHandler) HandleBaseRoute(c echo.Context) error {
-    return c.JSON(http.StatusOK, utils.Mapper{
-        "message": "Transaction base route",
-    })
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Transaction base route",
+	})
 }
 
 func (h *transactionHandler) HandleCount(c echo.Context) error {
@@ -34,7 +34,7 @@ func (h *transactionHandler) HandleCount(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"transactionCount": count,
 	})
 }
@@ -56,7 +56,7 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"message":       "transaction created successfully",
 		"transactionId": transactionId,
 	})
@@ -77,7 +77,9 @@ func (h *transactionHandler) HandleOngoingTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, transactions)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"transactions": transactions,
+	})
 }
 
 func (h *transactionHandler) HandleHistory(c echo.Context) error {
@@ -95,5 +97,7 @@ func (h *transactionHandler) HandleHistory(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, history)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"history": history,
+	})
 }

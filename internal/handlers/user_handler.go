@@ -37,7 +37,9 @@ func (h *userHandler) HandleGetUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"user": user,
+	})
 }
 
 func (h *userHandler) HandleCount(c echo.Context) error {
@@ -46,7 +48,7 @@ func (h *userHandler) HandleCount(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"userCount": count,
 	})
 }

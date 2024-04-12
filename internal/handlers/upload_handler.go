@@ -55,7 +55,7 @@ func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, utils.Mapper{
 		"message": "Files uploaded successfully",
 	})
 }
@@ -89,7 +89,7 @@ func (h *uploadHandler) HandleNewProofPhoto(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, utils.Mapper{
 		"message": "Files uploaded successfully",
 	})
 }

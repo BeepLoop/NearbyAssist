@@ -3,6 +3,7 @@ package handlers
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -28,7 +29,7 @@ func (h *applicationHandler) HandleCount(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"applicationCount": count,
 	})
 }
@@ -50,7 +51,7 @@ func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, utils.Mapper{
 		"applicationId": applicationId,
 	})
 }
@@ -64,7 +65,9 @@ func (h *applicationHandler) HandleGetApplications(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, applications)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"applications": applications,
+	})
 }
 
 func (h *applicationHandler) HandleApprove(c echo.Context) error {
@@ -79,7 +82,7 @@ func (h *applicationHandler) HandleApprove(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"message":       "Application approved successfully",
 		"applicationId": id,
 	})
@@ -97,7 +100,7 @@ func (h *applicationHandler) HandleReject(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"message":       "Application rejected successfully",
 		"applicationId": id,
 	})

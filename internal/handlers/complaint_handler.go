@@ -31,7 +31,7 @@ func (h *complaintHandler) HandleCount(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"complaintsCount": count,
 	})
 }
@@ -53,7 +53,7 @@ func (h *complaintHandler) HandleNewComplaint(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusCreated, utils.Mapper{
 		"message":     "complaint created successfully",
 		"complaintId": complaintId,
 	})

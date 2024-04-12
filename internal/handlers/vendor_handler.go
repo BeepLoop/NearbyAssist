@@ -32,7 +32,7 @@ func (h *vendorHandler) HandleCount(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"vendorCount": count,
 	})
 }
@@ -51,7 +51,9 @@ func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 
 	// TODO: retrieve review count
 
-	return c.JSON(http.StatusOK, vendor)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"vendor": vendor,
+	})
 }
 
 func (h *vendorHandler) HandleRestrict(c echo.Context) error {
@@ -66,8 +68,8 @@ func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": id,
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"restricedId": id,
 	})
 }
 
@@ -83,7 +85,7 @@ func (h *vendorHandler) HandleUnrestrict(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": id,
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"unrestrictedId": id,
 	})
 }

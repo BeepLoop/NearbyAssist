@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/utils"
 	"net/http"
 	"time"
 
@@ -19,7 +20,7 @@ func NewHealthHandler(server *server.Server) *healthHandler {
 }
 
 func (h *healthHandler) HandleHealthCheck(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"health": "ok",
 		"time":   time.Now(),
 	})
