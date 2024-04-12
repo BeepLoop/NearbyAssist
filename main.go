@@ -16,8 +16,8 @@ func main() {
 	config := config.LoadConfig()
 
 	// Load file store
-	store := storage.NewDiskStorage(config)
-	store.CreateDirectories()
+	store := storage.NewStorage(config)
+	store.Initialize()
 
 	// Load database configuration
 	db := mysql.NewMysqlDatabase(config)

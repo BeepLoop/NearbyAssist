@@ -18,7 +18,7 @@ type DiskStorage struct {
 	storagePermission        os.FileMode
 }
 
-func NewDiskStorage(conf *config.Config) *DiskStorage {
+func newDiskStorage(conf *config.Config) *DiskStorage {
 	return &DiskStorage{
 		ApplicationProofLocation: conf.ApplicationProofLocation,
 		ServicePhotoLocation:     conf.ServicePhotoLocation,
@@ -26,7 +26,7 @@ func NewDiskStorage(conf *config.Config) *DiskStorage {
 	}
 }
 
-func (s *DiskStorage) CreateDirectories() error {
+func (s *DiskStorage) Initialize() error {
 	if err := s.createApplicationProofLocation(); err != nil {
 		return err
 	}
