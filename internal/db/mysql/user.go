@@ -14,16 +14,16 @@ func (m *Mysql) NewUser(user *models.UserModel) (int, error) {
 
 	res, err := m.Conn.NamedExecContext(ctx, query, user)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return 0, context.DeadlineExceeded
 	}
 
 	return int(id), nil
@@ -73,14 +73,14 @@ func (m *Mysql) CountUser() (int, error) {
 
 	query := "SELECT COUNT(*) FROM User"
 
-	count := -1
+	count := 0
 	err := m.Conn.GetContext(ctx, &count, query)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return 0, context.DeadlineExceeded
 	}
 
 	return count, nil

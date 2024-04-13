@@ -20,3 +20,9 @@ func NewMysqlDatabase(conf *config.Config) *Mysql {
 
 	return &Mysql{Conn: conn}
 }
+
+func NewMysqlWithDb(db *sqlx.DB) *Mysql {
+	return &Mysql{
+		Conn: db,
+	}
+}
