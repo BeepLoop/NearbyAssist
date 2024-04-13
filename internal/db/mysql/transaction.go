@@ -10,12 +10,7 @@ func (m *Mysql) CountTransaction(status models.TransactionStatus) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := `
-        SELECT
-            COUNT(*)
-        FROM
-            Transaction
-    `
+	query := "SELECT COUNT(*) FROM Transaction"
 
 	switch status {
 	case models.TRANSACTION_STATUS_ONGOING:
