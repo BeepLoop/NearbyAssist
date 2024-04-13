@@ -6,6 +6,12 @@ import (
 )
 
 type Database interface {
+	// Session Queries
+	FindSessionByToken(token string) (*models.SessionModel, error)
+	FindSessionById(id int) (*models.SessionModel, error)
+	NewSession(session *models.SessionModel) (int, error)
+	LogoutSession(sesionId int) error
+
 	// User Queries
 	CountUser() (int, error)
 	FindUserById(id int) (*models.UserModel, error)

@@ -1,13 +1,14 @@
 package utils
 
 import (
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/types"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJwt(user types.User) (string, error) {
+func GenerateJwt(user *models.UserModel) (string, error) {
 	claims := &types.JwtClaims{
 		Name:  user.Name,
 		Email: user.Email,

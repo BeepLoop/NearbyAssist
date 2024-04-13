@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -49,11 +50,21 @@ func (h *authHandler) HandleRegister(c echo.Context) error {
 	}
 
 	// TODO: Generate JWT Token, not really sure
+	token, err := utils.GenerateJwt(user)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
-	// TODO: Create new session
+	// TODO: Implement better session handling
+	session := models.NewSessionModel(userId, token)
+	sessionId, err := h.server.DB.NewSession(session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"userId": userId,
+		"userId":    userId,
+		"sessionId": sessionId,
 	})
 }
 
@@ -83,16 +94,44 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 	}
 
 	// TODO: Generate JWT Token, not really sure
+	token, err := utils.GenerateJwt(model)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
-	// TODO: Create new session
+	// TODO: Implement better session handling
+	session := models.NewSessionModel(model.Id, token)
+	sessionId, err := h.server.DB.NewSession(session)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"userId": model.Id,
+		"userId":    model.Id,
+		"sessionId": sessionId,
 	})
 }
 
 func (h *authHandler) HandleLogout(c echo.Context) error {
 	// TODO: Handle logout
+	cookie, err := c.Cookie("session")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	sessionId, err := strconv.Atoi(cookie.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if session, _ := h.server.DB.FindSessionById(sessionId); session == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Session not found")
+	}
+
+	if err := h.server.DB.LogoutSession(sessionId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"message": "Logout",
 	})
