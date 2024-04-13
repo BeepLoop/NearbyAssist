@@ -16,6 +16,7 @@ const (
 type Config struct {
 	DSN                      string
 	Port                     string
+	JwtSecret                string
 	StorageType              StorageType
 	ApplicationProofLocation string
 	ServicePhotoLocation     string
@@ -36,6 +37,7 @@ func LoadConfig() *Config {
 	return &Config{
 		DSN:                      dsn,
 		Port:                     os.Getenv("PORT"),
+		JwtSecret:                os.Getenv("JWT_SECRET"),
 		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),
 		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
 		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),

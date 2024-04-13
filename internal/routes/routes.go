@@ -2,6 +2,7 @@ package routes
 
 import (
 	"nearbyassist/internal/handlers"
+	"nearbyassist/internal/middleware"
 	"nearbyassist/internal/server"
 )
 
@@ -22,6 +23,7 @@ func RegisterRoutes(s *server.Server) {
 		handler := handlers.NewAuthHandler(s)
 		auth.GET("/health", healthHandler.HandleHealthCheck).Name = "auth route health check"
 		auth.GET("", handler.HandleBaseRoute).Name = "auth base route"
+		auth.POST("/refresh", handler.HandleTokenRefresh).Name = "route for refreshing access token"
 
 		admin := auth.Group("/admin")
 		{
@@ -40,6 +42,8 @@ func RegisterRoutes(s *server.Server) {
 	// V1 routes
 	v1 := s.Echo.Group("/v1")
 	{
+		v1.Use(middleware.CheckAuth(s.Auth))
+
 		// TODO: Add base route
 		v1.GET("/health", healthHandler.HandleHealthCheck).Name = "v1 route health check"
 		v1.GET("", rootHandler.HandleV1BaseRoute).Name = "v1 base route"

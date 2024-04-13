@@ -1,6 +1,7 @@
 package server
 
 import (
+	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/storage"
@@ -16,15 +17,17 @@ type Server struct {
 	Websocket *websocket.Websocket
 	DB        db.Database
 	Storage   storage.Storage
+	Auth      authenticator.Authenticator
 	Port      string
 }
 
-func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage) *Server {
+func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage, auth authenticator.Authenticator) *Server {
 	NewServer := &Server{
 		Echo:      echo.New(),
 		Websocket: ws,
 		DB:        db,
 		Storage:   storage,
+		Auth:      auth,
 		Port:      conf.Port,
 	}
 

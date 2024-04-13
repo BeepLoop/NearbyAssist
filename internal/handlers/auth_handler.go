@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -39,8 +37,7 @@ func (h *authHandler) HandleRegister(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = c.Validate(user)
-	if err != nil {
+	if err = c.Validate(user); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -49,22 +46,25 @@ func (h *authHandler) HandleRegister(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// TODO: Generate JWT Token, not really sure
-	token, err := utils.GenerateJwt(user)
+	accessToken, err := h.server.Auth.GenerateAccessToken(user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// TODO: Implement better session handling
-	session := models.NewSessionModel(userId, token)
-	sessionId, err := h.server.DB.NewSession(session)
+	refreshToken, err := h.server.Auth.GenerateRefreshToken()
 	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	session := models.NewSessionModel(userId, refreshToken)
+	if _, err = h.server.DB.NewSession(session); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"userId":    userId,
-		"sessionId": sessionId,
+		"userId":       userId,
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
 	})
 }
 
@@ -75,14 +75,12 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = c.Validate(model)
-	if err != nil {
+	if err = c.Validate(model); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	user, err := h.server.DB.FindUserByEmail(model.Email)
 	if err != nil {
-		fmt.Println("user  not found, trying to register")
 		userId, err := h.server.DB.NewUser(model)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -93,46 +91,76 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 		model.Id = user.Id
 	}
 
-	// TODO: Generate JWT Token, not really sure
-	token, err := utils.GenerateJwt(model)
+	accessToken, err := h.server.Auth.GenerateAccessToken(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// TODO: Implement better session handling
-	session := models.NewSessionModel(model.Id, token)
-	sessionId, err := h.server.DB.NewSession(session)
+	refreshToken, err := h.server.Auth.GenerateRefreshToken()
 	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	session := models.NewSessionModel(model.Id, refreshToken)
+	if _, err := h.server.DB.NewSession(session); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"userId":    model.Id,
-		"sessionId": sessionId,
+		"userId":       model.Id,
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
 	})
 }
 
 func (h *authHandler) HandleLogout(c echo.Context) error {
-	// TODO: Handle logout
-	cookie, err := c.Cookie("session")
+	model := models.NewRefreshTokenModel()
+	err := c.Bind(model)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	sessionId, err := strconv.Atoi(cookie.Value)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if err = c.Validate(model); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if session, _ := h.server.DB.FindSessionById(sessionId); session == nil {
+	session, err := h.server.DB.FindActiveSessionByToken(model.Token)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Session not found")
 	}
 
-	if err := h.server.DB.LogoutSession(sessionId); err != nil {
+	if err := h.server.DB.LogoutSession(session.Id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"message": "Logout",
+		"message": "Logout successful",
+	})
+}
+
+func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
+	model := models.NewRefreshTokenModel()
+	err := c.Bind(model)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	session, err := h.server.DB.FindActiveSessionByToken(model.Token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	user, err := h.server.DB.FindUserById(session.UserId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	accessToken, err := h.server.Auth.GenerateAccessToken(user)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"accessToken": accessToken,
 	})
 }

@@ -6,18 +6,33 @@ import (
 	"time"
 )
 
-func (m *Mysql) FindSessionByToken(token string) (*models.SessionModel, error) {
-	return nil, nil
-}
-
-func (m *Mysql) FindSessionById(id int) (*models.SessionModel, error) {
+func (m *Mysql) FindActiveSessionByToken(token string) (*models.SessionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, userId, token, status FROM Session WHERE id = ?"
+	query := "SELECT id, userId, token, status FROM Session WHERE token = ? AND status = 'online'"
 
 	session := new(models.SessionModel)
-	err := m.Conn.GetContext(ctx, session, query, id)
+	err := m.Conn.GetContext(ctx, session, query, token)
+	if err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return session, nil
+}
+
+func (m *Mysql) FindSessionByToken(token string) (*models.SessionModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "SELECT id, userId, token, status FROM Session WHERE token = ?"
+
+	session := new(models.SessionModel)
+	err := m.Conn.GetContext(ctx, session, query, token)
 	if err != nil {
 		return nil, err
 	}
