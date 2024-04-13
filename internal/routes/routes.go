@@ -16,33 +16,33 @@ func RegisterRoutes(s *server.Server) {
 	s.Echo.GET("", rootHandler.HandleBaseRoute).Name = "base route"
 	s.Echo.GET("/health", healthHandler.HandleHealthCheck).Name = "base route health check"
 
+	// Auth Routes
+	auth := s.Echo.Group("/auth")
+	{
+		handler := handlers.NewAuthHandler(s)
+		auth.GET("/health", healthHandler.HandleHealthCheck).Name = "auth route health check"
+		auth.GET("", handler.HandleBaseRoute).Name = "auth base route"
+
+		admin := auth.Group("/admin")
+		{
+			admin.POST("/login", handler.HandleAdminLogin).Name = "admin login"
+			admin.POST("/logout", handler.HandleLogout).Name = "admin logout"
+		}
+
+		client := auth.Group("/client")
+		{
+			client.POST("/register", handler.HandleRegister).Name = "client register"
+			client.POST("/login", handler.HandleLogin).Name = "client login"
+			client.POST("/logout", handler.HandleLogout).Name = "client logout"
+		}
+	}
+
 	// V1 routes
 	v1 := s.Echo.Group("/v1")
 	{
 		// TODO: Add base route
 		v1.GET("/health", healthHandler.HandleHealthCheck).Name = "v1 route health check"
 		v1.GET("", rootHandler.HandleV1BaseRoute).Name = "v1 base route"
-
-		// Auth Routes
-		auth := v1.Group("/auth")
-		{
-			handler := handlers.NewAuthHandler(s)
-			auth.GET("/health", healthHandler.HandleHealthCheck).Name = "auth route health check"
-			auth.POST("", handler.HandleBaseRoute).Name = "auth base route"
-
-			admin := auth.Group("/admin")
-			{
-				admin.POST("/login", handler.HandleAdminLogin).Name = "admin login"
-				admin.POST("/logout", handler.HandleLogout).Name = "admin logout"
-			}
-
-			client := auth.Group("/client")
-			{
-				client.POST("/register", handler.HandleRegister).Name = "client register"
-				client.POST("/login", handler.HandleLogin).Name = "client login"
-				client.POST("/logout", handler.HandleLogout).Name = "client logout"
-			}
-		}
 
 		// User Routes
 		user := v1.Group("/users")
