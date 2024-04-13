@@ -19,14 +19,14 @@ func (m *Mysql) CountVendor(filter models.VendorStatus) (int, error) {
 		query += " WHERE restricted = 0"
 	}
 
-	count := -1
+	count := 0
 	err := m.Conn.GetContext(ctx, &count, query)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return 0, context.DeadlineExceeded
 	}
 
 	return count, nil

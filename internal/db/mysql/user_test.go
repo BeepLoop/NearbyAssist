@@ -1,8 +1,6 @@
 package mysql
 
 import (
-	"database/sql"
-	"log"
 	"nearbyassist/internal/models"
 	"testing"
 
@@ -10,15 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 )
-
-func newMock() (*sql.DB, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		log.Fatalf("an error occurred while opening a stub database connection: %v", err)
-	}
-
-	return db, mock
-}
 
 func TestFindUserById(t *testing.T) {
 	u := &models.UserModel{
@@ -30,9 +19,9 @@ func TestFindUserById(t *testing.T) {
 		ImageUrl: "https://example.com",
 	}
 
-	db, mock := newMock()
-	sqlxDb := sqlx.NewDb(db, "sqlmock")
-	d := NewMysqlWithDb(sqlxDb)
+	sql, mock := newMock()
+	sqlx := sqlx.NewDb(sql, "sqlmock")
+	db := NewMysqlWithDb(sqlx)
 
 	rows := sqlmock.NewRows([]string{"id", "name", "email", "imageUrl"}).
 		AddRow(u.Id, u.Name, u.Email, u.ImageUrl)
@@ -40,7 +29,7 @@ func TestFindUserById(t *testing.T) {
 	query := "SELECT id, name, email, imageUrl FROM User WHERE id = ?"
 	mock.ExpectQuery(query).WithArgs(u.Id).WillReturnRows(rows)
 
-	user, err := d.FindUserById(u.Id)
+	user, err := db.FindUserById(u.Id)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
@@ -60,16 +49,16 @@ func TestFindUserByIdError(t *testing.T) {
 		ImageUrl: "https://example.com",
 	}
 
-	db, mock := newMock()
-	sqlxDb := sqlx.NewDb(db, "sqlmock")
-	d := NewMysqlWithDb(sqlxDb)
+	sql, mock := newMock()
+	sqlx := sqlx.NewDb(sql, "sqlmock")
+	db := NewMysqlWithDb(sqlx)
 
 	rows := sqlmock.NewRows([]string{"id", "name", "email", "imageUrl"})
 
 	query := "SELECT id, name, email, imageUrl FROM User WHERE id = ?"
 	mock.ExpectQuery(query).WithArgs(u.Id).WillReturnRows(rows)
 
-	user, err := d.FindUserById(u.Id)
+	user, err := db.FindUserById(u.Id)
 
 	assert.Nil(t, user)
 	assert.Error(t, err)
@@ -88,9 +77,9 @@ func TestFindUserByEmail(t *testing.T) {
 		ImageUrl: "https://example.com",
 	}
 
-	db, mock := newMock()
-	sqlxDb := sqlx.NewDb(db, "sqlmock")
-	d := NewMysqlWithDb(sqlxDb)
+	sql, mock := newMock()
+	sqlx := sqlx.NewDb(sql, "sqlmock")
+	db := NewMysqlWithDb(sqlx)
 
 	rows := sqlmock.NewRows([]string{"id", "name", "email", "imageUrl"}).
 		AddRow(u.Id, u.Name, u.Email, u.ImageUrl)
@@ -98,7 +87,7 @@ func TestFindUserByEmail(t *testing.T) {
 	query := "SELECT id, name, email, imageUrl FROM User WHERE email = ?"
 	mock.ExpectQuery(query).WithArgs(u.Email).WillReturnRows(rows)
 
-	user, err := d.FindUserByEmail(u.Email)
+	user, err := db.FindUserByEmail(u.Email)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
@@ -119,16 +108,16 @@ func TestFindUserByEmailError(t *testing.T) {
 		ImageUrl: "https://example.com",
 	}
 
-	db, mock := newMock()
-	sqlxDb := sqlx.NewDb(db, "sqlmock")
-	d := NewMysqlWithDb(sqlxDb)
+	sql, mock := newMock()
+	sqlx := sqlx.NewDb(sql, "sqlmock")
+	db := NewMysqlWithDb(sqlx)
 
 	rows := sqlmock.NewRows([]string{"id", "name", "email", "imageUrl"})
 
 	query := "SELECT id, name, email, imageUrl FROM User WHERE email = ?"
 	mock.ExpectQuery(query).WithArgs(u.Email).WillReturnRows(rows)
 
-	user, err := d.FindUserByEmail(u.Email)
+	user, err := db.FindUserByEmail(u.Email)
 
 	assert.Error(t, err)
 	assert.Nil(t, user)
@@ -138,25 +127,25 @@ func TestFindUserByEmailError(t *testing.T) {
 }
 
 func TestCountUserShouldBeZero(t *testing.T) {
-	db, mock := newMock()
-	sqlxDb := sqlx.NewDb(db, "sqlmock")
-	d := NewMysqlWithDb(sqlxDb)
+	sql, mock := newMock()
+	sqlx := sqlx.NewDb(sql, "sqlmock")
+	db := NewMysqlWithDb(sqlx)
 
 	rows := sqlmock.NewRows([]string{"count"})
 
 	query := "SELECT COUNT\\(\\*\\) FROM User"
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
-	count, err := d.CountUser()
+	count, err := db.CountUser()
 
 	assert.Error(t, err)
 	assert.Equal(t, 0, count)
 }
 
 func TestCountUserShouldBeOne(t *testing.T) {
-	db, mock := newMock()
-	sqlxDb := sqlx.NewDb(db, "sqlmock")
-	d := NewMysqlWithDb(sqlxDb)
+	sql, mock := newMock()
+	sqlx := sqlx.NewDb(sql, "sqlmock")
+	db := NewMysqlWithDb(sqlx)
 
 	rows := sqlmock.NewRows([]string{"count"}).
 		AddRow(1)
@@ -164,7 +153,7 @@ func TestCountUserShouldBeOne(t *testing.T) {
 	query := "SELECT COUNT\\(\\*\\) FROM User"
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
-	count, err := d.CountUser()
+	count, err := db.CountUser()
 
 	assert.NoError(t, err)
 	assert.Equal(t, 1, count)
