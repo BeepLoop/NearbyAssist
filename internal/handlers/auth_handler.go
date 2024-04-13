@@ -145,6 +145,10 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	if err := c.Validate(model); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
 	session, err := h.server.DB.FindActiveSessionByToken(model.Token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
