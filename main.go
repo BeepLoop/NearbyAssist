@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db/mysql"
 	"nearbyassist/internal/routes"
@@ -22,10 +23,14 @@ func main() {
 	// Load database configuration
 	db := mysql.NewMysqlDatabase(config)
 
+	// Load authenticator configuration
+	auth := authenticator.NewJWTAuthenticator(config)
+
+	// Load websocket configuration
 	ws := websocket.NewWebsocket(db)
 
 	// Create and start the server
-	server := server.NewServer(config, ws, db, store)
+	server := server.NewServer(config, ws, db, store, auth)
 	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()
