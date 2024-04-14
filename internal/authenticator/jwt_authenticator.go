@@ -50,6 +50,10 @@ func (j *jwtAuthenticator) GenerateRefreshToken() (string, error) {
 
 func (j *jwtAuthenticator) ValidateToken(tokenString string) error {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Unexpected signing method")
+		}
+
 		return []byte(j.secret), nil
 	})
 	if err != nil {
