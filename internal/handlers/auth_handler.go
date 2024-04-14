@@ -114,22 +114,26 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 }
 
 func (h *authHandler) HandleLogout(c echo.Context) error {
-	model := models.NewRefreshTokenModel()
-	err := c.Bind(model)
+	refreshTokenModel := models.NewRefreshTokenModel()
+	err := c.Bind(refreshTokenModel)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err = c.Validate(model); err != nil {
+	if err = c.Validate(refreshTokenModel); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	session, err := h.server.DB.FindActiveSessionByToken(model.Token)
+	session, err := h.server.DB.FindActiveSessionByToken(refreshTokenModel.Token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Session not found")
 	}
 
 	if err := h.server.DB.LogoutSession(session.Id); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := h.server.DB.BlacklistToken(session.Token); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -139,17 +143,21 @@ func (h *authHandler) HandleLogout(c echo.Context) error {
 }
 
 func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
-	model := models.NewRefreshTokenModel()
-	err := c.Bind(model)
+	refreshTokenModel := models.NewRefreshTokenModel()
+	err := c.Bind(refreshTokenModel)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err := c.Validate(model); err != nil {
+	if err := c.Validate(refreshTokenModel); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	session, err := h.server.DB.FindActiveSessionByToken(model.Token)
+	if blacklist, _ := h.server.DB.FindBlacklistedToken(refreshTokenModel.Token); blacklist != nil {
+		return echo.NewHTTPError(http.StatusForbidden, "Token blacklisted")
+	}
+
+	session, err := h.server.DB.FindActiveSessionByToken(refreshTokenModel.Token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

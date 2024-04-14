@@ -12,14 +12,23 @@ CREATE TABLE IF NOT EXISTS User (
 CREATE TABLE IF NOT EXISTS Session (
     id Int NOT NULL AUTO_INCREMENT,
     userId Int NOT NULL,
-    token Text NOT NULL,
+    token Varchar(255) NOT NULL,
     status Enum('online', 'offline') NOT NULL DEFAULT 'online',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(userId) REFERENCES User(id),
     CONSTRAINT unique_userId_online UNIQUE (userId, (CASE WHEN status = 'online' THEN 1 ELSE NULL END)),
-    INDEX(userId, status)
+    INDEX(userId, token, status)
+);
+
+CREATE TABLE IF NOT EXISTS Blacklist (
+    id Int NOT NULL AUTO_INCREMENT,
+    token Varchar(255) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    INDEX(token)
 );
 
 CREATE TABLE IF NOT EXISTS Category (

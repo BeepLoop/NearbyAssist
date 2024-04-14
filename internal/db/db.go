@@ -11,6 +11,8 @@ type Database interface {
 	FindActiveSessionByToken(token string) (*models.SessionModel, error)
 	NewSession(session *models.SessionModel) (int, error)
 	LogoutSession(sesionId int) error
+	BlacklistToken(token string) error
+	FindBlacklistedToken(token string) (*models.BlacklistModel, error)
 
 	// User Queries
 	CountUser() (int, error)
