@@ -20,6 +20,7 @@ type Config struct {
 	StorageType              StorageType
 	ApplicationProofLocation string
 	ServicePhotoLocation     string
+	RouteEngineUrl           string
 }
 
 func LoadConfig() *Config {
@@ -41,5 +42,6 @@ func LoadConfig() *Config {
 		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),
 		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
 		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),
+		RouteEngineUrl:           os.Getenv("ROUTE_ENGINE_URL"),
 	}
 }
