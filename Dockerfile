@@ -9,7 +9,6 @@ RUN go mod download
 
 RUN go build -o /nearbyassist
 
-
 FROM gcr.io/distroless/base-debian12 as release-stage
 
 WORKDIR /
@@ -19,6 +18,4 @@ COPY --from=build-stage /nearbyassist /nearbyassist
 # This container exposes port 3000 to the outside world
 EXPOSE 3000
 
-USER nonroot:nonroot
-
-ENTRYPOINT [ "/nearbyassist" ]
+CMD [ "/nearbyassist" ]

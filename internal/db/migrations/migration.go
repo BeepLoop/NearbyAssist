@@ -18,12 +18,14 @@ func main() {
 	flag.Parse()
 
 	godotenv.Load()
-	var dsn string
-	if os.Getenv("GO_ENV") == "development" {
-		dsn = os.Getenv("MIGRATE_DSN_DEV")
-	} else {
-		dsn = os.Getenv("MIGRATE_DSN_PROD")
-	}
+
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	name := os.Getenv("DB_NAME")
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+
+	dsn := fmt.Sprintf("mysql://%s:%s@tcp(%s:%s)/%s", user, password, host, port, name)
 
 	m, err := migrate.New("file:///home/johnloydmulit/go/personal/nearbyassist/internal/db/migrations/", dsn)
 	if err != nil {

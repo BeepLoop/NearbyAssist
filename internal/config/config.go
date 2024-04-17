@@ -14,7 +14,11 @@ const (
 )
 
 type Config struct {
-	DSN                      string
+	DB_User                  string
+	DB_Password              string
+	DB_Name                  string
+	DB_Host                  string
+	DB_Port                  string
 	Port                     string
 	JwtSecret                string
 	StorageType              StorageType
@@ -25,17 +29,12 @@ type Config struct {
 func LoadConfig() *Config {
 	godotenv.Load()
 
-	environment := os.Getenv("GO_ENV")
-
-	var dsn string
-	if environment == "development" {
-		dsn = os.Getenv("DSN_DEV")
-	} else {
-		dsn = os.Getenv("DSN_PROD")
-	}
-
 	return &Config{
-		DSN:                      dsn,
+		DB_User:                  os.Getenv("DB_USER"),
+		DB_Password:              os.Getenv("DB_PASSWORD"),
+		DB_Name:                  os.Getenv("DB_NAME"),
+		DB_Host:                  os.Getenv("DB_HOST"),
+		DB_Port:                  os.Getenv("DB_PORT"),
 		Port:                     os.Getenv("PORT"),
 		JwtSecret:                os.Getenv("JWT_SECRET"),
 		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),
