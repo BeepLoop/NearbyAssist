@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -105,4 +106,51 @@ func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"services": services,
 	})
+}
+
+// takes origin as QueryString ex: origin=lat,long
+func (h *serviceHandler) HandleFindRoute(c echo.Context) error {
+	serviceId := c.Param("serviceId")
+	id, err := strconv.Atoi(serviceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+	}
+
+	service, err := h.server.DB.FindServiceById(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Could not find service")
+	}
+
+	origin, err := parseOrigin(c.QueryParam("origin"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid origin coordinates")
+	}
+
+	distination := models.NewLocationWithData(service.Latitude, service.Longitude)
+
+	polyline, err := h.server.RouteEngine.FindRoute(origin, distination)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Could not find routes at the moment")
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"polyline": polyline,
+	})
+}
+
+func parseOrigin(query string) (*models.Location, error) {
+	coords := strings.Split(query, ",")
+	lat, err := strconv.ParseFloat(coords[0], 64)
+	if err != nil {
+		return nil, err
+	}
+
+	long, err := strconv.ParseFloat(coords[1], 64)
+	if err != nil {
+		return nil, err
+	}
+
+	origin := models.NewLocationWithData(lat, long)
+
+	return origin, nil
 }

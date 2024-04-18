@@ -88,6 +88,7 @@ func RegisterRoutes(s *server.Server) {
 			service.GET("/search", handler.HandleSearchService).Name = "search service"
 			service.GET("/:serviceId", handler.HandleGetDetails).Name = "get service details"
 			service.GET("/vendor/:vendorId", handler.HandleGetByVendor).Name = "get owner services"
+            service.GET("/route/:serviceId", handler.HandleFindRoute).Name = "get route"
 		}
 
 		// Complaint Routes
