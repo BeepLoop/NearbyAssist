@@ -1,0 +1,13 @@
+version: '3'
+
+services: 
+  db: 
+    image: mysql
+    container_name: nearbyassist-dev-db
+    restart: on-failure
+    env_file:
+      - "./.db.env"
+    ports:
+      - "3307:3306"
+    volumes:
+      - "./internal/db/migrations/20231231015242_init.up.sql:/docker-entrypoint-initdb.d/init.sql"
