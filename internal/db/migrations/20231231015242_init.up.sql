@@ -9,6 +9,30 @@ CREATE TABLE IF NOT EXISTS User (
     INDEX(id, name, email)
 );
 
+CREATE TABLE IF NOT EXISTS Vendor (
+    id Int NOT NULL AUTO_INCREMENT,
+    vendorId Int NOT NULL,
+    rating Decimal(5,1) NOT NULL DEFAULT 0.0,
+    job Varchar(255) NOT NULL,
+    restricted TINYINT(1) NOT NULL DEFAULT 0,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(vendorId) REFERENCES User(id),
+    INDEX(id, vendorId, job)
+);
+
+create table if not exists Admin (
+    id Int NOT NULL AUTO_INCREMENT,
+    username Varchar(255) NOT NULL UNIQUE,
+    password Varchar(255) NOT NULL,
+    role Enum('admin', 'staff') NOT NULL DEFAULT 'staff',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    INDEX(id, username, role)
+);
+
 CREATE TABLE IF NOT EXISTS Session (
     id Int NOT NULL AUTO_INCREMENT,
     userId Int NOT NULL,
@@ -69,19 +93,6 @@ CREATE TABLE IF NOT EXISTS Message (
     INDEX(id, sender, receiver)
 );
 
-CREATE TABLE IF NOT EXISTS Vendor (
-    id Int NOT NULL AUTO_INCREMENT,
-    vendorId Int NOT NULL,
-    rating Decimal(5,1) NOT NULL DEFAULT 0.0,
-    job Varchar(255) NOT NULL,
-    restricted TINYINT(1) NOT NULL DEFAULT 0,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY(id),
-    FOREIGN KEY(vendorId) REFERENCES User(id),
-    INDEX(id, vendorId, job)
-);
-
 CREATE TABLE IF NOT EXISTS ServicePhoto (
     id Int NOT NULL AUTO_INCREMENT,
     serviceId Int NOT NULL,
@@ -133,7 +144,7 @@ CREATE TABLE IF NOT EXISTS Transaction (
     FOREIGN KEY(clientId) REFERENCES User(id)
 );
 
-create table if not exists Application (
+CREATE TABLE IF NOT EXISTS Application (
     id INT NOT NULL AUTO_INCREMENT,
     applicantId INT NOT NULL,
     job Varchar(255) NOT NULL,
@@ -146,7 +157,7 @@ create table if not exists Application (
     FOREIGN KEY(applicantId) REFERENCES User(id)
 );
 
-create table if not exists ApplicationProof (
+CREATE TABLE IF NOT EXISTS ApplicationProof (
     id INT NOT NULL AUTO_INCREMENT,
     applicationId INT NOT NULL,
     applicantId INT NOT NULL,

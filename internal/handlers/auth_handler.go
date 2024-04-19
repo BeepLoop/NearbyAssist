@@ -24,29 +24,28 @@ func (h *authHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *authHandler) HandleAdminLogin(c echo.Context) error {
-	// TODO: Handle admin login
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"message": "Admin login",
-	})
-}
-
-func (h *authHandler) HandleRegister(c echo.Context) error {
-	user := models.NewUserModel()
-	err := c.Bind(user)
+	adminModel := models.NewAdminModel()
+	err := c.Bind(adminModel)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err = c.Validate(user); err != nil {
+	if err := c.Validate(adminModel); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	userId, err := h.server.DB.NewUser(user)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	// TODO: Handle validating credentials
+	admin, err := h.server.DB.FindAdminByUsername(adminModel.Username)
+	if admin == nil || err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Account not found")
 	}
 
-	accessToken, err := h.server.Auth.GenerateAccessToken(user)
+	// TODO: Implement better password validation with encryption
+	if adminModel.Password != admin.Password {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid credentials")
+	}
+
+	accessToken, err := h.server.Auth.GenerateAdminAccessToken(admin)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -56,13 +55,9 @@ func (h *authHandler) HandleRegister(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	session := models.NewSessionModel(userId, refreshToken)
-	if _, err = h.server.DB.NewSession(session); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
+	// TODO: Implement session management for admin
 
-	return c.JSON(http.StatusCreated, utils.Mapper{
-		"userId":       userId,
+	return c.JSON(http.StatusOK, utils.Mapper{
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	})
@@ -91,7 +86,7 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 		model.Id = user.Id
 	}
 
-	accessToken, err := h.server.Auth.GenerateAccessToken(model)
+	accessToken, err := h.server.Auth.GenerateUserAccessToken(model)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -167,7 +162,7 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	accessToken, err := h.server.Auth.GenerateAccessToken(user)
+	accessToken, err := h.server.Auth.GenerateUserAccessToken(user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

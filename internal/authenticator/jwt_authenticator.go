@@ -23,9 +23,27 @@ func NewJWTAuthenticator(conf *config.Config) *jwtAuthenticator {
 		tokenDuration: time.Second * 60,
 	}
 }
+func (j *jwtAuthenticator) GenerateAdminAccessToken(admin *models.AdminModel) (string, error) {
+	claims := &models.AdminJwtClaims{
+		Username: admin.Username,
+		Role:     admin.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.tokenDuration)),
+		},
+	}
 
-func (j *jwtAuthenticator) GenerateAccessToken(user *models.UserModel) (string, error) {
-	claims := &models.JwtClaims{
+	token := jwt.NewWithClaims(j.signMethod, claims)
+
+	t, err := token.SignedString([]byte(j.secret))
+	if err != nil {
+		return "", err
+	}
+
+	return t, nil
+}
+
+func (j *jwtAuthenticator) GenerateUserAccessToken(user *models.UserModel) (string, error) {
+	claims := &models.UserJwtClaims{
 		Name:  user.Name,
 		Email: user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -65,4 +83,24 @@ func (j *jwtAuthenticator) ValidateToken(tokenString string) error {
 	}
 
 	return nil
+}
+
+func (j *jwtAuthenticator) GetClaims(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Unexpected signing method")
+		}
+
+		return []byte(j.secret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("Cannot get claims")
+	}
+
+	return claims, nil
 }

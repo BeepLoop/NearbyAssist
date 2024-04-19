@@ -21,7 +21,7 @@ func NewComplaintServer(server *server.Server) *complaintHandler {
 
 func (h *complaintHandler) HandleBaseRoute(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"message": "Vendor base route",
+		"message": "Complaints base route",
 	})
 }
 

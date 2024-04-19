@@ -25,18 +25,28 @@ func RegisterRoutes(s *server.Server) {
 		auth.GET("", handler.HandleBaseRoute).Name = "auth base route"
 		auth.POST("/refresh", handler.HandleTokenRefresh).Name = "route for refreshing access token"
 
-		admin := auth.Group("/admin")
+		web := auth.Group("/web")
 		{
-			admin.POST("/login", handler.HandleAdminLogin).Name = "admin login"
-			admin.POST("/logout", handler.HandleLogout).Name = "admin logout"
+			web.POST("/login", handler.HandleAdminLogin).Name = "web client login"
+			web.POST("/logout", handler.HandleLogout).Name = "web client logout"
 		}
 
-		client := auth.Group("/client")
+		mobile := auth.Group("/mobile")
 		{
-			client.POST("/register", handler.HandleRegister).Name = "client register"
-			client.POST("/login", handler.HandleLogin).Name = "client login"
-			client.POST("/logout", handler.HandleLogout).Name = "client logout"
+			mobile.POST("/login", handler.HandleLogin).Name = "mobile client login"
+			mobile.POST("/logout", handler.HandleLogout).Name = "mobile client logout"
 		}
+	}
+
+	// Admin only routes
+	admin := s.Echo.Group("/admin")
+	{
+		admin.Use(middleware.CheckAuth(s.Auth))
+		admin.Use(middleware.CheckRole(s.Auth))
+
+		handler := handlers.NewAdminHandler(s)
+		admin.GET("", handler.HandleBaseRoute)
+		admin.POST("/staff", handler.HandleRegisterStaff)
 	}
 
 	// V1 routes
@@ -88,7 +98,7 @@ func RegisterRoutes(s *server.Server) {
 			service.GET("/search", handler.HandleSearchService).Name = "search service"
 			service.GET("/:serviceId", handler.HandleGetDetails).Name = "get service details"
 			service.GET("/vendor/:vendorId", handler.HandleGetByVendor).Name = "get owner services"
-            service.GET("/route/:serviceId", handler.HandleFindRoute).Name = "get route"
+			service.GET("/route/:serviceId", handler.HandleFindRoute).Name = "get route"
 		}
 
 		// Complaint Routes

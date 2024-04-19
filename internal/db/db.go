@@ -14,6 +14,10 @@ type Database interface {
 	BlacklistToken(token string) error
 	FindBlacklistedToken(token string) (*models.BlacklistModel, error)
 
+	// Admin Queries
+	FindAdminByUsername(username string) (*models.AdminModel, error)
+	NewAdmin(admin *models.AdminModel) (int, error)
+
 	// User Queries
 	CountUser() (int, error)
 	FindUserById(id int) (*models.UserModel, error)
