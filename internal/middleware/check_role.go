@@ -31,7 +31,7 @@ func CheckRole(jwtChecker authenticator.Authenticator) echo.MiddlewareFunc {
 
 			// Check if the user is accessing admin-only route
 			url := c.Request().URL.String()
-			iAdminRoute := strings.HasPrefix(url, "/admin")
+			iAdminRoute := strings.Contains(url, "/admin")
 			if iAdminRoute && role != "admin" {
 				return echo.NewHTTPError(http.StatusForbidden, "Unauthorized access")
 			}

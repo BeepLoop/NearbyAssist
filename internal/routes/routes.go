@@ -38,7 +38,7 @@ func RegisterRoutes(s *server.Server) {
 		v1.GET("", rootHandler.HandleV1BaseRoute)
 
 		// Admin only routes
-		admin := s.Echo.Group("/admin")
+		admin := v1.Group("/admin")
 		handleAdminRoutes(admin, s)
 
 		// Public routes
