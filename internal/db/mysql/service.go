@@ -143,6 +143,37 @@ func (m *Mysql) RegisterService(service *models.ServiceModel) (int, error) {
 	return int(insertId), nil
 }
 
+func (m *Mysql) UpdateService(service *models.ServiceModel) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        UPDATE
+            Service
+        SET
+            title = :title,
+            description = :description,
+            rate = :rate,
+            location = ST_GeomFromText(:location, 4326),
+            categoryId = :categoryId
+        WHERE
+            id = :id
+    `
+
+	models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
+
+	_, err := m.Conn.NamedExecContext(ctx, query, service)
+	if err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

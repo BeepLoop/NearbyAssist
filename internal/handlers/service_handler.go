@@ -54,6 +54,33 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 	})
 }
 
+func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
+	serviceId := c.Param("serviceId")
+	id, err := strconv.Atoi(serviceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+	}
+
+	updatedData := models.NewServiceModel()
+	err = c.Bind(updatedData)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request data")
+	}
+
+	if err := c.Validate(updatedData); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
+	}
+	updatedData.Id = id
+
+	if err := h.server.DB.UpdateService(updatedData); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Could not process update request")
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Update service",
+	})
+}
+
 func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 	params, err := utils.GetSearchParams(c)
 	if err != nil {
