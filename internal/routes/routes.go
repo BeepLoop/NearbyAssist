@@ -8,167 +8,127 @@ import (
 
 func RegisterRoutes(s *server.Server) {
 	// File server
-	s.Echo.Static("/resource", "store/").Name = "file resource"
+	s.Echo.Static("/resource", "store/")
 
 	// Routes
 	healthHandler := handlers.NewHealthHandler(s)
 
 	rootHandler := handlers.NewHandler(s)
-	s.Echo.GET("", rootHandler.HandleBaseRoute).Name = "base route"
-	s.Echo.GET("/health", healthHandler.HandleHealthCheck).Name = "base route health check"
+	s.Echo.RouteNotFound("/*", rootHandler.HandleUnknownRoute)
+	s.Echo.GET("", rootHandler.HandleBaseRoute)
+	s.Echo.GET("/health", healthHandler.HandleHealthCheck)
 
 	// Auth Routes
 	auth := s.Echo.Group("/auth")
 	{
 		handler := handlers.NewAuthHandler(s)
-		auth.GET("/health", healthHandler.HandleHealthCheck).Name = "auth route health check"
-		auth.GET("", handler.HandleBaseRoute).Name = "auth base route"
-		auth.POST("/refresh", handler.HandleTokenRefresh).Name = "route for refreshing access token"
 
-		web := auth.Group("/web")
-		{
-			web.POST("/login", handler.HandleAdminLogin).Name = "web client login"
-			web.POST("/logout", handler.HandleLogout).Name = "web client logout"
-		}
-
-		mobile := auth.Group("/mobile")
-		{
-			mobile.POST("/login", handler.HandleLogin).Name = "mobile client login"
-			mobile.POST("/logout", handler.HandleLogout).Name = "mobile client logout"
-		}
-	}
-
-	// Admin only routes
-	admin := s.Echo.Group("/admin")
-	{
-		admin.Use(middleware.CheckAuth(s.Auth))
-		admin.Use(middleware.CheckRole(s.Auth))
-
-		handler := handlers.NewAdminHandler(s)
-		admin.GET("", handler.HandleBaseRoute)
-		admin.POST("/staff", handler.HandleRegisterStaff)
+		auth.GET("/health", healthHandler.HandleHealthCheck)
+		auth.GET("", handler.HandleBaseRoute)
+		auth.POST("/refresh", handler.HandleTokenRefresh)
+		auth.POST("/admin/login", handler.HandleAdminLogin)
+		auth.POST("/client/login", handler.HandleLogin)
+		auth.POST("/logout", handler.HandleLogout)
 	}
 
 	// V1 routes
 	v1 := s.Echo.Group("/v1")
 	{
-		v1.Use(middleware.CheckAuth(s.Auth))
+		v1.GET("/health", healthHandler.HandleHealthCheck)
+		v1.GET("", rootHandler.HandleV1BaseRoute)
 
-		// TODO: Add base route
-		v1.GET("/health", healthHandler.HandleHealthCheck).Name = "v1 route health check"
-		v1.GET("", rootHandler.HandleV1BaseRoute).Name = "v1 base route"
+		// Admin only routes
+		admin := s.Echo.Group("/admin")
+		handleAdminRoutes(admin, s)
 
-		// User Routes
-		user := v1.Group("/users")
+		// Public routes
+		public := v1.Group("/public")
 		{
-			handler := handlers.NewUserHandler(s)
-			user.GET("/health", healthHandler.HandleHealthCheck).Name = "user route health check"
-			user.GET("", handler.HandleBaseRoute).Name = "user base route"
-			user.GET("/count", handler.HandleCount).Name = "get number of users"
-			user.GET("/:userId", handler.HandleGetUser).Name = "get user details"
-		}
+			public.Use(middleware.CheckAuth(s.Auth))
 
-		// Vendor Routes
-		vendor := v1.Group("/vendors")
-		{
-			handler := handlers.NewVendorHandler(s)
-			vendor.GET("/health", healthHandler.HandleHealthCheck).Name = "vendor route health check"
-			vendor.GET("", handler.HandleBaseRoute).Name = "vendor base route"
-			vendor.GET("/count", handler.HandleCount).Name = "get number of vendors"
-			vendor.GET("/:vendorId", handler.HandleGetVendor).Name = "get vendor details"
-			vendor.PATCH("/restrict/:vendorId", handler.HandleRestrict).Name = "restrict vendor"
-			vendor.PATCH("/unrestrict/:vendorId", handler.HandleUnrestrict).Name = "unrestrict vendor"
-		}
+			user := public.Group("/users")
+			{
+				handler := handlers.NewUserHandler(s)
+				user.GET("", handler.HandleBaseRoute)
+				user.GET("/:userId", handler.HandleGetUser)
+			}
 
-		// Category Routes
-		category := v1.Group("/category")
-		{
-			handler := handlers.NewCategoryHandler(s)
-			category.GET("/health", healthHandler.HandleHealthCheck).Name = "category route health check"
-			category.GET("", handler.HandleCategories).Name = "get all categories"
-		}
+			vendor := public.Group("/vendors")
+			{
+				handler := handlers.NewVendorHandler(s)
+				vendor.GET("", handler.HandleBaseRoute)
+				vendor.GET("/:vendorId", handler.HandleGetVendor)
+			}
 
-		// Services Routes
-		service := v1.Group("/services")
-		{
-			handler := handlers.NewServiceHandler(s)
-			service.GET("/health", healthHandler.HandleHealthCheck).Name = "service route health check"
-			service.GET("", handler.HandleGetServices).Name = "get all services"
-			service.PUT("/register", handler.HandleRegisterService).Name = "register service"
-			service.GET("/search", handler.HandleSearchService).Name = "search service"
-			service.GET("/:serviceId", handler.HandleGetDetails).Name = "get service details"
-			service.GET("/vendor/:vendorId", handler.HandleGetByVendor).Name = "get owner services"
-			service.GET("/route/:serviceId", handler.HandleFindRoute).Name = "get route"
-		}
+			category := public.Group("/category")
+			{
+				handler := handlers.NewCategoryHandler(s)
+				category.GET("", handler.HandleCategories)
+			}
 
-		// Complaint Routes
-		complaint := v1.Group("/complaints")
-		{
-			handler := handlers.NewComplaintServer(s)
-			complaint.GET("/health", healthHandler.HandleHealthCheck).Name = "complaint route health check"
-			complaint.GET("", handler.HandleBaseRoute).Name = "complaint base route"
-			complaint.GET("/count", handler.HandleCount).Name = "get number of complaints"
-			complaint.PUT("/create", handler.HandleNewComplaint).Name = "file a complaint"
-		}
+			service := public.Group("/services")
+			{
+				handler := handlers.NewServiceHandler(s)
+				service.GET("", handler.HandleGetServices)
+				service.POST("", handler.HandleRegisterService)
+				service.GET("/search", handler.HandleSearchService)
+				service.GET("/:serviceId", handler.HandleGetDetails)
+				service.GET("/vendor/:vendorId", handler.HandleGetByVendor)
+				service.GET("/route/:serviceId", handler.HandleFindRoute)
+			}
 
-		// Transaction Routes
-		transaction := v1.Group("/transactions")
-		{
-			handler := handlers.NewTransactionHandler(s)
-			transaction.GET("/health", healthHandler.HandleHealthCheck).Name = "health check for transactions route"
-			transaction.GET("", handler.HandleBaseRoute).Name = "transaction base route"
-			transaction.PUT("/create", handler.HandleNewTransaction).Name = "create new transaction"
-			transaction.GET("/count", handler.HandleCount).Name = "number of transactions, takes in a filter for status"
-			// TODO: maybe refactor this to be base route that takes in the following
-			// userId = can be a client or vendor ID
-			// Filter = view transactions as client or vendor
-			// Status = transaction status (see transaction model for valid status)
-			transaction.GET("/ongoing/:userId", handler.HandleOngoingTransaction).Name = "get ongoing transaction of given userId. can take a filter = client | vendor"
-			transaction.GET("/history/:userId", handler.HandleHistory).Name = "get transaction history, can take in a filter = client | vendor"
-		}
+			complaint := public.Group("/complaints")
+			{
+				handler := handlers.NewComplaintServer(s)
+				complaint.GET("", handler.HandleBaseRoute)
+				complaint.POST("", handler.HandleNewComplaint)
+			}
 
-		// Application Routes
-		application := v1.Group("/application")
-		{
-			handler := handlers.NewApplicationHandler(s)
-			application.GET("/health", healthHandler.HandleHealthCheck).Name = "application route health check"
-			application.GET("", handler.HandleGetApplications).Name = "get all vendor applications"
-			application.PUT("", handler.HandleNewApplication).Name = "vendor application"
-			application.GET("/count", handler.HandleCount).Name = "get number of vendor applications"
-			application.PATCH("/approve/:applicationId", handler.HandleApprove).Name = "approve vendor application"
-			application.PATCH("/reject/:applicationId", handler.HandleReject).Name = "reject vendor application"
-		}
+			transaction := public.Group("/transactions")
+			{
+				handler := handlers.NewTransactionHandler(s)
+				transaction.GET("", handler.HandleBaseRoute)
+				transaction.POST("", handler.HandleNewTransaction)
+				// TODO: maybepublic.factor this to be basev1.ute that takes in the following
+				// userId = can be a client or vendor ID
+				// Filter = view transactions as client or vendor
+				// Status = transaction status (see transaction model for valid status)
+				transaction.GET("/ongoing/:userId", handler.HandleOngoingTransaction)
+				transaction.GET("/history/:userId", handler.HandleHistory)
+			}
 
-		// Review Routes
-		review := v1.Group("/reviews")
-		{
-			handler := handlers.NewReviewHandler(s)
-			review.GET("/health", healthHandler.HandleHealthCheck).Name = "review route health check"
-			review.GET("", handler.HandleBaseRoute).Name = "review base route"
-			review.GET("/:reviewId", handler.HandleGetReview).Name = "get review details"
-			review.PUT("/create", handler.HandleNewReview).Name = "post a review"
-			review.GET("/service/:serviceId", handler.HandleServiceReview).Name = "get reviews by service"
-		}
+			application := public.Group("/application")
+			{
+				handler := handlers.NewApplicationHandler(s)
+				application.GET("", handler.HandleGetApplications)
+				application.POST("", handler.HandleNewApplication)
+			}
 
-		// Upload Routes
-		upload := v1.Group("/upload")
-		{
-			handler := handlers.NewUploadHandler(s)
-			upload.GET("/health", healthHandler.HandleHealthCheck).Name = "upload route health check"
-			upload.GET("", handler.HandleBaseRoute).Name = "upload base route"
-			upload.PUT("/service", handler.HandleNewServicePhoto).Name = "upload service image"
-			upload.PUT("/proof", handler.HandleNewProofPhoto).Name = "upload vendor application proof"
-		}
+			review := public.Group("/reviews")
+			{
+				handler := handlers.NewReviewHandler(s)
+				review.GET("", handler.HandleBaseRoute)
+				review.POST("", handler.HandleNewReview)
+				review.GET("/:reviewId", handler.HandleGetReview)
+				review.GET("/service/:serviceId", handler.HandleServiceReview)
+			}
 
-		// Chat Routes
-		chat := v1.Group("/chat")
-		{
-			handler := handlers.NewChatHandler(s)
-			chat.GET("/health", healthHandler.HandleHealthCheck).Name = "message route health check"
-			chat.GET("", handler.HandleBaseRoute).Name = "chat base route"
-			chat.GET("/messages", handler.HandleGetMessages).Name = "get messages between sender and receiver"
-			chat.GET("/ws", handler.HandleWebsocket).Name = "websocket route for chat"
-			chat.GET("/conversations", handler.HandleGetConversations).Name = "get all users you chatted with"
+			upload := public.Group("/upload")
+			{
+				handler := handlers.NewUploadHandler(s)
+				upload.GET("", handler.HandleBaseRoute)
+				upload.POST("/service", handler.HandleNewServicePhoto)
+				upload.POST("/proof", handler.HandleNewProofPhoto)
+			}
+
+			chat := public.Group("/chat")
+			{
+				handler := handlers.NewChatHandler(s)
+				chat.GET("", handler.HandleBaseRoute)
+				chat.GET("/messages", handler.HandleGetMessages)
+				chat.GET("/ws", handler.HandleWebsocket)
+				chat.GET("/conversations", handler.HandleGetConversations)
+			}
 		}
 	}
 }

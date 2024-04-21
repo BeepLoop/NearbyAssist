@@ -23,8 +23,14 @@ func (h *handler) HandleBaseRoute(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.Mapper{"routes": routes})
 }
 
+func (h *handler) HandleUnknownRoute(c echo.Context) error {
+	return c.JSON(http.StatusNotFound, utils.Mapper{
+		"message": "Are you lost baby girl??",
+	})
+}
+
 func (h *handler) HandleV1BaseRoute(c echo.Context) error {
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"message": "V1 base route",
+		"message": "V1 base route app and running!",
 	})
 }
