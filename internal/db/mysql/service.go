@@ -72,7 +72,7 @@ func (m *Mysql) FindServiceByVendor(id int) ([]*models.ServiceModel, error) {
 	return services, nil
 }
 
-func (m *Mysql) FindAllService() ([]models.ServiceModel, error) {
+func (m *Mysql) FindAllService() ([]*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -85,7 +85,7 @@ func (m *Mysql) FindAllService() ([]models.ServiceModel, error) {
             10
     `
 
-	services := make([]models.ServiceModel, 0)
+	services := make([]*models.ServiceModel, 0)
 	err := m.Conn.SelectContext(ctx, &services, query)
 	if err != nil {
 		return nil, err
