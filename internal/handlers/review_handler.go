@@ -67,10 +67,10 @@ func (h *reviewHandler) HandleGetReview(c echo.Context) error {
 }
 
 func (h *reviewHandler) HandleServiceReview(c echo.Context) error {
-	vendorId := c.Param("vendorId")
-	id, err := strconv.Atoi(vendorId)
+	serviceId := c.Param("serviceId")
+	id, err := strconv.Atoi(serviceId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
 	reviews, err := h.server.DB.FindAllReviewByService(id)
