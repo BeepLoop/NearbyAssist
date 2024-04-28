@@ -123,12 +123,22 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	vendor, err := h.server.DB.FindVendorByService(service.ServiceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	// TODO: retrieve review count
 
-	// TODO: retrieve photos associated with a given service
+	images, err := h.server.DB.FindAllPhotosByServiceId(service.ServiceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"service": service,
+		"serviceInfo":   service,
+		"vendorInfo":    vendor,
+		"serviceImages": images,
 	})
 }
 

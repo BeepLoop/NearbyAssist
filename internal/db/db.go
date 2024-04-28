@@ -2,6 +2,7 @@ package db
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/types"
 )
 
@@ -27,6 +28,7 @@ type Database interface {
 	// Vendor Queries
 	CountVendor(filter models.VendorStatus) (int, error)
 	FindVendorById(id int) (*models.VendorModel, error)
+	FindVendorByService(id int) (*response.ServiceVendorDetails, error)
 	RestrictVendor(id int) error
 	UnrestrictVendor(id int) error
 
@@ -34,12 +36,12 @@ type Database interface {
 	FindAllCategory() ([]models.CategoryModel, error)
 
 	//  Service Queries
-	FindServiceById(id int) (*models.ServiceModel, error)
+	FindServiceById(id int) (*response.ServiceDetails, error)
 	FindServiceByVendor(id int) ([]*models.ServiceModel, error)
 	FindAllService() ([]*models.ServiceModel, error)
 	RegisterService(service *models.ServiceModel) (int, error)
 	UpdateService(service *models.ServiceModel) error
-    DeleteService(id int) error
+	DeleteService(id int) error
 	GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceModel, error)
 
 	// Complaint Queries
@@ -72,6 +74,7 @@ type Database interface {
 
 	// Service Photo Queries
 	NewServicePhoto(data *models.ServicePhotoModel) (int, error)
+	FindAllPhotosByServiceId(serviceId int) ([]response.ServiceImages, error)
 
 	// Application Proof Queries
 	NewApplicationProof(data *models.ApplicationProofModel) (int, error)

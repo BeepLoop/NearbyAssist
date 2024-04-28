@@ -4,24 +4,31 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/types"
 	"time"
 )
 
-func (m *Mysql) FindServiceById(id int) (*models.ServiceModel, error) {
+func (m *Mysql) FindServiceById(id int) (*response.ServiceDetails, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         SELECT
-            id, vendorId, title, description, rate, ST_AsText(location) as location, categoryId
+            s.id as serviceId,
+            s.title,
+            s.description,
+            s.rate,
+            ST_AsText(location) as location,
+            c.title as category
         FROM 
-            Service
+            Service s
+            JOIN Category c ON s.categoryId = c.id
         WHERE
-            id = ?
+            s.id = ?
     `
 
-	service := models.NewServiceModel()
+	service := &response.ServiceDetails{}
 	err := m.Conn.GetContext(ctx, service, query, id)
 	if err != nil {
 		return nil, err

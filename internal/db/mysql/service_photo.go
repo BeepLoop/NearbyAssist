@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	"time"
 )
 
@@ -32,4 +33,31 @@ func (m *Mysql) NewServicePhoto(data *models.ServicePhotoModel) (int, error) {
 	}
 
 	return int(id), nil
+}
+
+func (m *Mysql) FindAllPhotosByServiceId(serviceId int) ([]response.ServiceImages, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT 
+            id AS imageId,
+            url AS imageUrl
+        FROM
+            ServicePhoto
+        WHERE
+            serviceId = ?
+    `
+
+	images := make([]response.ServiceImages, 0)
+	err := m.Conn.SelectContext(ctx, &images, query, serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return images, nil
 }

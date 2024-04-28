@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	"time"
 )
 
@@ -39,6 +40,38 @@ func (m *Mysql) FindVendorById(id int) (*models.VendorModel, error) {
 	query := "SELECT id, vendorId, rating, job, restricted FROM Vendor WHERE id = ?"
 
 	vendor := models.NewVendorModel()
+	err := m.Conn.GetContext(ctx, vendor, query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return vendor, nil
+}
+
+func (m *Mysql) FindVendorByService(id int) (*response.ServiceVendorDetails, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT
+            v.id as vendorId,
+            v.rating,
+            v.job,
+            u.name as vendor,
+            u.imageUrl as imageUrl
+        FROM
+            Vendor v
+            JOIN Service s ON s.vendorId = v.id
+            JOIN User u ON u.id = v.vendorId
+        WHERE 
+            s.id = ?
+    `
+
+	vendor := &response.ServiceVendorDetails{}
 	err := m.Conn.GetContext(ctx, vendor, query, id)
 	if err != nil {
 		return nil, err
