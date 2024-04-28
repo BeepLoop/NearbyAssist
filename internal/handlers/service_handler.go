@@ -81,6 +81,20 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	})
 }
 
+func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
+	serviceId := c.Param("serviceId")
+	id, err := strconv.Atoi(serviceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+	}
+
+	if err := h.server.DB.DeleteService(id); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
 func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 	params, err := utils.GetSearchParams(c)
 	if err != nil {

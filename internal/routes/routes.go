@@ -74,6 +74,7 @@ func RegisterRoutes(s *server.Server) {
 				service.GET("/search", handler.HandleSearchService)
 				service.GET("/:serviceId", handler.HandleGetDetails)
 				service.PUT("/:serviceId", handler.HandleUpdateService)
+				service.DELETE("/:serviceId", handler.HandleDeleteService)
 				service.GET("/vendor/:vendorId", handler.HandleGetByVendor)
 				service.GET("/route/:serviceId", handler.HandleFindRoute)
 			}

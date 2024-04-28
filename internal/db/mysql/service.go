@@ -174,6 +174,24 @@ func (m *Mysql) UpdateService(service *models.ServiceModel) error {
 	return nil
 }
 
+func (m *Mysql) DeleteService(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "DELETE FROM Service WHERE id = ?"
+
+	_, err := m.Conn.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
