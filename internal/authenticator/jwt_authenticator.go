@@ -20,11 +20,12 @@ func NewJWTAuthenticator(conf *config.Config) *jwtAuthenticator {
 	return &jwtAuthenticator{
 		secret:        conf.JwtSecret,
 		signMethod:    jwt.SigningMethodHS512,
-		tokenDuration: time.Second * 60,
+		tokenDuration: time.Second * 60 * 10,
 	}
 }
 func (j *jwtAuthenticator) GenerateAdminAccessToken(admin *models.AdminModel) (string, error) {
 	claims := &models.AdminJwtClaims{
+		AdminId:  admin.Id,
 		Username: admin.Username,
 		Role:     admin.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -44,8 +45,9 @@ func (j *jwtAuthenticator) GenerateAdminAccessToken(admin *models.AdminModel) (s
 
 func (j *jwtAuthenticator) GenerateUserAccessToken(user *models.UserModel) (string, error) {
 	claims := &models.UserJwtClaims{
-		Name:  user.Name,
-		Email: user.Email,
+		UserId: user.Id,
+		Name:   user.Name,
+		Email:  user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.tokenDuration)),
 		},
