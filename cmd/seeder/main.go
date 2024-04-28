@@ -20,6 +20,19 @@ func main() {
 		panic("Error inserting category: " + err.Error())
 	}
 
+	// Seed Admin
+	_, err = db.Conn.NamedExec("INSERT INTO Admin (username, password, role) VALUES (:username, :password, :role)", []struct {
+		Username string `db:"username"`
+		Password string `db:"password"`
+		Role     string `db:"role"`
+	}{
+		{Username: "admin", Password: "admin", Role: "admin"},
+		{Username: "dui", Password: "pass", Role: "staff"},
+	})
+	if err != nil {
+		panic("Error inserting admin: " + err.Error())
+	}
+
 	// Seed users
 	_, err = db.Conn.NamedExec("INSERT INTO User (name, email, imageUrl) values (:name, :email, :imageUrl)", []types.User{
 		{
