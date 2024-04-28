@@ -25,7 +25,7 @@ func main() {
 	db := mysql.NewMysqlDatabase(config)
 
 	// Load authenticator configuration
-	auth := authenticator.NewJWTAuthenticator(config)
+	auth := authenticator.NewJWTAuthenticator(config.JwtSecret)
 
 	// Load websocket configuration
 	ws := websocket.NewWebsocket(db)

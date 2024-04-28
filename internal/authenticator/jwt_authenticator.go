@@ -2,7 +2,6 @@ package authenticator
 
 import (
 	"errors"
-	"nearbyassist/internal/config"
 	"nearbyassist/internal/models"
 	"time"
 
@@ -16,9 +15,9 @@ type jwtAuthenticator struct {
 	tokenDuration time.Duration
 }
 
-func NewJWTAuthenticator(conf *config.Config) *jwtAuthenticator {
+func NewJWTAuthenticator(secret string) *jwtAuthenticator {
 	return &jwtAuthenticator{
-		secret:        conf.JwtSecret,
+		secret:        secret,
 		signMethod:    jwt.SigningMethodHS512,
 		tokenDuration: time.Second * 60 * 10,
 	}
