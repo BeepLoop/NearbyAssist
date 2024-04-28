@@ -44,7 +44,7 @@ func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	vendor, err := h.server.DB.FindUserById(id)
+	vendor, err := h.server.DB.FindVendorById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
