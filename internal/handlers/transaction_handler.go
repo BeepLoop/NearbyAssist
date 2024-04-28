@@ -63,16 +63,16 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 }
 
 func (h *transactionHandler) HandleOngoingTransaction(c echo.Context) error {
-	userId := c.Param("userId")
-	id, err := strconv.Atoi(userId)
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	param := c.QueryParam("filter")
 	filter := models.TransactionFilter(param)
 
-	transactions, err := h.server.DB.FindAllOngoingTransaction(id, filter)
+	transactions, err := h.server.DB.FindAllOngoingTransaction(userId, filter)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
