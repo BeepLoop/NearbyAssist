@@ -5,7 +5,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -83,16 +82,16 @@ func (h *transactionHandler) HandleOngoingTransaction(c echo.Context) error {
 }
 
 func (h *transactionHandler) HandleHistory(c echo.Context) error {
-	userId := c.Param("userId")
-	id, err := strconv.Atoi(userId)
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	param := c.QueryParam("filter")
 	filter := models.TransactionFilter(param)
 
-	history, err := h.server.DB.GetTransactionHistory(id, filter)
+	history, err := h.server.DB.GetTransactionHistory(userId, filter)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

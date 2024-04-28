@@ -96,7 +96,7 @@ func RegisterRoutes(s *server.Server) {
 				// Filter = view transactions as client or vendor
 				// Status = transaction status (see transaction model for valid status)
 				transaction.GET("/ongoing", handler.HandleOngoingTransaction)
-				transaction.GET("/history/:userId", handler.HandleHistory)
+				transaction.GET("/history", handler.HandleHistory)
 			}
 
 			application := public.Group("/application")
