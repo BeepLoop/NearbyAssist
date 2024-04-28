@@ -127,7 +127,7 @@ func RegisterRoutes(s *server.Server) {
 			{
 				handler := handlers.NewChatHandler(s)
 				chat.GET("", handler.HandleBaseRoute)
-				chat.GET("/messages", handler.HandleGetMessages)
+				chat.GET("/messages/:otherUserId", handler.HandleGetMessages)
 				chat.GET("/ws", handler.HandleWebsocket)
 				chat.GET("/conversations", handler.HandleGetConversations)
 			}

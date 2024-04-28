@@ -29,14 +29,19 @@ func (h *chatHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *chatHandler) HandleGetMessages(c echo.Context) error {
-	params := c.QueryString()
-
-	values, err := models.MessageValueMapFactory(params)
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	messages, err := h.server.DB.GetMessages(values["sender"], values["receiver"])
+	otherUser := c.Param("otherUserId")
+	otherUserId, err := strconv.Atoi(otherUser)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID must be a number")
+	}
+
+	messages, err := h.server.DB.GetMessages(userId, otherUserId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -50,10 +55,10 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	conn, err := h.server.Websocket.Upgrade(c)
 	defer conn.Close()
 
-	user := c.QueryParam("userId")
-	userId, err := strconv.Atoi(user)
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.server.Websocket.Clients[userId] = conn
@@ -81,13 +86,13 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 }
 
 func (h *chatHandler) HandleGetConversations(c echo.Context) error {
-	userId := c.QueryParam("userId")
-	id, err := strconv.Atoi(userId)
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	conversations, err := h.server.DB.GetAllUserConversations(id)
+	conversations, err := h.server.DB.GetAllUserConversations(userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
