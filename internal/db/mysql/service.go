@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/types"
 	"time"
@@ -112,7 +113,7 @@ func (m *Mysql) FindAllService() ([]*models.ServiceModel, error) {
 	return services, nil
 }
 
-func (m *Mysql) RegisterService(service *models.ServiceModel) (int, error) {
+func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -131,20 +132,18 @@ func (m *Mysql) RegisterService(service *models.ServiceModel) (int, error) {
                 )
 	    `
 
-	models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
-
 	res, err := m.Conn.NamedExecContext(ctx, query, service)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	insertId, err := res.LastInsertId()
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return 0, context.DeadlineExceeded
 	}
 
 	return int(insertId), nil

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -33,18 +34,24 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 }
 
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
-	model := models.NewServiceModel()
-	err := c.Bind(model)
-	if err != nil {
+	service := &request.NewService{}
+	if err := c.Bind(service); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = c.Validate(model)
-	if err != nil {
+	authHeader := c.Request().Header.Get("Authorization")
+	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		service.VendorId = userId
+	}
+
+	if err := c.Validate(service); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	insertId, err := h.server.DB.RegisterService(model)
+	models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
+	insertId, err := h.server.DB.RegisterService(service)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}

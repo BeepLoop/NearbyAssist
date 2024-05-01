@@ -2,6 +2,7 @@ package db
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/types"
 )
@@ -39,7 +40,7 @@ type Database interface {
 	FindServiceById(id int) (*response.ServiceDetails, error)
 	FindServiceByVendor(id int) ([]*models.ServiceModel, error)
 	FindAllService() ([]*models.ServiceModel, error)
-	RegisterService(service *models.ServiceModel) (int, error)
+	RegisterService(service *request.NewService) (int, error)
 	UpdateService(service *models.ServiceModel) error
 	DeleteService(id int) error
 	GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceModel, error)
