@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"time"
 )
 
@@ -35,7 +36,7 @@ func (m *Mysql) CountApplication(status models.ApplicationStatus) (int, error) {
 	return count, nil
 }
 
-func (m *Mysql) CreateApplication(application *models.ApplicationModel) (int, error) {
+func (m *Mysql) CreateApplication(application *request.NewApplication) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 

@@ -57,7 +57,7 @@ type Database interface {
 
 	// Application Queries
 	CountApplication(status models.ApplicationStatus) (int, error)
-	CreateApplication(application *models.ApplicationModel) (int, error)
+	CreateApplication(application *request.NewApplication) (int, error)
 	FindApplicationById(id int) (*models.ApplicationModel, error)
 	FindAllApplication(status models.ApplicationStatus) ([]models.ApplicationModel, error)
 	ApproveApplication(id int) error

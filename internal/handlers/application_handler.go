@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -35,18 +36,23 @@ func (h *applicationHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
-	model := models.NewApplicationModel()
-	err := c.Bind(model)
-	if err != nil {
+	application := &request.NewApplication{}
+	if err := c.Bind(application); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "unable to process data provided")
 	}
 
-	err = c.Validate(model)
-	if err != nil {
+	authHeader := c.Request().Header.Get("Authorization")
+	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		application.ApplicantId = userId
+	}
+
+	if err := c.Validate(application); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
-	applicationId, err := h.server.DB.CreateApplication(model)
+	applicationId, err := h.server.DB.CreateApplication(application)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
