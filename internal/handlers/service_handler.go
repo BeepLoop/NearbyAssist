@@ -46,11 +46,12 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 		service.VendorId = userId
 	}
 
+	models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
+
 	if err := c.Validate(service); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
 	insertId, err := h.server.DB.RegisterService(service)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
