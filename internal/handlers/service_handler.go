@@ -75,8 +75,7 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	}
 
 	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
-	if err != nil {
+	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	} else {
 		updatedData.VendorId = userId
