@@ -34,6 +34,8 @@ func RegisterRoutes(s *server.Server) {
 	// V1 routes
 	v1 := s.Echo.Group("/v1")
 	{
+		v1.Use(middleware.CheckAuth(s.Auth))
+
 		v1.GET("/health", healthHandler.HandleHealthCheck)
 		v1.GET("", rootHandler.HandleV1BaseRoute)
 
@@ -44,8 +46,6 @@ func RegisterRoutes(s *server.Server) {
 		// Public routes
 		public := v1.Group("/public")
 		{
-			public.Use(middleware.CheckAuth(s.Auth))
-
 			user := public.Group("/users")
 			{
 				handler := handlers.NewUserHandler(s)
