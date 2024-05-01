@@ -149,7 +149,7 @@ func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
 	return int(insertId), nil
 }
 
-func (m *Mysql) UpdateService(service *models.ServiceModel) error {
+func (m *Mysql) UpdateService(service *request.UpdateService) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -165,8 +165,6 @@ func (m *Mysql) UpdateService(service *models.ServiceModel) error {
         WHERE
             id = :id
     `
-
-	models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
 
 	_, err := m.Conn.NamedExecContext(ctx, query, service)
 	if err != nil {

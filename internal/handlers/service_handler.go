@@ -68,16 +68,26 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	updatedData := models.NewServiceModel()
-	err = c.Bind(updatedData)
-	if err != nil {
+	updatedData := &request.UpdateService{}
+	if err = c.Bind(updatedData); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request data")
 	}
 
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		updatedData.VendorId = userId
+	}
+
+	models.ConstructLocationFromLatLong(&updatedData.GeoSpatialModel)
+
 	if err := c.Validate(updatedData); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
+	} else {
+		updatedData.Id = id
 	}
-	updatedData.Id = id
 
 	if err := h.server.DB.UpdateService(updatedData); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not process update request")

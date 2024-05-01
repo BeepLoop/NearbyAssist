@@ -41,7 +41,7 @@ type Database interface {
 	FindServiceByVendor(id int) ([]*models.ServiceModel, error)
 	FindAllService() ([]*models.ServiceModel, error)
 	RegisterService(service *request.NewService) (int, error)
-	UpdateService(service *models.ServiceModel) error
+	UpdateService(service *request.UpdateService) error
 	DeleteService(id int) error
 	GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceModel, error)
 
