@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -39,18 +40,16 @@ func (h *transactionHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
-	model := models.NewTransactionModel()
-	err := c.Bind(model)
-	if err != nil {
+	transaction := &request.NewTransaction{}
+	if err := c.Bind(transaction); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
-	err = c.Validate(model)
-	if err != nil {
+	if err := c.Validate(transaction); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	transactionId, err := h.server.DB.CreateTransaction(model)
+	transactionId, err := h.server.DB.CreateTransaction(transaction)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

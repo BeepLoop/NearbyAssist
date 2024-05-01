@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"time"
 )
 
@@ -34,7 +35,7 @@ func (m *Mysql) CountTransaction(status models.TransactionStatus) (int, error) {
 	return count, nil
 }
 
-func (m *Mysql) CreateTransaction(transaction *models.TransactionModel) (int, error) {
+func (m *Mysql) CreateTransaction(transaction *request.NewTransaction) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
