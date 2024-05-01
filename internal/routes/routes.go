@@ -46,13 +46,6 @@ func RegisterRoutes(s *server.Server) {
 		// Public routes
 		public := v1.Group("/public")
 		{
-			user := public.Group("/users")
-			{
-				handler := handlers.NewUserHandler(s)
-				user.GET("", handler.HandleBaseRoute)
-				user.GET("/:userId", handler.HandleGetUser)
-			}
-
 			vendor := public.Group("/vendors")
 			{
 				handler := handlers.NewVendorHandler(s)

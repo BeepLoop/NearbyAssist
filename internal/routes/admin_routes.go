@@ -22,7 +22,9 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 	{
 		handler := handlers.NewUserHandler(s)
 
+		user.GET("", handler.HandleBaseRoute)
 		user.GET("/count", handler.HandleCount)
+		user.GET("/:userId", handler.HandleGetUser)
 	}
 
 	vendor := r.Group("/vendor")
