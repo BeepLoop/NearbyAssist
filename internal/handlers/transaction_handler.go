@@ -40,16 +40,16 @@ func (h *transactionHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
-	transaction := &request.NewTransaction{}
-	if err := c.Bind(transaction); err != nil {
+	req := &request.NewTransaction{}
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
-	if err := c.Validate(transaction); err != nil {
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	transactionId, err := h.server.DB.CreateTransaction(transaction)
+	transactionId, err := h.server.DB.CreateTransaction(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
