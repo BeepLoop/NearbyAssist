@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -27,18 +27,16 @@ func (h *reviewHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *reviewHandler) HandleNewReview(c echo.Context) error {
-	model := models.NewReviewModel()
-	err := c.Bind(model)
-	if err != nil {
+	req := &request.NewReview{}
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = c.Validate(model)
-	if err != nil {
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	reviewId, err := h.server.DB.CreateReview(model)
+	reviewId, err := h.server.DB.CreateReview(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

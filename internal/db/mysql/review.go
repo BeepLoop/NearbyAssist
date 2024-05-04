@@ -3,10 +3,11 @@ package mysql
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"time"
 )
 
-func (m *Mysql) CreateReview(review *models.ReviewModel) (int, error) {
+func (m *Mysql) CreateReview(review *request.NewReview) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 

@@ -64,7 +64,7 @@ type Database interface {
 	RejectApplication(id int) error
 
 	// Review Queries
-	CreateReview(review *models.ReviewModel) (int, error)
+	CreateReview(review *request.NewReview) (int, error)
 	FindReviewById(id int) (*models.ReviewModel, error)
 	FindAllReviewByService(id int) ([]models.ReviewModel, error)
 
