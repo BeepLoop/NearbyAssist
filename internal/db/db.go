@@ -24,7 +24,7 @@ type Database interface {
 	CountUser() (int, error)
 	FindUserById(id int) (*models.UserModel, error)
 	FindUserByEmail(email string) (*models.UserModel, error)
-	NewUser(user *models.UserModel) (int, error)
+	NewUser(user *request.UserLogin) (int, error)
 
 	// Vendor Queries
 	CountVendor(filter models.VendorStatus) (int, error)

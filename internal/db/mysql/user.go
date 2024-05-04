@@ -3,10 +3,11 @@ package mysql
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"time"
 )
 
-func (m *Mysql) NewUser(user *models.UserModel) (int, error) {
+func (m *Mysql) NewUser(user *request.UserLogin) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 

@@ -11,3 +11,11 @@ type UserModel struct {
 func NewUserModel() *UserModel {
 	return &UserModel{}
 }
+
+func NewUserModelWithData(name, email, imageUrl string) *UserModel {
+	return &UserModel{
+		Name:     name,
+		Email:    email,
+		ImageUrl: imageUrl,
+	}
+}

@@ -25,24 +25,24 @@ func (h *authHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *authHandler) HandleAdminLogin(c echo.Context) error {
-	adminModel := models.NewAdminModel()
-	err := c.Bind(adminModel)
+	req := &request.AdminLogin{}
+	err := c.Bind(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err := c.Validate(adminModel); err != nil {
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	// TODO: Handle validating credentials
-	admin, err := h.server.DB.FindAdminByUsername(adminModel.Username)
+	admin, err := h.server.DB.FindAdminByUsername(req.Username)
 	if admin == nil || err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Account not found")
 	}
 
 	// TODO: Implement better password validation with encryption
-	if adminModel.Password != admin.Password {
+	if req.Password != admin.Password {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid credentials")
 	}
 
@@ -70,29 +70,33 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 }
 
 func (h *authHandler) HandleLogin(c echo.Context) error {
-	model := models.NewUserModel()
-	err := c.Bind(model)
+	req := &request.UserLogin{}
+	err := c.Bind(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err = c.Validate(model); err != nil {
+	if err = c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	user, err := h.server.DB.FindUserByEmail(model.Email)
+	userModel := models.NewUserModelWithData(req.Name, req.Email, req.Image)
+
+	// Check if user exists
+	user, err := h.server.DB.FindUserByEmail(req.Email)
 	if err != nil {
-		userId, err := h.server.DB.NewUser(model)
+		// Register user if not found
+		userId, err := h.server.DB.NewUser(req)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		model.Id = userId
+		userModel.Id = userId
 	} else {
-		model.Id = user.Id
+		userModel.Id = user.Id
 	}
 
-	accessToken, err := h.server.Auth.GenerateUserAccessToken(model)
+	accessToken, err := h.server.Auth.GenerateUserAccessToken(userModel)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -108,7 +112,7 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"userId":       model.Id,
+		"userId":       userModel.Id,
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	})
