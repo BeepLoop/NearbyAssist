@@ -10,7 +10,7 @@ func (m *Mysql) FindActiveSessionByToken(token string) (*models.SessionModel, er
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, userId, token, status FROM Session WHERE token = ? AND status = 'online'"
+	query := "SELECT id, token, status FROM Session WHERE token = ? AND status = 'online'"
 
 	session := new(models.SessionModel)
 	err := m.Conn.GetContext(ctx, session, query, token)
@@ -29,7 +29,7 @@ func (m *Mysql) FindSessionByToken(token string) (*models.SessionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, userId, token, status FROM Session WHERE token = ?"
+	query := "SELECT id, token, status FROM Session WHERE token = ?"
 
 	session := new(models.SessionModel)
 	err := m.Conn.GetContext(ctx, session, query, token)
@@ -48,7 +48,7 @@ func (m *Mysql) NewSession(session *models.SessionModel) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO Session (userId, token) VALUES (:userId, :token)"
+	query := "INSERT INTO Session (token) VALUES (:token)"
 
 	res, err := m.Conn.NamedExecContext(ctx, query, session)
 	if err != nil {

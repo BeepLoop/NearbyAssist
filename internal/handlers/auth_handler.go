@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -56,8 +57,13 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 	}
 
 	// TODO: Implement session management for admin
+	session := models.NewSessionModel(refreshToken)
+	if _, err := h.server.DB.NewSession(session); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
+		"adminId":      admin.Id,
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	})
@@ -96,7 +102,7 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	session := models.NewSessionModel(model.Id, refreshToken)
+	session := models.NewSessionModel(refreshToken)
 	if _, err := h.server.DB.NewSession(session); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -109,17 +115,17 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 }
 
 func (h *authHandler) HandleLogout(c echo.Context) error {
-	refreshTokenModel := models.NewRefreshTokenModel()
-	err := c.Bind(refreshTokenModel)
+	req := &request.Logout{}
+	err := c.Bind(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err = c.Validate(refreshTokenModel); err != nil {
+	if err = c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	session, err := h.server.DB.FindActiveSessionByToken(refreshTokenModel.Token)
+	session, err := h.server.DB.FindActiveSessionByToken(req.Token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Session not found")
 	}
@@ -138,26 +144,26 @@ func (h *authHandler) HandleLogout(c echo.Context) error {
 }
 
 func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
-	refreshTokenModel := models.NewRefreshTokenModel()
-	err := c.Bind(refreshTokenModel)
-	if err != nil {
+	req := &request.RefreshToken{}
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if err := c.Validate(refreshTokenModel); err != nil {
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if blacklist, _ := h.server.DB.FindBlacklistedToken(refreshTokenModel.Token); blacklist != nil {
+	if blacklist, _ := h.server.DB.FindBlacklistedToken(req.Token); blacklist != nil {
 		return echo.NewHTTPError(http.StatusForbidden, "Token blacklisted")
 	}
 
-	session, err := h.server.DB.FindActiveSessionByToken(refreshTokenModel.Token)
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	user, err := h.server.DB.FindUserById(session.UserId)
+	user, err := h.server.DB.FindUserById(userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

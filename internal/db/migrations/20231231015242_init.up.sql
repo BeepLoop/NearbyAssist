@@ -35,15 +35,13 @@ CREATE TABLE IF NOT EXISTS Admin (
 
 CREATE TABLE IF NOT EXISTS Session (
     id Int NOT NULL AUTO_INCREMENT,
-    userId Int NOT NULL,
     token Varchar(255) NOT NULL,
     status Enum('online', 'offline') NOT NULL DEFAULT 'online',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
-    FOREIGN KEY(userId) REFERENCES User(id),
-    CONSTRAINT unique_userId_online UNIQUE (userId, (CASE WHEN status = 'online' THEN 1 ELSE NULL END)),
-    INDEX(userId, token, status)
+    CONSTRAINT unique_token_online UNIQUE (token, (CASE WHEN status = 'online' THEN 1 ELSE NULL END)),
+    INDEX(token, status)
 );
 
 CREATE TABLE IF NOT EXISTS Blacklist (
