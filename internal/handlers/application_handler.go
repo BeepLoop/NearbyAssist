@@ -36,8 +36,8 @@ func (h *applicationHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
-	application := &request.NewApplication{}
-	if err := c.Bind(application); err != nil {
+	req := &request.NewApplication{}
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "unable to process data provided")
 	}
 
@@ -45,14 +45,14 @@ func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
 	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	} else {
-		application.ApplicantId = userId
+		req.ApplicantId = userId
 	}
 
-	if err := c.Validate(application); err != nil {
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
-	applicationId, err := h.server.DB.CreateApplication(application)
+	applicationId, err := h.server.DB.CreateApplication(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -101,8 +101,7 @@ func (h *applicationHandler) HandleReject(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	err = h.server.DB.RejectApplication(id)
-	if err != nil {
+	if err := h.server.DB.RejectApplication(id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
