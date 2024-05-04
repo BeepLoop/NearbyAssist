@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"context"
-	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"time"
 )

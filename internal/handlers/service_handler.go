@@ -3,6 +3,7 @@ package handlers
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -135,27 +136,51 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
+	// Get service  info
 	service, err := h.server.DB.FindServiceById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	// Get vendor info
 	vendor, err := h.server.DB.FindVendorByService(service.ServiceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// TODO: retrieve review count
+	// Get count per review rating
+	reviews, err := h.server.DB.FindAllReviewByService(service.ServiceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
+	countPerRating := response.NewCountPerRating()
+	for _, review := range reviews {
+		switch review.Rating {
+		case 5:
+			countPerRating["five"]++
+		case 4:
+			countPerRating["four"]++
+		case 3:
+			countPerRating["three"]++
+		case 2:
+			countPerRating["two"]++
+		case 1:
+			countPerRating["one"]++
+		}
+	}
+
+	// Get service images
 	images, err := h.server.DB.FindAllPhotosByServiceId(service.ServiceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"serviceInfo":   service,
-		"vendorInfo":    vendor,
-		"serviceImages": images,
+		"serviceInfo":    service,
+		"vendorInfo":     vendor,
+		"serviceImages":  images,
+		"countPerRating": countPerRating,
 	})
 }
 
