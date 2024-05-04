@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"time"
 )
 
@@ -25,7 +26,7 @@ func (m *Mysql) CountComplaint() (int, error) {
 	return count, nil
 }
 
-func (m *Mysql) FileComplaint(complaint *models.ComplaintModel) (int, error) {
+func (m *Mysql) FileComplaint(complaint *request.NewComplaint) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 

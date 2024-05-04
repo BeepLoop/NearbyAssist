@@ -47,7 +47,7 @@ type Database interface {
 
 	// Complaint Queries
 	CountComplaint() (int, error)
-	FileComplaint(complaint *models.ComplaintModel) (int, error)
+	FileComplaint(complaint *request.NewComplaint) (int, error)
 
 	// Transaction Queries
 	CountTransaction(status models.TransactionStatus) (int, error)

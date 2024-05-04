@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -37,18 +37,16 @@ func (h *complaintHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *complaintHandler) HandleNewComplaint(c echo.Context) error {
-	model := models.NewComplaintModel()
-	err := c.Bind(model)
-	if err != nil {
+	req := &request.NewComplaint{}
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err = c.Validate(model)
-	if err != nil {
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	complaintId, err := h.server.DB.FileComplaint(model)
+	complaintId, err := h.server.DB.FileComplaint(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
