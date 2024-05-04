@@ -19,7 +19,7 @@ func NewJWTAuthenticator(secret string) *jwtAuthenticator {
 	return &jwtAuthenticator{
 		secret:        secret,
 		signMethod:    jwt.SigningMethodHS512,
-		tokenDuration: time.Second * 60 * 10,
+		tokenDuration: time.Second * 60,
 	}
 }
 func (j *jwtAuthenticator) GenerateAdminAccessToken(admin *models.AdminModel) (string, error) {
@@ -87,16 +87,13 @@ func (j *jwtAuthenticator) ValidateToken(tokenString string) error {
 }
 
 func (j *jwtAuthenticator) GetClaims(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("Unexpected signing method")
 		}
 
 		return []byte(j.secret), nil
 	})
-	if err != nil {
-		return nil, err
-	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {

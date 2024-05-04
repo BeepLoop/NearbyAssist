@@ -8,10 +8,6 @@ import (
 func GetUserIdFromJWT(jwtSigner authenticator.Authenticator, authHeader string) (int, error) {
 	token := authHeader[len("Bearer "):]
 
-	if err := jwtSigner.ValidateToken(token); err != nil {
-		return 0, err
-	}
-
 	claims, err := jwtSigner.GetClaims(token)
 	if err != nil {
 		return 0, err
