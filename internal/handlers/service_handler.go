@@ -34,8 +34,8 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 }
 
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
-	service := &request.NewService{}
-	if err := c.Bind(service); err != nil {
+	req := &request.NewService{}
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -43,16 +43,16 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	} else {
-		service.VendorId = userId
+		req.VendorId = userId
 	}
 
-	models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
+	models.ConstructLocationFromLatLong(&req.GeoSpatialModel)
 
-	if err := c.Validate(service); err != nil {
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	insertId, err := h.server.DB.RegisterService(service)
+	insertId, err := h.server.DB.RegisterService(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -69,8 +69,8 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	updatedData := &request.UpdateService{}
-	if err = c.Bind(updatedData); err != nil {
+	req := &request.UpdateService{}
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request data")
 	}
 
@@ -78,18 +78,18 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	} else {
-		updatedData.VendorId = userId
+		req.VendorId = userId
 	}
 
-	models.ConstructLocationFromLatLong(&updatedData.GeoSpatialModel)
+	models.ConstructLocationFromLatLong(&req.GeoSpatialModel)
 
-	if err := c.Validate(updatedData); err != nil {
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
 	} else {
-		updatedData.Id = id
+		req.Id = id
 	}
 
-	if err := h.server.DB.UpdateService(updatedData); err != nil {
+	if err := h.server.DB.UpdateService(req); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not process update request")
 	}
 
