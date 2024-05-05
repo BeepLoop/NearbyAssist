@@ -14,8 +14,12 @@ func GetSearchParams(c echo.Context) (*types.SearchParams, error) {
 	radius := c.QueryParam("radius")
 	query := c.QueryParam("q")
 
-	if latitude == "" || longitude == "" || radius == "" || query == "" {
+	if latitude == "" || longitude == "" || query == "" {
 		return nil, errors.New("missing params")
+	}
+
+	if radius == "" {
+		radius = "500"
 	}
 
 	lat, err := strconv.ParseFloat(latitude, 64)
