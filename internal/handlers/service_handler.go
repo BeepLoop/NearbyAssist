@@ -124,7 +124,7 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-    // TODO: rank services by suggestability 
+	// TODO: rank services by suggestability
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"services": services,
