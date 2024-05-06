@@ -8,23 +8,23 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type categoryHandler struct {
+type tagHandler struct {
 	server *server.Server
 }
 
-func NewCategoryHandler(server *server.Server) *categoryHandler {
-	return &categoryHandler{
+func NewTagHandler(server *server.Server) *tagHandler {
+	return &tagHandler{
 		server: server,
 	}
 }
 
-func (h *categoryHandler) HandleCategories(c echo.Context) error {
-	categories, err := h.server.DB.FindAllCategory()
+func (h *tagHandler) HandleGetTags(c echo.Context) error {
+	tags, err := h.server.DB.FindAllTags()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"categories": categories,
+		"tags": tags,
 	})
 }

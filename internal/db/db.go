@@ -34,7 +34,7 @@ type Database interface {
 	UnrestrictVendor(id int) error
 
 	// Category Queries
-	FindAllCategory() ([]models.CategoryModel, error)
+	FindAllTags() ([]models.TagModel, error)
 
 	//  Service Queries
 	FindServiceById(id int) (*response.ServiceDetails, error)

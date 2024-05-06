@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-func (m *Mysql) FindAllCategory() ([]models.CategoryModel, error) {
+func (m *Mysql) FindAllTags() ([]models.TagModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, title FROM Category"
+	query := "SELECT id, title FROM Tag"
 
-	categories := make([]models.CategoryModel, 0)
-	err := m.Conn.SelectContext(ctx, &categories, query)
+	tags := make([]models.TagModel, 0)
+	err := m.Conn.SelectContext(ctx, &tags, query)
 	if err != nil {
 		return nil, err
 	}
@@ -22,5 +22,5 @@ func (m *Mysql) FindAllCategory() ([]models.CategoryModel, error) {
 		return nil, context.DeadlineExceeded
 	}
 
-	return categories, nil
+	return tags, nil
 }

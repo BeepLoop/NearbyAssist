@@ -53,10 +53,10 @@ func RegisterRoutes(s *server.Server) {
 				vendor.GET("/:vendorId", handler.HandleGetVendor)
 			}
 
-			category := public.Group("/category")
+			tags := public.Group("/tags")
 			{
-				handler := handlers.NewCategoryHandler(s)
-				category.GET("", handler.HandleCategories)
+				handler := handlers.NewTagHandler(s)
+				tags.GET("", handler.HandleGetTags)
 			}
 
 			service := public.Group("/services")
