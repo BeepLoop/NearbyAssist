@@ -12,9 +12,10 @@ func main() {
 	db := mysql.NewMysqlDatabase(conf)
 
 	// Seed categories
-	_, err := db.Conn.NamedExec("INSERT INTO Category (title) values (:title)", []types.Category{
-		{Title: "food"},
-		{Title: "service"},
+	_, err := db.Conn.NamedExec("INSERT INTO Tag (title) values (:title)", []types.Category{
+		{Title: "computer repair"},
+		{Title: "plumbing"},
+		{Title: "electric"},
 	})
 	if err != nil {
 		panic("Error inserting category: " + err.Error())
