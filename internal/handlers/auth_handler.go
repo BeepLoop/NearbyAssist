@@ -157,6 +157,10 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	if _, err := h.server.DB.FindSessionByToken(req.Token); err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, "Invalid token")
+	}
+
 	if blacklist, _ := h.server.DB.FindBlacklistedToken(req.Token); blacklist != nil {
 		return echo.NewHTTPError(http.StatusForbidden, "Token blacklisted")
 	}
