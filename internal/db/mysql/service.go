@@ -15,27 +15,19 @@ func (m *Mysql) FindServiceById(id int) (*response.ServiceDetails, error) {
 
 	query := `
         SELECT
-            s.id as serviceId,
-            s.title,
-            s.description,
-            s.rate,
-            ST_AsText(location) as location,
-            c.title as category
+            id as serviceId,
+            description,
+            format(rate, 2) as rate,
+            latitude, 
+            longitude
         FROM 
-            Service s
-            JOIN Category c ON s.categoryId = c.id
+            Service
         WHERE
-            s.id = ?
+            id = ?
     `
 
 	service := &response.ServiceDetails{}
-	err := m.Conn.GetContext(ctx, service, query, id)
-	if err != nil {
-		return nil, err
-	}
-
-	err = models.ExtractLatLongFromLocation(&service.GeoSpatialModel)
-	if err != nil {
+	if err := m.Conn.GetContext(ctx, service, query, id); err != nil {
 		return nil, err
 	}
 
@@ -52,7 +44,12 @@ func (m *Mysql) FindServiceByVendor(id int) ([]*models.ServiceModel, error) {
 
 	query := `
         SELECT
-            id, vendorId, title, description, rate, ST_AsText(location) as location, categoryId
+            id,
+            vendorId,
+            description,
+            rate,
+            latitude,
+            longitude
         FROM 
             Service
         WHERE
@@ -63,13 +60,6 @@ func (m *Mysql) FindServiceByVendor(id int) ([]*models.ServiceModel, error) {
 	err := m.Conn.SelectContext(ctx, &services, query, id)
 	if err != nil {
 		return nil, err
-	}
-
-	for _, service := range services {
-		err := models.ExtractLatLongFromLocation(&service.GeoSpatialModel)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -85,7 +75,12 @@ func (m *Mysql) FindAllService() ([]*models.ServiceModel, error) {
 
 	query := `
         SELECT
-            id, vendorId, title, description, rate, ST_AsText(location) as location, categoryId
+            id,
+            vendorId,
+            description,
+            rate,
+            latitude,
+            longitude
         FROM 
             Service
         LIMIT
@@ -96,13 +91,6 @@ func (m *Mysql) FindAllService() ([]*models.ServiceModel, error) {
 	err := m.Conn.SelectContext(ctx, &services, query)
 	if err != nil {
 		return nil, err
-	}
-
-	for _, service := range services {
-		err := models.ExtractLatLongFromLocation(&service.GeoSpatialModel)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -124,13 +112,14 @@ func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
 	registerService := `
 	        INSERT INTO
 	            Service
-	                (vendorId, description, rate, location)
+	                (vendorId, description, rate, latitude, longitude)
 	        VALUES 
                 (
                     :vendorId,
                     :description,
                     :rate,
-                    ST_GeomFromText(:location, 4326)
+                    :latitude,
+                    :longitude
                 )
 	    `
 
@@ -198,7 +187,8 @@ func (m *Mysql) UpdateService(service *request.UpdateService) error {
             title = :title,
             description = :description,
             rate = :rate,
-            location = ST_GeomFromText(:location, 4326),
+            latitude = :latitude
+            longitude = :longitude
             categoryId = :categoryId
         WHERE
             id = :id

@@ -47,8 +47,6 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 		req.VendorId = userId
 	}
 
-	models.ConstructLocationFromLatLong(&req.GeoSpatialModel)
-
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -81,8 +79,6 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	} else {
 		req.VendorId = userId
 	}
-
-	models.ConstructLocationFromLatLong(&req.GeoSpatialModel)
 
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")

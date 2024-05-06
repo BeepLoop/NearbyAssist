@@ -3,11 +3,10 @@ package response
 import "nearbyassist/internal/models"
 
 type ServiceDetails struct {
-	ServiceId   int    `json:"serviceId" db:"serviceId"`
-	Title       string `json:"title" db:"title"`
-	Description string `json:"description" db:"description"`
-	Category    string `json:"category" db:"category"`
-	Rate        string `json:"rate" db:"rate"`
+	ServiceId   int      `json:"serviceId" db:"serviceId"`
+	Description string   `json:"description" db:"description"`
+	Tags        []string `json:"tags" db:"tags"`
+	Rate        string   `json:"rate" db:"rate"`
 	models.GeoSpatialModel
 }
 
