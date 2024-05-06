@@ -33,7 +33,7 @@ type Database interface {
 	RestrictVendor(id int) error
 	UnrestrictVendor(id int) error
 
-	// Category Queries
+	// Tag Queries
 	FindAllTags() ([]models.TagModel, error)
 
 	//  Service Queries

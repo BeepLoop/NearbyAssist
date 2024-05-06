@@ -180,6 +180,8 @@ func (m *Mysql) UpdateService(service *request.UpdateService) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	// TODO: Update tags and use transaction
+
 	query := `
         UPDATE
             Service
@@ -189,7 +191,6 @@ func (m *Mysql) UpdateService(service *request.UpdateService) error {
             rate = :rate,
             latitude = :latitude
             longitude = :longitude
-            categoryId = :categoryId
         WHERE
             id = :id
     `
