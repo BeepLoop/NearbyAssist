@@ -117,36 +117,75 @@ func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := `
-	        INSERT INTO
-	            Service
-	                (vendorId, title, description, rate, location, categoryId)
-	        VALUES 
-                (
-                    :vendorId,
-                    :title,
-                    :description,
-                    :rate,
-                    ST_GeomFromText(:location, 4326),
-                    :categoryId
-                )
-	    `
-
-	res, err := m.Conn.NamedExecContext(ctx, query, service)
+	tx, err := m.Conn.BeginTxx(ctx, nil)
 	if err != nil {
 		return 0, err
 	}
 
-	insertId, err := res.LastInsertId()
+	registerService := `
+	        INSERT INTO
+	            Service
+	                (vendorId, description, rate, location)
+	        VALUES 
+                (
+                    :vendorId,
+                    :description,
+                    :rate,
+                    ST_GeomFromText(:location, 4326)
+                )
+	    `
+
+	res, err := tx.NamedExecContext(ctx, registerService, service)
+	if err != nil {
+		if err := tx.Rollback(); err != nil {
+			return 0, err
+		}
+
+		return 0, err
+	}
+
+	serviceId, err := res.LastInsertId()
 	if err != nil {
 		return 0, err
+	}
+
+	registerTag := `
+        INSERT INTO 
+            Service_Tag (serviceId, tagId)
+        VALUES
+            (
+                ?,
+                (SELECT id FROM Tag WHERE title = ?)
+            )
+    `
+
+	var tagErr error
+	for _, tag := range service.Tags {
+		if _, err := tx.ExecContext(ctx, registerTag, serviceId, tag); err != nil {
+			tagErr = err
+			break
+		}
+	}
+
+	if tagErr != nil {
+		if err := tx.Rollback(); err != nil {
+			return 0, err
+		}
+
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return 0, err
+		}
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return 0, context.DeadlineExceeded
 	}
 
-	return int(insertId), nil
+	return int(serviceId), nil
 }
 
 func (m *Mysql) UpdateService(service *request.UpdateService) error {

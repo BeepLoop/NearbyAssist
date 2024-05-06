@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS Blacklist (
     INDEX(token)
 );
 
-CREATE TABLE IF NOT EXISTS Category (
+CREATE TABLE IF NOT EXISTS Tag (
     id Int NOT NULL AUTO_INCREMENT,
     title Varchar(255) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -65,17 +65,26 @@ CREATE TABLE IF NOT EXISTS Category (
 CREATE TABLE IF NOT EXISTS Service (
     id Int NOT NULL AUTO_INCREMENT,
     vendorId Int NOT NULL,
-    title Varchar(255) NOT NULL,
     description Varchar(255) NOT NULL,
     rate Double NOT NULL,
     location Geometry NOT NULL SRID 4326,
-    categoryId  Int NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES User(id),
-    FOREIGN KEY(categoryId) REFERENCES Category(id),
-    INDEX(id, vendorId, categoryId)
+    INDEX(id, vendorId)
+);
+
+CREATE TABLE IF NOT EXISTS Service_Tag (
+    id Int NOT NULL AUTO_INCREMENT,
+    serviceId Int NOT NULL,
+    tagId Int NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(serviceId) REFERENCES Service(id),
+    FOREIGN KEY(tagId) REFERENCES Tag(id),
+    INDEX(id, serviceId, tagId)
 );
 
 CREATE TABLE IF NOT EXISTS Message (
