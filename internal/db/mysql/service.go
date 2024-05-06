@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"context"
-	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
@@ -239,31 +238,30 @@ func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceM
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf(`
-        SELECT
-            id, vendorId, title, description, format(rate, 2) as rate, ST_AsText(location) as location, categoryId
+	query := `
+        SELECT 
+            s.id,
+            s.vendorId,
+            s.description,
+            format(s.rate, 2) as rate,
+            s.latitude,
+            s.longitude
         FROM 
-            Service
+            Service_Tag st
+            JOIN Service s ON s.id = st.serviceId
         WHERE
-            title LIKE '%%%s%%'
+            st.tagId = (SELECT id from Tag WHERE title = ?)
         AND
             ST_Distance_Sphere(
-                location,
-                ST_GeomFromText('POINT(%f %f)', 4326)
-            ) < ?;
-    `, params.Query, params.Latitude, params.Longitude)
+                POINT(s.longitude, s.latitude),
+                POINT(?, ?)
+            ) < ?
+    `
 
 	services := make([]*models.ServiceModel, 0)
-	err := m.Conn.SelectContext(ctx, &services, query, params.Radius)
+	err := m.Conn.SelectContext(ctx, &services, query, params.Query, params.Longitude, params.Latitude, params.Radius)
 	if err != nil {
 		return nil, err
-	}
-
-	for _, service := range services {
-		err := models.ExtractLatLongFromLocation(&service.GeoSpatialModel)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {

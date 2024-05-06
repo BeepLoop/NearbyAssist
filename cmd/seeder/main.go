@@ -3,8 +3,9 @@ package main
 import (
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db/mysql"
+	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/types"
-	"nearbyassist/internal/utils"
 )
 
 func main() {
@@ -58,35 +59,100 @@ func main() {
 	}
 
 	// Seed sevices
-	services := []types.ServiceRegister{
+	services := []request.NewService{
 		{
 			VendorId:    1,
-			Title:       "Computer Repair & Maintenance",
 			Description: "We offer computer repair and maintenance services.",
-			Rate:        100.00,
-			Latitude:    7.422302,
-			Longitude:   125.824747,
-			CategoryId:  2,
+			Rate:        "100",
+			Tags: []string{
+				"computer repair",
+				"electric",
+			},
+			GeoSpatialModel: models.GeoSpatialModel{
+				Latitude:  7.422302,
+				Longitude: 125.824747,
+			},
 		},
 		{
 			VendorId:    1,
-			Title:       "Plumbing Services",
 			Description: "We offer plumbing services.",
-			Rate:        100.00,
-			Latitude:    7.419594,
-			Longitude:   125.824616,
-			CategoryId:  2,
+			Rate:        "100",
+			Tags: []string{
+				"plumbing",
+			},
+			GeoSpatialModel: models.GeoSpatialModel{
+				Latitude:  7.419594,
+				Longitude: 125.824616,
+			},
 		},
 	}
+
+	registerService := `
+	        INSERT INTO
+	            Service
+	                (vendorId, description, rate, latitude, longitude)
+	        VALUES 
+                (
+                    :vendorId,
+                    :description,
+                    :rate,
+                    :latitude,
+                    :longitude
+                )
+	    `
+
 	for _, service := range services {
-		data, err := utils.TransformServiceData(service)
+		tx, err := db.Conn.Beginx()
 		if err != nil {
-			panic("Error transforming service data: " + err.Error())
+			panic(err)
 		}
 
-		_, err = db.Conn.NamedExec("INSERT INTO Service (vendorId, title, description, rate, location, categoryId) values (:vendorId, :title, :description, :rate, ST_GeomFromText(:point, 4326), :categoryId)", data)
+		models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
+
+		res, err := tx.NamedExec(registerService, service)
 		if err != nil {
-			panic("Error inserting service: " + err.Error())
+			if err := tx.Rollback(); err != nil {
+				panic("failed to rollback on insert service: " + err.Error())
+			}
+
+			panic(err)
+		}
+
+		serviceId, err := res.LastInsertId()
+		if err != nil {
+			panic("unable to get service ID")
+		}
+
+		registerTag := `
+        INSERT INTO 
+            Service_Tag (serviceId, tagId)
+        VALUES
+            (
+                ?,
+                (SELECT id FROM Tag WHERE title = ?)
+            )
+    `
+
+		var tagErr error
+		for _, tag := range service.Tags {
+			if _, err := tx.Exec(registerTag, serviceId, tag); err != nil {
+				tagErr = err
+				break
+			}
+		}
+
+		if tagErr != nil {
+			if err := tx.Rollback(); err != nil {
+				panic("failed to rollback on insert tag " + err.Error())
+			}
+
+			panic(err.Error())
+		}
+
+		if err := tx.Commit(); err != nil {
+			if err := tx.Rollback(); err != nil {
+				panic("failed to rollback on commit " + err.Error())
+			}
 		}
 	}
 
