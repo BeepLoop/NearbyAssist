@@ -107,8 +107,6 @@ func main() {
 			panic(err)
 		}
 
-		models.ConstructLocationFromLatLong(&service.GeoSpatialModel)
-
 		res, err := tx.NamedExec(registerService, service)
 		if err != nil {
 			if err := tx.Rollback(); err != nil {
