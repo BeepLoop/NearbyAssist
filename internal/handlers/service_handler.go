@@ -87,11 +87,12 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	}
 
 	if err := h.server.DB.UpdateService(req); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not process update request")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"message": "Update service",
+		"message":   "Service updated",
+		"serviceId": serviceId,
 	})
 }
 

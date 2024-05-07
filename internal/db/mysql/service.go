@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/types"
+	"nearbyassist/internal/utils"
 	"time"
 )
 
@@ -180,23 +181,90 @@ func (m *Mysql) UpdateService(service *request.UpdateService) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	// TODO: Update tags and use transaction
+	tx, err := m.Conn.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
 
-	query := `
+	updateService := `
         UPDATE
             Service
         SET
-            title = :title,
             description = :description,
             rate = :rate,
-            latitude = :latitude
+            latitude = :latitude,
             longitude = :longitude
         WHERE
             id = :id
     `
 
-	_, err := m.Conn.NamedExecContext(ctx, query, service)
+	_, err = tx.NamedExecContext(ctx, updateService, service)
 	if err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	getExistingTags := `
+        SELECT
+            st.id,
+            st.serviceId,
+            t.title AS tag
+        FROM
+            Service_Tag st
+            JOIN Tag t ON t.id = st.tagId
+        WHERE
+            st.serviceId = ?;
+    `
+
+	existingTags := make([]models.ServiceTagModel, 0)
+	if err := tx.SelectContext(ctx, &existingTags, getExistingTags, service.Id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	deleteTag := "DELETE FROM Service_Tag WHERE id = ?"
+	insertTag := "INSERT INTO Service_Tag (serviceId, tagId) VALUES (?, (SELECT id FROM Tag WHERE title = ?))"
+
+	newTags := service.Tags
+
+	for _, tag := range existingTags {
+		exists := utils.StringSliceContains(newTags, tag.Tag)
+		if exists {
+			// Remove item from newTags
+			newTags = utils.RemoveStringFromSlice(newTags, tag.Tag)
+		} else {
+			// Append to tagsToBeDeleted
+			if _, err := tx.ExecContext(ctx, deleteTag, tag.Id); err != nil {
+				if err := tx.Rollback(); err != nil {
+					return err
+				}
+
+				return err
+			}
+		}
+	}
+
+	for _, tag := range newTags {
+		if _, err := tx.ExecContext(ctx, insertTag, service.Id, tag); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
+
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
 		return err
 	}
 
