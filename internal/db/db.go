@@ -35,6 +35,7 @@ type Database interface {
 
 	// Tag Queries
 	FindAllTags() ([]models.TagModel, error)
+	FindAllTagByServiceId(serviceId int) ([]string, error)
 
 	//  Service Queries
 	FindServiceById(id int) (*response.ServiceDetails, error)

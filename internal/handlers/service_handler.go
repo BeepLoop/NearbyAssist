@@ -141,6 +141,12 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	if tags, err := h.server.DB.FindAllTagByServiceId(id); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		service.Tags = tags
+	}
+
 	// Get vendor info
 	vendor, err := h.server.DB.FindVendorByService(service.ServiceId)
 	if err != nil {
