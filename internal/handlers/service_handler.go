@@ -91,6 +91,15 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 		req.Id = id
 	}
 
+	// Validate if the service id  is owned by the requestor
+	if owner, err := h.server.DB.GetServiceOwner(req.Id); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		if owner.Id != req.VendorId {
+			return echo.NewHTTPError(http.StatusForbidden, "you do not own this service")
+		}
+	}
+
 	if err := h.server.DB.UpdateService(req); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

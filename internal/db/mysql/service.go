@@ -293,6 +293,34 @@ func (m *Mysql) DeleteService(id int) error {
 	return nil
 }
 
+func (m *Mysql) GetServiceOwner(id int) (*response.ServiceOwner, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT 
+            s.vendorId AS id,
+            u.name as name
+        FROM 
+            Service s
+        JOIN 
+            User u ON u.id = s.vendorId
+        WHERE
+            s.id = ?
+    `
+
+	owner := &response.ServiceOwner{}
+	if err := m.Conn.GetContext(ctx, owner, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return owner, nil
+}
+
 func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
