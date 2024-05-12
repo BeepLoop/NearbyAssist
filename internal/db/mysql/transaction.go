@@ -41,9 +41,9 @@ func (m *Mysql) CreateTransaction(transaction *request.NewTransaction) (int, err
 
 	query := `
         INSERT INTO
-            Transaction (vendorId, clientId, serviceId)
+            Transaction (vendorId, clientId, serviceId, start, end)
         VALUES
-            (:vendorId, :clientId, :serviceId)
+            (:vendorId, :clientId, :serviceId, :start, :end)
     `
 
 	res, err := m.Conn.NamedExecContext(ctx, query, transaction)

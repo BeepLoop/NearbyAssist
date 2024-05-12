@@ -144,6 +144,8 @@ CREATE TABLE IF NOT EXISTS Transaction (
     clientId INT NOT NULL,
     serviceId INT NOT NULL,
     status Enum('ongoing', 'done', 'cancelled') NOT NULL DEFAULT 'ongoing',
+    start TIMESTAMP NOT NULL,
+    end TIMESTAMP NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
