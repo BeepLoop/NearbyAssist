@@ -51,6 +51,11 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	// Validate that the user is a registered vendor
+	if _, err := h.server.DB.FindVendorById(req.VendorId); err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, "user is not a registered vendor")
+	}
+
 	insertId, err := h.server.DB.RegisterService(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
