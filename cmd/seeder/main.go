@@ -42,6 +42,11 @@ func main() {
 			Email:    "jlmulit68@gmail.com",
 			ImageUrl: "https://i.pravatar.cc/100",
 		},
+		{
+			Name:     "Adrian Juntilla",
+			Email:    "ajuntilla@gmail.com",
+			ImageUrl: "https://i.pravatar.cc/100",
+		},
 	})
 	if err != nil {
 		panic("Error inserting user: " + err.Error())
