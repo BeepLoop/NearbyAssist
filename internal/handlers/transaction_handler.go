@@ -56,6 +56,16 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	// Validate that the vendor entered exists
+	if _, err := h.server.DB.FindVendorById(req.VendorId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "vendor not found")
+	}
+
+	// Validate that the service exists
+	if _, err := h.server.DB.FindServiceById(req.ServiceId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "service not found")
+	}
+
 	transactionId, err := h.server.DB.CreateTransaction(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
