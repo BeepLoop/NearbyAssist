@@ -45,6 +45,13 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
+	authHeader := c.Request().Header.Get("Authorization")
+	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		req.ClientId = userId
+	}
+
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
