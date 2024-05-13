@@ -45,7 +45,7 @@ type Database interface {
 	UpdateService(service *request.UpdateService) error
 	DeleteService(id int) error
 	GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceModel, error)
-	GetServiceOwner(id int) (*response.ServiceOwner, error)
+	FindServiceOwner(id int) (*response.ServiceOwner, error)
 
 	// Complaint Queries
 	CountComplaint() (int, error)

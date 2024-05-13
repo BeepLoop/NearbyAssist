@@ -92,7 +92,7 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	}
 
 	// Validate if the service id  is owned by the requestor
-	if owner, err := h.server.DB.GetServiceOwner(req.Id); err != nil {
+	if owner, err := h.server.DB.FindServiceOwner(req.Id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	} else {
 		if owner.Id != req.VendorId {
@@ -115,6 +115,21 @@ func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 	id, err := strconv.Atoi(serviceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+	}
+
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	// Validate if the service is owned by the requestor
+	if owner, err := h.server.DB.FindServiceOwner(id); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		if owner.Id != userId {
+			return echo.NewHTTPError(http.StatusForbidden, "you do not own this service")
+		}
 	}
 
 	if err := h.server.DB.DeleteService(id); err != nil {

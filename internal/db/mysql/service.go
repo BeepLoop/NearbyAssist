@@ -293,7 +293,7 @@ func (m *Mysql) DeleteService(id int) error {
 	return nil
 }
 
-func (m *Mysql) GetServiceOwner(id int) (*response.ServiceOwner, error) {
+func (m *Mysql) FindServiceOwner(id int) (*response.ServiceOwner, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
