@@ -1,5 +1,10 @@
 package models
 
+type ServiceSearchResult struct {
+	ServiceModel
+	Vendor string `json:"vendor" db:"vendor"`
+}
+
 type ServiceModel struct {
 	Model
 	UpdateableModel

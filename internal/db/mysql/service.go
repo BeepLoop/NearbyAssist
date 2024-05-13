@@ -321,7 +321,7 @@ func (m *Mysql) FindServiceOwner(id int) (*response.ServiceOwner, error) {
 	return owner, nil
 }
 
-func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceModel, error) {
+func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceSearchResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -329,6 +329,7 @@ func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceM
         SELECT 
             s.id,
             s.vendorId,
+            u.name as vendor,
             s.description,
             format(s.rate, 2) as rate,
             s.latitude,
@@ -336,6 +337,7 @@ func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceM
         FROM 
             Service_Tag st
             JOIN Service s ON s.id = st.serviceId
+            JOIN User u ON u.id = s.vendorId
         WHERE
             st.tagId = (SELECT id from Tag WHERE title = ?)
         AND
@@ -345,7 +347,7 @@ func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceM
             ) < ?
     `
 
-	services := make([]*models.ServiceModel, 0)
+	services := make([]*models.ServiceSearchResult, 0)
 	err := m.Conn.SelectContext(ctx, &services, query, params.Query, params.Longitude, params.Latitude, params.Radius)
 	if err != nil {
 		return nil, err
