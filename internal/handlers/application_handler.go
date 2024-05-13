@@ -52,6 +52,10 @@ func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
+	if vendor, _ := h.server.DB.FindVendorById(req.ApplicantId); vendor != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, "applicant is already a vendor")
+	}
+
 	applicationId, err := h.server.DB.CreateApplication(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
