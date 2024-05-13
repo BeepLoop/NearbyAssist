@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -114,5 +115,40 @@ func (h *transactionHandler) HandleHistory(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"history": history,
+	})
+}
+
+func (h *transactionHandler) HandleCompleteTransaction(c echo.Context) error {
+	transactionId := c.Param("transactionId")
+	id, err := strconv.Atoi(transactionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "transaction ID must be a number")
+	}
+
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if transaction, err := h.server.DB.FindTransactionById(id); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "transaction not found")
+	} else {
+		if transaction.ClientId != userId {
+			return echo.NewHTTPError(http.StatusForbidden, "you're not the client of this transaction")
+		}
+
+		if transaction.Status == models.TRANSACTION_STATUS_DONE {
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, "transaction already marked as completed")
+		}
+	}
+
+	if err := h.server.DB.CompleteTransaction(id); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message":       "transaction marked as complete",
+		"transactionId": transactionId,
 	})
 }

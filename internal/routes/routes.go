@@ -84,6 +84,7 @@ func RegisterRoutes(s *server.Server) {
 				handler := handlers.NewTransactionHandler(s)
 				transaction.GET("", handler.HandleBaseRoute)
 				transaction.POST("", handler.HandleNewTransaction)
+				transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
 				// TODO: maybepublic.factor this to be basev1.ute that takes in the following
 				// userId = can be a client or vendor ID
 				// Filter = view transactions as client or vendor

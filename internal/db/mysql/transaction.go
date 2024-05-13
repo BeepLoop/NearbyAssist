@@ -63,6 +63,31 @@ func (m *Mysql) CreateTransaction(transaction *request.NewTransaction) (int, err
 	return int(id), nil
 }
 
+func (m *Mysql) FindTransactionById(id int) (*models.TransactionModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT 
+            *
+        FROM 
+            Transaction 
+        WHERE
+            id = ?
+    `
+
+	transaction := models.NewTransactionModel()
+	if err := m.Conn.GetContext(ctx, transaction, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return transaction, nil
+}
+
 func (m *Mysql) FindAllOngoingTransaction(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -143,4 +168,21 @@ func (m *Mysql) GetTransactionHistory(id int, filter models.TransactionFilter) (
 	}
 
 	return transactions, nil
+}
+
+func (m *Mysql) CompleteTransaction(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "UPDATE Transaction SET status = 'done' WHERE id = ?"
+
+	if _, err := m.Conn.ExecContext(ctx, query, id); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
 }
