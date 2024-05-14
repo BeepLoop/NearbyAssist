@@ -151,8 +151,7 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 	}
 
 	// TODO: rank services by suggestability
-
-	searchResult := make([]response.SearchResult, 0)
+	searchResult := make([]*response.SearchResult, 0)
 	var scoreError error
 	for _, service := range services {
 		score, err := h.server.SuggestionEngine.GenerateSuggestability(service)
@@ -161,7 +160,7 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 			break
 		}
 
-		res := response.SearchResult{
+		res := &response.SearchResult{
 			Id:             service.Id,
 			Suggestability: score,
 			Vendor:         service.Vendor,
@@ -176,8 +175,14 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, scoreError.Error())
 	}
 
+	// sort services by Suggestability
+	sortedResult := utils.BubbleSort(searchResult)
+	for i, svc := range sortedResult {
+		svc.Rank = i + 1
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"services": searchResult,
+		"services": sortedResult,
 	})
 }
 
