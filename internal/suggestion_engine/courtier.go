@@ -12,6 +12,8 @@ func NewCourtier() *Courtier {
 }
 
 func (c *Courtier) GenerateSuggestability(service *models.ServiceSearchResult) (float32, error) {
+	// TODO: Impement suggestability generation
+
 	rng := rand.Float32()
 	return rng, nil
 }
