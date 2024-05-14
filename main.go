@@ -10,6 +10,7 @@ import (
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/storage"
+	"nearbyassist/internal/suggestion_engine"
 	"nearbyassist/internal/websocket"
 )
 
@@ -33,8 +34,11 @@ func main() {
 	// Load Routing Engine configuration
 	engine := routing_engine.NewOSRM(config)
 
+    // Load Suggestion Engine configuration
+    courtier := suggestion_engine.NewCourtier()
+
 	// Create and start the server
-	server := server.NewServer(config, ws, db, store, auth, engine)
+	server := server.NewServer(config, ws, db, store, auth, engine, courtier)
 	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()

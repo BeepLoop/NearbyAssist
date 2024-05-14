@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/storage"
+	"nearbyassist/internal/suggestion_engine"
 	"nearbyassist/internal/utils"
 	"nearbyassist/internal/websocket"
 
@@ -14,24 +15,26 @@ import (
 )
 
 type Server struct {
-	Echo        *echo.Echo
-	Websocket   *websocket.Websocket
-	DB          db.Database
-	Storage     storage.Storage
-	RouteEngine routing_engine.Engine
-	Auth        authenticator.Authenticator
-	Port        string
+	Echo             *echo.Echo
+	Websocket        *websocket.Websocket
+	DB               db.Database
+	Storage          storage.Storage
+	RouteEngine      routing_engine.Engine
+	SuggestionEngine suggestion_engine.Engine
+	Auth             authenticator.Authenticator
+	Port             string
 }
 
-func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage, auth authenticator.Authenticator, engine routing_engine.Engine) *Server {
+func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage, auth authenticator.Authenticator, router routing_engine.Engine, courtier suggestion_engine.Engine) *Server {
 	NewServer := &Server{
-		Echo:        echo.New(),
-		Websocket:   ws,
-		DB:          db,
-		Storage:     storage,
-		RouteEngine: engine,
-		Auth:        auth,
-		Port:        conf.Port,
+		Echo:             echo.New(),
+		Websocket:        ws,
+		DB:               db,
+		Storage:          storage,
+		RouteEngine:      router,
+		SuggestionEngine: courtier,
+		Auth:             auth,
+		Port:             conf.Port,
 	}
 
 	return NewServer

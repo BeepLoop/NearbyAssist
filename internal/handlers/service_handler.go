@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"math/rand"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
@@ -154,16 +153,27 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 	// TODO: rank services by suggestability
 
 	searchResult := make([]response.SearchResult, 0)
+	var scoreError error
 	for _, service := range services {
+		score, err := h.server.SuggestionEngine.GenerateSuggestability(service)
+		if err != nil {
+			scoreError = err
+			break
+		}
+
 		res := response.SearchResult{
 			Id:             service.Id,
-			Suggestability: rand.Float32(),
+			Suggestability: score,
 			Vendor:         service.Vendor,
 			Latitude:       service.Latitude,
 			Longitude:      service.Longitude,
 		}
 
 		searchResult = append(searchResult, res)
+	}
+
+	if scoreError != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, scoreError.Error())
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
