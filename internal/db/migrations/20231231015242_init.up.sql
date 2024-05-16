@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS Transaction (
 
 CREATE TABLE IF NOT EXISTS Application (
     id INT NOT NULL AUTO_INCREMENT,
-    applicantId INT NOT NULL,
+    applicantId INT NOT NULL UNIQUE,
     job Varchar(255) NOT NULL,
     latitude Double NOT NULL,
     longitude Double NOT NULL,
