@@ -5,7 +5,7 @@ all: build
 
 build:
 	@echo "Building..."
-	@go build -o main main.go
+	@go build -o bin/main main.go
 
 # Run the application
 run:
@@ -20,7 +20,7 @@ test:
 # Clean the binary
 clean:
 	@echo "Cleaning..."
-	@rm -f main
+	@rm -rf bin 
 
 # Live Reload
 watch:

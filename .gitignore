@@ -31,3 +31,4 @@ store/*
 
 test_payload/
 test/
+bin/
