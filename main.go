@@ -26,7 +26,7 @@ func main() {
 	db := mysql.NewMysqlDatabase(config)
 
 	// Load authenticator configuration
-	auth := authenticator.NewJWTAuthenticator(config.JwtSecret)
+	auth := authenticator.NewJWTAuthenticator(config)
 
 	// Load websocket configuration
 	ws := websocket.NewWebsocket(db)
@@ -34,8 +34,8 @@ func main() {
 	// Load Routing Engine configuration
 	engine := routing_engine.NewOSRM(config)
 
-    // Load Suggestion Engine configuration
-    courtier := suggestion_engine.NewCourtier()
+	// Load Suggestion Engine configuration
+	courtier := suggestion_engine.NewCourtier()
 
 	// Create and start the server
 	server := server.NewServer(config, ws, db, store, auth, engine, courtier)

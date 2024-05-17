@@ -2,6 +2,7 @@ package authenticator
 
 import (
 	"errors"
+	"nearbyassist/internal/config"
 	"nearbyassist/internal/models"
 	"time"
 
@@ -15,11 +16,11 @@ type jwtAuthenticator struct {
 	tokenDuration time.Duration
 }
 
-func NewJWTAuthenticator(secret string) *jwtAuthenticator {
+func NewJWTAuthenticator(conf *config.Config) *jwtAuthenticator {
 	return &jwtAuthenticator{
-		secret:        secret,
+		secret:        conf.JwtSecret,
 		signMethod:    jwt.SigningMethodHS512,
-		tokenDuration: time.Second * 60,
+		tokenDuration: time.Second * time.Duration(conf.JwtDuration),
 	}
 }
 func (j *jwtAuthenticator) GenerateAdminAccessToken(admin *models.AdminModel) (string, error) {
