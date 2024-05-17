@@ -52,3 +52,7 @@ seed db
 ```bash
 make seed
 ```
+## Compile with docker
+```bash
+docker compose --file compiler-docker-compose.yml up --build
+```

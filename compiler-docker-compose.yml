@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  build:
+    build:
+      context: .
+      dockerfile: compiler.Dockerfile
+    volumes:
+      - ./bin:/app/bin
+    command: sh -c "cp /app/nearbyassist /app/bin/"
+
+volumes:
+  bin:
