@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN GOOS=widows GOARCH=amd64 go build -o nearbyassist.exe .
+RUN GOOS=windows GOARCH=amd64 go build -o nearbyassist.exe .
 
 # List files for debugging
 RUN ls -la /app

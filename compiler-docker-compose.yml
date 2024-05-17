@@ -8,7 +8,7 @@ services:
     container_name: nearbyassist-compiler
     volumes:
       - ./bin:/app/bin
-    command: sh -c "cp /app/nearbyassist /app/bin/"
+    command: sh -c "cp /app/nearbyassist.exe /app/bin/"
 
 volumes:
   bin:
