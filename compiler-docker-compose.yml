@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: compiler.Dockerfile
+    container_name: nearbyassist-compiler
     volumes:
       - ./bin:/app/bin
     command: sh -c "cp /app/nearbyassist /app/bin/"
