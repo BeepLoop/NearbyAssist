@@ -12,7 +12,7 @@ func (s *Server) registerMiddleware() {
 	s.Echo.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 
 	s.Echo.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"127.0.0.1:5173", "localhost:5173"},
+		AllowOrigins: s.AllowedOrigins,
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 	}))
 

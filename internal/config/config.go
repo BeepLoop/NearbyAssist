@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -21,6 +22,7 @@ type Config struct {
 	DB_Host                  string
 	DB_Port                  string
 	Port                     string
+	AllowedOrigins           []string
 	JwtSecret                string
 	JwtDuration              int
 	StorageType              StorageType
@@ -45,6 +47,7 @@ func LoadConfig() *Config {
 		DB_Host:                  os.Getenv("DB_HOST"),
 		DB_Port:                  os.Getenv("DB_PORT"),
 		Port:                     os.Getenv("PORT"),
+		AllowedOrigins:           strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","),
 		JwtSecret:                os.Getenv("JWT_SECRET"),
 		JwtDuration:              duration,
 		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),

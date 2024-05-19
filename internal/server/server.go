@@ -23,6 +23,7 @@ type Server struct {
 	SuggestionEngine suggestion_engine.Engine
 	Auth             authenticator.Authenticator
 	Port             string
+	AllowedOrigins   []string
 }
 
 func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage, auth authenticator.Authenticator, router routing_engine.Engine, courtier suggestion_engine.Engine) *Server {
@@ -35,6 +36,7 @@ func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, sto
 		SuggestionEngine: courtier,
 		Auth:             auth,
 		Port:             conf.Port,
+		AllowedOrigins:   conf.AllowedOrigins,
 	}
 
 	return NewServer
