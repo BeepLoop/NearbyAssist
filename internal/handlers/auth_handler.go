@@ -38,12 +38,12 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 	// TODO: Handle validating credentials
 	admin, err := h.server.DB.FindAdminByUsername(req.Username)
 	if admin == nil || err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Account not found")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 	}
 
 	// TODO: Implement better password validation with encryption
 	if req.Password != admin.Password {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid credentials")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 	}
 
 	accessToken, err := h.server.Auth.GenerateAdminAccessToken(admin)
