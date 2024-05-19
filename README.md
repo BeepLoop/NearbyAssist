@@ -6,7 +6,12 @@ One Paragraph of project description goes here
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-## MakeFile
+## How to use
+
+### Note
+In order to build the project you'll need (Go)[https://go.dev/doc/install] to be installed in your machine
+
+### Compile with Make
 
 run all make commands with clean tests
 ```bash
@@ -38,21 +43,7 @@ clean up binary from the last build
 make clean
 ```
 
-run migration file up
-```bash
-make migrate-up
-```
-
-run migration file down
-```bash
-make migrate-down
-```
-
-seed db
-```bash
-make seed
-```
-## Compile with docker
+### Compile with docker
 ```bash
 docker compose --file compiler-docker-compose.yml up --build
 ```
