@@ -1,11 +1,13 @@
 package models
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"github.com/golang-jwt/jwt/v5"
+)
 
 type AdminJwtClaims struct {
-	AdminId  int    `json:"adminId"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	AdminId  int       `json:"adminId"`
+	Username string    `json:"username"`
+	Role     AdminRole `json:"role"`
 	jwt.RegisteredClaims
 }
 

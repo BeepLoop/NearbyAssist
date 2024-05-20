@@ -27,7 +27,7 @@ func (j *jwtAuthenticator) GenerateAdminAccessToken(admin *models.AdminModel) (s
 	claims := &models.AdminJwtClaims{
 		AdminId:  admin.Id,
 		Username: admin.Username,
-		Role:     admin.Role,
+		Role:     models.AdminRole(admin.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.tokenDuration)),
 		},

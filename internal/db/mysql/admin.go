@@ -29,3 +29,26 @@ func (m *Mysql) NewAdmin(admin *models.AdminModel) (int, error) {
 
 	return 0, nil
 }
+
+func (m *Mysql) NewStaff(staff *models.AdminModel) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "INSERT INTO Admin (username, password) VALUES (:username, :password)"
+
+	res, err := m.Conn.NamedExecContext(ctx, query, staff)
+	if err != nil {
+		return 0, err
+	}
+
+	insertId, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return int(insertId), nil
+}

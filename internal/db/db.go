@@ -19,6 +19,7 @@ type Database interface {
 	// Admin Queries
 	FindAdminByUsername(username string) (*models.AdminModel, error)
 	NewAdmin(admin *models.AdminModel) (int, error)
+	NewStaff(staff *models.AdminModel) (int, error)
 
 	// User Queries
 	CountUser() (int, error)
