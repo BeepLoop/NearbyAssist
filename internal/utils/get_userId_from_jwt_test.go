@@ -2,6 +2,7 @@ package utils
 
 import (
 	"nearbyassist/internal/authenticator"
+	"nearbyassist/internal/config"
 	"nearbyassist/internal/models"
 	"testing"
 )
@@ -30,8 +31,10 @@ func TestGetUserIdFromJWT(t *testing.T) {
 		},
 	}
 
+	conf := config.LoadConfig()
+
 	for _, test := range tests {
-		jwtSigner := authenticator.NewJWTAuthenticator("secret")
+		jwtSigner := authenticator.NewJWTAuthenticator(conf)
 
 		token, err := jwtSigner.GenerateUserAccessToken(test.user)
 		if err != nil {
