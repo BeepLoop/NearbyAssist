@@ -50,6 +50,7 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 		handler := handlers.NewTransactionHandler(s)
 
 		transaction.GET("/count", handler.HandleCount)
+		transaction.GET("/:transactionId", handler.HandleGetTransaction)
 	}
 
 	complaint := r.Group("/complaints")

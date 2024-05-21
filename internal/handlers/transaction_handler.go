@@ -27,6 +27,23 @@ func (h *transactionHandler) HandleBaseRoute(c echo.Context) error {
 	})
 }
 
+func (h *transactionHandler) HandleGetTransaction(c echo.Context) error {
+	transactionId := c.Param("transactionId")
+	id, err := strconv.Atoi(transactionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "transaction ID must be a number")
+	}
+
+	transaction, err := h.server.DB.FindTransactionById(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"transaction": transaction,
+	})
+}
+
 func (h *transactionHandler) HandleCount(c echo.Context) error {
 	status := models.TransactionStatus(c.QueryParam("status"))
 
@@ -56,6 +73,8 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
+	// TODO: Validate that the date is valid
 
 	// Validate that the vendor entered exists
 	if _, err := h.server.DB.FindVendorById(req.VendorId); err != nil {
