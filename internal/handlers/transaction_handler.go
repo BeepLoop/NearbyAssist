@@ -75,15 +75,22 @@ func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
 	}
 
 	// TODO: Validate that the date is valid
+	if err := utils.ValidateDateRange(req.Start, req.End); err != nil {
+		if err.Error() == utils.DATE_PARSE_ERROR {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
 	// Validate that the vendor entered exists
 	if _, err := h.server.DB.FindVendorById(req.VendorId); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "vendor not found")
+		return echo.NewHTTPError(http.StatusBadRequest, "Vendor not found")
 	}
 
 	// Validate that the service exists
 	if _, err := h.server.DB.FindServiceById(req.ServiceId); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "service not found")
+		return echo.NewHTTPError(http.StatusBadRequest, "Service not found")
 	}
 
 	transactionId, err := h.server.DB.CreateTransaction(req)
