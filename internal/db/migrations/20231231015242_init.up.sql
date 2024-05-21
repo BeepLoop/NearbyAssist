@@ -146,6 +146,7 @@ CREATE TABLE IF NOT EXISTS Transaction (
     status Enum('ongoing', 'done', 'cancelled') NOT NULL DEFAULT 'ongoing',
     start TIMESTAMP NOT NULL,
     end TIMESTAMP NOT NULL,
+    isReviewed TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: not reviewed, 1: reviewed',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
