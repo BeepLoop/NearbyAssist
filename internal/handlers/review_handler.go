@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
@@ -34,6 +35,32 @@ func (h *reviewHandler) HandleNewReview(c echo.Context) error {
 
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Validate that transaction ID exists
+	transaction, err := h.server.DB.FindTransactionById(req.TransactionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	// Validate that the transaction is marked as done
+	if transaction.Status != models.TRANSACTION_STATUS_DONE {
+		return echo.NewHTTPError(http.StatusForbidden, "Transaction is not yet completed")
+	}
+
+	// Validate that user has not posted a review yet
+	if transaction.IsReviewed != false {
+		return echo.NewHTTPError(http.StatusForbidden, "Transaction has already been reviewed")
+	}
+
+	// Validate that user is the client of the given transaction
+	authHeader := c.Request().Header.Get("Authorization")
+	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		if transaction.ClientId != userId {
+			return echo.NewHTTPError(http.StatusForbidden, "You are not allowed to post a review for this transaction")
+		}
 	}
 
 	reviewId, err := h.server.DB.CreateReview(req)

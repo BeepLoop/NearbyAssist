@@ -11,28 +11,62 @@ func (m *Mysql) CreateReview(review *request.NewReview) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := `
+	tx, err := m.Conn.BeginTxx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	insertReview := `
         INSERT INTO
             Review (serviceId, rating)
         VALUES
             (:serviceId, :rating)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, review)
+	res, err := tx.NamedExecContext(ctx, insertReview, review)
 	if err != nil {
-		return -1, err
+		if err := tx.Rollback(); err != nil {
+			return 0, err
+		}
+
+		return 0, err
 	}
 
-	id, err := res.LastInsertId()
+	insertId, err := res.LastInsertId()
 	if err != nil {
-		return -1, err
+		return 0, err
+	}
+
+	updateReviewedFlag := `
+        UPDATE 
+            Transaction 
+        SET 
+            isReviewed = 1
+        WHERE
+            id = ?
+    `
+	_, err = tx.ExecContext(ctx, updateReviewedFlag, review.TransactionId)
+	if err != nil {
+		if err := tx.Rollback(); err != nil {
+			return 0, err
+		}
+
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return 0, err
+		}
+
+		return 0, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return 0, context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return int(insertId), nil
 }
 
 func (m *Mysql) FindReviewById(id int) (*models.ReviewModel, error) {
