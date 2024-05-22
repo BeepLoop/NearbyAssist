@@ -9,7 +9,7 @@ RUN go mod download
 
 RUN go build -o /nearbyassist
 
-FROM gcr.io/distroless/static-debian12 as release-stage
+FROM gcr.io/distroless/base-debian12 as release-stage
 
 WORKDIR /
 
