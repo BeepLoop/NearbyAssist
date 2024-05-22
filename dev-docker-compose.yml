@@ -13,6 +13,8 @@ services:
       - "3307:3306"
     volumes:
       - "./internal/db/migrations/20231231015242_init.up.sql:/docker-entrypoint-initdb.d/init.sql"
+    networks:
+      - nearbyassist-dev
 
   server:
     build:
@@ -20,8 +22,6 @@ services:
       dockerfile: ./Dockerfile
     container_name: nearbyassist-dev-server
     restart: on-failure
-    expose:
-      - "3000"
     ports:
       - "3000:3000"
     depends_on:
@@ -29,3 +29,8 @@ services:
         condition: service_started
     env_file:
       - ./.env
+    networks:
+      - nearbyassist-dev
+
+networks:
+  nearbyassist-dev:

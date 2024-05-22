@@ -50,7 +50,12 @@ docker compose --file compiler-docker-compose.yml up --build
 
 ### Run dev server with docker
 ```bash
-docker compose -f dev-docker-compose.yml up --build
+docker compose -f dev-docker-compose.yml up
+```
+
+to remove all containers for dev server
+```bash
+docker compose -f dev-docker-compose down
 ```
 
 ### Run dev server without docker 
