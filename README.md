@@ -47,3 +47,21 @@ make clean
 ```bash
 docker compose --file compiler-docker-compose.yml up --build
 ```
+
+### Run dev server with docker
+```bash
+docker compose -f dev-docker-compose.yml up --build
+```
+
+### Run dev server without docker 
+1. Run mysql db
+```bash 
+docker compose up
+```
+
+2. Run server
+- In windows, either run the server executable in terminal or double click the executable
+
+3. Seed the db
+- Run the [seeder](https://github.com/BeepLoop/NearbyAssist_seeder/releases/tag/v1.0)
+
