@@ -18,6 +18,8 @@ func (s *Server) registerMiddleware() {
 			echo.HeaderOrigin,
 			echo.HeaderContentType,
 			echo.HeaderAccept,
+			echo.HeaderAccessControlAllowOrigin,
+			echo.HeaderAuthorization,
 		},
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
 	}))
