@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type adminHandler struct {
@@ -35,6 +36,12 @@ func (h *adminHandler) HandleRegisterStaff(c echo.Context) error {
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to hash password")
+	}
+	req.Password = string(hash)
 
 	staffId, err := h.server.DB.NewStaff(req)
 	if err != nil {
