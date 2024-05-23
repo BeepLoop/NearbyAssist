@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type authHandler struct {
@@ -35,14 +36,12 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	// TODO: Handle validating credentials
 	admin, err := h.server.DB.FindAdminByUsername(req.Username)
 	if admin == nil || err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 	}
 
-	// TODO: Implement better password validation with encryption
-	if req.Password != admin.Password {
+	if err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(req.Password)); err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 	}
 
@@ -56,7 +55,6 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// TODO: Implement session management for admin
 	session := models.NewSessionModel(refreshToken)
 	if _, err := h.server.DB.NewSession(session); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
