@@ -1,6 +1,8 @@
 package encryption
 
 type Encryption interface {
-	Encrypt(text string) (string, error)
-	Decrypt(text string) (string, error)
+	EncryptString(text string) (string, error)
+	DecryptString(text string) (string, error)
+    EncryptFile(source []byte) ([]byte, error)
+    DecryptFile(source []byte) ([]byte, error)
 }
