@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
+	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/storage"
 	"nearbyassist/internal/suggestion_engine"
@@ -21,12 +22,13 @@ type Server struct {
 	Storage          storage.Storage
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
+	Encrypt          encryption.Encryption
 	Auth             authenticator.Authenticator
 	Port             string
 	AllowedOrigins   []string
 }
 
-func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage, auth authenticator.Authenticator, router routing_engine.Engine, courtier suggestion_engine.Engine) *Server {
+func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage, auth authenticator.Authenticator, router routing_engine.Engine, courtier suggestion_engine.Engine, crypto encryption.Encryption) *Server {
 	NewServer := &Server{
 		Echo:             echo.New(),
 		Websocket:        ws,
@@ -34,6 +36,7 @@ func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, sto
 		Storage:          storage,
 		RouteEngine:      router,
 		SuggestionEngine: courtier,
+		Encrypt:          crypto,
 		Auth:             auth,
 		Port:             conf.Port,
 		AllowedOrigins:   conf.AllowedOrigins,

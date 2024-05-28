@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db/mysql"
+	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/routes"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/server"
@@ -37,8 +38,11 @@ func main() {
 	// Load Suggestion Engine configuration
 	courtier := suggestion_engine.NewCourtier()
 
+	// Load encryption configuration
+	crypto := encryption.NewAes(config)
+
 	// Create and start the server
-	server := server.NewServer(config, ws, db, store, auth, engine, courtier)
+	server := server.NewServer(config, ws, db, store, auth, engine, courtier, crypto)
 	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()

@@ -25,6 +25,7 @@ type Config struct {
 	AllowedOrigins           []string
 	JwtSecret                string
 	JwtDuration              int
+	EncryptionKey            string
 	StorageType              StorageType
 	ApplicationProofLocation string
 	ServicePhotoLocation     string
@@ -50,6 +51,7 @@ func LoadConfig() *Config {
 		AllowedOrigins:           strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","),
 		JwtSecret:                os.Getenv("JWT_SECRET"),
 		JwtDuration:              duration,
+		EncryptionKey:            os.Getenv("ENCRYPTION_KEY"),
 		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),
 		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
 		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),
