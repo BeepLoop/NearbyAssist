@@ -1,6 +1,7 @@
 package filehandler
 
 import (
+	"errors"
 	"mime/multipart"
 
 	"github.com/labstack/echo/v4"
@@ -12,10 +13,13 @@ func FormParser(c echo.Context) ([]*multipart.FileHeader, error) {
 		return nil, err
 	}
 
-	files := form.File["files"]
-	if len(files) == 0 {
-		return nil, err
-	}
+	if files, ok := form.File["files"]; !ok {
+		return nil, errors.New("No files found in the form")
+	} else {
+		if len(files) == 0 {
+			return nil, err
+		}
 
-	return files, nil
+		return files, nil
+	}
 }
