@@ -8,6 +8,7 @@ import (
 )
 
 func FormParser(c echo.Context) ([]*multipart.FileHeader, error) {
+	// BUG: hangs when submitted an empty multipart form
 	form, err := c.MultipartForm()
 	if err != nil {
 		return nil, err
