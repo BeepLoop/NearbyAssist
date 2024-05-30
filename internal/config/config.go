@@ -9,10 +9,14 @@ import (
 )
 
 type StorageType string
+type DatabaseType string
 
 const (
 	STORAGE_DISK  StorageType = "disk"
 	STORAGE_DUMMY StorageType = "dummy"
+
+	DATABASE_MYSQL DatabaseType = "mysql"
+	DATABASE_DUMMY DatabaseType = "dummy"
 )
 
 type Config struct {
@@ -27,6 +31,7 @@ type Config struct {
 	JwtDuration              int
 	EncryptionKey            string
 	StorageType              StorageType
+    DatabaseType             DatabaseType
 	ApplicationProofLocation string
 	ServicePhotoLocation     string
 	RouteEngineUrl           string
@@ -53,6 +58,7 @@ func LoadConfig() *Config {
 		JwtDuration:              duration,
 		EncryptionKey:            os.Getenv("ENCRYPTION_KEY"),
 		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),
+        DatabaseType:             DatabaseType(os.Getenv("DATABASE_TYPE")),
 		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
 		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),
 		RouteEngineUrl:           os.Getenv("ROUTE_ENGINE_URL"),

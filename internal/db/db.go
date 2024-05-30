@@ -1,6 +1,8 @@
 package db
 
 import (
+	"nearbyassist/internal/config"
+	"nearbyassist/internal/db/mysql"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
@@ -12,7 +14,7 @@ type Database interface {
 	FindSessionByToken(token string) (*models.SessionModel, error)
 	FindActiveSessionByToken(token string) (*models.SessionModel, error)
 	NewSession(session *models.SessionModel) (int, error)
-	LogoutSession(sesionId int) error
+	LogoutSession(sessionId int) error
 	BlacklistToken(token string) error
 	FindBlacklistedToken(token string) (*models.BlacklistModel, error)
 
@@ -84,4 +86,18 @@ type Database interface {
 
 	// Application Proof Queries
 	NewApplicationProof(data *models.ApplicationProofModel) (int, error)
+}
+
+func NewDatabase(conf *config.Config) Database {
+	switch conf.DatabaseType {
+
+	case config.DATABASE_MYSQL:
+		return mysql.NewMysqlDatabase(conf)
+
+	case config.DATABASE_DUMMY:
+		return NewDummyDatabase()
+
+	default:
+		panic("Invalid environment. Cannot initialize storage.")
+	}
 }

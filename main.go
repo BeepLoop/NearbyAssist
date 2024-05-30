@@ -5,7 +5,7 @@ import (
 
 	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/db/mysql"
+	"nearbyassist/internal/db"
 	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/routes"
 	"nearbyassist/internal/routing_engine"
@@ -24,7 +24,7 @@ func main() {
 	store.Initialize()
 
 	// Load database configuration
-	db := mysql.NewMysqlDatabase(config)
+	db := db.NewDatabase(config)
 
 	// Load authenticator configuration
 	auth := authenticator.NewJWTAuthenticator(config)
