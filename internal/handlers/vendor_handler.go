@@ -69,7 +69,7 @@ func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"restricedId": id,
+		"restrictedId": id,
 	})
 }
 
