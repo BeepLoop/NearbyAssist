@@ -91,7 +91,7 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 		req.Id = id
 	}
 
-	// Validate if the service id  is owned by the requestor
+	// Validate if the service id  is owned by the requester
 	if owner, err := h.server.DB.FindServiceOwner(req.Id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	} else {
@@ -123,7 +123,7 @@ func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// Validate if the service is owned by the requestor
+	// Validate if the service is owned by the requester
 	if owner, err := h.server.DB.FindServiceOwner(id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	} else {
@@ -281,9 +281,9 @@ func (h *serviceHandler) HandleFindRoute(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid origin coordinates")
 	}
 
-	distination := models.NewLocationWithData(service.Latitude, service.Longitude)
+	destination := models.NewLocationWithData(service.Latitude, service.Longitude)
 
-	polyline, err := h.server.RouteEngine.FindRoute(origin, distination)
+	polyline, err := h.server.RouteEngine.FindRoute(origin, destination)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not find routes at the moment")
 	}
