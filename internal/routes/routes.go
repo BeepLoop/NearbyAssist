@@ -127,4 +127,15 @@ func RegisterRoutes(s *server.Server) {
 			}
 		}
 	}
+
+	// websocket route
+	// NOTE: this route is separated because it is not possible to pass
+	// headers to connection request, thus unable to authenticate the user.
+    // Instead, access token is passed as a query parameter
+	ws := s.Echo.Group("/chat")
+	{
+		handler := handlers.NewChatHandler(s)
+
+		ws.GET("/ws", handler.HandleWebsocket)
+	}
 }

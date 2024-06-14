@@ -53,10 +53,13 @@ func (h *chatHandler) HandleGetMessages(c echo.Context) error {
 
 func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	conn, err := h.server.Websocket.Upgrade(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	defer conn.Close()
 
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	token := c.QueryParam("token")
+	userId, err := utils.GetUserIdFromJWTString(h.server.Auth, token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
