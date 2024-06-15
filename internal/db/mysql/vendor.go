@@ -58,7 +58,7 @@ func (m *Mysql) FindVendorByService(id int) (*response.ServiceVendorDetails, err
 
 	query := `
         SELECT
-            v.id as vendorId,
+            v.vendorId,
             v.rating,
             v.job,
             u.name as vendor,
