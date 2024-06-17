@@ -37,7 +37,7 @@ func (m *Mysql) FindVendorById(id int) (*models.VendorModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, vendorId, rating, job, restricted FROM Vendor WHERE id = ?"
+	query := "SELECT id, vendorId, rating, job, restricted FROM Vendor WHERE vendorId = ?"
 
 	vendor := models.NewVendorModel()
 	err := m.Conn.GetContext(ctx, vendor, query, id)
