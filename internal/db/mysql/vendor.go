@@ -65,7 +65,7 @@ func (m *Mysql) FindVendorByService(id int) (*response.ServiceVendorDetails, err
             u.imageUrl as imageUrl
         FROM
             Vendor v
-            JOIN Service s ON s.vendorId = v.id
+            JOIN Service s ON s.vendorId = v.vendorId
             JOIN User u ON u.id = v.vendorId
         WHERE 
             s.id = ?
