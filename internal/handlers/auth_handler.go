@@ -61,6 +61,7 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
+		"role":         admin.Role,
 		"adminId":      admin.Id,
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
