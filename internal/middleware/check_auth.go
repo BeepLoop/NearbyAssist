@@ -16,7 +16,7 @@ func CheckAuth(jwtChecker authenticator.Authenticator) echo.MiddlewareFunc {
 
 			err := jwtChecker.ValidateToken(token)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+				return echo.NewHTTPError(http.StatusUnauthorized, "Token has expired")
 			}
 
 			return next(c)
