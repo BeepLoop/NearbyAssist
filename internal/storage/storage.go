@@ -9,6 +9,7 @@ type Storage interface {
 	Initialize() error
 	SaveServicePhoto(uuid string, file *multipart.FileHeader) (string, error)
 	SaveApplicationProof(uuid string, file *multipart.FileHeader) (string, error)
+	SaveSystemComplaint(uuid string, file *multipart.FileHeader) (string, error)
 }
 
 func NewStorage(conf *config.Config) Storage {

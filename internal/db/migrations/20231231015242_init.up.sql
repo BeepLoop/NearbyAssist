@@ -114,10 +114,9 @@ CREATE TABLE IF NOT EXISTS ServicePhoto (
     INDEX(id, serviceId, vendorId)
 );
 
-CREATE TABLE IF NOT EXISTS Complaint (
+CREATE TABLE IF NOT EXISTS VendorComplaint (
     id Int NOT NULL AUTO_INCREMENT,
     vendorId Int NOT NULL,
-    code Int NOT NULL,
     title Varchar(255) NOT NULL,
     content Text NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -125,6 +124,27 @@ CREATE TABLE IF NOT EXISTS Complaint (
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES Vendor(id) ON DELETE CASCADE,
     INDEX(id, vendorId)
+);
+
+create table if not exists SystemComplaint (
+    id Int NOT NULL AUTO_INCREMENT,
+    title Varchar(255) NOT NULL,
+    detail Text NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    INDEX(id, title)
+);
+
+create table if not exists SystemComplaintImage (
+    id Int NOT NULL AUTO_INCREMENT,
+    complaintId Int NOT NULL,
+    url Varchar(255) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(complaintId) REFERENCES SystemComplaint(id),
+    INDEX(id, complaintId)
 );
 
 CREATE TABLE IF NOT EXISTS Review (

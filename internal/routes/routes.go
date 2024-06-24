@@ -75,8 +75,10 @@ func RegisterRoutes(s *server.Server) {
 			complaint := public.Group("/complaints")
 			{
 				handler := handlers.NewComplaintServer(s)
-				complaint.GET("", handler.HandleBaseRoute)
-				complaint.POST("", handler.HandleNewComplaint)
+				// complaint.GET("", handler.HandleBaseRoute)
+				// complaint.POST("", handler.HandleNewComplaint)
+				complaint.POST("/system", handler.HandleSystemComplaint)
+				complaint.POST("/vendor", handler.HandleVendorComplaint)
 			}
 
 			transaction := public.Group("/transactions")
@@ -131,7 +133,7 @@ func RegisterRoutes(s *server.Server) {
 	// websocket route
 	// NOTE: this route is separated because it is not possible to pass
 	// headers to connection request, thus unable to authenticate the user.
-    // Instead, access token is passed as a query parameter
+	// Instead, access token is passed as a query parameter
 	ws := s.Echo.Group("/chat")
 	{
 		handler := handlers.NewChatHandler(s)

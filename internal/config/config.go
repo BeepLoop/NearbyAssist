@@ -31,9 +31,10 @@ type Config struct {
 	JwtDuration              int
 	EncryptionKey            string
 	StorageType              StorageType
-    DatabaseType             DatabaseType
+	DatabaseType             DatabaseType
 	ApplicationProofLocation string
 	ServicePhotoLocation     string
+	SystemComplaintLocation  string
 	RouteEngineUrl           string
 }
 
@@ -58,9 +59,10 @@ func LoadConfig() *Config {
 		JwtDuration:              duration,
 		EncryptionKey:            os.Getenv("ENCRYPTION_KEY"),
 		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),
-        DatabaseType:             DatabaseType(os.Getenv("DATABASE_TYPE")),
+		DatabaseType:             DatabaseType(os.Getenv("DATABASE_TYPE")),
 		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
 		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),
+		SystemComplaintLocation:  os.Getenv("SYSTEM_COMPLAINT_LOCATION"),
 		RouteEngineUrl:           os.Getenv("ROUTE_ENGINE_URL"),
 	}
 }

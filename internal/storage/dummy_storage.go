@@ -23,3 +23,7 @@ func (s *DummyStorage) SaveServicePhoto(uuid string, file *multipart.FileHeader)
 func (s *DummyStorage) SaveApplicationProof(uuid string, file *multipart.FileHeader) (string, error) {
 	return "", nil
 }
+
+func (s *DummyStorage) SaveSystemComplaint(uuid string, file *multipart.FileHeader) (string, error) {
+	return "", nil
+}

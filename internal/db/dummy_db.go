@@ -129,7 +129,15 @@ func (d *DummyDatabase) CountComplaint() (int, error) {
 	return 0, nil
 }
 
-func (d *DummyDatabase) FileComplaint(complaint *request.NewComplaint) (int, error) {
+func (d *DummyDatabase) FileVendorComplaint(complaint *request.NewComplaint) (int, error) {
+	return 0, nil
+}
+
+func (d *DummyDatabase) FileSystemComplaint(complaint *request.SystemComplaint) (int, error) {
+	return 0, nil
+}
+
+func (d *DummyDatabase) NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error) {
 	return 0, nil
 }
 

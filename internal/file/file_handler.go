@@ -38,3 +38,15 @@ func (f *FileHandler) SaveApplicationProof(file *multipart.FileHeader) (string, 
 
 	return filename, nil
 }
+
+func (f *FileHandler) SavePhoto(file *multipart.FileHeader, saveFunc func(string, *multipart.FileHeader) (string, error)) (string, error) {
+	// TODO: implement file encryption
+	uuid := uuid.New().String()
+
+	filename, err := saveFunc(uuid, file)
+	if err != nil {
+		return "", err
+	}
+
+	return filename, nil
+}
