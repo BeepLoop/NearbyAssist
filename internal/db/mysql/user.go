@@ -11,7 +11,7 @@ func (m *Mysql) NewUser(user *request.UserLogin) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO User (name, email, imageUrl) VALUES (:name, :email, :imageUrl)"
+	query := "INSERT INTO User (name, email, imageUrl) VALUES (:name, :email, :image)"
 
 	res, err := m.Conn.NamedExecContext(ctx, query, user)
 	if err != nil {
