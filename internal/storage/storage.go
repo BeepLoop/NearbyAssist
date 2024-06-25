@@ -1,15 +1,14 @@
 package storage
 
 import (
-	"mime/multipart"
 	"nearbyassist/internal/config"
 )
 
 type Storage interface {
 	Initialize() error
-	SaveServicePhoto(uuid string, file *multipart.FileHeader) (string, error)
-	SaveApplicationProof(uuid string, file *multipart.FileHeader) (string, error)
-	SaveSystemComplaint(uuid string, file *multipart.FileHeader) (string, error)
+	SaveServicePhoto(file []byte, filename string) (string, error)
+	SaveApplicationProof(file []byte, filename string) (string, error)
+	SaveSystemComplaint(file []byte, filename string) (string, error)
 }
 
 func NewStorage(conf *config.Config) Storage {

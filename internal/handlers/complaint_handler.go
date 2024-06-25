@@ -80,7 +80,7 @@ func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
 
 	supportingImages := make([]string, 0)
 	for _, file := range files {
-		handler := filehandler.NewFileHandler(h.server.Storage)
+		handler := filehandler.NewFileHandler(h.server.Encrypt)
 		filename, err := handler.SavePhoto(file, h.server.Storage.SaveSystemComplaint)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

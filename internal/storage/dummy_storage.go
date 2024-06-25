@@ -2,7 +2,6 @@ package storage
 
 import (
 	"log"
-	"mime/multipart"
 )
 
 type DummyStorage struct{}
@@ -16,14 +15,14 @@ func (s *DummyStorage) Initialize() error {
 	return nil
 }
 
-func (s *DummyStorage) SaveServicePhoto(uuid string, file *multipart.FileHeader) (string, error) {
+func (s *DummyStorage) SaveServicePhoto(file []byte, filename string) (string, error) {
 	return "", nil
 }
 
-func (s *DummyStorage) SaveApplicationProof(uuid string, file *multipart.FileHeader) (string, error) {
+func (s *DummyStorage) SaveApplicationProof(file []byte, filename string) (string, error) {
 	return "", nil
 }
 
-func (s *DummyStorage) SaveSystemComplaint(uuid string, file *multipart.FileHeader) (string, error) {
+func (s *DummyStorage) SaveSystemComplaint(file []byte, filename string) (string, error) {
 	return "", nil
 }

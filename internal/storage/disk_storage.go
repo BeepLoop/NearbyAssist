@@ -2,13 +2,9 @@ package storage
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"mime/multipart"
 	"nearbyassist/internal/config"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -44,30 +40,22 @@ func (s *DiskStorage) Initialize() error {
 	return nil
 }
 
-func (s *DiskStorage) SaveServicePhoto(uuid string, file *multipart.FileHeader) (string, error) {
+func (s *DiskStorage) SaveFile(path string, file []byte) error {
+	if err := os.WriteFile(path, file, 0777); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *DiskStorage) SaveServicePhoto(file []byte, filename string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	src, err := file.Open()
-	if err != nil {
-		return "", err
-	}
-	defer src.Close()
-
-	mimeType := strings.Split(file.Header["Content-Type"][0], "/")[1]
-	filename := fmt.Sprintf("%s.%s", uuid, mimeType)
 
 	storageDir := s.SystemComplaintLocation
 	path := filepath.Join(storageDir, filename)
 
-	dist, err := os.Create(path)
-	if err != nil {
-		return "", err
-	}
-	defer dist.Close()
-
-	_, err = io.Copy(dist, src)
-	if err != nil {
+	if err := s.SaveFile(path, file); err != nil {
 		return "", err
 	}
 
@@ -78,30 +66,14 @@ func (s *DiskStorage) SaveServicePhoto(uuid string, file *multipart.FileHeader) 
 	return filename, nil
 }
 
-func (s *DiskStorage) SaveApplicationProof(uuid string, file *multipart.FileHeader) (string, error) {
+func (s *DiskStorage) SaveApplicationProof(file []byte, filename string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	src, err := file.Open()
-	if err != nil {
-		return "", err
-	}
-	defer src.Close()
-
-	mimeType := strings.Split(file.Header["Content-Type"][0], "/")[1]
-	filename := fmt.Sprintf("%s.%s", uuid, mimeType)
 
 	storageDir := s.ApplicationProofLocation
 	path := filepath.Join(storageDir, filename)
 
-	dist, err := os.Create(path)
-	if err != nil {
-		return "", err
-	}
-	defer dist.Close()
-
-	_, err = io.Copy(dist, src)
-	if err != nil {
+	if err := s.SaveFile(path, file); err != nil {
 		return "", err
 	}
 
@@ -112,30 +84,14 @@ func (s *DiskStorage) SaveApplicationProof(uuid string, file *multipart.FileHead
 	return filename, nil
 }
 
-func (s *DiskStorage) SaveSystemComplaint(uuid string, file *multipart.FileHeader) (string, error) {
+func (s *DiskStorage) SaveSystemComplaint(file []byte, filename string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	src, err := file.Open()
-	if err != nil {
-		return "", err
-	}
-	defer src.Close()
-
-	mimeType := strings.Split(file.Header["Content-Type"][0], "/")[1]
-	filename := fmt.Sprintf("%s.%s", uuid, mimeType)
 
 	storageDir := s.SystemComplaintLocation
 	path := filepath.Join(storageDir, filename)
 
-	dist, err := os.Create(path)
-	if err != nil {
-		return "", err
-	}
-	defer dist.Close()
-
-	_, err = io.Copy(dist, src)
-	if err != nil {
+	if err := s.SaveFile(path, file); err != nil {
 		return "", err
 	}
 

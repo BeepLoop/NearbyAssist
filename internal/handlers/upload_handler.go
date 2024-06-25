@@ -42,8 +42,8 @@ func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		handler := filehandler.NewFileHandler(h.server.Storage)
-		filename, err := handler.SaveServicePhoto(file)
+		handler := filehandler.NewFileHandler(h.server.Encrypt)
+		filename, err := handler.SavePhoto(file, h.server.Storage.SaveServicePhoto)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -76,8 +76,8 @@ func (h *uploadHandler) HandleNewProofPhoto(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		handler := filehandler.NewFileHandler(h.server.Storage)
-		filename, err := handler.SaveApplicationProof(file)
+		handler := filehandler.NewFileHandler(h.server.Encrypt)
+		filename, err := handler.SavePhoto(file, h.server.Storage.SaveApplicationProof)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
