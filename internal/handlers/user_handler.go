@@ -49,6 +49,6 @@ func (h *userHandler) HandleCount(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"userCount": count,
+		"count": count,
 	})
 }

@@ -53,7 +53,7 @@ func (h *transactionHandler) HandleCount(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactionCount": count,
+		"count": count,
 	})
 }
 

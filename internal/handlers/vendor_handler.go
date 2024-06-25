@@ -33,7 +33,7 @@ func (h *vendorHandler) HandleCount(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"vendorCount": count,
+		"count": count,
 	})
 }
 

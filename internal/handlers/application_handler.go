@@ -31,7 +31,7 @@ func (h *applicationHandler) HandleCount(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"applicationCount": count,
+		"count": count,
 	})
 }
 

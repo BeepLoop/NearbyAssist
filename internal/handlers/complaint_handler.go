@@ -34,7 +34,7 @@ func (h *complaintHandler) HandleCount(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"complaintsCount": count,
+		"count": count,
 	})
 }
 
