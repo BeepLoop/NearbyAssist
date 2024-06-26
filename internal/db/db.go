@@ -52,7 +52,7 @@ type Database interface {
 	FindServiceOwner(id int) (*response.ServiceOwner, error)
 
 	// Complaint Queries
-	CountComplaint() (int, error)
+    CountSystemComplaint() (int, error)
 	FileVendorComplaint(complaint *request.NewComplaint) (int, error)
 	FileSystemComplaint(complaint *request.SystemComplaint) (int, error)
 	NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error)

@@ -129,7 +129,7 @@ func (d *DummyDatabase) FindServiceOwner(id int) (*response.ServiceOwner, error)
 	return nil, nil
 }
 
-func (d *DummyDatabase) CountComplaint() (int, error) {
+func (d *DummyDatabase) CountSystemComplaint() (int, error) {
 	return 0, nil
 }
 

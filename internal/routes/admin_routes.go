@@ -57,6 +57,6 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 	{
 		handler := handlers.NewComplaintServer(s)
 
-		complaint.GET("/count", handler.HandleCount)
+		complaint.GET("/system/count", handler.HandleSystemComplaintCount)
 	}
 }

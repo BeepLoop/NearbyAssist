@@ -7,20 +7,20 @@ import (
 	"time"
 )
 
-func (m *Mysql) CountComplaint() (int, error) {
+func (m *Mysql) CountSystemComplaint() (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT COUNT(*) FROM Complaint"
+	query := "SELECT COUNT(*) FROM SystemComplaint"
 
-	count := -1
+	count := 0
 	err := m.Conn.GetContext(ctx, &count, query)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return 0, context.DeadlineExceeded
 	}
 
 	return count, nil

@@ -27,8 +27,8 @@ func (h *complaintHandler) HandleBaseRoute(c echo.Context) error {
 	})
 }
 
-func (h *complaintHandler) HandleCount(c echo.Context) error {
-	count, err := h.server.DB.CountComplaint()
+func (h *complaintHandler) HandleSystemComplaintCount(c echo.Context) error {
+	count, err := h.server.DB.CountSystemComplaint()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
