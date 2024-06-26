@@ -3,6 +3,9 @@ package utils
 import (
 	"errors"
 	"nearbyassist/internal/authenticator"
+	"nearbyassist/internal/models"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func GetUserIdFromJWT(jwtSigner authenticator.Authenticator, authHeader string) (int, error) {
@@ -14,7 +17,7 @@ func GetUserIdFromJWT(jwtSigner authenticator.Authenticator, authHeader string) 
 	}
 
 	// Check if jwt has role, if so, user is an admin or staff
-	if _, ok := claims["role"].(string); ok {
+	if _, err := GetRoleFromClaims(claims); err == nil {
 		adminId, ok := claims["adminId"].(float64)
 		if !ok {
 			return 0, errors.New("Value adminId not found in claims")
@@ -31,14 +34,14 @@ func GetUserIdFromJWT(jwtSigner authenticator.Authenticator, authHeader string) 
 	return int(userId), nil
 }
 
-func GetUserIdFromJWTString(jwtSigner authenticator.Authenticator, token string) (int, error) {
+func GetUserIdFromJwtString(jwtSigner authenticator.Authenticator, token string) (int, error) {
 	claims, err := jwtSigner.GetClaims(token)
 	if err != nil {
 		return 0, err
 	}
 
 	// Check if jwt has role, if so, user is an admin or staff
-	if _, ok := claims["role"].(string); ok {
+	if _, err := GetRoleFromClaims(claims); err == nil {
 		adminId, ok := claims["adminId"].(float64)
 		if !ok {
 			return 0, errors.New("Value adminId not found in claims")
@@ -53,4 +56,12 @@ func GetUserIdFromJWTString(jwtSigner authenticator.Authenticator, token string)
 	}
 
 	return int(userId), nil
+}
+
+func GetRoleFromClaims(claims jwt.MapClaims) (models.AdminRole, error) {
+	if role, ok := claims["role"].(string); ok {
+		return models.AdminRole(role), nil
+	}
+
+	return "", errors.New("No role field found in the JWT")
 }

@@ -59,7 +59,7 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	defer conn.Close()
 
 	token := c.QueryParam("token")
-	userId, err := utils.GetUserIdFromJWTString(h.server.Auth, token)
+	userId, err := utils.GetUserIdFromJwtString(h.server.Auth, token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

@@ -20,6 +20,7 @@ type Database interface {
 
 	// Admin Queries
 	FindAdminByUsername(username string) (*models.AdminModel, error)
+	FindAdminById(id int) (*models.AdminModel, error)
 	NewAdmin(admin *models.AdminModel) (int, error)
 	NewStaff(staff *models.AdminModel) (int, error)
 
@@ -54,7 +55,7 @@ type Database interface {
 	CountComplaint() (int, error)
 	FileVendorComplaint(complaint *request.NewComplaint) (int, error)
 	FileSystemComplaint(complaint *request.SystemComplaint) (int, error)
-    NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error)
+	NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error)
 
 	// Transaction Queries
 	CountTransaction(status models.TransactionStatus) (int, error)

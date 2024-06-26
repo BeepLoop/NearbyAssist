@@ -25,6 +25,25 @@ func (m *Mysql) FindAdminByUsername(username string) (*models.AdminModel, error)
 	return admin, nil
 }
 
+func (m *Mysql) FindAdminById(id int) (*models.AdminModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "SELECT id, username, password, role FROM Admin WHERE id = ?"
+
+	admin := models.NewAdminModel()
+	err := m.Conn.GetContext(ctx, admin, query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return admin, nil
+}
+
 func (m *Mysql) NewAdmin(admin *models.AdminModel) (int, error) {
 
 	return 0, nil

@@ -41,6 +41,10 @@ func (d *DummyDatabase) FindAdminByUsername(username string) (*models.AdminModel
 	return nil, nil
 }
 
+func (d *DummyDatabase) FindAdminById(id int) (*models.AdminModel, error) {
+	return nil, nil
+}
+
 func (d *DummyDatabase) NewAdmin(admin *models.AdminModel) (int, error) {
 	return 0, nil
 }

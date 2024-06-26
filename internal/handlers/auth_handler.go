@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
@@ -170,17 +171,42 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	user, err := h.server.DB.FindUserById(userId)
+	jwtClaims, err := h.server.Auth.GetClaims(authHeader[len("Bearer "):])
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to parse JWT")
 	}
 
-	accessToken, err := h.server.Auth.GenerateUserAccessToken(user)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	var newAccessToken string // If there's an err, user is not an admin
+	if _, err := utils.GetRoleFromClaims(jwtClaims); err != nil {
+		user, err := h.server.DB.FindUserById(userId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		if token, err := h.server.Auth.GenerateUserAccessToken(user); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		} else {
+			newAccessToken = token
+		}
+	} else {
+		admin, err := h.server.DB.FindAdminById(userId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		if token, err := h.server.Auth.GenerateAdminAccessToken(admin); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		} else {
+			newAccessToken = token
+		}
+	}
+
+	// As defense against my dumb self, check first if newAccessToken is an empty string
+	if newAccessToken == "" {
+		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("Some error occurred while generating new access token"))
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"accessToken": accessToken,
+		"accessToken": newAccessToken,
 	})
 }
