@@ -3,6 +3,7 @@ package models
 type ApplicationStatus string
 
 const (
+	APPLICATION_STATUS_ALL      ApplicationStatus = "all"
 	APPLICATION_STATUS_PENDING  ApplicationStatus = "pending"
 	APPLICATION_STATUS_APPROVED ApplicationStatus = "approved"
 	APPLICATION_STATUS_REJECTED ApplicationStatus = "rejected"
