@@ -34,7 +34,16 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 	})
 }
 
-// TODO: implement handler for getting service count
+func (h *serviceHandler) HandleCount(c echo.Context) error {
+	count, err := h.server.DB.CountServices()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve service count")
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"count": count,
+	})
+}
 
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 	req := &request.NewService{}

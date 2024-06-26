@@ -50,9 +50,10 @@ type Database interface {
 	DeleteService(id int) error
 	GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceSearchResult, error)
 	FindServiceOwner(id int) (*response.ServiceOwner, error)
+	CountServices() (int, error)
 
 	// Complaint Queries
-    CountSystemComplaint() (int, error)
+	CountSystemComplaint() (int, error)
 	FileVendorComplaint(complaint *request.NewComplaint) (int, error)
 	FileSystemComplaint(complaint *request.SystemComplaint) (int, error)
 	NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error)

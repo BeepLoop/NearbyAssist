@@ -45,6 +45,13 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 		application.PUT("/reject/:applicationId", handler.HandleReject)
 	}
 
+	services := r.Group("/services")
+	{
+		handler := handlers.NewServiceHandler(s)
+
+		services.GET("/count", handler.HandleCount)
+	}
+
 	transaction := r.Group("/transactions")
 	{
 		handler := handlers.NewTransactionHandler(s)

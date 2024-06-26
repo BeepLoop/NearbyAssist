@@ -10,6 +10,25 @@ import (
 	"time"
 )
 
+func (m *Mysql) CountServices() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "SELECT COUNT(*) FROM Service"
+
+	count := 0
+	err := m.Conn.GetContext(ctx, &count, query)
+	if err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
 func (m *Mysql) FindServiceById(id int) (*response.ServiceDetails, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

@@ -97,6 +97,10 @@ func (d *DummyDatabase) FindAllTagByServiceId(serviceId int) ([]string, error) {
 	return nil, nil
 }
 
+func (d *DummyDatabase) CountServices() (int, error) {
+	return 0, nil
+}
+
 func (d *DummyDatabase) FindServiceById(id int) (*response.ServiceDetails, error) {
 	return nil, nil
 }
