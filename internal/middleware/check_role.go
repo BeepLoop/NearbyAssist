@@ -26,7 +26,7 @@ func CheckRole(jwtChecker authenticator.Authenticator) echo.MiddlewareFunc {
 
 			role, ok := claims["role"].(string)
 			if !ok {
-				return echo.NewHTTPError(http.StatusForbidden, "Unkown user")
+				return echo.NewHTTPError(http.StatusForbidden, "Unknown user")
 			}
 
 			// Check if the user is accessing admin-only route
