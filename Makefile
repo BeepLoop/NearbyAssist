@@ -5,11 +5,11 @@ all: build
 
 build:
 	@echo "Building..."
-	@go build -o bin/main main.go
+	@go build -o bin/main cmd/main.go
 
 # Run the application
 run:
-	@go run main.go
+	@go run cmd/main.go
 
 # Test the application
 test:
@@ -40,11 +40,6 @@ watch:
 	fi
 
 .PHONY: all build run test clean
-
-seed:
-	@echo "Seeding..."
-	@go run cmd/seeder/main.go
-	@echo "done"
 
 migrate-up:
 	@echo "running up migration..."
