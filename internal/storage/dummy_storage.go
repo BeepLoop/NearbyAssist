@@ -26,3 +26,15 @@ func (s *DummyStorage) SaveApplicationProof(file []byte, filename string) (strin
 func (s *DummyStorage) SaveSystemComplaint(file []byte, filename string) (string, error) {
 	return "", nil
 }
+
+func (s *DummyStorage) SaveFrontId(file []byte, filename string) (string, error) {
+	return "", nil
+}
+
+func (s *DummyStorage) SaveBackId(file []byte, filename string) (string, error) {
+	return "", nil
+}
+
+func (s *DummyStorage) SaveFace(file []byte, filename string) (string, error) {
+	return "", nil
+}

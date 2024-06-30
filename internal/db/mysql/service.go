@@ -159,7 +159,7 @@ func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
 
 	registerTag := `
         INSERT INTO 
-            Service_Tag (serviceId, tagId)
+            ServiceTag (serviceId, tagId)
         VALUES
             (
                 ?,
@@ -232,7 +232,7 @@ func (m *Mysql) UpdateService(service *request.UpdateService) error {
             st.serviceId,
             t.title AS tag
         FROM
-            Service_Tag st
+            ServiceTag st
             JOIN Tag t ON t.id = st.tagId
         WHERE
             st.serviceId = ?;
@@ -247,8 +247,8 @@ func (m *Mysql) UpdateService(service *request.UpdateService) error {
 		return err
 	}
 
-	deleteTag := "DELETE FROM Service_Tag WHERE id = ?"
-	insertTag := "INSERT INTO Service_Tag (serviceId, tagId) VALUES (?, (SELECT id FROM Tag WHERE title = ?))"
+	deleteTag := "DELETE FROM ServiceTag WHERE id = ?"
+	insertTag := "INSERT INTO ServiceTag (serviceId, tagId) VALUES (?, (SELECT id FROM Tag WHERE title = ?))"
 
 	newTags := service.Tags
 
@@ -354,7 +354,7 @@ func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceS
             s.latitude,
             s.longitude
         FROM 
-            Service_Tag st
+            ServiceTag st
             JOIN Service s ON s.id = st.serviceId
             JOIN User u ON u.id = s.vendorId
         WHERE

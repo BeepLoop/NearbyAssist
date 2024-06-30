@@ -35,6 +35,9 @@ type Config struct {
 	ApplicationProofLocation string
 	ServicePhotoLocation     string
 	SystemComplaintLocation  string
+	FrontIdLocation          string
+	BackIdLocation           string
+	FaceLocation             string
 	RouteEngineUrl           string
 }
 
@@ -63,6 +66,9 @@ func LoadConfig() *Config {
 		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
 		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),
 		SystemComplaintLocation:  os.Getenv("SYSTEM_COMPLAINT_LOCATION"),
+		FrontIdLocation:          os.Getenv("VERIFICATION_FRONT_ID"),
+		BackIdLocation:           os.Getenv("VERIFICATION_BACK_ID"),
+		FaceLocation:             os.Getenv("VERIFICATION_FACE"),
 		RouteEngineUrl:           os.Getenv("ROUTE_ENGINE_URL"),
 	}
 }

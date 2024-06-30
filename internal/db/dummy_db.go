@@ -232,3 +232,19 @@ func (d *DummyDatabase) FindAllPhotosByServiceId(serviceId int) ([]response.Serv
 func (d *DummyDatabase) NewApplicationProof(data *models.ApplicationProofModel) (int, error) {
 	return 0, nil
 }
+
+func (m *DummyDatabase) NewIdentityVerification(model *models.IdentityVerificationModel) (int, error) {
+	return 0, nil
+}
+
+func (m *DummyDatabase) NewFrontId(model *models.FrontIdModel) (int, error) {
+	return 0, nil
+}
+
+func (m *DummyDatabase) NewBackId(model *models.BackIdModel) (int, error) {
+	return 0, nil
+}
+
+func (m *DummyDatabase) NewFace(model *models.FaceModel) (int, error) {
+	return 0, nil
+}

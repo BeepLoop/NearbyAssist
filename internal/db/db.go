@@ -90,6 +90,12 @@ type Database interface {
 
 	// Application Proof Queries
 	NewApplicationProof(data *models.ApplicationProofModel) (int, error)
+
+	// Verification Queries
+	NewIdentityVerification(model *models.IdentityVerificationModel) (int, error)
+	NewFrontId(model *models.FrontIdModel) (int, error)
+	NewBackId(model *models.BackIdModel) (int, error)
+	NewFace(model *models.FaceModel) (int, error)
 }
 
 func NewDatabase(conf *config.Config) Database {

@@ -63,7 +63,7 @@ func main() {
 		panic("Error inserting vendors: " + err.Error())
 	}
 
-	// Seed sevices
+	// Seed services
 	services := []request.NewService{
 		{
 			VendorId:    1,
@@ -128,7 +128,7 @@ func main() {
 
 		registerTag := `
         INSERT INTO 
-            Service_Tag (serviceId, tagId)
+            ServiceTag (serviceId, tagId)
         VALUES
             (
                 ?,

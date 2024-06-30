@@ -33,7 +33,7 @@ func (m *Mysql) FindAllTagByServiceId(serviceId int) ([]string, error) {
         SELECT
             t.title AS tag
         FROM
-            Service_Tag st
+            ServiceTag st
             JOIN Tag t ON t.id = st.tagId
         WHERE
             st.serviceId = ?;
