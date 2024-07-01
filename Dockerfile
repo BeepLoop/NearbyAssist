@@ -7,9 +7,9 @@ WORKDIR /build
 COPY . .
 RUN go mod download
 
-RUN go build -o /nearbyassist
+RUN go build -o /nearbyassist cmd/main.go
 
-FROM gcr.io/distroless/base-debian12 as release-stage
+FROM gcr.io/distroless/base-debian12 AS release-stage
 
 WORKDIR /
 

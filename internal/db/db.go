@@ -54,9 +54,12 @@ type Database interface {
 
 	// Complaint Queries
 	CountSystemComplaint() (int, error)
+	FindAllSystemComplaints() ([]response.SystemComplaint, error)
+	FindSystemComplaintById(id int) (*models.SystemComplaintModel, error)
 	FileVendorComplaint(complaint *request.NewComplaint) (int, error)
 	FileSystemComplaint(complaint *request.SystemComplaint) (int, error)
 	NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error)
+	FindSystemComplaintImagesByComplaintId(id int) ([]models.SystemComplaintImageModel, error)
 
 	// Transaction Queries
 	CountTransaction(status models.TransactionStatus) (int, error)

@@ -62,8 +62,14 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 
 	complaint := r.Group("/complaints")
 	{
-		handler := handlers.NewComplaintServer(s)
+		handler := handlers.NewComplaintHandler(s)
 
-		complaint.GET("/system/count", handler.HandleSystemComplaintCount)
+		system := complaint.Group("/system")
+		{
+			system.GET("", handler.HandleGetSystemComplaint)
+			system.GET("/", handler.HandleGetSystemComplaint)
+			system.GET("/:complaintId", handler.HandleGetSystemComplaintById)
+			system.GET("/count", handler.HandleSystemComplaintCount)
+		}
 	}
 }

@@ -11,3 +11,10 @@ type ComplaintModel struct {
 func NewComplaintModel() *ComplaintModel {
 	return &ComplaintModel{}
 }
+
+type SystemComplaintModel struct {
+	Model
+	UpdateableModel
+	Title  string `json:"title" db:"title"`
+	Detail string `json:"detail" db:"detail"`
+}

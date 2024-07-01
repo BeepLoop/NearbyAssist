@@ -74,7 +74,7 @@ func RegisterRoutes(s *server.Server) {
 
 			complaint := public.Group("/complaints")
 			{
-				handler := handlers.NewComplaintServer(s)
+				handler := handlers.NewComplaintHandler(s)
 				// complaint.GET("", handler.HandleBaseRoute)
 				// complaint.POST("", handler.HandleNewComplaint)
 				complaint.POST("/system", handler.HandleSystemComplaint)

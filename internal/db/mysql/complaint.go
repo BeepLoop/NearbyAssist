@@ -4,6 +4,7 @@ import (
 	"context"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	"time"
 )
 
@@ -24,6 +25,42 @@ func (m *Mysql) CountSystemComplaint() (int, error) {
 	}
 
 	return count, nil
+}
+
+func (m *Mysql) FindAllSystemComplaints() ([]response.SystemComplaint, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "SELECT id, title FROM SystemComplaint"
+
+	complaints := make([]response.SystemComplaint, 0)
+	if err := m.Conn.SelectContext(ctx, &complaints, query); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return complaints, nil
+}
+
+func (m *Mysql) FindSystemComplaintById(id int) (*models.SystemComplaintModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "SELECT * FROM SystemComplaint WHERE id = ?"
+
+	complaint := &models.SystemComplaintModel{}
+	if err := m.Conn.GetContext(ctx, complaint, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return complaint, nil
 }
 
 func (m *Mysql) FileVendorComplaint(complaint *request.NewComplaint) (int, error) {
@@ -84,7 +121,6 @@ func (m *Mysql) FileSystemComplaint(complaint *request.SystemComplaint) (int, er
 }
 
 func (m *Mysql) NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error) {
-	// TODO: implement this function
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -110,4 +146,22 @@ func (m *Mysql) NewSystemComplaintImage(model *models.SystemComplaintImageModel)
 	}
 
 	return int(id), nil
+}
+
+func (m *Mysql) FindSystemComplaintImagesByComplaintId(id int) ([]models.SystemComplaintImageModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "SELECT * FROM SystemComplaintImage WHERE complaintId = ?"
+
+	images := make([]models.SystemComplaintImageModel, 0)
+	if err := m.Conn.SelectContext(ctx, &images, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return images, nil
 }

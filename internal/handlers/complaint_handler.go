@@ -7,6 +7,7 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,7 +16,7 @@ type complaintHandler struct {
 	server *server.Server
 }
 
-func NewComplaintServer(server *server.Server) *complaintHandler {
+func NewComplaintHandler(server *server.Server) *complaintHandler {
 	return &complaintHandler{
 		server: server,
 	}
@@ -38,26 +39,39 @@ func (h *complaintHandler) HandleSystemComplaintCount(c echo.Context) error {
 	})
 }
 
-// func (h *complaintHandler) HandleNewComplaint(c echo.Context) error {
-// 	req := &request.NewComplaint{}
-// 	if err := c.Bind(req); err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-// 	}
-//
-// 	if err := c.Validate(req); err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-// 	}
-//
-// 	complaintId, err := h.server.DB.FileComplaint(req)
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-// 	}
-//
-// 	return c.JSON(http.StatusCreated, utils.Mapper{
-// 		"message":     "complaint created successfully",
-// 		"complaintId": complaintId,
-// 	})
-// }
+func (h *complaintHandler) HandleGetSystemComplaint(c echo.Context) error {
+	complaints, err := h.server.DB.FindAllSystemComplaints()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"complaints": complaints,
+	})
+}
+
+func (h *complaintHandler) HandleGetSystemComplaintById(c echo.Context) error {
+	complaintId := c.Param("complaintId")
+	id, err := strconv.Atoi(complaintId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "complaint ID must be a number")
+	}
+
+	complaint, err := h.server.DB.FindSystemComplaintById(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	images, err := h.server.DB.FindSystemComplaintImagesByComplaintId(complaint.Id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"complaint": complaint,
+		"images":    images,
+	})
+}
 
 func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
 	title := c.FormValue("title")
@@ -107,6 +121,7 @@ func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
 }
 
 func (h *complaintHandler) HandleVendorComplaint(c echo.Context) error {
+	// TODO: implement filing a complaint for a vendor
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"message": "Vendor complaint route",
 	})

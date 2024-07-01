@@ -137,6 +137,14 @@ func (d *DummyDatabase) CountSystemComplaint() (int, error) {
 	return 0, nil
 }
 
+func (m *DummyDatabase) FindAllSystemComplaints() ([]response.SystemComplaint, error) {
+	return nil, nil
+}
+
+func (m *DummyDatabase) FindSystemComplaintById(id int) (*models.SystemComplaintModel, error) {
+	return nil, nil
+}
+
 func (d *DummyDatabase) FileVendorComplaint(complaint *request.NewComplaint) (int, error) {
 	return 0, nil
 }
@@ -147,6 +155,10 @@ func (d *DummyDatabase) FileSystemComplaint(complaint *request.SystemComplaint) 
 
 func (d *DummyDatabase) NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error) {
 	return 0, nil
+}
+
+func (d *DummyDatabase) FindSystemComplaintImagesByComplaintId(id int) ([]models.SystemComplaintImageModel, error) {
+	return nil, nil
 }
 
 func (d *DummyDatabase) CountTransaction(status models.TransactionStatus) (int, error) {
