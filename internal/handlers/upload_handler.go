@@ -43,12 +43,12 @@ func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 
 	for _, file := range files {
 		handler := filehandler.NewFileHandler(h.server.Encrypt)
-		filename, err := handler.SavePhoto(file, h.server.Storage.SaveServicePhoto)
+		url, err := handler.SavePhoto(file, h.server.Storage.SaveServicePhoto)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		uploadData := models.NewServicePhotoModel(params["vendorId"], params["serviceId"], filename)
+		uploadData := models.NewServicePhotoModel(params["vendorId"], params["serviceId"], url)
 		_, err = h.server.DB.NewServicePhoto(uploadData)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -77,12 +77,12 @@ func (h *uploadHandler) HandleNewProofPhoto(c echo.Context) error {
 
 	for _, file := range files {
 		handler := filehandler.NewFileHandler(h.server.Encrypt)
-		filename, err := handler.SavePhoto(file, h.server.Storage.SaveApplicationProof)
+		url, err := handler.SavePhoto(file, h.server.Storage.SaveApplicationProof)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		uploadData := models.NewApplicationProofModel(params["applicationId"], params["applicantId"], filename)
+		uploadData := models.NewApplicationProofModel(params["applicationId"], params["applicantId"], url)
 		_, err = h.server.DB.NewApplicationProof(uploadData)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

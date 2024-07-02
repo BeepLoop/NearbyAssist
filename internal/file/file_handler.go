@@ -56,11 +56,12 @@ func (f *FileHandler) SavePhoto(file *multipart.FileHeader, saveFunc func(src []
 
 	filename := fmt.Sprintf("%s.%s", uuid, extension)
 
-	if _, err := saveFunc(encrypted, filename); err != nil {
+	url, err := saveFunc(encrypted, filename)
+	if err != nil {
 		return "", err
 	}
 
-	return filename, nil
+	return url, nil
 }
 
 func (f *FileHandler) GetFileExtension(file []byte) (FILETYPE, error) {

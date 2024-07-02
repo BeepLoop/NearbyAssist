@@ -146,4 +146,11 @@ func RegisterRoutes(s *server.Server) {
 
 		ws.GET("/ws", handler.HandleWebsocket)
 	}
+
+	file := s.Echo.Group("/resource")
+	{
+		handler := handlers.NewFileServerHandler(s)
+
+		file.GET("/:path", handler.HandleFileServer)
+	}
 }

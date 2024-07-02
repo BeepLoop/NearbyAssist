@@ -92,21 +92,21 @@ func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	supportingImages := make([]string, 0)
+	imageUrl := make([]string, 0)
 	for _, file := range files {
 		handler := filehandler.NewFileHandler(h.server.Encrypt)
-		filename, err := handler.SavePhoto(file, h.server.Storage.SaveSystemComplaint)
+		url, err := handler.SavePhoto(file, h.server.Storage.SaveSystemComplaint)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		supportingImages = append(supportingImages, filename)
+		imageUrl = append(imageUrl, url)
 	}
 
-	for _, filename := range supportingImages {
+	for _, url := range imageUrl {
 		model := &models.SystemComplaintImageModel{
 			ComplaintId: complaintId,
-			Url:         filename,
+			Url:         url,
 		}
 
 		_, err := h.server.DB.NewSystemComplaintImage(model)

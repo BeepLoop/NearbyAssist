@@ -78,7 +78,8 @@ func (s *DiskStorage) SaveServicePhoto(file []byte, filename string) (string, er
 		return "", context.DeadlineExceeded
 	}
 
-	return filename, nil
+	url := s.SystemComplaintLocation + "/" + filename
+	return url, nil
 }
 
 func (s *DiskStorage) SaveApplicationProof(file []byte, filename string) (string, error) {
@@ -96,7 +97,8 @@ func (s *DiskStorage) SaveApplicationProof(file []byte, filename string) (string
 		return "", context.DeadlineExceeded
 	}
 
-	return filename, nil
+	url := s.ApplicationProofLocation + "/" + filename
+	return url, nil
 }
 
 func (s *DiskStorage) SaveSystemComplaint(file []byte, filename string) (string, error) {
@@ -114,7 +116,8 @@ func (s *DiskStorage) SaveSystemComplaint(file []byte, filename string) (string,
 		return "", context.DeadlineExceeded
 	}
 
-	return filename, nil
+	url := s.SystemComplaintLocation + "/" + filename
+	return url, nil
 }
 
 func (s *DiskStorage) SaveFrontId(file []byte, filename string) (string, error) {
@@ -132,7 +135,8 @@ func (s *DiskStorage) SaveFrontId(file []byte, filename string) (string, error) 
 		return "", context.DeadlineExceeded
 	}
 
-	return filename, nil
+	url := s.FrontIdLocation + "/" + filename
+	return url, nil
 }
 
 func (s *DiskStorage) SaveBackId(file []byte, filename string) (string, error) {
@@ -150,7 +154,8 @@ func (s *DiskStorage) SaveBackId(file []byte, filename string) (string, error) {
 		return "", context.DeadlineExceeded
 	}
 
-	return filename, nil
+	url := s.BackIdLocation + "/" + filename
+	return url, nil
 }
 
 func (s *DiskStorage) SaveFace(file []byte, filename string) (string, error) {
@@ -168,5 +173,6 @@ func (s *DiskStorage) SaveFace(file []byte, filename string) (string, error) {
 		return "", context.DeadlineExceeded
 	}
 
-	return filename, nil
+	url := s.FaceLocation + "/" + filename
+	return url, nil
 }
