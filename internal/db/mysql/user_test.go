@@ -87,7 +87,7 @@ func TestFindUserByEmail(t *testing.T) {
 	query := "SELECT id, name, email, imageUrl FROM User WHERE email = ?"
 	mock.ExpectQuery(query).WithArgs(u.Email).WillReturnRows(rows)
 
-	user, err := db.FindUserByEmail(u.Email)
+	user, err := db.FindUserByEmailHash(u.Email)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
@@ -117,7 +117,7 @@ func TestFindUserByEmailError(t *testing.T) {
 	query := "SELECT id, name, email, imageUrl FROM User WHERE email = ?"
 	mock.ExpectQuery(query).WithArgs(u.Email).WillReturnRows(rows)
 
-	user, err := db.FindUserByEmail(u.Email)
+	user, err := db.FindUserByEmailHash(u.Email)
 
 	assert.Error(t, err)
 	assert.Nil(t, user)

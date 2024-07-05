@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
@@ -37,11 +38,23 @@ func (h *adminHandler) HandleRegisterStaff(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to hash password")
+	if hashed, err := h.server.Hash.Hash([]byte(req.Username)); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.UsernameHash = hashed
 	}
-	req.Password = string(hash)
+
+	if cipher, err := h.server.Encrypt.EncryptString(req.Username); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.Username = cipher
+	}
+
+	if hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.Password = string(hashed)
+	}
 
 	staffId, err := h.server.DB.NewStaff(req)
 	if err != nil {

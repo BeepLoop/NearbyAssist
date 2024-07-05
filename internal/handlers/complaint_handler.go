@@ -2,6 +2,7 @@ package handlers
 
 import (
 	filehandler "nearbyassist/internal/file"
+	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
@@ -45,6 +46,14 @@ func (h *complaintHandler) HandleGetSystemComplaint(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	for _, complaint := range complaints {
+		if decrypted, err := h.server.Encrypt.DecryptString(complaint.Title); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+		} else {
+			complaint.Title = decrypted
+		}
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"complaints": complaints,
 	})
@@ -60,6 +69,18 @@ func (h *complaintHandler) HandleGetSystemComplaintById(c echo.Context) error {
 	complaint, err := h.server.DB.FindSystemComplaintById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if decrypted, err := h.server.Encrypt.DecryptString(complaint.Title); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		complaint.Title = decrypted
+	}
+
+	if decrypted, err := h.server.Encrypt.DecryptString(complaint.Detail); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		complaint.Detail = decrypted
 	}
 
 	images, err := h.server.DB.FindSystemComplaintImagesByComplaintId(complaint.Id)
@@ -85,6 +106,18 @@ func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
 	req := &request.SystemComplaint{
 		Title:  title,
 		Detail: detail,
+	}
+
+	if cipher, err := h.server.Encrypt.EncryptString(req.Title); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.Title = cipher
+	}
+
+	if cipher, err := h.server.Encrypt.EncryptString(req.Detail); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.Detail = cipher
 	}
 
 	complaintId, err := h.server.DB.FileSystemComplaint(req)

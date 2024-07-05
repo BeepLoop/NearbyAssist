@@ -7,9 +7,6 @@ import (
 )
 
 func RegisterRoutes(s *server.Server) {
-	// File server
-	s.Echo.Static("/resource", "store/")
-
 	// Routes
 	healthHandler := handlers.NewHealthHandler(s)
 
@@ -75,8 +72,6 @@ func RegisterRoutes(s *server.Server) {
 			complaint := public.Group("/complaints")
 			{
 				handler := handlers.NewComplaintHandler(s)
-				// complaint.GET("", handler.HandleBaseRoute)
-				// complaint.POST("", handler.HandleNewComplaint)
 				complaint.POST("/system", handler.HandleSystemComplaint)
 				complaint.POST("/vendor", handler.HandleVendorComplaint)
 			}

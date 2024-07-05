@@ -37,7 +37,7 @@ func (d *DummyDatabase) FindBlacklistedToken(token string) (*models.BlacklistMod
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindAdminByUsername(username string) (*models.AdminModel, error) {
+func (d *DummyDatabase) FindAdminByUsernameHash(hash string) (*models.AdminModel, error) {
 	return nil, nil
 }
 
@@ -61,11 +61,11 @@ func (d *DummyDatabase) FindUserById(id int) (*models.UserModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindUserByEmail(email string) (*models.UserModel, error) {
+func (d *DummyDatabase) FindUserByEmailHash(hash string) (*models.UserModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) NewUser(user *request.UserLogin) (int, error) {
+func (d *DummyDatabase) NewUser(user *models.UserModel) (int, error) {
 	return 0, nil
 }
 
@@ -137,7 +137,7 @@ func (d *DummyDatabase) CountSystemComplaint() (int, error) {
 	return 0, nil
 }
 
-func (m *DummyDatabase) FindAllSystemComplaints() ([]response.SystemComplaint, error) {
+func (m *DummyDatabase) FindAllSystemComplaints() ([]*response.SystemComplaint, error) {
 	return nil, nil
 }
 

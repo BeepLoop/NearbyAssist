@@ -2,11 +2,12 @@ CREATE TABLE IF NOT EXISTS User (
     id Int NOT NULL AUTO_INCREMENT,
     name Varchar(255) NOT NULL,
     email Varchar(255) NOT NULL UNIQUE,
+    emailHash Varchar(64) NOT NULL,
     imageUrl Varchar(255),
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    INDEX(id, name, email)
+    INDEX(id, name, emailHash)
 );
 
 CREATE TABLE IF NOT EXISTS Vendor (
@@ -27,10 +28,11 @@ CREATE TABLE IF NOT EXISTS Admin (
     username Varchar(255) NOT NULL UNIQUE,
     password Varchar(255) NOT NULL,
     role Enum('admin', 'staff') NOT NULL DEFAULT 'staff',
+    usernameHash Varchar(64) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
-    INDEX(id, username, role)
+    INDEX(id, usernameHash, role)
 );
 
 CREATE TABLE IF NOT EXISTS Session (
@@ -110,7 +112,7 @@ CREATE TABLE IF NOT EXISTS ServicePhoto (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(serviceId) REFERENCES Service(id) ON DELETE CASCADE,
-    FOREIGN KEY(vendorId) REFERENCES Vendor(id) ON DELETE CASCADE,
+    FOREIGN KEY(vendorId) REFERENCES User(id) ON DELETE CASCADE,
     INDEX(id, serviceId, vendorId)
 );
 

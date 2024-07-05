@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-func (m *Mysql) FindAdminByUsername(username string) (*models.AdminModel, error) {
+func (m *Mysql) FindAdminByUsernameHash(hash string) (*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, username, password, role FROM Admin WHERE username = ?"
+	query := "SELECT id, username, password, role FROM Admin WHERE usernameHash = ?"
 
 	admin := models.NewAdminModel()
-	err := m.Conn.GetContext(ctx, admin, query, username)
+	err := m.Conn.GetContext(ctx, admin, query, hash)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (m *Mysql) NewStaff(staff *models.AdminModel) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO Admin (username, password) VALUES (:username, :password)"
+	query := "INSERT INTO Admin (username, password, usernameHash) VALUES (:username, :password, :usernameHash)"
 
 	res, err := m.Conn.NamedExecContext(ctx, query, staff)
 	if err != nil {

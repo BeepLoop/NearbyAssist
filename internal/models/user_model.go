@@ -6,6 +6,7 @@ type UserModel struct {
 	Name     string `json:"name" db:"name"`
 	Email    string `json:"email" db:"email"`
 	ImageUrl string `json:"imageUrl" db:"imageUrl"`
+	Hash     string `json:"hash" db:"hash"`
 }
 
 func NewUserModel() *UserModel {

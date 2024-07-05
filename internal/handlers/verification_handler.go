@@ -2,6 +2,7 @@ package handlers
 
 import (
 	filehandler "nearbyassist/internal/file"
+	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
@@ -80,6 +81,24 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if cipher, err := h.server.Encrypt.EncryptString(req.Name); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.Name = cipher
+	}
+
+	if cipher, err := h.server.Encrypt.EncryptString(req.Address); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.Address = cipher
+	}
+
+	if cipher, err := h.server.Encrypt.EncryptString(req.IdNumber); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.IdNumber = cipher
 	}
 
 	verificationId, err := h.server.DB.NewIdentityVerification(req)

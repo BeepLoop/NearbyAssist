@@ -19,7 +19,7 @@ type Database interface {
 	FindBlacklistedToken(token string) (*models.BlacklistModel, error)
 
 	// Admin Queries
-	FindAdminByUsername(username string) (*models.AdminModel, error)
+	FindAdminByUsernameHash(hash string) (*models.AdminModel, error)
 	FindAdminById(id int) (*models.AdminModel, error)
 	NewAdmin(admin *models.AdminModel) (int, error)
 	NewStaff(staff *models.AdminModel) (int, error)
@@ -27,8 +27,8 @@ type Database interface {
 	// User Queries
 	CountUser() (int, error)
 	FindUserById(id int) (*models.UserModel, error)
-	FindUserByEmail(email string) (*models.UserModel, error)
-	NewUser(user *request.UserLogin) (int, error)
+	FindUserByEmailHash(hash string) (*models.UserModel, error)
+	NewUser(user *models.UserModel) (int, error)
 
 	// Vendor Queries
 	CountVendor(filter models.VendorStatus) (int, error)
@@ -54,7 +54,7 @@ type Database interface {
 
 	// Complaint Queries
 	CountSystemComplaint() (int, error)
-	FindAllSystemComplaints() ([]response.SystemComplaint, error)
+	FindAllSystemComplaints() ([]*response.SystemComplaint, error)
 	FindSystemComplaintById(id int) (*models.SystemComplaintModel, error)
 	FileVendorComplaint(complaint *request.NewComplaint) (int, error)
 	FileSystemComplaint(complaint *request.SystemComplaint) (int, error)

@@ -27,13 +27,13 @@ func (m *Mysql) CountSystemComplaint() (int, error) {
 	return count, nil
 }
 
-func (m *Mysql) FindAllSystemComplaints() ([]response.SystemComplaint, error) {
+func (m *Mysql) FindAllSystemComplaints() ([]*response.SystemComplaint, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, title FROM SystemComplaint"
 
-	complaints := make([]response.SystemComplaint, 0)
+	complaints := make([]*response.SystemComplaint, 0)
 	if err := m.Conn.SelectContext(ctx, &complaints, query); err != nil {
 		return nil, err
 	}

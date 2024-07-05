@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
@@ -37,13 +38,24 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	admin, err := h.server.DB.FindAdminByUsername(req.Username)
-	if admin == nil || err != nil {
+	usernameHash, err := h.server.Hash.Hash([]byte(req.Username))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	}
+
+	admin, err := h.server.DB.FindAdminByUsernameHash(usernameHash)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(req.Password)); err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
+	}
+
+	if decryptedUsername, err := h.server.Encrypt.DecryptString(admin.Username); err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	} else {
+		admin.Username = decryptedUsername
 	}
 
 	accessToken, err := h.server.Auth.GenerateAdminAccessToken(admin)
@@ -80,23 +92,38 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	userModel := models.NewUserModelWithData(req.Name, req.Email, req.Image)
-
-	// Check if user exists
-	user, err := h.server.DB.FindUserByEmail(req.Email)
-	if err != nil {
-		// Register user if not found
-		userId, err := h.server.DB.NewUser(req)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	emailHash, err := h.server.Hash.Hash([]byte(req.Email))
+	user, err := h.server.DB.FindUserByEmailHash(emailHash)
+	if err != nil && user == nil {
+		model := &models.UserModel{
+			ImageUrl: req.Image,
+			Hash:     emailHash,
 		}
 
-		userModel.Id = userId
-	} else {
-		userModel.Id = user.Id
+		if cipher, err := h.server.Encrypt.EncryptString(req.Email); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+		} else {
+			model.Email = cipher
+		}
+
+		if cipher, err := h.server.Encrypt.EncryptString(req.Name); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+		} else {
+			model.Name = cipher
+		}
+
+		if id, err := h.server.DB.NewUser(model); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		} else {
+			user = &models.UserModel{
+				Model: models.Model{Id: id},
+				Name:  req.Name,
+				Email: req.Email,
+			}
+		}
 	}
 
-	accessToken, err := h.server.Auth.GenerateUserAccessToken(userModel)
+	accessToken, err := h.server.Auth.GenerateUserAccessToken(user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -112,7 +139,7 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"userId":       userModel.Id,
+		"userId":       user.Id,
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	})
@@ -183,6 +210,18 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
+		if decrypted, err := h.server.Encrypt.DecryptString(user.Name); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+		} else {
+			user.Name = decrypted
+		}
+
+		if decrypted, err := h.server.Encrypt.DecryptString(user.Email); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+		} else {
+			user.Email = decrypted
+		}
+
 		if token, err := h.server.Auth.GenerateUserAccessToken(user); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		} else {
@@ -194,6 +233,12 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
+		if decrypted, err := h.server.Encrypt.DecryptString(admin.Username); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+		} else {
+			admin.Username = decrypted
+		}
+
 		if token, err := h.server.Auth.GenerateAdminAccessToken(admin); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		} else {
@@ -201,7 +246,7 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 		}
 	}
 
-	// As defense against my dumb self, check first if newAccessToken is an empty string
+	// As protection against my dumb self, check first if newAccessToken is an empty string
 	if newAccessToken == "" {
 		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("Some error occurred while generating new access token"))
 	}

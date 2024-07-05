@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
@@ -67,6 +68,13 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "user is not a registered vendor")
 	}
 
+	// encrypt description
+	if cipher, err := h.server.Encrypt.EncryptString(req.Description); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.Description = cipher
+	}
+
 	insertId, err := h.server.DB.RegisterService(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
@@ -109,6 +117,12 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 		if owner.Id != req.VendorId {
 			return echo.NewHTTPError(http.StatusForbidden, "you do not own this service")
 		}
+	}
+
+	if cipher, err := h.server.Encrypt.EncryptString(req.Description); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		req.Description = cipher
 	}
 
 	if err := h.server.DB.UpdateService(req); err != nil {
@@ -171,10 +185,16 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 			break
 		}
 
+		decrypted, err := h.server.Encrypt.DecryptString(service.Vendor)
+		if err != nil {
+			scoreError = err
+			break
+		}
+
 		res := response.SearchResult{
 			Id:             service.Id,
 			Suggestability: score,
-			Vendor:         service.Vendor,
+			Vendor:         decrypted,
 			Latitude:       service.Latitude,
 			Longitude:      service.Longitude,
 		}
@@ -219,6 +239,12 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	vendor, err := h.server.DB.FindVendorByService(service.ServiceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if decrypted, err := h.server.Encrypt.DecryptString(vendor.Vendor); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		vendor.Vendor = decrypted
 	}
 
 	// Get count per review rating

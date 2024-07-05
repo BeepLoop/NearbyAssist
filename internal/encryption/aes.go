@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"nearbyassist/internal/config"
 )
@@ -71,11 +72,14 @@ func (e *Aes) EncryptString(plaintext string) (string, error) {
 		return "", err
 	}
 
-	return string(encrypted), nil
+	return hex.EncodeToString(encrypted), nil
 }
 
 func (e *Aes) DecryptString(encrypted string) (string, error) {
-	bytes := []byte(encrypted)
+	bytes, err := hex.DecodeString(encrypted)
+	if err != nil {
+		return "", err
+	}
 
 	decrypted, err := e.Decrypt(bytes)
 	if err != nil {

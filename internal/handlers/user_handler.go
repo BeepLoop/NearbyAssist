@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"nearbyassist/internal/hash"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -35,6 +36,18 @@ func (h *userHandler) HandleGetUser(c echo.Context) error {
 	user, err := h.server.DB.FindUserById(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if decrypted, err := h.server.Encrypt.DecryptString(user.Name); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		user.Name = decrypted
+	}
+
+	if decrypted, err := h.server.Encrypt.DecryptString(user.Email); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		user.Email = decrypted
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

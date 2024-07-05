@@ -3,15 +3,14 @@ package mysql
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/request"
 	"time"
 )
 
-func (m *Mysql) NewUser(user *request.UserLogin) (int, error) {
+func (m *Mysql) NewUser(user *models.UserModel) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO User (name, email, imageUrl) VALUES (:name, :email, :image)"
+	query := "INSERT INTO User (name, email, imageUrl, emailHash) VALUES (:name, :email, :imageUrl, :hash)"
 
 	res, err := m.Conn.NamedExecContext(ctx, query, user)
 	if err != nil {
@@ -49,15 +48,14 @@ func (m *Mysql) FindUserById(id int) (*models.UserModel, error) {
 	return user, nil
 }
 
-func (m *Mysql) FindUserByEmail(email string) (*models.UserModel, error) {
+func (m *Mysql) FindUserByEmailHash(hash string) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, name, email, imageUrl FROM User WHERE email = ?"
+	query := "SELECT id, name, email, imageUrl FROM User WHERE emailHash = ?"
 
 	user := models.NewUserModel()
-	err := m.Conn.GetContext(ctx, user, query, email)
-	if err != nil {
+	if err := m.Conn.GetContext(ctx, user, query, hash); err != nil {
 		return nil, err
 	}
 

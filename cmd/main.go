@@ -7,6 +7,7 @@ import (
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/encryption"
+	"nearbyassist/internal/hash"
 	"nearbyassist/internal/routes"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/server"
@@ -41,8 +42,11 @@ func main() {
 	// Load encryption configuration
 	crypto := encryption.NewAes(config)
 
+	// Load hashing algorithm
+	hash := hash.NewSha()
+
 	// Create and start the server
-	server := server.NewServer(config, ws, db, store, auth, engine, courtier, crypto)
+	server := server.NewServer(config, ws, db, store, auth, engine, courtier, crypto, hash)
 	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()
