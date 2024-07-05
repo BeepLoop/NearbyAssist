@@ -87,9 +87,8 @@ func (h *applicationHandler) HandleApprove(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	err = h.server.DB.ApproveApplication(id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if err = h.server.DB.ApproveApplication(id); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "application not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -106,7 +105,7 @@ func (h *applicationHandler) HandleReject(c echo.Context) error {
 	}
 
 	if err := h.server.DB.RejectApplication(id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "application not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

@@ -68,7 +68,7 @@ func (h *complaintHandler) HandleGetSystemComplaintById(c echo.Context) error {
 
 	complaint, err := h.server.DB.FindSystemComplaintById(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "complaint not found")
 	}
 
 	if decrypted, err := h.server.Encrypt.DecryptString(complaint.Title); err != nil {

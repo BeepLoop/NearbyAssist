@@ -83,7 +83,7 @@ func (h *reviewHandler) HandleGetReview(c echo.Context) error {
 
 	review, err := h.server.DB.FindReviewById(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "Review not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -100,7 +100,7 @@ func (h *reviewHandler) HandleServiceReview(c echo.Context) error {
 
 	reviews, err := h.server.DB.FindAllReviewByService(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

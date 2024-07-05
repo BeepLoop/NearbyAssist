@@ -112,7 +112,7 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 
 	// Validate if the service id  is owned by the requester
 	if owner, err := h.server.DB.FindServiceOwner(req.Id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	} else {
 		if owner.Id != req.VendorId {
 			return echo.NewHTTPError(http.StatusForbidden, "you do not own this service")
@@ -150,7 +150,7 @@ func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 
 	// Validate if the service is owned by the requester
 	if owner, err := h.server.DB.FindServiceOwner(id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	} else {
 		if owner.Id != userId {
 			return echo.NewHTTPError(http.StatusForbidden, "you do not own this service")
@@ -226,11 +226,11 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	// Get service  info
 	service, err := h.server.DB.FindServiceById(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	}
 
 	if tags, err := h.server.DB.FindAllTagByServiceId(id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	} else {
 		service.Tags = tags
 	}
@@ -238,7 +238,7 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	// Get vendor info
 	vendor, err := h.server.DB.FindVendorByService(service.ServiceId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	}
 
 	if decrypted, err := h.server.Encrypt.DecryptString(vendor.Vendor); err != nil {
@@ -292,7 +292,7 @@ func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
 
 	services, err := h.server.DB.FindServiceByVendor(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -310,7 +310,7 @@ func (h *serviceHandler) HandleFindRoute(c echo.Context) error {
 
 	service, err := h.server.DB.FindServiceById(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not find service")
+		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	}
 
 	origin, err := parseOrigin(c.QueryParam("origin"))

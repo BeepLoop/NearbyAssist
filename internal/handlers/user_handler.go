@@ -35,7 +35,7 @@ func (h *userHandler) HandleGetUser(c echo.Context) error {
 
 	user, err := h.server.DB.FindUserById(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
 	if decrypted, err := h.server.Encrypt.DecryptString(user.Name); err != nil {

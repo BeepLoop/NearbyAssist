@@ -46,7 +46,7 @@ func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 
 	vendor, err := h.server.DB.FindVendorById(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
 	}
 
 	// TODO: retrieve review count
@@ -65,7 +65,7 @@ func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 
 	err = h.server.DB.RestrictVendor(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -82,7 +82,7 @@ func (h *vendorHandler) HandleUnrestrict(c echo.Context) error {
 
 	err = h.server.DB.UnrestrictVendor(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

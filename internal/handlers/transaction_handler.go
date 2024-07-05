@@ -36,7 +36,7 @@ func (h *transactionHandler) HandleGetTransaction(c echo.Context) error {
 
 	transaction, err := h.server.DB.FindTransactionById(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, "transaction not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -158,7 +158,7 @@ func (h *transactionHandler) HandleCompleteTransaction(c echo.Context) error {
 	}
 
 	if transaction, err := h.server.DB.FindTransactionById(id); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "transaction not found")
+		return echo.NewHTTPError(http.StatusNotFound, "transaction not found")
 	} else {
 		if transaction.ClientId != userId {
 			return echo.NewHTTPError(http.StatusForbidden, "you're not the client of this transaction")
