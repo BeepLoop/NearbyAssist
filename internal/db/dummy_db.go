@@ -245,8 +245,16 @@ func (d *DummyDatabase) NewApplicationProof(data *models.ApplicationProofModel) 
 	return 0, nil
 }
 
+func (m *DummyDatabase) FindAllIdentityVerification() ([]response.AllVerification, error) {
+	return nil, nil
+}
+
 func (m *DummyDatabase) NewIdentityVerification(model *models.IdentityVerificationModel) (int, error) {
 	return 0, nil
+}
+
+func (m *DummyDatabase) FindIdentityVerificationById(id int) (*models.IdentityVerificationModel, error) {
+	return nil, nil
 }
 
 func (m *DummyDatabase) NewFrontId(model *models.FrontIdModel) (int, error) {

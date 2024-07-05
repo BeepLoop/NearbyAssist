@@ -72,4 +72,16 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 			system.GET("/count", handler.HandleSystemComplaintCount)
 		}
 	}
+
+	verification := r.Group("/verification")
+	{
+		handler := handlers.NewVerificationHandler(s)
+
+		identity := verification.Group("/identity")
+		{
+			identity.GET("/", handler.HandleGetAllIdentityVerification)
+			identity.GET("", handler.HandleGetAllIdentityVerification)
+			identity.GET("/:verificationId", handler.HandleGetIdentityVerification)
+		}
+	}
 }

@@ -95,7 +95,9 @@ type Database interface {
 	NewApplicationProof(data *models.ApplicationProofModel) (int, error)
 
 	// Verification Queries
+	FindAllIdentityVerification() ([]response.AllVerification, error)
 	NewIdentityVerification(model *models.IdentityVerificationModel) (int, error)
+	FindIdentityVerificationById(id int) (*models.IdentityVerificationModel, error)
 	NewFrontId(model *models.FrontIdModel) (int, error)
 	NewBackId(model *models.BackIdModel) (int, error)
 	NewFace(model *models.FaceModel) (int, error)

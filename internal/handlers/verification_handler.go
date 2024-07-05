@@ -7,6 +7,7 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -109,5 +110,51 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"message":        "Identity verification submitted.",
 		"verificationId": verificationId,
+	})
+}
+
+func (h *verificationHandler) HandleGetAllIdentityVerification(c echo.Context) error {
+	requests, err := h.server.DB.FindAllIdentityVerification()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"requests": requests,
+	})
+}
+
+func (h *verificationHandler) HandleGetIdentityVerification(c echo.Context) error {
+	verificationId := c.Param("verificationId")
+	id, err := strconv.Atoi(verificationId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Verification ID must be a number")
+	}
+
+	request, err := h.server.DB.FindIdentityVerificationById(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Identity verification not found")
+	}
+
+	if decrypted, err := h.server.Encrypt.DecryptString(request.Name); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		request.Name = decrypted
+	}
+
+	if decrypted, err := h.server.Encrypt.DecryptString(request.Address); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		request.Address = decrypted
+	}
+
+	if decrypted, err := h.server.Encrypt.DecryptString(request.IdNumber); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		request.IdNumber = decrypted
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"request": request,
 	})
 }
