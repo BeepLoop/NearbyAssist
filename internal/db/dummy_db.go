@@ -197,7 +197,7 @@ func (d *DummyDatabase) FindApplicationById(id int) (*models.ApplicationModel, e
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindAllApplication(status models.ApplicationStatus) ([]models.ApplicationModel, error) {
+func (d *DummyDatabase) FindAllApplication(status models.ApplicationStatus) ([]response.Application, error) {
 	return nil, nil
 }
 

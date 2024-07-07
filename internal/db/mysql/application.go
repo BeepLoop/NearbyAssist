@@ -5,6 +5,7 @@ import (
 	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	"time"
 )
 
@@ -90,11 +91,11 @@ func (m *Mysql) FindApplicationById(id int) (*models.ApplicationModel, error) {
 	return application, nil
 }
 
-func (m *Mysql) FindAllApplication(status models.ApplicationStatus) ([]models.ApplicationModel, error) {
+func (m *Mysql) FindAllApplication(status models.ApplicationStatus) ([]response.Application, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, applicantId, job, status, latitude, longitude FROM Application"
+	query := "SELECT id, applicantId, status, createdAt FROM Application"
 
 	switch status {
 	case models.APPLICATION_STATUS_PENDING:
@@ -105,7 +106,7 @@ func (m *Mysql) FindAllApplication(status models.ApplicationStatus) ([]models.Ap
 		query += " WHERE status = 'rejected'"
 	}
 
-	applications := make([]models.ApplicationModel, 0)
+	applications := make([]response.Application, 0)
 	err := m.Conn.SelectContext(ctx, &applications, query)
 	if err != nil {
 		return nil, err

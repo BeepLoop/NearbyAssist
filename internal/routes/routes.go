@@ -93,7 +93,6 @@ func RegisterRoutes(s *server.Server) {
 			application := public.Group("/application")
 			{
 				handler := handlers.NewApplicationHandler(s)
-				application.GET("", handler.HandleGetApplications)
 				application.POST("", handler.HandleNewApplication)
 			}
 
