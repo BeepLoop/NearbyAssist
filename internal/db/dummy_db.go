@@ -177,6 +177,10 @@ func (d *DummyDatabase) FindAllOngoingTransaction(id int, filter models.Transact
 	return nil, nil
 }
 
+func (d *DummyDatabase) FindUserTransactions(id int) ([]*models.DetailedTransactionModel, error) {
+	return nil, nil
+}
+
 func (d *DummyDatabase) FindTransactionById(id int) (*models.TransactionModel, error) {
 	return nil, nil
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
@@ -21,9 +22,34 @@ func NewTransactionHandler(server *server.Server) *transactionHandler {
 	}
 }
 
-func (h *transactionHandler) HandleBaseRoute(c echo.Context) error {
+func (h *transactionHandler) HandleGetTransactions(c echo.Context) error {
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	transactions, err := h.server.DB.FindUserTransactions(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while fetching transactions")
+	}
+
+	for _, transaction := range transactions {
+		if decrypted, err := h.server.Encrypt.DecryptString(transaction.Client); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+		} else {
+			transaction.Client = decrypted
+		}
+
+		if decrypted, err := h.server.Encrypt.DecryptString(transaction.Vendor); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+		} else {
+			transaction.Vendor = decrypted
+		}
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"message": "Transaction base route",
+		"transactions": transactions,
 	})
 }
 

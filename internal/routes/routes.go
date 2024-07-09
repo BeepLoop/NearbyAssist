@@ -79,7 +79,7 @@ func RegisterRoutes(s *server.Server) {
 			transaction := public.Group("/transactions")
 			{
 				handler := handlers.NewTransactionHandler(s)
-				transaction.GET("", handler.HandleBaseRoute)
+				transaction.GET("", handler.HandleGetTransactions)
 				transaction.POST("", handler.HandleNewTransaction)
 				transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
 				// TODO: maybepublic.factor this to be basev1.ute that takes in the following

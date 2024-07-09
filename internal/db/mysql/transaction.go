@@ -97,7 +97,6 @@ func (m *Mysql) FindAllOngoingTransaction(id int, filter models.TransactionFilte
             t.id,
             uVendor.name as vendor,
             uClient.name as client,
-            s.title as service,
             t.status
         FROM
             Transaction t
@@ -129,6 +128,38 @@ func (m *Mysql) FindAllOngoingTransaction(id int, filter models.TransactionFilte
 	return transactions, nil
 }
 
+func (m *Mysql) FindUserTransactions(id int) ([]*models.DetailedTransactionModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT
+            t.id,
+            uVendor.name as vendor,
+            uClient.name as client,
+            t.createdAt as createdAt,
+            t.status
+        FROM
+            Transaction t
+            LEFT JOIN User uVendor ON uVendor.id = t.vendorId
+            LEFT JOIN User uClient ON uClient.id = t.clientId
+            LEFT JOIN Service s ON s.id = t.serviceId
+        WHERE
+            t.clientId = ? OR t.vendorId = ?
+    `
+
+	transactions := make([]*models.DetailedTransactionModel, 0)
+	if err := m.Conn.SelectContext(ctx, &transactions, query, id, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return transactions, nil
+}
+
 func (m *Mysql) GetTransactionHistory(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -138,13 +169,13 @@ func (m *Mysql) GetTransactionHistory(id int, filter models.TransactionFilter) (
             t.id,
             uVendor.name as vendor,
             uClient.name as client,
-            s.title as service,
+            t.createdAt as createdAt,
             t.status
         FROM
             Transaction t
-        LEFT JOIN User uVendor ON uVendor.id = t.vendorId
-        LEFT JOIN User uClient ON uClient.id = t.clientId
-        LEFT JOIN Service s ON s.id = t.serviceId
+            LEFT JOIN User uVendor ON uVendor.id = t.vendorId
+            LEFT JOIN User uClient ON uClient.id = t.clientId
+            LEFT JOIN Service s ON s.id = t.serviceId
         WHERE status = 'done' OR status = 'cancelled'
     `
 

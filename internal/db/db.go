@@ -66,6 +66,7 @@ type Database interface {
 	CreateTransaction(transaction *request.NewTransaction) (int, error)
 	CompleteTransaction(id int) error
 	FindAllOngoingTransaction(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error)
+    FindUserTransactions(id int) ([]*models.DetailedTransactionModel, error)
 	FindTransactionById(id int) (*models.TransactionModel, error)
 	GetTransactionHistory(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error)
 
