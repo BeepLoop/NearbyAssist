@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
@@ -335,7 +336,7 @@ func (m *Mysql) FindServiceOwner(id int) (*response.ServiceOwner, error) {
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
-	}
+    }
 
 	return owner, nil
 }
@@ -358,16 +359,23 @@ func (m *Mysql) GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceS
             JOIN Service s ON s.id = st.serviceId
             JOIN User u ON u.id = s.vendorId
         WHERE
-            st.tagId = (SELECT id from Tag WHERE title = ?)
-        AND
-            ST_Distance_Sphere(
-                POINT(s.longitude, s.latitude),
-                POINT(?, ?)
-            ) < ?
     `
 
+	tagCondition := ""
+	for i, tag := range params.Query {
+		if i == 0 {
+			tagCondition += fmt.Sprintf(" st.tagId = (SELECT id from Tag WHERE title = '%s')", tag)
+			continue
+		}
+		tagCondition += fmt.Sprintf(" OR st.tagId = (SELECT id from Tag WHERE title = '%s')", tag)
+	}
+
+	distanceCondition := fmt.Sprintf(" AND ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(%v, %v)) < ?", params.Longitude, params.Latitude)
+
+	query += tagCondition + distanceCondition
+
 	services := make([]*models.ServiceSearchResult, 0)
-	err := m.Conn.SelectContext(ctx, &services, query, params.Query, params.Longitude, params.Latitude, params.Radius)
+	err := m.Conn.SelectContext(ctx, &services, query, params.Radius)
 	if err != nil {
 		return nil, err
 	}
