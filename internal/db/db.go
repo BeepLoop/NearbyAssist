@@ -26,6 +26,7 @@ type Database interface {
 
 	// User Queries
 	CountUser() (int, error)
+	CheckUserVerification(id int) (bool, error)
 	FindUserById(id int) (*models.UserModel, error)
 	FindUserByEmailHash(hash string) (*models.UserModel, error)
 	NewUser(user *models.UserModel) (int, error)
@@ -66,7 +67,7 @@ type Database interface {
 	CreateTransaction(transaction *request.NewTransaction) (int, error)
 	CompleteTransaction(id int) error
 	FindAllOngoingTransaction(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error)
-    FindUserTransactions(id int) ([]*models.DetailedTransactionModel, error)
+	FindUserTransactions(id int) ([]*models.DetailedTransactionModel, error)
 	FindTransactionById(id int) (*models.TransactionModel, error)
 	GetTransactionHistory(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error)
 

@@ -26,6 +26,24 @@ func (h *userHandler) HandleBaseRoute(c echo.Context) error {
 	})
 }
 
+func (h *userHandler) HandleCheckVerification(c echo.Context) error {
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error getting user ID from JWT")
+	}
+
+	isVerified, err := h.server.DB.CheckUserVerification(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error checking user verification")
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"userId": userId,
+		"verified": isVerified,
+	})
+}
+
 func (h *userHandler) HandleGetUser(c echo.Context) error {
 	userId := c.Param("userId")
 	id, err := strconv.Atoi(userId)

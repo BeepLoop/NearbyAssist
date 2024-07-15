@@ -53,6 +53,10 @@ func (d *DummyDatabase) NewStaff(staff *models.AdminModel) (int, error) {
 	return 0, nil
 }
 
+func (d *DummyDatabase) CheckUserVerification(id int) (bool, error) {
+	return false, nil
+}
+
 func (d *DummyDatabase) CountUser() (int, error) {
 	return 0, nil
 }

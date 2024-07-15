@@ -29,11 +29,29 @@ func (m *Mysql) NewUser(user *models.UserModel) (int, error) {
 	return int(id), nil
 }
 
+func (m *Mysql) CheckUserVerification(id int) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "SELECT verified FROM User WHERE id = ?"
+
+	var verified bool
+	if err := m.Conn.GetContext(ctx, &verified, query, id); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return false, nil
+}
+
 func (m *Mysql) FindUserById(id int) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, name, email, imageUrl FROM User WHERE id = ?"
+	query := "SELECT id, name, email, imageUrl, verified FROM User WHERE id = ?"
 
 	user := models.NewUserModel()
 	err := m.Conn.GetContext(ctx, user, query, id)

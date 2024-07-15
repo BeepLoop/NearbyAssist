@@ -22,6 +22,7 @@ type TransactionModel struct {
 	End        string            `json:"end" db:"end" validate:"required"`
 	Status     TransactionStatus `json:"status" db:"status"`
 	IsReviewed bool              `json:"isReviewed" db:"isReviewed"`
+	IsReported bool              `json:"isReported" db:"isReported"`
 }
 
 func NewTransactionModel() *TransactionModel {
