@@ -5,7 +5,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -39,19 +38,19 @@ func (h *userHandler) HandleCheckVerification(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"userId": userId,
+		"userId":   userId,
 		"verified": isVerified,
 	})
 }
 
-func (h *userHandler) HandleGetUser(c echo.Context) error {
-	userId := c.Param("userId")
-	id, err := strconv.Atoi(userId)
+func (h *userHandler) HandleGetMyDetails(c echo.Context) error {
+	authHeader := c.Request().Header.Get("Authorization")
+	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error getting user ID from JWT")
 	}
 
-	user, err := h.server.DB.FindUserById(id)
+	user, err := h.server.DB.FindUserById(userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}

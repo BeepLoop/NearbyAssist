@@ -44,7 +44,7 @@ func (m *Mysql) CheckUserVerification(id int) (bool, error) {
 		return false, context.DeadlineExceeded
 	}
 
-	return false, nil
+	return verified, nil
 }
 
 func (m *Mysql) FindUserById(id int) (*models.UserModel, error) {
@@ -70,7 +70,7 @@ func (m *Mysql) FindUserByEmailHash(hash string) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, name, email, imageUrl FROM User WHERE emailHash = ?"
+	query := "SELECT id, name, email, imageUrl, verified FROM User WHERE emailHash = ?"
 
 	user := models.NewUserModel()
 	if err := m.Conn.GetContext(ctx, user, query, hash); err != nil {

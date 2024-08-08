@@ -24,7 +24,7 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 
 		user.GET("", handler.HandleBaseRoute)
 		user.GET("/count", handler.HandleCount)
-		user.GET("/:userId", handler.HandleGetUser)
+		user.GET("/:userId", handler.HandleGetMyDetails)
 	}
 
 	vendor := r.Group("/vendor")

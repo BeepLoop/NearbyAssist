@@ -139,7 +139,7 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"userId":       user.Id,
+		"user":         user,
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	})

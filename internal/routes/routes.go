@@ -47,6 +47,7 @@ func RegisterRoutes(s *server.Server) {
 			{
 				handler := handlers.NewUserHandler(s)
 				user.GET("", handler.HandleCheckVerification)
+                user.GET("/me", handler.HandleGetMyDetails)
 			}
 
 			vendor := public.Group("/vendors")
