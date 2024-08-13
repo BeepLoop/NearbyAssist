@@ -47,7 +47,7 @@ func RegisterRoutes(s *server.Server) {
 			{
 				handler := handlers.NewUserHandler(s)
 				user.GET("", handler.HandleCheckVerification)
-                user.GET("/me", handler.HandleGetMyDetails)
+				user.GET("/me", handler.HandleGetMyDetails)
 			}
 
 			vendor := public.Group("/vendors")
@@ -55,12 +55,6 @@ func RegisterRoutes(s *server.Server) {
 				handler := handlers.NewVendorHandler(s)
 				vendor.GET("", handler.HandleBaseRoute)
 				vendor.GET("/:vendorId", handler.HandleGetVendor)
-			}
-
-			tags := public.Group("/tags")
-			{
-				handler := handlers.NewTagHandler(s)
-				tags.GET("", handler.HandleGetTags)
 			}
 
 			service := public.Group("/services")
@@ -135,6 +129,12 @@ func RegisterRoutes(s *server.Server) {
 				verification.POST("/identity", handler.HandleVerifyIdentity)
 			}
 		}
+	}
+
+	tags := s.Echo.Group("/tags")
+	{
+		handler := handlers.NewTagHandler(s)
+		tags.GET("", handler.HandleGetTags)
 	}
 
 	// websocket route
