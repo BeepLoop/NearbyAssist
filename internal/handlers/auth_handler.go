@@ -93,6 +93,10 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 	}
 
 	emailHash, err := h.server.Hash.Hash([]byte(req.Email))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	}
+
 	user, err := h.server.DB.FindUserByEmailHash(emailHash)
 	if err != nil && user == nil {
 		model := &models.UserModel{
@@ -116,9 +120,10 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		} else {
 			user = &models.UserModel{
-				Model: models.Model{Id: id},
-				Name:  req.Name,
-				Email: req.Email,
+				Model:    models.Model{Id: id},
+				Name:     req.Name,
+				Email:    req.Email,
+				ImageUrl: req.Image,
 			}
 		}
 	}
@@ -139,7 +144,13 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"user":         user,
+		"user": &models.UserModel{
+			Model:    models.Model{Id: user.Id},
+			Name:     req.Name,
+			Email:    req.Email,
+			ImageUrl: req.Image,
+			Verified: user.Verified,
+		},
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	})
