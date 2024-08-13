@@ -17,6 +17,7 @@ func NewSha() *sha {
 }
 
 func (h *sha) Hash(value []byte) (string, error) {
+    h.hasher.Reset()
 	if _, err := h.hasher.Write(value); err != nil {
 		return "", err
 	}
