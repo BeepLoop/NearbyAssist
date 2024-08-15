@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -95,9 +96,24 @@ func (h *chatHandler) HandleGetConversations(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	conversations, err := h.server.DB.GetAllUserConversations(userId)
+	initialResult, err := h.server.DB.GetAllUserConversations(userId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error getting conversations")
+	}
+
+	conversations := make([]*response.Conversation, 0)
+	for _, entry := range initialResult {
+
+		name, err := h.server.Encrypt.DecryptString(entry.Name)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		conversations = append(conversations, &response.Conversation{
+			UserId:   entry.Id,
+			Name:     name,
+			ImageUrl: entry.ImageUrl,
+		})
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

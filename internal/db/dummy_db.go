@@ -233,7 +233,7 @@ func (d *DummyDatabase) GetMessages(senderId, receiverId int) ([]models.MessageM
 	return nil, nil
 }
 
-func (d *DummyDatabase) GetAllUserConversations(userId int) ([]models.UserModel, error) {
+func (d *DummyDatabase) GetAllUserConversations(userId int) ([]*models.UserModel, error) {
 	return nil, nil
 }
 

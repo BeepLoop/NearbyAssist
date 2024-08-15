@@ -86,7 +86,7 @@ type Database interface {
 
 	// Message Queries
 	GetMessages(senderId, receiverId int) ([]models.MessageModel, error)
-	GetAllUserConversations(userId int) ([]models.UserModel, error)
+	GetAllUserConversations(userId int) ([]*models.UserModel, error)
 	NewMessage(message models.MessageModel) (int, error)
 
 	// Service Photo Queries

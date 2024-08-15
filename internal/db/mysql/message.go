@@ -72,7 +72,7 @@ func (m *Mysql) GetMessages(senderId, receiverId int) ([]models.MessageModel, er
 	return messages, nil
 }
 
-func (m *Mysql) GetAllUserConversations(userId int) ([]models.UserModel, error) {
+func (m *Mysql) GetAllUserConversations(userId int) ([]*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -89,7 +89,7 @@ func (m *Mysql) GetAllUserConversations(userId int) ([]models.UserModel, error) 
             u.id <> ?
     `
 
-	conversations := make([]models.UserModel, 0)
+	conversations := make([]*models.UserModel, 0)
 	err := m.Conn.SelectContext(ctx, &conversations, query, userId)
 	if err != nil {
 		return nil, err
