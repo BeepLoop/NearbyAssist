@@ -1,7 +1,7 @@
 package response
 
 type SearchResult struct {
-	Id             int     `json:"id"`
+	Id             string  `json:"id"`
 	Suggestability float32 `json:"suggestability"`
 	Rank           int     `json:"rank"`
 	Vendor         string  `json:"vendor"`

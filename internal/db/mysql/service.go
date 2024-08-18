@@ -30,7 +30,7 @@ func (m *Mysql) CountServices() (int, error) {
 	return count, nil
 }
 
-func (m *Mysql) FindServiceById(id int) (*response.ServiceDetails, error) {
+func (m *Mysql) FindServiceById(serviceId string) (*response.ServiceDetails, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -48,7 +48,7 @@ func (m *Mysql) FindServiceById(id int) (*response.ServiceDetails, error) {
     `
 
 	service := &response.ServiceDetails{}
-	if err := m.Conn.GetContext(ctx, service, query, id); err != nil {
+	if err := m.Conn.GetContext(ctx, service, query, serviceId); err != nil {
 		return nil, err
 	}
 
@@ -59,7 +59,7 @@ func (m *Mysql) FindServiceById(id int) (*response.ServiceDetails, error) {
 	return service, nil
 }
 
-func (m *Mysql) FindServiceByVendor(id int) ([]*models.ServiceModel, error) {
+func (m *Mysql) FindServiceByVendor(vendorId string) ([]*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -78,8 +78,7 @@ func (m *Mysql) FindServiceByVendor(id int) ([]*models.ServiceModel, error) {
     `
 
 	services := make([]*models.ServiceModel, 0)
-	err := m.Conn.SelectContext(ctx, &services, query, id)
-	if err != nil {
+	if err := m.Conn.SelectContext(ctx, &services, query, vendorId); err != nil {
 		return nil, err
 	}
 
@@ -121,21 +120,22 @@ func (m *Mysql) FindAllService() ([]*models.ServiceModel, error) {
 	return services, nil
 }
 
-func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
+func (m *Mysql) RegisterService(service *request.NewService) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	tx, err := m.Conn.BeginTxx(ctx, nil)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	registerService := `
 	        INSERT INTO
 	            Service
-	                (vendorId, description, rate, latitude, longitude)
+	                (id, vendorId, description, rate, latitude, longitude)
 	        VALUES 
                 (
+                    :id,
                     :vendorId,
                     :description,
                     :rate,
@@ -144,18 +144,12 @@ func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
                 )
 	    `
 
-	res, err := tx.NamedExecContext(ctx, registerService, service)
-	if err != nil {
+	if _, err := tx.NamedExecContext(ctx, registerService, service); err != nil {
 		if err := tx.Rollback(); err != nil {
-			return 0, err
+			return "", err
 		}
 
-		return 0, err
-	}
-
-	serviceId, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	registerTag := `
@@ -170,7 +164,7 @@ func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
 
 	var tagErr error
 	for _, tag := range service.Tags {
-		if _, err := tx.ExecContext(ctx, registerTag, serviceId, tag); err != nil {
+		if _, err := tx.ExecContext(ctx, registerTag, service.Id, tag); err != nil {
 			tagErr = err
 			break
 		}
@@ -178,23 +172,23 @@ func (m *Mysql) RegisterService(service *request.NewService) (int, error) {
 
 	if tagErr != nil {
 		if err := tx.Rollback(); err != nil {
-			return 0, err
+			return "", err
 		}
 
-		return 0, err
+		return "", err
 	}
 
 	if err := tx.Commit(); err != nil {
 		if err := tx.Rollback(); err != nil {
-			return 0, err
+			return "", err
 		}
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(serviceId), nil
+	return service.Id, nil
 }
 
 func (m *Mysql) UpdateService(service *request.UpdateService) error {
@@ -295,14 +289,12 @@ func (m *Mysql) UpdateService(service *request.UpdateService) error {
 	return nil
 }
 
-func (m *Mysql) DeleteService(id int) error {
+func (m *Mysql) DeleteService(serviceId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "DELETE FROM Service WHERE id = ?"
-
-	_, err := m.Conn.ExecContext(ctx, query, id)
-	if err != nil {
+	if _, err := m.Conn.ExecContext(ctx, query, serviceId); err != nil {
 		return err
 	}
 
@@ -313,7 +305,7 @@ func (m *Mysql) DeleteService(id int) error {
 	return nil
 }
 
-func (m *Mysql) FindServiceOwner(id int) (*response.ServiceOwner, error) {
+func (m *Mysql) FindServiceOwner(serviceId string) (*response.ServiceOwner, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -330,13 +322,13 @@ func (m *Mysql) FindServiceOwner(id int) (*response.ServiceOwner, error) {
     `
 
 	owner := &response.ServiceOwner{}
-	if err := m.Conn.GetContext(ctx, owner, query, id); err != nil {
+	if err := m.Conn.GetContext(ctx, owner, query, serviceId); err != nil {
 		return nil, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
-    }
+	}
 
 	return owner, nil
 }

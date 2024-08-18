@@ -48,7 +48,12 @@ func (h *uploadHandler) HandleNewServicePhoto(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		uploadData := models.NewServicePhotoModel(params["vendorId"], params["serviceId"], url)
+		generatedId, err := h.server.IdGen.Generate()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		uploadData := models.NewServicePhotoModel(generatedId, params["vendorId"], params["serviceId"], url)
 		_, err = h.server.DB.NewServicePhoto(uploadData)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -82,7 +87,12 @@ func (h *uploadHandler) HandleNewProofPhoto(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		uploadData := models.NewApplicationProofModel(params["applicationId"], params["applicantId"], url)
+		generatedId, err := h.server.IdGen.Generate()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		uploadData := models.NewApplicationProofModel(generatedId, params["applicationId"], params["applicantId"], url)
 		_, err = h.server.DB.NewApplicationProof(uploadData)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

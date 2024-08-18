@@ -44,37 +44,28 @@ func (m *Mysql) FindSessionByToken(token string) (*models.SessionModel, error) {
 	return session, nil
 }
 
-func (m *Mysql) NewSession(session *models.SessionModel) (int, error) {
+func (m *Mysql) NewSession(session *models.SessionModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO Session (token) VALUES (:token)"
-
-	res, err := m.Conn.NamedExecContext(ctx, query, session)
-	if err != nil {
-		return -1, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return -1, err
+    query := "INSERT INTO Session (id, token) VALUES (:id, :token)"
+	if _, err := m.Conn.NamedExecContext(ctx, query, session); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return session.Id, nil
 }
 
-func (m *Mysql) LogoutSession(sessionId int) error {
+func (m *Mysql) LogoutSession(sessionId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "UPDATE Session SET status = 'offline' WHERE id = ?"
-
-	_, err := m.Conn.ExecContext(ctx, query, sessionId)
-	if err != nil {
+	if _, err := m.Conn.ExecContext(ctx, query, sessionId); err != nil {
 		return err
 	}
 

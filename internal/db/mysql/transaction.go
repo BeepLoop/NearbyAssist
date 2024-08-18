@@ -35,49 +35,36 @@ func (m *Mysql) CountTransaction(status models.TransactionStatus) (int, error) {
 	return count, nil
 }
 
-func (m *Mysql) CreateTransaction(transaction *request.NewTransaction) (int, error) {
+func (m *Mysql) CreateTransaction(transaction *request.NewTransaction) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         INSERT INTO
-            Transaction (vendorId, clientId, serviceId, start, end)
+            Transaction (id, vendorId, clientId, serviceId, start, end)
         VALUES
-            (:vendorId, :clientId, :serviceId, :start, :end)
+            (:id, :vendorId, :clientId, :serviceId, :start, :end)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, transaction)
-	if err != nil {
-		return -1, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return -1, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, transaction); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return transaction.Id, nil
 }
 
-func (m *Mysql) FindTransactionById(id int) (*models.TransactionModel, error) {
+func (m *Mysql) FindTransactionById(transactionId string) (*models.TransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := `
-        SELECT 
-            *
-        FROM 
-            Transaction 
-        WHERE
-            id = ?
-    `
+	query := "SELECT * FROM Transaction WHERE id = ?"
 
 	transaction := models.NewTransactionModel()
-	if err := m.Conn.GetContext(ctx, transaction, query, id); err != nil {
+	if err := m.Conn.GetContext(ctx, transaction, query, transactionId); err != nil {
 		return nil, err
 	}
 
@@ -88,7 +75,7 @@ func (m *Mysql) FindTransactionById(id int) (*models.TransactionModel, error) {
 	return transaction, nil
 }
 
-func (m *Mysql) FindAllOngoingTransaction(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
+func (m *Mysql) FindAllOngoingTransaction(id string, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -128,7 +115,7 @@ func (m *Mysql) FindAllOngoingTransaction(id int, filter models.TransactionFilte
 	return transactions, nil
 }
 
-func (m *Mysql) FindUserTransactions(id int) ([]*models.DetailedTransactionModel, error) {
+func (m *Mysql) FindUserTransactions(userId string) ([]*models.DetailedTransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -149,7 +136,7 @@ func (m *Mysql) FindUserTransactions(id int) ([]*models.DetailedTransactionModel
     `
 
 	transactions := make([]*models.DetailedTransactionModel, 0)
-	if err := m.Conn.SelectContext(ctx, &transactions, query, id, id); err != nil {
+	if err := m.Conn.SelectContext(ctx, &transactions, query, userId, userId); err != nil {
 		return nil, err
 	}
 
@@ -160,7 +147,7 @@ func (m *Mysql) FindUserTransactions(id int) ([]*models.DetailedTransactionModel
 	return transactions, nil
 }
 
-func (m *Mysql) GetTransactionHistory(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
+func (m *Mysql) GetTransactionHistory(id string, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -201,13 +188,12 @@ func (m *Mysql) GetTransactionHistory(id int, filter models.TransactionFilter) (
 	return transactions, nil
 }
 
-func (m *Mysql) CompleteTransaction(id int) error {
+func (m *Mysql) CompleteTransaction(transactionIid string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "UPDATE Transaction SET status = 'done' WHERE id = ?"
-
-	if _, err := m.Conn.ExecContext(ctx, query, id); err != nil {
+	if _, err := m.Conn.ExecContext(ctx, query, transactionIid); err != nil {
 		return err
 	}
 

@@ -47,7 +47,14 @@ func (h *serviceHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
-	req := &request.NewService{}
+	generatedId, err := h.server.IdGen.Generate()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	req := &request.NewService{
+		Model: models.Model{Id: generatedId},
+	}
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -87,8 +94,7 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 
 func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	serviceId := c.Param("serviceId")
-	id, err := strconv.Atoi(serviceId)
-	if err != nil {
+	if serviceId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
@@ -107,7 +113,7 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
 	} else {
-		req.Id = id
+		req.Id = serviceId
 	}
 
 	// Validate if the service id  is owned by the requester
@@ -137,8 +143,7 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 
 func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 	serviceId := c.Param("serviceId")
-	id, err := strconv.Atoi(serviceId)
-	if err != nil {
+	if serviceId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
@@ -149,7 +154,7 @@ func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 	}
 
 	// Validate if the service is owned by the requester
-	if owner, err := h.server.DB.FindServiceOwner(id); err != nil {
+	if owner, err := h.server.DB.FindServiceOwner(serviceId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	} else {
 		if owner.Id != userId {
@@ -157,7 +162,7 @@ func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 		}
 	}
 
-	if err := h.server.DB.DeleteService(id); err != nil {
+	if err := h.server.DB.DeleteService(serviceId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -218,18 +223,17 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 
 func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	serviceId := c.Param("serviceId")
-	id, err := strconv.Atoi(serviceId)
-	if err != nil {
+	if serviceId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
 	// Get service  info
-	service, err := h.server.DB.FindServiceById(id)
+	service, err := h.server.DB.FindServiceById(serviceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	}
 
-	if tags, err := h.server.DB.FindAllTagByServiceId(id); err != nil {
+	if tags, err := h.server.DB.FindAllTagByServiceId(serviceId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	} else {
 		service.Tags = tags
@@ -285,12 +289,11 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 
 func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
 	vendorId := c.Param("vendorId")
-	id, err := strconv.Atoi(vendorId)
-	if err != nil {
+	if vendorId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "owner ID must be a number")
 	}
 
-	services, err := h.server.DB.FindServiceByVendor(id)
+	services, err := h.server.DB.FindServiceByVendor(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
 	}
@@ -303,12 +306,11 @@ func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
 // takes origin as QueryString ex: origin=lat,long
 func (h *serviceHandler) HandleFindRoute(c echo.Context) error {
 	serviceId := c.Param("serviceId")
-	id, err := strconv.Atoi(serviceId)
-	if err != nil {
+	if serviceId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	service, err := h.server.DB.FindServiceById(id)
+	service, err := h.server.DB.FindServiceById(serviceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	}

@@ -21,11 +21,11 @@ func (d *DummyDatabase) FindActiveSessionByToken(token string) (*models.SessionM
 	return nil, nil
 }
 
-func (d *DummyDatabase) NewSession(session *models.SessionModel) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) NewSession(session *models.SessionModel) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) LogoutSession(sessionId int) error {
+func (d *DummyDatabase) LogoutSession(sessionId string) error {
 	return nil
 }
 
@@ -41,19 +41,19 @@ func (d *DummyDatabase) FindAdminByUsernameHash(hash string) (*models.AdminModel
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindAdminById(id int) (*models.AdminModel, error) {
+func (d *DummyDatabase) FindAdminById(id string) (*models.AdminModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) NewAdmin(admin *models.AdminModel) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) NewAdmin(admin *models.AdminModel) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) NewStaff(staff *models.AdminModel) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) NewStaff(staff *models.AdminModel) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) CheckUserVerification(id int) (bool, error) {
+func (d *DummyDatabase) CheckUserVerification(id string) (bool, error) {
 	return false, nil
 }
 
@@ -61,7 +61,7 @@ func (d *DummyDatabase) CountUser() (int, error) {
 	return 0, nil
 }
 
-func (d *DummyDatabase) FindUserById(id int) (*models.UserModel, error) {
+func (d *DummyDatabase) FindUserById(id string) (*models.UserModel, error) {
 	return nil, nil
 }
 
@@ -69,27 +69,27 @@ func (d *DummyDatabase) FindUserByEmailHash(hash string) (*models.UserModel, err
 	return nil, nil
 }
 
-func (d *DummyDatabase) NewUser(user *models.UserModel) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) NewUser(user *models.UserModel) (string, error) {
+	return "", nil
 }
 
 func (d *DummyDatabase) CountVendor(filter models.VendorStatus) (int, error) {
 	return 0, nil
 }
 
-func (d *DummyDatabase) FindVendorById(id int) (*models.VendorModel, error) {
+func (d *DummyDatabase) FindVendorById(id string) (*models.VendorModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindVendorByService(id int) (*response.ServiceVendorDetails, error) {
+func (d *DummyDatabase) FindVendorByService(id string) (*response.ServiceVendorDetails, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) RestrictVendor(id int) error {
+func (d *DummyDatabase) RestrictVendor(id string) error {
 	return nil
 }
 
-func (d *DummyDatabase) UnrestrictVendor(id int) error {
+func (d *DummyDatabase) UnrestrictVendor(id string) error {
 	return nil
 }
 
@@ -97,7 +97,7 @@ func (d *DummyDatabase) FindAllTags() ([]models.TagModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindAllTagByServiceId(serviceId int) ([]string, error) {
+func (d *DummyDatabase) FindAllTagByServiceId(serviceId string) ([]string, error) {
 	return nil, nil
 }
 
@@ -105,11 +105,11 @@ func (d *DummyDatabase) CountServices() (int, error) {
 	return 0, nil
 }
 
-func (d *DummyDatabase) FindServiceById(id int) (*response.ServiceDetails, error) {
+func (d *DummyDatabase) FindServiceById(id string) (*response.ServiceDetails, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindServiceByVendor(id int) ([]*models.ServiceModel, error) {
+func (d *DummyDatabase) FindServiceByVendor(id string) ([]*models.ServiceModel, error) {
 	return nil, nil
 }
 
@@ -117,15 +117,15 @@ func (d *DummyDatabase) FindAllService() ([]*models.ServiceModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) RegisterService(service *request.NewService) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) RegisterService(service *request.NewService) (string, error) {
+	return "", nil
 }
 
 func (d *DummyDatabase) UpdateService(service *request.UpdateService) error {
 	return nil
 }
 
-func (d *DummyDatabase) DeleteService(id int) error {
+func (d *DummyDatabase) DeleteService(id string) error {
 	return nil
 }
 
@@ -133,7 +133,7 @@ func (d *DummyDatabase) GeoSpatialSearch(params *types.SearchParams) ([]*models.
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindServiceOwner(id int) (*response.ServiceOwner, error) {
+func (d *DummyDatabase) FindServiceOwner(id string) (*response.ServiceOwner, error) {
 	return nil, nil
 }
 
@@ -145,23 +145,23 @@ func (m *DummyDatabase) FindAllSystemComplaints() ([]*response.SystemComplaint, 
 	return nil, nil
 }
 
-func (m *DummyDatabase) FindSystemComplaintById(id int) (*models.SystemComplaintModel, error) {
+func (m *DummyDatabase) FindSystemComplaintById(id string) (*models.SystemComplaintModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) FileVendorComplaint(complaint *request.NewComplaint) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) FileVendorComplaint(complaint *request.NewComplaint) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) FileSystemComplaint(complaint *request.SystemComplaint) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) FileSystemComplaint(complaint *request.SystemComplaint) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) NewSystemComplaintImage(model *models.SystemComplaintImageModel) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) FindSystemComplaintImagesByComplaintId(id int) ([]models.SystemComplaintImageModel, error) {
+func (d *DummyDatabase) FindSystemComplaintImagesByComplaintId(id string) ([]models.SystemComplaintImageModel, error) {
 	return nil, nil
 }
 
@@ -169,27 +169,27 @@ func (d *DummyDatabase) CountTransaction(status models.TransactionStatus) (int, 
 	return 0, nil
 }
 
-func (d *DummyDatabase) CreateTransaction(transaction *request.NewTransaction) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) CreateTransaction(transaction *request.NewTransaction) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) CompleteTransaction(id int) error {
+func (d *DummyDatabase) CompleteTransaction(id string) error {
 	return nil
 }
 
-func (d *DummyDatabase) FindAllOngoingTransaction(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
+func (d *DummyDatabase) FindAllOngoingTransaction(id string, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindUserTransactions(id int) ([]*models.DetailedTransactionModel, error) {
+func (d *DummyDatabase) FindUserTransactions(id string) ([]*models.DetailedTransactionModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindTransactionById(id int) (*models.TransactionModel, error) {
+func (d *DummyDatabase) FindTransactionById(id string) (*models.TransactionModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) GetTransactionHistory(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
+func (d *DummyDatabase) GetTransactionHistory(id string, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error) {
 	return nil, nil
 }
 
@@ -197,11 +197,11 @@ func (d *DummyDatabase) CountApplication(status models.ApplicationStatus) (int, 
 	return 0, nil
 }
 
-func (d *DummyDatabase) CreateApplication(application *request.NewApplication) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) CreateApplication(application *request.NewApplication) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) FindApplicationById(id int) (*models.ApplicationModel, error) {
+func (d *DummyDatabase) FindApplicationById(id string) (*models.ApplicationModel, error) {
 	return nil, nil
 }
 
@@ -209,70 +209,70 @@ func (d *DummyDatabase) FindAllApplication(status models.ApplicationStatus) ([]r
 	return nil, nil
 }
 
-func (d *DummyDatabase) ApproveApplication(id int) error {
+func (d *DummyDatabase) ApproveApplication(id string) error {
 	return nil
 }
 
-func (d *DummyDatabase) RejectApplication(id int) error {
+func (d *DummyDatabase) RejectApplication(id string) error {
 	return nil
 }
 
-func (d *DummyDatabase) CreateReview(review *request.NewReview) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) CreateReview(review *request.NewReview) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) FindReviewById(id int) (*models.ReviewModel, error) {
+func (d *DummyDatabase) FindReviewById(id string) (*models.ReviewModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) FindAllReviewByService(id int) ([]models.ReviewModel, error) {
+func (d *DummyDatabase) FindAllReviewByService(id string) ([]models.ReviewModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) GetMessages(senderId, receiverId int) ([]models.MessageModel, error) {
+func (d *DummyDatabase) GetMessages(senderId, receiverId string) ([]models.MessageModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) GetAllUserConversations(userId int) ([]*models.UserModel, error) {
+func (d *DummyDatabase) GetAllUserConversations(userId string) ([]*models.UserModel, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) NewMessage(message models.MessageModel) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) NewMessage(message models.MessageModel) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) NewServicePhoto(data *models.ServicePhotoModel) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) NewServicePhoto(data *models.ServicePhotoModel) (string, error) {
+	return "", nil
 }
 
-func (d *DummyDatabase) FindAllPhotosByServiceId(serviceId int) ([]response.ServiceImages, error) {
+func (d *DummyDatabase) FindAllPhotosByServiceId(serviceId string) ([]response.ServiceImages, error) {
 	return nil, nil
 }
 
-func (d *DummyDatabase) NewApplicationProof(data *models.ApplicationProofModel) (int, error) {
-	return 0, nil
+func (d *DummyDatabase) NewApplicationProof(data *models.ApplicationProofModel) (string, error) {
+	return "", nil
 }
 
 func (m *DummyDatabase) FindAllIdentityVerification() ([]response.AllVerification, error) {
 	return nil, nil
 }
 
-func (m *DummyDatabase) NewIdentityVerification(model *models.IdentityVerificationModel) (int, error) {
-	return 0, nil
+func (m *DummyDatabase) NewIdentityVerification(model *models.IdentityVerificationModel) (string, error) {
+	return "", nil
 }
 
-func (m *DummyDatabase) FindIdentityVerificationById(id int) (*models.IdentityVerificationModel, error) {
+func (m *DummyDatabase) FindIdentityVerificationById(id string) (*models.IdentityVerificationModel, error) {
 	return nil, nil
 }
 
-func (m *DummyDatabase) NewFrontId(model *models.FrontIdModel) (int, error) {
-	return 0, nil
+func (m *DummyDatabase) NewFrontId(model *models.FrontIdModel) (string, error) {
+	return "", nil
 }
 
-func (m *DummyDatabase) NewBackId(model *models.BackIdModel) (int, error) {
-	return 0, nil
+func (m *DummyDatabase) NewBackId(model *models.BackIdModel) (string, error) {
+	return "", nil
 }
 
-func (m *DummyDatabase) NewFace(model *models.FaceModel) (int, error) {
-	return 0, nil
+func (m *DummyDatabase) NewFace(model *models.FaceModel) (string, error) {
+    return "", nil
 }

@@ -7,34 +7,28 @@ import (
 	"time"
 )
 
-func (m *Mysql) CreateReview(review *request.NewReview) (int, error) {
+func (m *Mysql) CreateReview(review *request.NewReview) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	tx, err := m.Conn.BeginTxx(ctx, nil)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	insertReview := `
         INSERT INTO
-            Review (serviceId, rating)
+            Review (id, serviceId, rating)
         VALUES
-            (:serviceId, :rating)
+            (:id, :serviceId, :rating)
     `
 
-	res, err := tx.NamedExecContext(ctx, insertReview, review)
-	if err != nil {
+	if _, err := tx.NamedExecContext(ctx, insertReview, review); err != nil {
 		if err := tx.Rollback(); err != nil {
-			return 0, err
+			return "", err
 		}
 
-		return 0, err
-	}
-
-	insertId, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	updateReviewedFlag := `
@@ -48,51 +42,49 @@ func (m *Mysql) CreateReview(review *request.NewReview) (int, error) {
 	_, err = tx.ExecContext(ctx, updateReviewedFlag, review.TransactionId)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
-			return 0, err
+			return "", err
 		}
 
-		return 0, err
+		return "", err
 	}
 
 	if err := tx.Commit(); err != nil {
 		if err := tx.Rollback(); err != nil {
-			return 0, err
+			return "", err
 		}
 
-		return 0, err
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(insertId), nil
+	return review.Id, nil
 }
 
-func (m *Mysql) FindReviewById(id int) (*models.ReviewModel, error) {
+func (m *Mysql) FindReviewById(reviewId string) (*models.ReviewModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, serviceId, rating FROM Review WHERE id = ?"
 
 	review := models.NewReviewModel()
-	err := m.Conn.GetContext(ctx, review, query, id)
-	if err != nil {
+	if err := m.Conn.GetContext(ctx, review, query, reviewId); err != nil {
 		return nil, err
 	}
 
 	return review, nil
 }
 
-func (m *Mysql) FindAllReviewByService(id int) ([]models.ReviewModel, error) {
+func (m *Mysql) FindAllReviewByService(serviceId string) ([]models.ReviewModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, serviceId, rating FROM Review WHERE serviceId = ?"
 
 	reviews := make([]models.ReviewModel, 0)
-	err := m.Conn.SelectContext(ctx, &reviews, query, id)
-	if err != nil {
+	if err := m.Conn.SelectContext(ctx, &reviews, query, serviceId); err != nil {
 		return nil, err
 	}
 

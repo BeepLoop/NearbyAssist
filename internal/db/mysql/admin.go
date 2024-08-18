@@ -12,7 +12,7 @@ func (m *Mysql) FindAdminByUsernameHash(hash string) (*models.AdminModel, error)
 
 	query := "SELECT id, username, password, role FROM Admin WHERE usernameHash = ?"
 
-	admin := models.NewAdminModel()
+	admin := &models.AdminModel{}
 	err := m.Conn.GetContext(ctx, admin, query, hash)
 	if err != nil {
 		return nil, err
@@ -25,13 +25,13 @@ func (m *Mysql) FindAdminByUsernameHash(hash string) (*models.AdminModel, error)
 	return admin, nil
 }
 
-func (m *Mysql) FindAdminById(id int) (*models.AdminModel, error) {
+func (m *Mysql) FindAdminById(id string) (*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, username, password, role FROM Admin WHERE id = ?"
 
-	admin := models.NewAdminModel()
+	admin := &models.AdminModel{}
 	err := m.Conn.GetContext(ctx, admin, query, id)
 	if err != nil {
 		return nil, err
@@ -44,30 +44,23 @@ func (m *Mysql) FindAdminById(id int) (*models.AdminModel, error) {
 	return admin, nil
 }
 
-func (m *Mysql) NewAdmin(admin *models.AdminModel) (int, error) {
-
-	return 0, nil
+func (m *Mysql) NewAdmin(admin *models.AdminModel) (string, error) {
+	// TODO: implement this method
+	return "", nil
 }
 
-func (m *Mysql) NewStaff(staff *models.AdminModel) (int, error) {
+func (m *Mysql) NewStaff(staff *models.AdminModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO Admin (username, password, usernameHash) VALUES (:username, :password, :usernameHash)"
-
-	res, err := m.Conn.NamedExecContext(ctx, query, staff)
-	if err != nil {
-		return 0, err
-	}
-
-	insertId, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	query := "INSERT INTO Admin (id, username, password, usernameHash) VALUES (:id, :username, :password, :usernameHash)"
+	if _, err := m.Conn.NamedExecContext(ctx, query, staff); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(insertId), nil
+	return staff.Id, nil
 }

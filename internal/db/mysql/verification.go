@@ -25,40 +25,34 @@ func (m *Mysql) FindAllIdentityVerification() ([]response.AllVerification, error
 	return requests, nil
 }
 
-func (m *Mysql) NewIdentityVerification(model *models.IdentityVerificationModel) (int, error) {
+func (m *Mysql) NewIdentityVerification(model *models.IdentityVerificationModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
-        INSERT INTO IdentityVerification (name, address, idType, idNumber, frontId, backId, face)
-        VALUES ( :name, :address, :idType, :idNumber, :frontId, :backId, :face)
+        INSERT INTO IdentityVerification (id, name, address, idType, idNumber, frontId, backId, face)
+        VALUES ( :id, :name, :address, :idType, :idNumber, :frontId, :backId, :face)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, model)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, model); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return model.Id, nil
 }
 
-func (m *Mysql) FindIdentityVerificationById(id int) (*models.IdentityVerificationModel, error) {
+func (m *Mysql) FindIdentityVerificationById(identityVerificationId string) (*models.IdentityVerificationModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, name, address, idType, idNumber, frontId, backId, face FROM IdentityVerification WHERE id = ?"
 
 	model := &models.IdentityVerificationModel{}
-	if err := m.Conn.GetContext(ctx, model, query, id); err != nil {
+	if err := m.Conn.GetContext(ctx, model, query, identityVerificationId); err != nil {
 		return nil, err
 	}
 
@@ -69,71 +63,53 @@ func (m *Mysql) FindIdentityVerificationById(id int) (*models.IdentityVerificati
 	return nil, nil
 }
 
-func (m *Mysql) NewFrontId(model *models.FrontIdModel) (int, error) {
+func (m *Mysql) NewFrontId(model *models.FrontIdModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO FrontId (url) VALUES (:url)"
+	query := "INSERT INTO FrontId (id, url) VALUES (:id, :url)"
 
-	res, err := m.Conn.NamedExecContext(ctx, query, model)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, model); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return model.Id, nil
 }
 
-func (m *Mysql) NewBackId(model *models.BackIdModel) (int, error) {
+func (m *Mysql) NewBackId(model *models.BackIdModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO BackId (url) VALUES (:url)"
+	query := "INSERT INTO BackId (id, url) VALUES (:id, :url)"
 
-	res, err := m.Conn.NamedExecContext(ctx, query, model)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, model); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return model.Id, nil
 }
 
-func (m *Mysql) NewFace(model *models.FaceModel) (int, error) {
+func (m *Mysql) NewFace(model *models.FaceModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO Face (url) VALUES (:url)"
+	query := "INSERT INTO Face (id, url) VALUES (:id, :url)"
 
-	res, err := m.Conn.NamedExecContext(ctx, query, model)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, model); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return model.Id, nil
 }

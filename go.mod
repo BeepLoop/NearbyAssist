@@ -13,7 +13,8 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.12.0
-	github.com/stretchr/testify v1.8.4
+	github.com/matoous/go-nanoid/v2 v2.1.0
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.22.0
 )
 

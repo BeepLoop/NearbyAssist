@@ -8,7 +8,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -61,12 +60,11 @@ func (h *complaintHandler) HandleGetSystemComplaint(c echo.Context) error {
 
 func (h *complaintHandler) HandleGetSystemComplaintById(c echo.Context) error {
 	complaintId := c.Param("complaintId")
-	id, err := strconv.Atoi(complaintId)
-	if err != nil {
+	if complaintId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "complaint ID must be a number")
 	}
 
-	complaint, err := h.server.DB.FindSystemComplaintById(id)
+	complaint, err := h.server.DB.FindSystemComplaintById(complaintId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "complaint not found")
 	}
@@ -103,7 +101,13 @@ func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	generatedId, err := h.server.IdGen.Generate()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
 	req := &request.SystemComplaint{
+		Model:  models.Model{Id: generatedId},
 		Title:  title,
 		Detail: detail,
 	}
@@ -137,13 +141,18 @@ func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
 	}
 
 	for _, url := range imageUrl {
+		generatedId, err := h.server.IdGen.Generate()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
 		model := &models.SystemComplaintImageModel{
+			Model:       models.Model{Id: generatedId},
 			ComplaintId: complaintId,
 			Url:         url,
 		}
 
-		_, err := h.server.DB.NewSystemComplaintImage(model)
-		if err != nil {
+		if _, err := h.server.DB.NewSystemComplaintImage(model); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}

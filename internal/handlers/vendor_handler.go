@@ -5,7 +5,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -39,12 +38,11 @@ func (h *vendorHandler) HandleCount(c echo.Context) error {
 
 func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 	vendorId := c.Param("vendorId")
-	id, err := strconv.Atoi(vendorId)
-	if err != nil {
+	if vendorId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	vendor, err := h.server.DB.FindVendorById(id)
+	vendor, err := h.server.DB.FindVendorById(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
 	}
@@ -58,34 +56,30 @@ func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 
 func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 	vendorId := c.Param("vendorId")
-	id, err := strconv.Atoi(vendorId)
-	if err != nil {
+	if vendorId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	err = h.server.DB.RestrictVendor(id)
-	if err != nil {
+	if err := h.server.DB.RestrictVendor(vendorId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"restrictedId": id,
+		"restrictedId": vendorId,
 	})
 }
 
 func (h *vendorHandler) HandleUnrestrict(c echo.Context) error {
 	vendorId := c.Param("vendorId")
-	id, err := strconv.Atoi(vendorId)
-	if err != nil {
+	if vendorId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	err = h.server.DB.UnrestrictVendor(id)
-	if err != nil {
+	if err := h.server.DB.UnrestrictVendor(vendorId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"unrestrictedId": id,
+		"unrestrictedId": vendorId,
 	})
 }

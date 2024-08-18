@@ -8,8 +8,8 @@ import (
 
 type MessageModel struct {
 	Model
-	Sender   int    `json:"sender" db:"sender"`
-	Receiver int    `json:"receiver" db:"receiver"`
+	Sender   string `json:"sender" db:"sender"`
+	Receiver string `json:"receiver" db:"receiver"`
 	Content  string `json:"content" db:"content"`
 }
 

@@ -7,35 +7,29 @@ import (
 	"time"
 )
 
-func (m *Mysql) NewServicePhoto(data *models.ServicePhotoModel) (int, error) {
+func (m *Mysql) NewServicePhoto(data *models.ServicePhotoModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := `
         INSERT INTO
-            ServicePhoto (vendorId, serviceId, url)
+            ServicePhoto (id, vendorId, serviceId, url)
         VALUES
-            (:vendorId, :serviceId, :url)
+            (:id, :vendorId, :serviceId, :url)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, data)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, data); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return data.Id, nil
 }
 
-func (m *Mysql) FindAllPhotosByServiceId(serviceId int) ([]response.ServiceImages, error) {
+func (m *Mysql) FindAllPhotosByServiceId(serviceId string) ([]response.ServiceImages, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -50,8 +44,7 @@ func (m *Mysql) FindAllPhotosByServiceId(serviceId int) ([]response.ServiceImage
     `
 
 	images := make([]response.ServiceImages, 0)
-	err := m.Conn.SelectContext(ctx, &images, query, serviceId)
-	if err != nil {
+	if err := m.Conn.SelectContext(ctx, &images, query, serviceId); err != nil {
 		return nil, err
 	}
 

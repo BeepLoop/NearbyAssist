@@ -20,7 +20,7 @@ type Locatable interface {
 }
 
 type Model struct {
-	Id        int    `json:"id" db:"id"`
+	Id        string `json:"id" db:"id"`
 	CreatedAt string `json:"createdAt" db:"createdAt"`
 }
 

@@ -7,9 +7,9 @@ type IdentityVerificationModel struct {
 	Address  string `json:"address" db:"address" validate:"required"`
 	IdType   string `json:"idType" db:"idType" validate:"required"`
 	IdNumber string `json:"idNumber" db:"idNumber" validate:"required"`
-	FrontId  int    `json:"frontId" db:"frontId" validate:"required"`
-	BackId   int    `json:"backId" db:"backId" validate:"required"`
-	Face     int    `json:"face" db:"face" validate:"required"`
+	FrontId  string `json:"frontId" db:"frontId" validate:"required"`
+	BackId   string `json:"backId" db:"backId" validate:"required"`
+	Face     string `json:"face" db:"face" validate:"required"`
 }
 
 type FrontIdModel struct {

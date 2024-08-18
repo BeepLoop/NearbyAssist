@@ -5,14 +5,14 @@ import (
 )
 
 type AdminJwtClaims struct {
-	AdminId  int       `json:"adminId"`
+	AdminId  string    `json:"adminId"`
 	Username string    `json:"username"`
 	Role     AdminRole `json:"role"`
 	jwt.RegisteredClaims
 }
 
 type UserJwtClaims struct {
-	UserId int    `json:"userId"`
+	UserId string `json:"userId"`
 	Name   string `json:"name"`
 	Email  string `json:"email"`
 	jwt.RegisteredClaims

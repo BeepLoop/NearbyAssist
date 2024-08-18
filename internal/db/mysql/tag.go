@@ -25,7 +25,7 @@ func (m *Mysql) FindAllTags() ([]models.TagModel, error) {
 	return tags, nil
 }
 
-func (m *Mysql) FindAllTagByServiceId(serviceId int) ([]string, error) {
+func (m *Mysql) FindAllTagByServiceId(serviceTagId string) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -40,7 +40,7 @@ func (m *Mysql) FindAllTagByServiceId(serviceId int) ([]string, error) {
     `
 
 	tags := make([]string, 0)
-	if err := m.Conn.SelectContext(ctx, &tags, query, serviceId); err != nil {
+	if err := m.Conn.SelectContext(ctx, &tags, query, serviceTagId); err != nil {
 		return nil, err
 	}
 

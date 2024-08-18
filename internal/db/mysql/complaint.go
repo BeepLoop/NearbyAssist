@@ -45,14 +45,14 @@ func (m *Mysql) FindAllSystemComplaints() ([]*response.SystemComplaint, error) {
 	return complaints, nil
 }
 
-func (m *Mysql) FindSystemComplaintById(id int) (*models.SystemComplaintModel, error) {
+func (m *Mysql) FindSystemComplaintById(systemComplaintId string) (*models.SystemComplaintModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT * FROM SystemComplaint WHERE id = ?"
 
 	complaint := &models.SystemComplaintModel{}
-	if err := m.Conn.GetContext(ctx, complaint, query, id); err != nil {
+	if err := m.Conn.GetContext(ctx, complaint, query, systemComplaintId); err != nil {
 		return nil, err
 	}
 
@@ -63,99 +63,80 @@ func (m *Mysql) FindSystemComplaintById(id int) (*models.SystemComplaintModel, e
 	return complaint, nil
 }
 
-func (m *Mysql) FileVendorComplaint(complaint *request.NewComplaint) (int, error) {
+func (m *Mysql) FileVendorComplaint(complaint *request.NewComplaint) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         INSERT INTO 
-            Complaint (vendorId, code, title, content)
+            Complaint (id, vendorId, code, title, content)
         VALUES
-            (:vendorId, :code, :title, :content)
+            (:id, :vendorId, :code, :title, :content)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, complaint)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, complaint); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return complaint.Id, nil
 }
 
-func (m *Mysql) FileSystemComplaint(complaint *request.SystemComplaint) (int, error) {
-	// TODO: Implement this function
+func (m *Mysql) FileSystemComplaint(complaint *request.SystemComplaint) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         INSERT INTO 
-            SystemComplaint (title, detail)
+            SystemComplaint (id, title, detail)
         VALUES
-            (:title, :detail)
+            (:id, :title, :detail)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, complaint)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, complaint); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return complaint.Id, nil
 }
 
-func (m *Mysql) NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error) {
+func (m *Mysql) NewSystemComplaintImage(model *models.SystemComplaintImageModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         INSERT INTO 
-            SystemComplaintImage (complaintId, url)
+            SystemComplaintImage (id, complaintId, url)
         VALUES
-            (:complaintId, :url)
+            (:id, :complaintId, :url)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, model)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, model); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return model.Id, nil
 }
 
-func (m *Mysql) FindSystemComplaintImagesByComplaintId(id int) ([]models.SystemComplaintImageModel, error) {
+func (m *Mysql) FindSystemComplaintImagesByComplaintId(systemComplaintId string) ([]models.SystemComplaintImageModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT * FROM SystemComplaintImage WHERE complaintId = ?"
 
 	images := make([]models.SystemComplaintImageModel, 0)
-	if err := m.Conn.SelectContext(ctx, &images, query, id); err != nil {
+	if err := m.Conn.SelectContext(ctx, &images, query, systemComplaintId); err != nil {
 		return nil, err
 	}
 

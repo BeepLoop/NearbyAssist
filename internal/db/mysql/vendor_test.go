@@ -42,7 +42,7 @@ func TestFindVendorById(t *testing.T) {
 	query := "SELECT id, vendorId, rating, job, restricted FROM Vendor WHERE id = ?"
 	mock.ExpectQuery(query).WithArgs(1).WillReturnRows(rows)
 
-	vendor, err := db.FindVendorById(1)
+	vendor, err := db.FindVendorById("1")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, vendor)
@@ -64,7 +64,7 @@ func TestRestrictVendor(t *testing.T) {
 	query := "UPDATE Vendor SET restricted = 1 WHERE vendorId = ?"
 	mock.ExpectExec(query).WithArgs(1).WillReturnResult(result)
 
-	err := db.RestrictVendor(1)
+	err := db.RestrictVendor("1")
 
 	assert.NoError(t, err)
 
@@ -83,7 +83,7 @@ func TestUnrestrictVendor(t *testing.T) {
 	query := "UPDATE Vendor SET restricted = 0 WHERE vendorId = ?"
 	mock.ExpectExec(query).WithArgs(1).WillReturnResult(result)
 
-	err := db.UnrestrictVendor(1)
+	err := db.UnrestrictVendor("1")
 
 	assert.NoError(t, err)
 

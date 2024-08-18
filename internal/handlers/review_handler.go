@@ -6,7 +6,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -28,7 +27,14 @@ func (h *reviewHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *reviewHandler) HandleNewReview(c echo.Context) error {
-	req := &request.NewReview{}
+	generatedId, err := h.server.IdGen.Generate()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	req := &request.NewReview{
+		Model: models.Model{Id: generatedId},
+	}
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -76,12 +82,11 @@ func (h *reviewHandler) HandleNewReview(c echo.Context) error {
 
 func (h *reviewHandler) HandleGetReview(c echo.Context) error {
 	reviewId := c.Param("reviewId")
-	id, err := strconv.Atoi(reviewId)
-	if err != nil {
+	if reviewId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "review ID must be a number")
 	}
 
-	review, err := h.server.DB.FindReviewById(id)
+	review, err := h.server.DB.FindReviewById(reviewId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Review not found")
 	}
@@ -93,12 +98,11 @@ func (h *reviewHandler) HandleGetReview(c echo.Context) error {
 
 func (h *reviewHandler) HandleServiceReview(c echo.Context) error {
 	serviceId := c.Param("serviceId")
-	id, err := strconv.Atoi(serviceId)
-	if err != nil {
+	if serviceId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	reviews, err := h.server.DB.FindAllReviewByService(id)
+	reviews, err := h.server.DB.FindAllReviewByService(serviceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	}

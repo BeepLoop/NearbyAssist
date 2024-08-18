@@ -13,96 +13,96 @@ type Database interface {
 	// Session Queries
 	FindSessionByToken(token string) (*models.SessionModel, error)
 	FindActiveSessionByToken(token string) (*models.SessionModel, error)
-	NewSession(session *models.SessionModel) (int, error)
-	LogoutSession(sessionId int) error
+	NewSession(session *models.SessionModel) (string, error)
+	LogoutSession(sessionId string) error
 	BlacklistToken(token string) error
 	FindBlacklistedToken(token string) (*models.BlacklistModel, error)
 
 	// Admin Queries
 	FindAdminByUsernameHash(hash string) (*models.AdminModel, error)
-	FindAdminById(id int) (*models.AdminModel, error)
-	NewAdmin(admin *models.AdminModel) (int, error)
-	NewStaff(staff *models.AdminModel) (int, error)
+	FindAdminById(id string) (*models.AdminModel, error)
+	NewAdmin(admin *models.AdminModel) (string, error)
+	NewStaff(staff *models.AdminModel) (string, error)
 
 	// User Queries
 	CountUser() (int, error)
-	CheckUserVerification(id int) (bool, error)
-	FindUserById(id int) (*models.UserModel, error)
+	CheckUserVerification(userId string) (bool, error)
+	FindUserById(userId string) (*models.UserModel, error)
 	FindUserByEmailHash(hash string) (*models.UserModel, error)
-	NewUser(user *models.UserModel) (int, error)
+	NewUser(user *models.UserModel) (string, error)
 
 	// Vendor Queries
 	CountVendor(filter models.VendorStatus) (int, error)
-	FindVendorById(id int) (*models.VendorModel, error)
-	FindVendorByService(id int) (*response.ServiceVendorDetails, error)
-	RestrictVendor(id int) error
-	UnrestrictVendor(id int) error
+	FindVendorById(vendorId string) (*models.VendorModel, error)
+	FindVendorByService(serviceId string) (*response.ServiceVendorDetails, error)
+	RestrictVendor(vendorId string) error
+	UnrestrictVendor(vendorId string) error
 
 	// Tag Queries
 	FindAllTags() ([]models.TagModel, error)
-	FindAllTagByServiceId(serviceId int) ([]string, error)
+	FindAllTagByServiceId(serviceTagId string) ([]string, error)
 
 	//  Service Queries
-	FindServiceById(id int) (*response.ServiceDetails, error)
-	FindServiceByVendor(id int) ([]*models.ServiceModel, error)
+	FindServiceById(serviceId string) (*response.ServiceDetails, error)
+	FindServiceByVendor(vendorId string) ([]*models.ServiceModel, error)
 	FindAllService() ([]*models.ServiceModel, error)
-	RegisterService(service *request.NewService) (int, error)
+	RegisterService(service *request.NewService) (string, error)
 	UpdateService(service *request.UpdateService) error
-	DeleteService(id int) error
+	DeleteService(serviceId string) error
 	GeoSpatialSearch(params *types.SearchParams) ([]*models.ServiceSearchResult, error)
-	FindServiceOwner(id int) (*response.ServiceOwner, error)
+	FindServiceOwner(serviceId string) (*response.ServiceOwner, error)
 	CountServices() (int, error)
 
 	// Complaint Queries
 	CountSystemComplaint() (int, error)
 	FindAllSystemComplaints() ([]*response.SystemComplaint, error)
-	FindSystemComplaintById(id int) (*models.SystemComplaintModel, error)
-	FileVendorComplaint(complaint *request.NewComplaint) (int, error)
-	FileSystemComplaint(complaint *request.SystemComplaint) (int, error)
-	NewSystemComplaintImage(model *models.SystemComplaintImageModel) (int, error)
-	FindSystemComplaintImagesByComplaintId(id int) ([]models.SystemComplaintImageModel, error)
+	FindSystemComplaintById(systemComplaintId string) (*models.SystemComplaintModel, error)
+	FileVendorComplaint(complaint *request.NewComplaint) (string, error)
+	FileSystemComplaint(complaint *request.SystemComplaint) (string, error)
+	NewSystemComplaintImage(model *models.SystemComplaintImageModel) (string, error)
+	FindSystemComplaintImagesByComplaintId(systemComplaintId string) ([]models.SystemComplaintImageModel, error)
 
 	// Transaction Queries
 	CountTransaction(status models.TransactionStatus) (int, error)
-	CreateTransaction(transaction *request.NewTransaction) (int, error)
-	CompleteTransaction(id int) error
-	FindAllOngoingTransaction(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error)
-	FindUserTransactions(id int) ([]*models.DetailedTransactionModel, error)
-	FindTransactionById(id int) (*models.TransactionModel, error)
-	GetTransactionHistory(id int, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error)
+	CreateTransaction(transaction *request.NewTransaction) (string, error)
+	CompleteTransaction(transactionId string) error
+	FindAllOngoingTransaction(id string, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error)
+	FindUserTransactions(userId string) ([]*models.DetailedTransactionModel, error)
+	FindTransactionById(transactionId string) (*models.TransactionModel, error)
+	GetTransactionHistory(id string, filter models.TransactionFilter) ([]models.DetailedTransactionModel, error)
 
 	// Application Queries
 	CountApplication(status models.ApplicationStatus) (int, error)
-	CreateApplication(application *request.NewApplication) (int, error)
-	FindApplicationById(id int) (*models.ApplicationModel, error)
+	CreateApplication(application *request.NewApplication) (string, error)
+	FindApplicationById(applicationId string) (*models.ApplicationModel, error)
 	FindAllApplication(status models.ApplicationStatus) ([]response.Application, error)
-	ApproveApplication(id int) error
-	RejectApplication(id int) error
+	ApproveApplication(applicationId string) error
+	RejectApplication(applicationId string) error
 
 	// Review Queries
-	CreateReview(review *request.NewReview) (int, error)
-	FindReviewById(id int) (*models.ReviewModel, error)
-	FindAllReviewByService(id int) ([]models.ReviewModel, error)
+	CreateReview(review *request.NewReview) (string, error)
+	FindReviewById(reviewId string) (*models.ReviewModel, error)
+	FindAllReviewByService(serviceId string) ([]models.ReviewModel, error)
 
 	// Message Queries
-	GetMessages(senderId, receiverId int) ([]models.MessageModel, error)
-	GetAllUserConversations(userId int) ([]*models.UserModel, error)
-	NewMessage(message models.MessageModel) (int, error)
+	GetMessages(senderId, receiverId string) ([]models.MessageModel, error)
+	GetAllUserConversations(userId string) ([]*models.UserModel, error)
+	NewMessage(message models.MessageModel) (string, error)
 
 	// Service Photo Queries
-	NewServicePhoto(data *models.ServicePhotoModel) (int, error)
-	FindAllPhotosByServiceId(serviceId int) ([]response.ServiceImages, error)
+	NewServicePhoto(data *models.ServicePhotoModel) (string, error)
+	FindAllPhotosByServiceId(serviceId string) ([]response.ServiceImages, error)
 
 	// Application Proof Queries
-	NewApplicationProof(data *models.ApplicationProofModel) (int, error)
+	NewApplicationProof(data *models.ApplicationProofModel) (string, error)
 
 	// Verification Queries
 	FindAllIdentityVerification() ([]response.AllVerification, error)
-	NewIdentityVerification(model *models.IdentityVerificationModel) (int, error)
-	FindIdentityVerificationById(id int) (*models.IdentityVerificationModel, error)
-	NewFrontId(model *models.FrontIdModel) (int, error)
-	NewBackId(model *models.BackIdModel) (int, error)
-	NewFace(model *models.FaceModel) (int, error)
+	NewIdentityVerification(model *models.IdentityVerificationModel) (string, error)
+	FindIdentityVerificationById(identityVerificationId string) (*models.IdentityVerificationModel, error)
+	NewFrontId(model *models.FrontIdModel) (string, error)
+	NewBackId(model *models.BackIdModel) (string, error)
+	NewFace(model *models.FaceModel) (string, error)
 }
 
 func NewDatabase(conf *config.Config) Database {

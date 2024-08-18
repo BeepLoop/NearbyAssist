@@ -2,20 +2,18 @@ package utils
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
-func GetUploadParams(c echo.Context, params ...string) (map[string]int, error) {
-	paramIds := make(map[string]int)
+func GetUploadParams(c echo.Context, params ...string) (map[string]string, error) {
+	paramIds := make(map[string]string)
 
 	var err error
 	for _, param := range params {
 		paramId := c.QueryParam(param)
 
-		var id int
-		if id, err = strconv.Atoi(paramId); err != nil {
+		if paramId == "" {
 			break
 		}
 
@@ -24,7 +22,7 @@ func GetUploadParams(c echo.Context, params ...string) (map[string]int, error) {
 			break
 		}
 
-		paramIds[param] = id
+		paramIds[param] = paramId
 	}
 
 	if err != nil {

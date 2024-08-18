@@ -7,7 +7,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -55,12 +54,11 @@ func (h *transactionHandler) HandleGetTransactions(c echo.Context) error {
 
 func (h *transactionHandler) HandleGetTransaction(c echo.Context) error {
 	transactionId := c.Param("transactionId")
-	id, err := strconv.Atoi(transactionId)
-	if err != nil {
+	if transactionId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "transaction ID must be a number")
 	}
 
-	transaction, err := h.server.DB.FindTransactionById(id)
+	transaction, err := h.server.DB.FindTransactionById(transactionId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "transaction not found")
 	}
@@ -84,7 +82,14 @@ func (h *transactionHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
-	req := &request.NewTransaction{}
+	generatedId, err := h.server.IdGen.Generate()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	req := &request.NewTransaction{
+		Model: models.Model{Id: generatedId},
+	}
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
 	}
@@ -172,8 +177,7 @@ func (h *transactionHandler) HandleHistory(c echo.Context) error {
 
 func (h *transactionHandler) HandleCompleteTransaction(c echo.Context) error {
 	transactionId := c.Param("transactionId")
-	id, err := strconv.Atoi(transactionId)
-	if err != nil {
+	if transactionId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "transaction ID must be a number")
 	}
 
@@ -183,7 +187,7 @@ func (h *transactionHandler) HandleCompleteTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if transaction, err := h.server.DB.FindTransactionById(id); err != nil {
+	if transaction, err := h.server.DB.FindTransactionById(transactionId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "transaction not found")
 	} else {
 		if transaction.ClientId != userId {
@@ -195,7 +199,7 @@ func (h *transactionHandler) HandleCompleteTransaction(c echo.Context) error {
 		}
 	}
 
-	if err := h.server.DB.CompleteTransaction(id); err != nil {
+	if err := h.server.DB.CompleteTransaction(transactionId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

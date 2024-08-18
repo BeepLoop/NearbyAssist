@@ -5,9 +5,10 @@ import (
 
 	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/db"
+	"nearbyassist/internal/db/mysql"
 	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/hash"
+	"nearbyassist/internal/id_generator"
 	"nearbyassist/internal/routes"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/server"
@@ -24,14 +25,17 @@ func main() {
 	store := storage.NewStorage(config)
 	store.Initialize()
 
+    // Load id generator
+    idGen := id_generator.NewNanoIdGenerator()
+
 	// Load database configuration
-	db := db.NewDatabase(config)
+    db := mysql.NewMysqlDatabase(config)
 
 	// Load authenticator configuration
 	auth := authenticator.NewJWTAuthenticator(config)
 
 	// Load websocket configuration
-	ws := websocket.NewWebsocket(db)
+	ws := websocket.NewWebsocket(db, idGen)
 
 	// Load Routing Engine configuration
 	engine := routing_engine.NewOSRM(config)
@@ -46,7 +50,7 @@ func main() {
 	hash := hash.NewSha()
 
 	// Create and start the server
-	server := server.NewServer(config, ws, db, store, auth, engine, courtier, crypto, hash)
+	server := server.NewServer(config, ws, db, store, auth, engine, courtier, idGen, crypto, hash)
 	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()

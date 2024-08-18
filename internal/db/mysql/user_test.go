@@ -12,7 +12,7 @@ import (
 func TestFindUserById(t *testing.T) {
 	u := &models.UserModel{
 		Model: models.Model{
-			Id: 1,
+			Id: "1",
 		},
 		Name:     "john loyd mulit",
 		Email:    "jlmulit68@gmail.com",
@@ -42,7 +42,7 @@ func TestFindUserById(t *testing.T) {
 func TestFindUserByIdError(t *testing.T) {
 	u := &models.UserModel{
 		Model: models.Model{
-			Id: 1,
+			Id: "1",
 		},
 		Name:     "john loyd mulit",
 		Email:    "jlmulit68@gmail.com",
@@ -70,7 +70,7 @@ func TestFindUserByIdError(t *testing.T) {
 func TestFindUserByEmail(t *testing.T) {
 	u := &models.UserModel{
 		Model: models.Model{
-			Id: 1,
+			Id: "1",
 		},
 		Name:     "john loyd mulit",
 		Email:    "jlmulit68@gmail.com",
@@ -101,7 +101,7 @@ func TestFindUserByEmail(t *testing.T) {
 func TestFindUserByEmailError(t *testing.T) {
 	u := &models.UserModel{
 		Model: models.Model{
-			Id: 1,
+			Id: "1",
 		},
 		Name:     "john loyd mulit",
 		Email:    "jlmulit68@gmail.com",

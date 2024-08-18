@@ -7,7 +7,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -50,7 +49,16 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save front id")
 			}
 
-			if id, err := h.server.DB.NewFrontId(&models.FrontIdModel{Url: url}); err != nil {
+			generatedId, err := h.server.IdGen.Generate()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+			newModel := &models.FrontIdModel{
+				Model: models.Model{Id: generatedId},
+				Url:   url,
+			}
+
+			if id, err := h.server.DB.NewFrontId(newModel); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save front id to db")
 			} else {
 				req.FrontId = id
@@ -61,7 +69,16 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save back id")
 			}
 
-			if id, err := h.server.DB.NewBackId(&models.BackIdModel{Url: url}); err != nil {
+			generatedId, err := h.server.IdGen.Generate()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+			newModel := &models.BackIdModel{
+				Model: models.Model{Id: generatedId},
+				Url:   url,
+			}
+
+			if id, err := h.server.DB.NewBackId(newModel); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save back id to db")
 			} else {
 				req.BackId = id
@@ -72,7 +89,16 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save face")
 			}
 
-			if id, err := h.server.DB.NewFace(&models.FaceModel{Url: url}); err != nil {
+			generatedId, err := h.server.IdGen.Generate()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			}
+			newModel := &models.FaceModel{
+				Model: models.Model{Id: generatedId},
+				Url:   url,
+			}
+
+			if id, err := h.server.DB.NewFace(newModel); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save face to db")
 			} else {
 				req.Face = id
@@ -126,12 +152,11 @@ func (h *verificationHandler) HandleGetAllIdentityVerification(c echo.Context) e
 
 func (h *verificationHandler) HandleGetIdentityVerification(c echo.Context) error {
 	verificationId := c.Param("verificationId")
-	id, err := strconv.Atoi(verificationId)
-	if err != nil {
+	if verificationId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Verification ID must be a number")
 	}
 
-	request, err := h.server.DB.FindIdentityVerificationById(id)
+	request, err := h.server.DB.FindIdentityVerificationById(verificationId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Identity verification not found")
 	}

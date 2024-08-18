@@ -16,6 +16,8 @@ type AdminModel struct {
 	UsernameHash string    `json:"usernameHash" db:"usernameHash"`
 }
 
-func NewAdminModel() *AdminModel {
-	return &AdminModel{}
+func NewAdminModel(userId string) *AdminModel {
+	return &AdminModel{
+		Model: Model{Id: userId},
+	}
 }

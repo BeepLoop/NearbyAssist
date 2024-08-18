@@ -28,8 +28,12 @@ func (h *adminHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *adminHandler) HandleRegisterStaff(c echo.Context) error {
-	// TODO: Implement registering staff accounts
-	req := models.NewAdminModel()
+	generatedId, err := h.server.IdGen.Generate()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	req := models.NewAdminModel(generatedId)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

@@ -37,35 +37,29 @@ func (m *Mysql) CountApplication(status models.ApplicationStatus) (int, error) {
 	return count, nil
 }
 
-func (m *Mysql) CreateApplication(application *request.NewApplication) (int, error) {
+func (m *Mysql) CreateApplication(application *request.NewApplication) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         INSERT INTO
-            Application (applicantId, job, latitude, longitude)
+            Application (id, applicantId, job, latitude, longitude)
         VALUES
-            (:applicantId, :job, :latitude, :longitude)
+            (:id, :applicantId, :job, :latitude, :longitude)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, application)
-	if err != nil {
-		return -1, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return -1, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, application); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return application.Id, nil
 }
 
-func (m *Mysql) FindApplicationById(id int) (*models.ApplicationModel, error) {
+func (m *Mysql) FindApplicationById(applicationId string) (*models.ApplicationModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -79,8 +73,7 @@ func (m *Mysql) FindApplicationById(id int) (*models.ApplicationModel, error) {
     `
 
 	application := models.NewApplicationModel()
-	err := m.Conn.GetContext(ctx, application, query, id)
-	if err != nil {
+	if err := m.Conn.GetContext(ctx, application, query, applicationId); err != nil {
 		return nil, err
 	}
 
@@ -107,8 +100,7 @@ func (m *Mysql) FindAllApplication(status models.ApplicationStatus) ([]response.
 	}
 
 	applications := make([]response.Application, 0)
-	err := m.Conn.SelectContext(ctx, &applications, query)
-	if err != nil {
+	if err := m.Conn.SelectContext(ctx, &applications, query); err != nil {
 		return nil, err
 	}
 
@@ -119,7 +111,7 @@ func (m *Mysql) FindAllApplication(status models.ApplicationStatus) ([]response.
 	return applications, nil
 }
 
-func (m *Mysql) ApproveApplication(id int) error {
+func (m *Mysql) ApproveApplication(applicationId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -130,7 +122,7 @@ func (m *Mysql) ApproveApplication(id int) error {
 
 	updateStatus := "UPDATE Application SET status = 'approved' WHERE id = ?"
 
-	if _, err := tx.ExecContext(ctx, updateStatus, id); err != nil {
+	if _, err := tx.ExecContext(ctx, updateStatus, applicationId); err != nil {
 		rollbackErr := tx.Rollback()
 		if rollbackErr != nil {
 			return errors.New("Failed to approve application and rollback transaction")
@@ -149,7 +141,7 @@ func (m *Mysql) ApproveApplication(id int) error {
             )
     `
 
-	if _, err := tx.ExecContext(ctx, promoteVendor, id, id); err != nil {
+	if _, err := tx.ExecContext(ctx, promoteVendor, applicationId, applicationId); err != nil {
 		rollbackErr := tx.Rollback()
 		if rollbackErr != nil {
 			return errors.New("Failed to promote applicant to vendor and rollback transaction")
@@ -174,14 +166,13 @@ func (m *Mysql) ApproveApplication(id int) error {
 	return nil
 }
 
-func (m *Mysql) RejectApplication(id int) error {
+func (m *Mysql) RejectApplication(applicationId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "UPDATE Application SET status = 'rejected' WHERE id = ?"
 
-	_, err := m.Conn.ExecContext(ctx, query, id)
-	if err != nil {
+	if _, err := m.Conn.ExecContext(ctx, query, applicationId); err != nil {
 		return err
 	}
 

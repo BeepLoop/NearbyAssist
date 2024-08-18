@@ -7,7 +7,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -37,12 +36,11 @@ func (h *chatHandler) HandleGetMessages(c echo.Context) error {
 	}
 
 	otherUser := c.Param("otherUserId")
-	otherUserId, err := strconv.Atoi(otherUser)
-	if err != nil {
+	if otherUser == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "User ID must be a number")
 	}
 
-	messages, err := h.server.DB.GetMessages(userId, otherUserId)
+	messages, err := h.server.DB.GetMessages(userId, otherUser)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -66,7 +64,7 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	}
 
 	h.server.Websocket.Clients[userId] = conn
-	fmt.Printf("userId: %d connected\n", userId)
+	fmt.Printf("userId: %s connected\n", userId)
 
 	for {
 		message := models.NewMessageModel()
@@ -77,7 +75,7 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 					delete(h.server.Websocket.Clients, userId)
 				}
 
-				fmt.Printf("client: %d disconnected\n", userId)
+				fmt.Printf("client: %s disconnected\n", userId)
 				return nil
 			}
 

@@ -7,8 +7,9 @@ type SessionModel struct {
 	Token  string `json:"token" db:"token"`
 }
 
-func NewSessionModel(token string) *SessionModel {
+func NewSessionModel(sessionId, token string) *SessionModel {
 	return &SessionModel{
+		Model: Model{Id: sessionId},
 		Token: token,
 	}
 }

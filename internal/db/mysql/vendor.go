@@ -33,14 +33,14 @@ func (m *Mysql) CountVendor(filter models.VendorStatus) (int, error) {
 	return count, nil
 }
 
-func (m *Mysql) FindVendorById(id int) (*models.VendorModel, error) {
+func (m *Mysql) FindVendorById(userId string) (*models.VendorModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, vendorId, rating, job, restricted FROM Vendor WHERE vendorId = ?"
 
 	vendor := models.NewVendorModel()
-	err := m.Conn.GetContext(ctx, vendor, query, id)
+	err := m.Conn.GetContext(ctx, vendor, query, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (m *Mysql) FindVendorById(id int) (*models.VendorModel, error) {
 	return vendor, nil
 }
 
-func (m *Mysql) FindVendorByService(id int) (*response.ServiceVendorDetails, error) {
+func (m *Mysql) FindVendorByService(serviceId string) (*response.ServiceVendorDetails, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -72,7 +72,7 @@ func (m *Mysql) FindVendorByService(id int) (*response.ServiceVendorDetails, err
     `
 
 	vendor := &response.ServiceVendorDetails{}
-	err := m.Conn.GetContext(ctx, vendor, query, id)
+	err := m.Conn.GetContext(ctx, vendor, query, serviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -84,14 +84,12 @@ func (m *Mysql) FindVendorByService(id int) (*response.ServiceVendorDetails, err
 	return vendor, nil
 }
 
-func (m *Mysql) RestrictVendor(id int) error {
+func (m *Mysql) RestrictVendor(userId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "UPDATE Vendor SET restricted = 1 WHERE vendorId = ?"
-
-	_, err := m.Conn.ExecContext(ctx, query, id)
-	if err != nil {
+	if _, err := m.Conn.ExecContext(ctx, query, userId); err != nil {
 		return err
 	}
 
@@ -102,14 +100,12 @@ func (m *Mysql) RestrictVendor(id int) error {
 	return nil
 }
 
-func (m *Mysql) UnrestrictVendor(id int) error {
+func (m *Mysql) UnrestrictVendor(userId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "UPDATE Vendor SET restricted = 0 WHERE vendorId = ?"
-
-	_, err := m.Conn.ExecContext(ctx, query, id)
-	if err != nil {
+	if _, err := m.Conn.ExecContext(ctx, query, userId); err != nil {
 		return err
 	}
 

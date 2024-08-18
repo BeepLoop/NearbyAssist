@@ -68,7 +68,12 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	session := models.NewSessionModel(refreshToken)
+	generatedId, err := h.server.IdGen.Generate()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	session := models.NewSessionModel(generatedId, refreshToken)
 	if _, err := h.server.DB.NewSession(session); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -102,6 +107,13 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 		model := &models.UserModel{
 			ImageUrl: req.Image,
 			Hash:     emailHash,
+		}
+
+		generatedId, err := h.server.IdGen.Generate()
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error generating ID")
+		} else {
+			model.Id = generatedId
 		}
 
 		if cipher, err := h.server.Encrypt.EncryptString(req.Email); err != nil {
@@ -138,7 +150,12 @@ func (h *authHandler) HandleLogin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	session := models.NewSessionModel(refreshToken)
+    generatedId, err := h.server.IdGen.Generate()
+    if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+    }
+
+	session := models.NewSessionModel(generatedId, refreshToken)
 	if _, err := h.server.DB.NewSession(session); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

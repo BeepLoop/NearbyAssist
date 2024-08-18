@@ -6,37 +6,30 @@ import (
 	"time"
 )
 
-func (m *Mysql) NewUser(user *models.UserModel) (int, error) {
+func (m *Mysql) NewUser(user *models.UserModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO User (name, email, imageUrl, emailHash) VALUES (:name, :email, :imageUrl, :hash)"
-
-	res, err := m.Conn.NamedExecContext(ctx, query, user)
-	if err != nil {
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
+	query := "INSERT INTO User (id, name, email, imageUrl, emailHash) VALUES (:id, :name, :email, :imageUrl, :hash)"
+	if _, err := m.Conn.NamedExecContext(ctx, query, user); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return 0, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return user.Id, nil
 }
 
-func (m *Mysql) CheckUserVerification(id int) (bool, error) {
+func (m *Mysql) CheckUserVerification(userId string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT verified FROM User WHERE id = ?"
 
 	var verified bool
-	if err := m.Conn.GetContext(ctx, &verified, query, id); err != nil {
+	if err := m.Conn.GetContext(ctx, &verified, query, userId); err != nil {
 		return false, err
 	}
 
@@ -47,14 +40,14 @@ func (m *Mysql) CheckUserVerification(id int) (bool, error) {
 	return verified, nil
 }
 
-func (m *Mysql) FindUserById(id int) (*models.UserModel, error) {
+func (m *Mysql) FindUserById(userId string) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, name, email, imageUrl, verified FROM User WHERE id = ?"
 
 	user := models.NewUserModel()
-	err := m.Conn.GetContext(ctx, user, query, id)
+	err := m.Conn.GetContext(ctx, user, query, userId)
 	if err != nil {
 		return nil, err
 	}

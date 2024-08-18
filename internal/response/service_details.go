@@ -3,7 +3,7 @@ package response
 import "nearbyassist/internal/models"
 
 type ServiceDetails struct {
-	ServiceId   int      `json:"serviceId" db:"serviceId"`
+	ServiceId   string   `json:"serviceId" db:"serviceId"`
 	Description string   `json:"description" db:"description"`
 	Tags        []string `json:"tags" db:"tags"`
 	Rate        string   `json:"rate" db:"rate"`
@@ -11,7 +11,7 @@ type ServiceDetails struct {
 }
 
 type ServiceVendorDetails struct {
-	VendorId int    `json:"vendorId" db:"vendorId"`
+	VendorId string `json:"vendorId" db:"vendorId"`
 	Vendor   string `json:"vendor" db:"vendor"`
 	ImageUrl string `json:"imageUrl" db:"imageUrl"`
 	Rating   string `json:"rating" db:"rating"`
@@ -19,7 +19,7 @@ type ServiceVendorDetails struct {
 }
 
 type ServiceImages struct {
-	ImageId  int    `json:"imageId" db:"imageId"`
+	ImageId  string `json:"imageId" db:"imageId"`
 	ImageUrl string `json:"imageUrl" db:"imageUrl"`
 }
 

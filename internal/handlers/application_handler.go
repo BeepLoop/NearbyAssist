@@ -6,7 +6,6 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -36,7 +35,14 @@ func (h *applicationHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *applicationHandler) HandleNewApplication(c echo.Context) error {
-	req := &request.NewApplication{}
+	generatedId, err := h.server.IdGen.Generate()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	req := &request.NewApplication{
+		Model: models.Model{Id: generatedId},
+	}
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "unable to process data provided")
 	}
@@ -82,34 +88,32 @@ func (h *applicationHandler) HandleGetApplications(c echo.Context) error {
 
 func (h *applicationHandler) HandleApprove(c echo.Context) error {
 	applicationId := c.Param("applicationId")
-	id, err := strconv.Atoi(applicationId)
-	if err != nil {
+	if applicationId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	if err = h.server.DB.ApproveApplication(id); err != nil {
+	if err := h.server.DB.ApproveApplication(applicationId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "application not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"message":       "Application approved successfully",
-		"applicationId": id,
+		"applicationId": applicationId,
 	})
 }
 
 func (h *applicationHandler) HandleReject(c echo.Context) error {
 	applicationId := c.Param("applicationId")
-	id, err := strconv.Atoi(applicationId)
-	if err != nil {
+	if applicationId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "application ID must be a number")
 	}
 
-	if err := h.server.DB.RejectApplication(id); err != nil {
+	if err := h.server.DB.RejectApplication(applicationId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "application not found")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"message":       "Application rejected successfully",
-		"applicationId": id,
+		"applicationId": applicationId,
 	})
 }

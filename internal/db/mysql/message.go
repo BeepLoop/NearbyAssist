@@ -6,35 +6,29 @@ import (
 	"time"
 )
 
-func (m *Mysql) NewMessage(message models.MessageModel) (int, error) {
+func (m *Mysql) NewMessage(message models.MessageModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         INSERT INTO
-            Message (sender, receiver, content)
+            Message (id, sender, receiver, content)
         VALUES
-            (:sender, :receiver, :content)
+            (:id, :sender, :receiver, :content)
     `
 
-	res, err := m.Conn.NamedExecContext(ctx, query, message)
-	if err != nil {
-		return -1, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return -1, err
+	if _, err := m.Conn.NamedExecContext(ctx, query, message); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return -1, context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return int(id), nil
+	return message.Id, nil
 }
 
-func (m *Mysql) GetMessages(senderId, receiverId int) ([]models.MessageModel, error) {
+func (m *Mysql) GetMessages(senderId, receiverId string) ([]models.MessageModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -52,7 +46,7 @@ func (m *Mysql) GetMessages(senderId, receiverId int) ([]models.MessageModel, er
     `
 
 	messages := make([]models.MessageModel, 0)
-	err := m.Conn.SelectContext(
+	if err := m.Conn.SelectContext(
 		ctx,
 		&messages,
 		query,
@@ -60,8 +54,7 @@ func (m *Mysql) GetMessages(senderId, receiverId int) ([]models.MessageModel, er
 		receiverId,
 		receiverId,
 		senderId,
-	)
-	if err != nil {
+	); err != nil {
 		return nil, err
 	}
 
@@ -72,7 +65,7 @@ func (m *Mysql) GetMessages(senderId, receiverId int) ([]models.MessageModel, er
 	return messages, nil
 }
 
-func (m *Mysql) GetAllUserConversations(userId int) ([]*models.UserModel, error) {
+func (m *Mysql) GetAllUserConversations(userId string) ([]*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -90,8 +83,7 @@ func (m *Mysql) GetAllUserConversations(userId int) ([]*models.UserModel, error)
     `
 
 	conversations := make([]*models.UserModel, 0)
-	err := m.Conn.SelectContext(ctx, &conversations, query, userId)
-	if err != nil {
+	if err := m.Conn.SelectContext(ctx, &conversations, query, userId); err != nil {
 		return nil, err
 	}
 
