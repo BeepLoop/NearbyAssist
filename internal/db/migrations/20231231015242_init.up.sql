@@ -231,8 +231,6 @@ CREATE TABLE IF NOT EXISTS Application (
     id VARCHAR(255) NOT NULL,
     applicantId VARCHAR(255) NOT NULL UNIQUE,
     job VARCHAR(255) NOT NULL,
-    latitude Double NOT NULL,
-    longitude Double NOT NULL,
     status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

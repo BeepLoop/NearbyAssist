@@ -83,10 +83,6 @@ func RegisterRoutes(s *server.Server) {
 				transaction.GET("", handler.HandleGetTransactions)
 				transaction.POST("", handler.HandleNewTransaction)
 				transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
-				// TODO: maybepublic.factor this to be basev1.ute that takes in the following
-				// userId = can be a client or vendor ID
-				// Filter = view transactions as client or vendor
-				// Status = transaction status (see transaction model for valid status)
 				transaction.GET("/ongoing", handler.HandleOngoingTransaction)
 				transaction.GET("/history", handler.HandleHistory)
 			}
@@ -104,14 +100,6 @@ func RegisterRoutes(s *server.Server) {
 				review.POST("", handler.HandleNewReview)
 				review.GET("/:reviewId", handler.HandleGetReview)
 				review.GET("/service/:serviceId", handler.HandleServiceReview)
-			}
-
-			upload := public.Group("/upload")
-			{
-				handler := handlers.NewUploadHandler(s)
-				upload.GET("", handler.HandleBaseRoute)
-				upload.POST("/service", handler.HandleNewServicePhoto)
-				upload.POST("/proof", handler.HandleNewProofPhoto)
 			}
 
 			chat := public.Group("/chat")
