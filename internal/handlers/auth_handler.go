@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"errors"
+	"nearbyassist/internal/authenticator"
+	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
@@ -10,7 +11,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type authHandler struct {
@@ -28,54 +28,56 @@ func (h *authHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *authHandler) HandleAdminLogin(c echo.Context) error {
-	req := &request.AdminLogin{}
-	err := c.Bind(req)
-	if err != nil {
+	// Bind request body
+	req := new(request.AdminLogin)
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	// Validate required fields
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	usernameHash, err := h.server.Hash.Hash([]byte(req.Username))
-	if err != nil {
+	admin := models.NewAdminModel(h.server.IdGen, h.server.DB)
+	if admin == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if usernameHash, err := h.server.Hash.Hash([]byte(req.Username)); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	}
-
-	admin, err := h.server.DB.FindAdminByUsernameHash(usernameHash)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(req.Password)); err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
-	}
-
-	if decryptedUsername, err := h.server.Encrypt.DecryptString(admin.Username); err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	} else {
-		admin.Username = decryptedUsername
+		admin.UsernameHash = usernameHash
 	}
 
-	accessToken, err := h.server.Auth.GenerateAdminAccessToken(admin)
+	if _, err := admin.FindByUsernameHash(); err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
+	}
+
+	if admin.IsPasswordMatch(req.Password) != true {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
+	}
+
+	accessToken, err := h.server.Auth.GenerateAdminAccessToken(authenticator.AdminOptions{
+		Id:       admin.Id,
+		Username: req.Username,
+		Role:     admin.Role,
+	})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, authenticator.ACCESS_TOKEN_ERR)
 	}
 
 	refreshToken, err := h.server.Auth.GenerateRefreshToken()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, authenticator.REFRESH_TOKEN_ERR)
 	}
 
-	generatedId, err := h.server.IdGen.Generate()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	session := models.NewSessionModel(refreshToken, h.server.IdGen, h.server.DB)
+	if session == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
-
-	session := models.NewSessionModel(generatedId, refreshToken)
-	if _, err := h.server.DB.NewSession(session); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if _, err := session.Create(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error creating session")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -86,124 +88,8 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 	})
 }
 
-func (h *authHandler) HandleLogin(c echo.Context) error {
-	req := &request.UserLogin{}
-	err := c.Bind(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if err = c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	emailHash, err := h.server.Hash.Hash([]byte(req.Email))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	}
-
-	user, err := h.server.DB.FindUserByEmailHash(emailHash)
-	if err != nil && user == nil {
-		model := &models.UserModel{
-			ImageUrl: req.Image,
-			Hash:     emailHash,
-		}
-
-		generatedId, err := h.server.IdGen.Generate()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error generating ID")
-		} else {
-			model.Id = generatedId
-		}
-
-		if cipher, err := h.server.Encrypt.EncryptString(req.Email); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-		} else {
-			model.Email = cipher
-		}
-
-		if cipher, err := h.server.Encrypt.EncryptString(req.Name); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-		} else {
-			model.Name = cipher
-		}
-
-		if id, err := h.server.DB.NewUser(model); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		} else {
-			user = &models.UserModel{
-				Model:    models.Model{Id: id},
-				Name:     req.Name,
-				Email:    req.Email,
-				ImageUrl: req.Image,
-			}
-		}
-	}
-
-	accessToken, err := h.server.Auth.GenerateUserAccessToken(user)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	refreshToken, err := h.server.Auth.GenerateRefreshToken()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-    generatedId, err := h.server.IdGen.Generate()
-    if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-    }
-
-	session := models.NewSessionModel(generatedId, refreshToken)
-	if _, err := h.server.DB.NewSession(session); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusCreated, utils.Mapper{
-		"user": &models.UserModel{
-			Model:    models.Model{Id: user.Id},
-			Name:     req.Name,
-			Email:    req.Email,
-			ImageUrl: req.Image,
-			Verified: user.Verified,
-		},
-		"accessToken":  accessToken,
-		"refreshToken": refreshToken,
-	})
-}
-
-func (h *authHandler) HandleLogout(c echo.Context) error {
-	req := &request.Logout{}
-	err := c.Bind(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if err = c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	session, err := h.server.DB.FindActiveSessionByToken(req.Token)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Session not found")
-	}
-
-	if err := h.server.DB.LogoutSession(session.Id); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := h.server.DB.BlacklistToken(session.Token); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"message": "Logout successful",
-	})
-}
-
-func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
-	req := &request.RefreshToken{}
+func (h *authHandler) HandleClientLogin(c echo.Context) error {
+	req := new(request.UserLogin)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -212,71 +98,198 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if _, err := h.server.DB.FindSessionByToken(req.Token); err != nil {
+	user := models.NewUserModel(h.server.IdGen, h.server.DB)
+	if user == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if emailHash, err := h.server.Hash.Hash([]byte(req.Email)); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
+	} else {
+		user.Hash = emailHash
+	}
+
+	if _, err := user.FindByEmailHash(); err != nil {
+		// Account not found
+
+		if encrypted, err := h.server.Encrypt.EncryptString(req.Name); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+		} else {
+			user.Name = encrypted
+		}
+
+		if encrypted, err := h.server.Encrypt.EncryptString(req.Email); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+		} else {
+			user.Email = encrypted
+		}
+
+		if _, err := user.Create(); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error creating account")
+		}
+	}
+
+	accessToken, err := h.server.Auth.GenerateUserAccessToken(authenticator.UserOptions{
+		Id:    user.Id,
+		Name:  req.Name,
+		Email: req.Email,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, authenticator.ACCESS_TOKEN_ERR)
+	}
+
+	refreshToken, err := h.server.Auth.GenerateRefreshToken()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, authenticator.REFRESH_TOKEN_ERR)
+	}
+
+	session := models.NewSessionModel(refreshToken, h.server.IdGen, h.server.DB)
+	if session == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+	if _, err := session.Create(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error creating session")
+	}
+
+	return c.JSON(http.StatusCreated, utils.Mapper{
+		"user": models.UserModel{
+			Model:    models.Model{Id: user.Id},
+			Name:     req.Name,
+			Email:    req.Email,
+			ImageUrl: req.Image,
+			Verified: user.IsVerified(),
+		},
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
+	})
+}
+
+func (h *authHandler) HandleLogout(c echo.Context) error {
+	req := new(request.Logout)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	session := models.NewSessionModel(req.Token, h.server.IdGen, h.server.DB)
+	if session == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if _, err := session.GetIfActive(); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "No active session found")
+	}
+
+	if err := session.Logout(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error logging out session")
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"message": "Logout successful",
+	})
+}
+
+func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
+	req := new(request.RefreshToken)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	session := models.NewSessionModel(req.Token, h.server.IdGen, h.server.DB)
+	if session == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if _, err := session.FindByToken(); err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 	}
 
-	if blacklist, _ := h.server.DB.FindBlacklistedToken(req.Token); blacklist != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "Token blacklisted")
+	if blacklisted, err := session.IsBlacklisted(); err != nil || blacklisted {
+		return echo.NewHTTPError(http.StatusForbidden, "Token is blacklisted")
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
 	}
 
-	jwtClaims, err := h.server.Auth.GetClaims(authHeader[len("Bearer "):])
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to parse JWT")
-	}
+	var newAccessToken string
+	if _, ok := claims["role"].(string); ok {
+		// Admin requests refresh token
+		idFromJWT, ok := claims["adminId"].(string)
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, "Admin Id not found in claims")
+		}
 
-	var newAccessToken string // If there's an err, user is not an admin
-	if _, err := utils.GetRoleFromClaims(jwtClaims); err != nil {
-		user, err := h.server.DB.FindUserById(userId)
+		admin := models.NewAdminModel(h.server.IdGen, h.server.DB)
+		if admin == nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		}
+
+		if _, err := admin.FindById(idFromJWT); err != nil {
+			return echo.NewHTTPError(http.StatusNotFound, "ID from JWT not found")
+		}
+
+		if _, err := admin.DecryptUsername(h.server.Encrypt.DecryptString); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		}
+
+		accessToken, err := h.server.Auth.GenerateAdminAccessToken(authenticator.AdminOptions{
+			Id:       admin.Id,
+			Username: admin.Username,
+			Role:     admin.Role,
+		})
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, authenticator.ACCESS_TOKEN_ERR)
 		}
 
-		if decrypted, err := h.server.Encrypt.DecryptString(user.Name); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-		} else {
-			user.Name = decrypted
-		}
-
-		if decrypted, err := h.server.Encrypt.DecryptString(user.Email); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-		} else {
-			user.Email = decrypted
-		}
-
-		if token, err := h.server.Auth.GenerateUserAccessToken(user); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		} else {
-			newAccessToken = token
-		}
+		newAccessToken = accessToken
 	} else {
-		admin, err := h.server.DB.FindAdminById(userId)
+		// User requests refresh token
+		idFromJWT, ok := claims["userId"].(string)
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, "Admin Id not found in claims")
+		}
+
+		user := models.NewUserModel(h.server.IdGen, h.server.DB)
+		if user == nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		}
+
+		if _, err := user.FindById(idFromJWT); err != nil {
+			return echo.NewHTTPError(http.StatusNotFound, "ID from JWT not found")
+		}
+
+		if _, err := user.DecryptName(h.server.Encrypt.EncryptString); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		}
+		if _, err := user.DecryptEmail(h.server.Encrypt.EncryptString); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		}
+
+		accessToken, err := h.server.Auth.GenerateUserAccessToken(authenticator.UserOptions{
+			Id:    user.Id,
+			Name:  user.Name,
+			Email: user.Email,
+		})
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, authenticator.ACCESS_TOKEN_ERR)
 		}
 
-		if decrypted, err := h.server.Encrypt.DecryptString(admin.Username); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-		} else {
-			admin.Username = decrypted
-		}
-
-		if token, err := h.server.Auth.GenerateAdminAccessToken(admin); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		} else {
-			newAccessToken = token
-		}
+		newAccessToken = accessToken
 	}
 
 	// As protection against my dumb self, check first if newAccessToken is an empty string
 	if newAccessToken == "" {
-		return echo.NewHTTPError(http.StatusInternalServerError, errors.New("Some error occurred while generating new access token"))
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while determining if request is from user or admin")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

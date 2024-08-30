@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -19,7 +20,12 @@ func NewTagHandler(server *server.Server) *tagHandler {
 }
 
 func (h *tagHandler) HandleGetTags(c echo.Context) error {
-	tags, err := h.server.DB.FindAllTags()
+	tag := models.NewTagModel(h.server.IdGen, h.server.DB)
+	if tag == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	tags, err := tag.FindAll()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

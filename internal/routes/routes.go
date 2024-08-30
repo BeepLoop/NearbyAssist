@@ -23,9 +23,10 @@ func RegisterRoutes(s *server.Server) {
 		auth.GET("/health", healthHandler.HandleHealthCheck)
 		auth.GET("", handler.HandleBaseRoute)
 		auth.POST("/refresh", handler.HandleTokenRefresh)
-		auth.POST("/admin/login", handler.HandleAdminLogin)
-		auth.POST("/client/login", handler.HandleLogin)
 		auth.POST("/logout", handler.HandleLogout)
+
+		auth.POST("/admin/login", handler.HandleAdminLogin)
+		auth.POST("/client/login", handler.HandleClientLogin)
 	}
 
 	// V1 routes
@@ -46,8 +47,8 @@ func RegisterRoutes(s *server.Server) {
 			user := public.Group("/users")
 			{
 				handler := handlers.NewUserHandler(s)
-				user.GET("", handler.HandleCheckVerification)
 				user.GET("/me", handler.HandleGetMyDetails)
+                user.GET("/verified", handler.HandleCheckVerification)
 			}
 
 			vendor := public.Group("/vendors")
@@ -80,11 +81,11 @@ func RegisterRoutes(s *server.Server) {
 			transaction := public.Group("/transactions")
 			{
 				handler := handlers.NewTransactionHandler(s)
-				transaction.GET("", handler.HandleGetTransactions)
+				transaction.GET("", handler.HandleGetMyTransactions)
 				transaction.POST("", handler.HandleNewTransaction)
-				transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
 				transaction.GET("/ongoing", handler.HandleOngoingTransaction)
-				transaction.GET("/history", handler.HandleHistory)
+				transaction.GET("/history", handler.HandleGetMyHistory)
+                transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
 			}
 
 			application := public.Group("/application")

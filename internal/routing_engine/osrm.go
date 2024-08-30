@@ -33,11 +33,11 @@ func NewOSRM(conf *config.Config) *OSRM {
 	}
 }
 
-func (e *OSRM) constructUrl(origin, destination models.Location) string {
+func (e *OSRM) constructUrl(origin, destination models.GeoSpatialModel) string {
 	return e.engineUrl + "/route/v1/driving/" + origin.StringReverseOrder() + ";" + destination.StringReverseOrder()
 }
 
-func (e *OSRM) FindRoute(origin, destination *models.Location) (PolylineCode, error) {
+func (e *OSRM) FindRoute(origin, destination *models.GeoSpatialModel) (PolylineCode, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), e.requestTimeout)
 	defer cancel()
 

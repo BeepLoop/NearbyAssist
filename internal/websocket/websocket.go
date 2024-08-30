@@ -2,8 +2,6 @@ package websocket
 
 import (
 	"fmt"
-	"nearbyassist/internal/db"
-	"nearbyassist/internal/id_generator"
 	"nearbyassist/internal/models"
 	"net/http"
 
@@ -15,17 +13,13 @@ type Websocket struct {
 	Clients       map[string]*websocket.Conn
 	MessageChan   chan models.MessageModel
 	BroadcastChan chan models.MessageModel
-	DB            db.Database
-	IdGen         id_generator.IdGenerator
 }
 
-func NewWebsocket(db db.Database, idGen id_generator.IdGenerator) *Websocket {
+func NewWebsocket() *Websocket {
 	return &Websocket{
 		Clients:       make(map[string]*websocket.Conn),
 		MessageChan:   make(chan models.MessageModel),
 		BroadcastChan: make(chan models.MessageModel),
-		DB:            db,
-		IdGen:         idGen,
 	}
 }
 
@@ -33,20 +27,11 @@ func (w *Websocket) SaveMessages() {
 	for {
 		message := <-w.MessageChan
 
-		generatedId, err := w.IdGen.Generate()
-		if err != nil {
-			continue
-		} else {
-			message.Id = generatedId
-		}
-
-		id, err := w.DB.NewMessage(message)
-		if err != nil {
+		if _, err := message.Create(); err != nil {
 			fmt.Printf("error saving message: %s\n", err.Error())
 			continue
 		}
 
-		message.Id = id
 		w.BroadcastChan <- message
 	}
 }

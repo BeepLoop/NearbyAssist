@@ -6,9 +6,26 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const (
+	ACCESS_TOKEN_ERR  = "Error generating access token"
+	REFRESH_TOKEN_ERR = "Error generating refresh token"
+)
+
+type AdminOptions struct {
+	Id       string
+	Username string
+	Role     models.AdminRole
+}
+
+type UserOptions struct {
+	Id    string
+	Name  string
+	Email string
+}
+
 type Authenticator interface {
-	GenerateAdminAccessToken(admin *models.AdminModel) (string, error)
-	GenerateUserAccessToken(user *models.UserModel) (string, error)
+	GenerateAdminAccessToken(options AdminOptions) (string, error)
+	GenerateUserAccessToken(options UserOptions) (string, error)
 	GenerateRefreshToken() (string, error)
 	ValidateToken(tokenString string) error
 	GetClaims(tokenString string) (jwt.MapClaims, error)

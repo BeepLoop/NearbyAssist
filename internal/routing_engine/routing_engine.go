@@ -5,5 +5,5 @@ import "nearbyassist/internal/models"
 type PolylineCode string
 
 type Engine interface {
-	FindRoute(origin, destination *models.Location) (PolylineCode, error)
+	FindRoute(origin, destination *models.GeoSpatialModel) (PolylineCode, error)
 }

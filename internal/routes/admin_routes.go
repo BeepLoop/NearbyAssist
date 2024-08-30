@@ -40,7 +40,7 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 	{
 		handler := handlers.NewApplicationHandler(s)
 
-		application.GET("", handler.HandleGetApplications)
+		application.GET("", handler.HandleGetAllApplications)
 		application.GET("/count", handler.HandleCount)
 		application.PUT("/approve/:applicationId", handler.HandleApprove)
 		application.PUT("/reject/:applicationId", handler.HandleReject)
@@ -58,7 +58,7 @@ func handleAdminRoutes(r *echo.Group, s *server.Server) {
 		handler := handlers.NewTransactionHandler(s)
 
 		transaction.GET("/count", handler.HandleCount)
-		transaction.GET("/:transactionId", handler.HandleGetTransaction)
+		transaction.GET("/:transactionId", handler.HandleGetSpecificTransaction)
 	}
 
 	complaint := r.Group("/complaints")

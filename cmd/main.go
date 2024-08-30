@@ -25,32 +25,24 @@ func main() {
 	store := storage.NewStorage(config)
 	store.Initialize()
 
-    // Load id generator
-    idGen := id_generator.NewNanoIdGenerator()
-
 	// Load database configuration
-    db := mysql.NewMysqlDatabase(config)
+	db := mysql.NewMysqlDatabase(config)
 
-	// Load authenticator configuration
-	auth := authenticator.NewJWTAuthenticator(config)
-
-	// Load websocket configuration
-	ws := websocket.NewWebsocket(db, idGen)
-
-	// Load Routing Engine configuration
-	engine := routing_engine.NewOSRM(config)
-
-	// Load Suggestion Engine configuration
-	courtier := suggestion_engine.NewCourtier()
-
-	// Load encryption configuration
-	crypto := encryption.NewAes(config)
-
-	// Load hashing algorithm
-	hash := hash.NewSha()
+	serverConfig := server.ServerConfig{
+		Config:           config,
+		Websocket:        websocket.NewWebsocket(),
+		DB:               db.Conn,
+		Storage:          store,
+		RouteEngine:      routing_engine.NewOSRM(config),
+		SuggestionEngine: suggestion_engine.NewCourtier(),
+		IdGen:            id_generator.NewNanoIdGenerator(),
+		Encrypt:          encryption.NewAes(config),
+		Hash:             hash.NewSha(),
+		Auth:             authenticator.NewJWTAuthenticator(config),
+	}
 
 	// Create and start the server
-	server := server.NewServer(config, ws, db, store, auth, engine, courtier, idGen, crypto, hash)
+	server := server.NewServer(serverConfig)
 	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()

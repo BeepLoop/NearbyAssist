@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
+	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/response"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -28,28 +28,6 @@ func (h *chatHandler) HandleBaseRoute(c echo.Context) error {
 	})
 }
 
-func (h *chatHandler) HandleGetMessages(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	otherUser := c.Param("otherUserId")
-	if otherUser == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "User ID must be a number")
-	}
-
-	messages, err := h.server.DB.GetMessages(userId, otherUser)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"messages": messages,
-	})
-}
-
 func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	conn, err := h.server.Websocket.Upgrade(c)
 	if err != nil {
@@ -67,7 +45,7 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	fmt.Printf("userId: %s connected\n", userId)
 
 	for {
-		message := models.NewMessageModel()
+		message := models.NewMessageModel(h.server.IdGen, h.server.DB)
 		err := conn.ReadJSON(message)
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -87,31 +65,56 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	}
 }
 
-func (h *chatHandler) HandleGetConversations(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+func (h *chatHandler) HandleGetMessages(c echo.Context) error {
+	otherUser := c.Param("otherUserId")
+	if otherUser == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID must be a number")
+	}
+
+	token := c.Request().Header.Get("Authorization")
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	initialResult, err := h.server.DB.GetAllUserConversations(userId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error getting conversations")
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
 	}
 
-	conversations := make([]*response.Conversation, 0)
-	for _, entry := range initialResult {
+	user := models.NewUserModelWithId(id, h.server.DB)
+	messages, err := user.GetMessages(otherUser)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
-		name, err := h.server.Encrypt.DecryptString(entry.Name)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"messages": messages,
+	})
+}
+
+func (h *chatHandler) HandleGetConversations(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+	claims, err := h.server.Auth.GetClaims(token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+	}
+
+	user := models.NewUserModelWithId(id, h.server.DB)
+	conversations, err := user.GetConversations()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error retrieving conversations")
+	}
+
+	for _, conversation := range conversations {
+		if _, err := conversation.DecryptName(h.server.Encrypt.DecryptString); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
 		}
-
-		conversations = append(conversations, &response.Conversation{
-			UserId:   entry.Id,
-			Name:     name,
-			ImageUrl: entry.ImageUrl,
-		})
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

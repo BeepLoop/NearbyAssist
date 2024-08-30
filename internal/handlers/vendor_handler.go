@@ -24,11 +24,29 @@ func (h *vendorHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *vendorHandler) HandleCount(c echo.Context) error {
-	status := models.VendorStatus(c.QueryParam("status"))
+	param := c.QueryParam("filter")
+	var filter models.VendorStatusFilter
+	switch param {
+	case "":
+		filter = models.VENDOR_STATUS_ALL
+	case "all":
+		filter = models.VENDOR_STATUS_ALL
+	case "restricted":
+		filter = models.VENDOR_STATUS_RESTRICTED
+	case "unrestricted":
+		filter = models.VENDOR_STATUS_UNRESTRICTED
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter found")
+	}
 
-	count, err := h.server.DB.CountVendor(status)
+	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
+	if vendor == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	count, err := vendor.Count(filter)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error retrieving vendor count")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -42,12 +60,14 @@ func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
 	}
 
-	vendor, err := h.server.DB.FindVendorById(vendorId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
+	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
+	if vendor == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
-	// TODO: retrieve review count
+	if _, err := vendor.FindById(vendorId); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Vendor not found")
+	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"vendor": vendor,
@@ -60,12 +80,17 @@ func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	if err := h.server.DB.RestrictVendor(vendorId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
+	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
+	if vendor == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if err := vendor.Restrict(vendorId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while restricting vendor")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"restrictedId": vendorId,
+		"vendor": vendorId,
 	})
 }
 
@@ -75,11 +100,16 @@ func (h *vendorHandler) HandleUnrestrict(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
 	}
 
-	if err := h.server.DB.UnrestrictVendor(vendorId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
+	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
+	if vendor == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if err := vendor.Unrestrict(vendorId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while unrestricting vendor")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"unrestrictedId": vendorId,
+		"vendor": vendorId,
 	})
 }

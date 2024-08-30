@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"nearbyassist/internal/hash"
+	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
@@ -25,9 +24,14 @@ func NewServiceHandler(server *server.Server) *serviceHandler {
 }
 
 func (h *serviceHandler) HandleGetServices(c echo.Context) error {
-	services, err := h.server.DB.FindAllService()
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	services, err := service.FindAll()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving services")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -36,9 +40,14 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 }
 
 func (h *serviceHandler) HandleCount(c echo.Context) error {
-	count, err := h.server.DB.CountServices()
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	count, err := service.Count()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to retrieve service count")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while counting services")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -47,48 +56,122 @@ func (h *serviceHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
-	generatedId, err := h.server.IdGen.Generate()
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if err := c.Bind(service); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Error occurred binding request data")
+	}
+
+	if err := c.Validate(service); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
+	}
+
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	req := &request.NewService{
-		Model: models.Model{Id: generatedId},
-	}
-	if err := c.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	authHeader := c.Request().Header.Get("Authorization")
-	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	} else {
-		req.VendorId = userId
-	}
-
-	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
 	}
 
 	// Validate that the user is a registered vendor
-	if _, err := h.server.DB.FindVendorById(req.VendorId); err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "user is not a registered vendor")
+	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
+	if vendor == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
-	// encrypt description
-	if cipher, err := h.server.Encrypt.EncryptString(req.Description); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		req.Description = cipher
+	if _, err := vendor.FindById(id); err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, "User is not a registered vendor")
 	}
 
-	insertId, err := h.server.DB.RegisterService(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	if _, err := service.EncryptDescription(h.server.Encrypt.EncryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+	}
+
+	if _, err := service.Create(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while creating service")
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"serviceId": insertId,
+		"serviceId": service.Id,
+	})
+}
+
+func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
+	serviceId := c.Param("serviceId")
+	if serviceId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+	}
+
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	// Get service  info
+	if _, err := service.FindById(serviceId); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "service not found")
+	}
+
+	if tags, err := service.GetTags(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service tags")
+	} else {
+		service.Tags = tags
+	}
+
+	// Get vendor info
+	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
+	if vendor == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if _, err := vendor.FindByServiceId(service.Id); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Vendor of the service not found")
+	}
+
+	if _, err := vendor.DecryptVendor(h.server.Encrypt.DecryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+	}
+
+	// Get count per review rating
+	reviews, err := service.GetReviews()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service reviews")
+	}
+
+	countPerRating := response.NewCountPerRating()
+	for _, review := range reviews {
+		switch review.Rating {
+		case 5:
+			countPerRating["five"]++
+		case 4:
+			countPerRating["four"]++
+		case 3:
+			countPerRating["three"]++
+		case 2:
+			countPerRating["two"]++
+		case 1:
+			countPerRating["one"]++
+		}
+	}
+
+	// Get service images
+	photos, err := service.GetPhotos()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service photos")
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"serviceInfo":    service,
+		"vendorInfo":     vendor,
+		"serviceImages":  photos,
+		"countPerRating": countPerRating,
 	})
 }
 
@@ -98,41 +181,45 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	req := &request.UpdateService{}
-	if err := c.Bind(req); err != nil {
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if err := c.Bind(service); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request data")
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
-	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	} else {
-		req.VendorId = userId
+	if err := c.Validate(service); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
 	}
 
-	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
-	} else {
-		req.Id = serviceId
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
 	}
 
 	// Validate if the service id  is owned by the requester
-	if owner, err := h.server.DB.FindServiceOwner(req.Id); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "service not found")
+	if vendor, err := service.GetVendor(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service vendor")
 	} else {
-		if owner.Id != req.VendorId {
-			return echo.NewHTTPError(http.StatusForbidden, "you do not own this service")
+		if vendor.VendorId != id {
+			return echo.NewHTTPError(http.StatusUnauthorized, "You do not own this service")
 		}
 	}
 
-	if cipher, err := h.server.Encrypt.EncryptString(req.Description); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		req.Description = cipher
+	if _, err := service.EncryptDescription(h.server.Encrypt.EncryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
 	}
 
-	if err := h.server.DB.UpdateService(req); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if err := service.Update(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while updating service")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -147,23 +234,33 @@ func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+	}
+
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
 	// Validate if the service is owned by the requester
-	if owner, err := h.server.DB.FindServiceOwner(serviceId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "service not found")
+	if vendor, err := service.GetVendor(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service vendor")
 	} else {
-		if owner.Id != userId {
-			return echo.NewHTTPError(http.StatusForbidden, "you do not own this service")
+		if vendor.VendorId != id {
+			return echo.NewHTTPError(http.StatusUnauthorized, "You do not own this service")
 		}
 	}
 
-	if err := h.server.DB.DeleteService(serviceId); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if err := service.Delete(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while deleting service")
 	}
 
 	return c.JSON(http.StatusNoContent, nil)
@@ -175,15 +272,20 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	services, err := h.server.DB.GeoSpatialSearch(params)
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	result, err := service.GeoSpatialSearch(params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, "Error occurred while searching services")
 	}
 
 	// TODO: rank services by suggestability
 	searchResult := make([]response.SearchResult, 0)
 	var scoreError error
-	for _, service := range services {
+	for _, service := range result {
 		score, err := h.server.SuggestionEngine.GenerateSuggestability(service)
 		if err != nil {
 			scoreError = err
@@ -221,81 +323,20 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 	})
 }
 
-func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
-	serviceId := c.Param("serviceId")
-	if serviceId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
-	}
-
-	// Get service  info
-	service, err := h.server.DB.FindServiceById(serviceId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "service not found")
-	}
-
-	if tags, err := h.server.DB.FindAllTagByServiceId(serviceId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "service not found")
-	} else {
-		service.Tags = tags
-	}
-
-	// Get vendor info
-	vendor, err := h.server.DB.FindVendorByService(service.ServiceId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "service not found")
-	}
-
-	if decrypted, err := h.server.Encrypt.DecryptString(vendor.Vendor); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		vendor.Vendor = decrypted
-	}
-
-	// Get count per review rating
-	reviews, err := h.server.DB.FindAllReviewByService(service.ServiceId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	countPerRating := response.NewCountPerRating()
-	for _, review := range reviews {
-		switch review.Rating {
-		case 5:
-			countPerRating["five"]++
-		case 4:
-			countPerRating["four"]++
-		case 3:
-			countPerRating["three"]++
-		case 2:
-			countPerRating["two"]++
-		case 1:
-			countPerRating["one"]++
-		}
-	}
-
-	// Get service images
-	images, err := h.server.DB.FindAllPhotosByServiceId(service.ServiceId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"serviceInfo":    service,
-		"vendorInfo":     vendor,
-		"serviceImages":  images,
-		"countPerRating": countPerRating,
-	})
-}
-
 func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	if vendorId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "owner ID must be a number")
 	}
 
-	services, err := h.server.DB.FindServiceByVendor(vendorId)
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	services, err := service.FindByAllVendorId(vendorId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "vendor not found")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving services")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -310,8 +351,12 @@ func (h *serviceHandler) HandleFindRoute(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
 	}
 
-	service, err := h.server.DB.FindServiceById(serviceId)
-	if err != nil {
+	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
+	if service == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if _, err := service.FindById(serviceId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "service not found")
 	}
 
@@ -320,8 +365,7 @@ func (h *serviceHandler) HandleFindRoute(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid origin coordinates")
 	}
 
-	destination := models.NewLocationWithData(service.Latitude, service.Longitude)
-
+	destination := models.NewGeoGeoSpatialModelWithData(service.Latitude, service.Longitude)
 	polyline, err := h.server.RouteEngine.FindRoute(origin, destination)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not find routes at the moment")
@@ -332,7 +376,7 @@ func (h *serviceHandler) HandleFindRoute(c echo.Context) error {
 	})
 }
 
-func parseOrigin(query string) (*models.Location, error) {
+func parseOrigin(query string) (*models.GeoSpatialModel, error) {
 	coords := strings.Split(query, ",")
 	lat, err := strconv.ParseFloat(coords[0], 64)
 	if err != nil {
@@ -344,7 +388,7 @@ func parseOrigin(query string) (*models.Location, error) {
 		return nil, err
 	}
 
-	origin := models.NewLocationWithData(lat, long)
+	origin := models.NewGeoGeoSpatialModelWithData(lat, long)
 
 	return origin, nil
 }

@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"nearbyassist/internal/hash"
+	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -21,57 +20,59 @@ func NewTransactionHandler(server *server.Server) *transactionHandler {
 	}
 }
 
-func (h *transactionHandler) HandleGetTransactions(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
+	transaction := models.NewTransactionModel(h.server.IdGen, h.server.DB)
+	if transaction == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
-	transactions, err := h.server.DB.FindUserTransactions(userId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while fetching transactions")
+	if err := c.Bind(transaction); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
 	}
 
-	for _, transaction := range transactions {
-		if decrypted, err := h.server.Encrypt.DecryptString(transaction.Client); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-		} else {
-			transaction.Client = decrypted
+	if err := c.Validate(transaction); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Validate that the date is valid
+	if err := utils.ValidateDateRange(transaction.Start, transaction.End); err != nil {
+		if err.Error() == utils.DATE_PARSE_ERR {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 
-		if decrypted, err := h.server.Encrypt.DecryptString(transaction.Vendor); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-		} else {
-			transaction.Vendor = decrypted
-		}
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if _, err := transaction.Create(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while creating transaction")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactions": transactions,
-	})
-}
-
-func (h *transactionHandler) HandleGetTransaction(c echo.Context) error {
-	transactionId := c.Param("transactionId")
-	if transactionId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "transaction ID must be a number")
-	}
-
-	transaction, err := h.server.DB.FindTransactionById(transactionId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "transaction not found")
-	}
-
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"transaction": transaction,
+		"message":       "transaction created successfully",
+		"transactionId": transaction.Id,
 	})
 }
 
 func (h *transactionHandler) HandleCount(c echo.Context) error {
-	status := models.TransactionStatus(c.QueryParam("status"))
+	param := c.QueryParam("filter")
+	var filter models.TransactionStatusFilter
+	switch param {
+	case "ongoing":
+		filter = models.TRANSACTION_STATUS_ONGOING
+	case "done":
+		filter = models.TRANSACTION_STATUS_DONE
+	case "cancelled":
+		filter = models.TRANSACTION_STATUS_CANCELLED
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter found")
+	}
 
-	count, err := h.server.DB.CountTransaction(status)
+	transaction := models.NewTransactionModel(h.server.IdGen, h.server.DB)
+	if transaction == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	count, err := transaction.Count(filter)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -81,71 +82,73 @@ func (h *transactionHandler) HandleCount(c echo.Context) error {
 	})
 }
 
-func (h *transactionHandler) HandleNewTransaction(c echo.Context) error {
-	generatedId, err := h.server.IdGen.Generate()
+func (h *transactionHandler) HandleGetMyTransactions(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	req := &request.NewTransaction{
-		Model: models.Model{Id: generatedId},
-	}
-	if err := c.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
-	if userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	} else {
-		req.ClientId = userId
+	user := models.NewUserModelWithId(id, h.server.DB)
+	transactions, err := user.GetTransactions()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while fetching transactions")
 	}
 
-	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	// TODO: Validate that the date is valid
-	if err := utils.ValidateDateRange(req.Start, req.End); err != nil {
-		if err.Error() == utils.DATE_PARSE_ERROR {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	for _, transaction := range transactions {
+		if _, err := transaction.DecryptVendorName(h.server.Encrypt.DecryptString); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
 		}
 
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	// Validate that the vendor entered exists
-	if _, err := h.server.DB.FindVendorById(req.VendorId); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Vendor not found")
-	}
-
-	// Validate that the service exists
-	if _, err := h.server.DB.FindServiceById(req.ServiceId); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Service not found")
-	}
-
-	transactionId, err := h.server.DB.CreateTransaction(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if _, err := transaction.DecryptClientName(h.server.Encrypt.DecryptString); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		}
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"message":       "transaction created successfully",
-		"transactionId": transactionId,
+		"transactions": transactions,
+	})
+}
+
+func (h *transactionHandler) HandleGetSpecificTransaction(c echo.Context) error {
+	transactionId := c.Param("transactionId")
+	if transactionId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Transaction ID must be a number")
+	}
+
+	transaction := models.NewTransactionModel(h.server.IdGen, h.server.DB)
+	if transaction == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if _, err := transaction.FindById(transactionId); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Transaction not found")
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"transaction": transaction,
 	})
 }
 
 func (h *transactionHandler) HandleOngoingTransaction(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	param := c.QueryParam("filter")
-	filter := models.TransactionFilter(param)
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+	}
 
-	transactions, err := h.server.DB.FindAllOngoingTransaction(userId, filter)
+	user := models.NewUserModelWithId(id, h.server.DB)
+	transactions, err := user.GetOngoingTransactions()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -155,23 +158,26 @@ func (h *transactionHandler) HandleOngoingTransaction(c echo.Context) error {
 	})
 }
 
-func (h *transactionHandler) HandleHistory(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+func (h *transactionHandler) HandleGetMyHistory(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	param := c.QueryParam("filter")
-	filter := models.TransactionFilter(param)
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+	}
 
-	history, err := h.server.DB.GetTransactionHistory(userId, filter)
+	user := models.NewUserModelWithId(id, h.server.DB)
+	transactions, err := user.GetTransactionHistory()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"history": history,
+		"history": transactions,
 	})
 }
 
@@ -181,26 +187,32 @@ func (h *transactionHandler) HandleCompleteTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "transaction ID must be a number")
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if transaction, err := h.server.DB.FindTransactionById(transactionId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "transaction not found")
-	} else {
-		if transaction.ClientId != userId {
-			return echo.NewHTTPError(http.StatusForbidden, "you're not the client of this transaction")
-		}
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+	}
 
-		if transaction.Status == models.TRANSACTION_STATUS_DONE {
-			return echo.NewHTTPError(http.StatusUnprocessableEntity, "transaction already marked as completed")
+	transaction := models.NewTransactionModel(h.server.IdGen, h.server.DB)
+	if transaction == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if _, err := transaction.FindById(transactionId); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Transaction not found")
+	} else {
+		if transaction.ClientId != id {
+			return echo.NewHTTPError(http.StatusForbidden, "You are not allowed to mark this transaction complete")
 		}
 	}
 
-	if err := h.server.DB.CompleteTransaction(transactionId); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if err := transaction.MarkComplete(transactionId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while marking transaction complete")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

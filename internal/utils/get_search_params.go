@@ -2,14 +2,14 @@ package utils
 
 import (
 	"errors"
-	"nearbyassist/internal/types"
+	"nearbyassist/internal/models"
 	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
 )
 
-func GetSearchParams(c echo.Context) (*types.SearchParams, error) {
+func GetSearchParams(c echo.Context) (*models.SearchParams, error) {
 	latitude := c.QueryParam("lat")
 	longitude := c.QueryParam("long")
 	radius := c.QueryParam("radius")
@@ -41,12 +41,12 @@ func GetSearchParams(c echo.Context) (*types.SearchParams, error) {
 	queryNoUnderscore := strings.ReplaceAll(query, "_", " ")
 	tags := strings.Split(queryNoUnderscore, ",")
 
-	params := types.SearchParams{
+	params := &models.SearchParams{
 		Latitude:  lat,
 		Longitude: long,
 		Radius:    rad,
 		Query:     tags,
 	}
 
-	return &params, nil
+	return params, nil
 }

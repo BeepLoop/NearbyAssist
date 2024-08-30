@@ -1,14 +1,15 @@
 package handlers
 
 import (
+	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type adminHandler struct {
@@ -28,45 +29,38 @@ func (h *adminHandler) HandleBaseRoute(c echo.Context) error {
 }
 
 func (h *adminHandler) HandleRegisterStaff(c echo.Context) error {
-	generatedId, err := h.server.IdGen.Generate()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	req := models.NewAdminModel(generatedId)
+	req := new(request.NewAdminRequest)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing required fields")
+		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
 	}
 
-	if hashed, err := h.server.Hash.Hash([]byte(req.Username)); err != nil {
+	admin := models.NewAdminModel(h.server.IdGen, h.server.DB)
+	if admin == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	if _, err := admin.HashUsername(req.Username, h.server.Hash.Hash); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		req.UsernameHash = hashed
 	}
 
-	if cipher, err := h.server.Encrypt.EncryptString(req.Username); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		req.Username = cipher
+	if _, err := admin.EncryptUsername(h.server.Encrypt.EncryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
 	}
 
-	if hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		req.Password = string(hashed)
+	if _, err := admin.EncryptPassword(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
 	}
 
-	staffId, err := h.server.DB.NewStaff(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	if _, err := admin.Create(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while creating admin account")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"message": "Register staff",
-		"staffId": staffId,
+		"message": "Account registered successfully",
+		"staffId": admin.Id,
 	})
 }

@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"nearbyassist/internal/hash"
+	"nearbyassist/internal/encryption"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -25,60 +26,91 @@ func (h *userHandler) HandleBaseRoute(c echo.Context) error {
 	})
 }
 
-func (h *userHandler) HandleCheckVerification(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error getting user ID from JWT")
+func (h *userHandler) HandleCount(c echo.Context) error {
+	param := c.QueryParam("filter")
+	var filter models.UserStatusFilter
+	switch param {
+	case "":
+		filter = models.USER_STATUS_ALL
+	case "all":
+		filter = models.USER_STATUS_ALL
+	case "verified":
+		filter = models.USER_STATUS_VERIFIED
+	case "unverified":
+		filter = models.USER_STATUS_UNVERIFIED
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter found")
 	}
 
-	isVerified, err := h.server.DB.CheckUserVerification(userId)
+	user := models.NewUserModel(h.server.IdGen, h.server.DB)
+	if user == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	count, err := user.Count(filter)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error checking user verification")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error retrieving user count")
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"userId":   userId,
+		"count": count,
+	})
+}
+
+func (h *userHandler) HandleCheckVerification(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+	}
+
+	user := models.NewUserModel(h.server.IdGen, h.server.DB)
+	if user == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+	user.Id = id
+	isVerified := user.IsVerified()
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"userId":   id,
 		"verified": isVerified,
 	})
 }
 
 func (h *userHandler) HandleGetMyDetails(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	userId, err := utils.GetUserIdFromJWT(h.server.Auth, authHeader)
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error getting user ID from JWT")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	user, err := h.server.DB.FindUserById(userId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
 	}
 
-	if decrypted, err := h.server.Encrypt.DecryptString(user.Name); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		user.Name = decrypted
+	user := models.NewUserModel(h.server.IdGen, h.server.DB)
+	if user == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
-	if decrypted, err := h.server.Encrypt.DecryptString(user.Email); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		user.Email = decrypted
+	if _, err := user.FindById(id); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "User not found")
+	}
+
+	if _, err := user.DecryptName(h.server.Encrypt.DecryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+	}
+	if _, err := user.DecryptEmail(h.server.Encrypt.DecryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"user": user,
-	})
-}
-
-func (h *userHandler) HandleCount(c echo.Context) error {
-	count, err := h.server.DB.CountUser()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"count": count,
 	})
 }

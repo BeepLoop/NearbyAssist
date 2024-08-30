@@ -1,29 +1,30 @@
 package models
 
 import (
-	"mime/multipart"
+	"nearbyassist/internal/id_generator"
+
+	"github.com/jmoiron/sqlx"
 )
 
-type FileModelInterface interface {
-	SaveToDisk(uuid string, file *multipart.FileHeader) (string, error)
-	SaveToDb(filename string) (int, error)
-}
-
-type ModelOperation interface {
-	Create() (int, error)
-	Update(id int) error
-	Delete(id int) error
-}
-
-type Locatable interface {
-	GetGeolocation() (*GeoSpatialModel, error)
-}
+const (
+	MODEL_INIT_ERROR = "Error initializing model"
+)
 
 type Model struct {
 	Id        string `json:"id" db:"id"`
 	CreatedAt string `json:"createdAt" db:"createdAt"`
+
+	Conn        *sqlx.DB                 `json:"-" db:"-"`
+	IdGenerator id_generator.IdGenerator `json:"-" db:"-"`
 }
 
 type UpdateableModel struct {
 	UpdatedAt string `json:"updatedAt" db:"updatedAt"`
+}
+
+type SearchParams struct {
+	Latitude  float64
+	Longitude float64
+	Radius    float64
+	Query     []string
 }

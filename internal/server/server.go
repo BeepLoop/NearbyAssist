@@ -3,7 +3,6 @@ package server
 import (
 	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/db"
 	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/hash"
 	"nearbyassist/internal/id_generator"
@@ -14,13 +13,27 @@ import (
 	"nearbyassist/internal/websocket"
 
 	"github.com/go-playground/validator"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
+
+type ServerConfig struct {
+	Config           *config.Config
+	Websocket        *websocket.Websocket
+	DB               *sqlx.DB
+	Storage          storage.Storage
+	RouteEngine      routing_engine.Engine
+	SuggestionEngine suggestion_engine.Engine
+	IdGen            id_generator.IdGenerator
+	Encrypt          encryption.Encryption
+	Hash             hash.Hash
+	Auth             authenticator.Authenticator
+}
 
 type Server struct {
 	Echo             *echo.Echo
 	Websocket        *websocket.Websocket
-	DB               db.Database
+	DB               *sqlx.DB
 	Storage          storage.Storage
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
@@ -32,20 +45,20 @@ type Server struct {
 	AllowedOrigins   []string
 }
 
-func NewServer(conf *config.Config, ws *websocket.Websocket, db db.Database, storage storage.Storage, auth authenticator.Authenticator, router routing_engine.Engine, courtier suggestion_engine.Engine, idGen id_generator.IdGenerator, crypto encryption.Encryption, hash hash.Hash) *Server {
+func NewServer(options ServerConfig) *Server {
 	NewServer := &Server{
 		Echo:             echo.New(),
-		Websocket:        ws,
-		DB:               db,
-		Storage:          storage,
-		RouteEngine:      router,
-		SuggestionEngine: courtier,
-		IdGen:            idGen,
-		Encrypt:          crypto,
-		Hash:             hash,
-		Auth:             auth,
-		Port:             conf.Port,
-		AllowedOrigins:   conf.AllowedOrigins,
+		Websocket:        options.Websocket,
+		DB:               options.DB,
+		Storage:          options.Storage,
+		RouteEngine:      options.RouteEngine,
+		SuggestionEngine: options.SuggestionEngine,
+		IdGen:            options.IdGen,
+		Encrypt:          options.Encrypt,
+		Hash:             options.Hash,
+		Auth:             options.Auth,
+		Port:             options.Config.Port,
+		AllowedOrigins:   options.Config.AllowedOrigins,
 	}
 
 	return NewServer

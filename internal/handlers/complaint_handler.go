@@ -1,10 +1,9 @@
 package handlers
 
 import (
+	"nearbyassist/internal/encryption"
 	filehandler "nearbyassist/internal/file"
-	"nearbyassist/internal/hash"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/request"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -28,8 +27,66 @@ func (h *complaintHandler) HandleBaseRoute(c echo.Context) error {
 	})
 }
 
+func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
+	title := c.FormValue("title")
+	detail := c.FormValue("detail")
+
+	complaint := models.NewSystemComplaintModel(h.server.IdGen, h.server.DB)
+	if complaint == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	} else {
+		complaint.Title = title
+		complaint.Detail = detail
+	}
+
+	if _, err := complaint.EncryptTitle(h.server.Encrypt.EncryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+	}
+
+	if _, err := complaint.EncryptDetail(h.server.Encrypt.EncryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+	}
+
+	files, err := filehandler.FormParser(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if _, err := complaint.Create(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	for _, file := range files {
+		handler := filehandler.NewFileHandler(h.server.Encrypt)
+		url, err := handler.SavePhoto(file, h.server.Storage.SaveSystemComplaint)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		imageData := models.SystemComplaintData{ComplaintId: complaint.Id, Url: url}
+		image := models.NewSystemComplaintImageWithData(imageData, h.server.IdGen, h.server.DB)
+		if image == nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		}
+
+		if _, err := image.Create(); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while saving image")
+		}
+	}
+
+	return c.JSON(http.StatusCreated, utils.Mapper{
+		"message":     "System complaint created successfully",
+		"complaintId": complaint.Id,
+	})
+}
+
 func (h *complaintHandler) HandleSystemComplaintCount(c echo.Context) error {
-	count, err := h.server.DB.CountSystemComplaint()
+	systemComplaint := models.NewSystemComplaintModel(h.server.IdGen, h.server.DB)
+	if systemComplaint == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	count, err := systemComplaint.Count()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -40,16 +97,19 @@ func (h *complaintHandler) HandleSystemComplaintCount(c echo.Context) error {
 }
 
 func (h *complaintHandler) HandleGetSystemComplaint(c echo.Context) error {
-	complaints, err := h.server.DB.FindAllSystemComplaints()
+	systemComplaint := models.NewSystemComplaintModel(h.server.IdGen, h.server.DB)
+	if systemComplaint == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+	}
+
+	complaints, err := systemComplaint.FindAll()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	for _, complaint := range complaints {
-		if decrypted, err := h.server.Encrypt.DecryptString(complaint.Title); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-		} else {
-			complaint.Title = decrypted
+		if _, err := complaint.DecryptTitle(h.server.Encrypt.DecryptString); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
 		}
 	}
 
@@ -61,104 +121,34 @@ func (h *complaintHandler) HandleGetSystemComplaint(c echo.Context) error {
 func (h *complaintHandler) HandleGetSystemComplaintById(c echo.Context) error {
 	complaintId := c.Param("complaintId")
 	if complaintId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "complaint ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, "Complaint ID must be a number")
 	}
 
-	complaint, err := h.server.DB.FindSystemComplaintById(complaintId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "complaint not found")
+	systemComplaint := models.NewSystemComplaintModel(h.server.IdGen, h.server.DB)
+	if systemComplaint == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
-	if decrypted, err := h.server.Encrypt.DecryptString(complaint.Title); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		complaint.Title = decrypted
+	if _, err := systemComplaint.FindById(complaintId); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Complaint not found")
 	}
 
-	if decrypted, err := h.server.Encrypt.DecryptString(complaint.Detail); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		complaint.Detail = decrypted
+	if _, err := systemComplaint.DecryptTitle(h.server.Encrypt.DecryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
 	}
 
-	images, err := h.server.DB.FindSystemComplaintImagesByComplaintId(complaint.Id)
+	if _, err := systemComplaint.DecryptDetail(h.server.Encrypt.DecryptString); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+	}
+
+	images, err := systemComplaint.GetPhotos()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"complaint": complaint,
+		"complaint": systemComplaint,
 		"images":    images,
-	})
-}
-
-func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
-	title := c.FormValue("title")
-	detail := c.FormValue("detail")
-
-	files, err := filehandler.FormParser(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	generatedId, err := h.server.IdGen.Generate()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	req := &request.SystemComplaint{
-		Model:  models.Model{Id: generatedId},
-		Title:  title,
-		Detail: detail,
-	}
-
-	if cipher, err := h.server.Encrypt.EncryptString(req.Title); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		req.Title = cipher
-	}
-
-	if cipher, err := h.server.Encrypt.EncryptString(req.Detail); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, hash.HASH_ERROR)
-	} else {
-		req.Detail = cipher
-	}
-
-	complaintId, err := h.server.DB.FileSystemComplaint(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	imageUrl := make([]string, 0)
-	for _, file := range files {
-		handler := filehandler.NewFileHandler(h.server.Encrypt)
-		url, err := handler.SavePhoto(file, h.server.Storage.SaveSystemComplaint)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		imageUrl = append(imageUrl, url)
-	}
-
-	for _, url := range imageUrl {
-		generatedId, err := h.server.IdGen.Generate()
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		model := &models.SystemComplaintImageModel{
-			Model:       models.Model{Id: generatedId},
-			ComplaintId: complaintId,
-			Url:         url,
-		}
-
-		if _, err := h.server.DB.NewSystemComplaintImage(model); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-	}
-
-	return c.JSON(http.StatusCreated, utils.Mapper{
-		"message": "System complaint created successfully",
 	})
 }
 
