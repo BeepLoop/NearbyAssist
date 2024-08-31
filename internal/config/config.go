@@ -26,6 +26,7 @@ type Config struct {
 	DB_Host                  string
 	DB_Port                  string
 	Port                     string
+	LOG_FILE                 string
 	AllowedOrigins           []string
 	JwtSecret                string
 	JwtDuration              int
@@ -57,6 +58,7 @@ func LoadConfig() *Config {
 		DB_Host:                  os.Getenv("DB_HOST"),
 		DB_Port:                  os.Getenv("DB_PORT"),
 		Port:                     os.Getenv("PORT"),
+		LOG_FILE:                 os.Getenv("LOG_FILE"),
 		AllowedOrigins:           strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","),
 		JwtSecret:                os.Getenv("JWT_SECRET"),
 		JwtDuration:              duration,

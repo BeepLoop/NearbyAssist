@@ -10,6 +10,7 @@ import (
 func (s *Server) registerMiddleware() {
 	s.Echo.Pre(middleware.RemoveTrailingSlash())
 	s.Echo.Use(middleware.Recover())
+	s.Echo.Use(middleware.RequestID())
 	s.Echo.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	s.Echo.Use(middleware.BodyLimit("100M"))
 
@@ -26,6 +27,6 @@ func (s *Server) registerMiddleware() {
 	}))
 
 	s.Echo.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n",
+		Output: s.LOG_FILE,
 	}))
 }

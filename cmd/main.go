@@ -42,7 +42,11 @@ func main() {
 	}
 
 	// Create and start the server
-	server := server.NewServer(serverConfig)
+	server, err := server.NewServer(serverConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()
