@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS Session (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
-    CONSTRAINT unique_token_online UNIQUE (token, (CASE WHEN status = 'online' THEN 1 ELSE NULL END)),
-    INDEX(token, status)
+    CONSTRAINT unique_refreshToken_online UNIQUE (refreshToken, (CASE WHEN status = 'online' THEN 1 ELSE NULL END)),
+    INDEX(refreshToken, status)
 );
 
 CREATE TABLE IF NOT EXISTS Blacklist (
