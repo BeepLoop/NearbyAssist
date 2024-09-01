@@ -31,7 +31,7 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 
 	services, err := service.FindAll()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving services")
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -142,7 +142,7 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	// Get count per review rating
 	reviews, err := service.GetReviews()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service reviews")
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	countPerRating := response.NewCountPerRating()
@@ -164,7 +164,7 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	// Get service images
 	photos, err := service.GetPhotos()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service photos")
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

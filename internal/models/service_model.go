@@ -19,7 +19,7 @@ type ServiceModel struct {
 	Model
 	UpdateableModel
 	GeoSpatialModel
-	VendorId    int    `json:"vendorId" db:"vendorId" validate:"required"`
+	VendorId    string `json:"vendorId" db:"vendorId" validate:"required"`
 	Description string `json:"description" db:"description" validate:"required"`
 	Rate        string `json:"rate" db:"rate" validate:"required"`
 
@@ -450,15 +450,7 @@ func (s *ServiceModel) GetPhotos() ([]ServicePhotoModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := `
-        SELECT 
-            id AS imageId,
-            url AS imageUrl
-        FROM
-            ServicePhoto
-        WHERE
-            serviceId = ?
-    `
+	query := "SELECT id, url FROM ServicePhoto WHERE serviceId = ?"
 
 	images := make([]ServicePhotoModel, 0)
 	if err := s.Conn.SelectContext(ctx, &images, query, s.Id); err != nil {
@@ -492,7 +484,7 @@ func (s *ServiceModel) GetVendor() (*VendorModel, error) {
 
 	query := `
         SELECT 
-            s.vendorId AS id,
+            s.vendorId,
             u.name as vendor
         FROM 
             Service s
