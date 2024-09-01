@@ -36,24 +36,28 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	defer conn.Close()
 
 	token := c.QueryParam("token")
-	userId, err := utils.GetUserIdFromJwtString(h.server.Auth, token)
+	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
+	}
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
 	}
 
-	h.server.Websocket.Clients[userId] = conn
-	fmt.Printf("userId: %s connected\n", userId)
+	h.server.Websocket.Clients[id] = conn
+	fmt.Printf("id: %s connected\n", id)
 
 	for {
 		message := models.NewMessageModel(h.server.IdGen, h.server.DB)
 		err := conn.ReadJSON(message)
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				if _, ok := h.server.Websocket.Clients[userId]; ok {
-					delete(h.server.Websocket.Clients, userId)
+				if _, ok := h.server.Websocket.Clients[id]; ok {
+					delete(h.server.Websocket.Clients, id)
 				}
 
-				fmt.Printf("client: %s disconnected\n", userId)
+				fmt.Printf("client: %s disconnected\n", id)
 				return nil
 			}
 

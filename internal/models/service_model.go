@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/id_generator"
+	"nearbyassist/internal/utils"
 	"strings"
 	"time"
 
@@ -297,10 +298,10 @@ func (s *ServiceModel) Update() error {
 	newTags := s.Tags
 
 	for _, tag := range currentServiceTags {
-		exists := StringSliceContains(newTags, tag.TagId)
+		exists := utils.StringSliceContains(newTags, tag.TagId)
 		if exists {
 			// Remove item from newTags
-			newTags = RemoveStringFromSlice(newTags, tag.TagId)
+			newTags = utils.RemoveStringFromSlice(newTags, tag.TagId)
 		} else {
 			// Append to tagsToBeDeleted
 			if _, err := tx.ExecContext(ctx, deleteTag, tag.Id); err != nil {
@@ -505,25 +506,25 @@ func (s *ServiceModel) GetVendor() (*VendorModel, error) {
 
 	return vendor, nil
 }
-
-func StringSliceContains(slice []string, target string) bool {
-	for _, item := range slice {
-		if item == target {
-			return true
-		}
-	}
-
-	return false
-}
-
-func RemoveStringFromSlice(slice []string, target string) []string {
-	var result []string
-
-	for _, item := range slice {
-		if item != target {
-			result = append(result, item)
-		}
-	}
-
-	return result
-}
+//
+// func StringSliceContains(slice []string, target string) bool {
+// 	for _, item := range slice {
+// 		if item == target {
+// 			return true
+// 		}
+// 	}
+//
+// 	return false
+// }
+//
+// func RemoveStringFromSlice(slice []string, target string) []string {
+// 	var result []string
+//
+// 	for _, item := range slice {
+// 		if item != target {
+// 			result = append(result, item)
+// 		}
+// 	}
+//
+// 	return result
+// }
