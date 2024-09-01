@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/id_generator"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -353,7 +354,7 @@ func (s *ServiceModel) Delete() error {
 	return nil
 }
 
-func (s *ServiceModel) GeoSpatialSearch(params *SearchParams) ([]*ServiceSearchResult, error) {
+func (s *ServiceModel) GeoSpatialSearch(params map[string]string) ([]*ServiceSearchResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -373,21 +374,41 @@ func (s *ServiceModel) GeoSpatialSearch(params *SearchParams) ([]*ServiceSearchR
         WHERE
     `
 
-	tagCondition := ""
-	for i, tag := range params.Query {
-		if i == 0 {
-			tagCondition += fmt.Sprintf(" st.tagId = (SELECT id from Tag WHERE title = '%s')", tag)
-			continue
+	if q, ok := params["q"]; ok {
+		condition := ""
+		tags := strings.Split(q, ",")
+		for i, tag := range tags {
+			if i == 0 {
+				condition += fmt.Sprintf(" st.tagId = (SELECT id from Tag WHERE title = '%s')", tag)
+			} else {
+				condition += fmt.Sprintf(" OR st.tagId = (SELECT id from Tag WHERE title = '%s')", tag)
+			}
 		}
-		tagCondition += fmt.Sprintf(" OR st.tagId = (SELECT id from Tag WHERE title = '%s')", tag)
+
+		query += condition
+	} else {
+		return nil, fmt.Errorf("Missing query parameter 'q'")
 	}
 
-	distanceCondition := fmt.Sprintf(" AND ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(%v, %v)) < ?", params.Longitude, params.Latitude)
+	if l, ok := params["l"]; ok {
+		location := strings.Split(l, ",")
+		if len(location) != 2 {
+			return nil, fmt.Errorf("Malformed location parameter 'l'")
+		}
+		condition := fmt.Sprintf(" AND ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(%v, %v))", location[0], location[1])
+		query += condition
+	} else {
+		return nil, fmt.Errorf("Missing location parameter 'l'")
+	}
 
-	query += tagCondition + distanceCondition
+	if r, ok := params["r"]; ok {
+		query += fmt.Sprintf(" < %v", r)
+	} else {
+		return nil, fmt.Errorf("Missing radius parameter 'r'")
+	}
 
 	services := make([]*ServiceSearchResult, 0)
-	err := s.Conn.SelectContext(ctx, &services, query, params.Radius)
+	err := s.Conn.SelectContext(ctx, &services, query)
 	if err != nil {
 		return nil, err
 	}

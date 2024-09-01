@@ -21,10 +21,3 @@ type Model struct {
 type UpdateableModel struct {
 	UpdatedAt string `json:"updatedAt" db:"updatedAt"`
 }
-
-type SearchParams struct {
-	Latitude  float64
-	Longitude float64
-	Radius    float64
-	Query     []string
-}

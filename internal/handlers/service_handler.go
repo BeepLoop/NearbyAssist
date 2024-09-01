@@ -267,16 +267,12 @@ func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 }
 
 func (h *serviceHandler) HandleSearchService(c echo.Context) error {
-	params, err := utils.GetSearchParams(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
+	params := utils.ParseQuery(c.QueryString())
 	result, err := service.GeoSpatialSearch(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Error occurred while searching services")
