@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"nearbyassist/internal/id_generator"
+	"strconv"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -113,21 +114,57 @@ func (a *ApplicationModel) FindById(id string) (*ApplicationModel, error) {
 	return a, nil
 }
 
-func (a *ApplicationModel) FindAll(filter ApplicationStatusFilter) ([]ApplicationModel, error) {
+func (a *ApplicationModel) FindAll(params map[string]string) ([]ApplicationModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+    // Initial query
 	query := "SELECT id, applicantId, status, createdAt FROM Application"
 
-	switch filter {
-	case APPLICATION_STATUS_PENDING:
-		query += " WHERE status = 'pending'"
-	case APPLICATION_STATUS_APPROVED:
-		query += " WHERE status = 'approved'"
-	case APPLICATION_STATUS_REJECTED:
-		query += " WHERE status = 'rejected'"
+    // Apply filters
+	if filter, ok := params["filter"]; ok {
+		switch filter {
+		case "all":
+			query += " WHERE status = 'approved' OR status = 'rejected' OR status = 'pending'"
+		case "approved":
+			query += " WHERE status = 'approved'"
+		case "rejected":
+			query += " WHERE status = 'rejected'"
+		case "pending":
+			query += " WHERE status = 'pending'"
+		default:
+			return nil, errors.New("Invalid parameter found")
+		}
+	} else {
+		query += " WHERE status = 'approved' OR status = 'rejected' OR status = 'pending'"
 	}
 
+	// Order by id and createdAt (deterministic order)
+	query += " ORDER BY id, createdAt"
+
+	// Paginate using limit and offset
+	if page, ok := params["page"]; ok {
+		pageNumber, err := strconv.Atoi(page)
+		if err != nil {
+			return nil, err
+		}
+
+		pageSize := DEFAULT_LIMIT
+		if limit, ok := params["limit"]; ok {
+			if size, err := strconv.Atoi(limit); err != nil {
+				return nil, err
+			} else {
+				pageSize = size
+			}
+		}
+
+		offset := (pageNumber - 1) * pageSize
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, offset)
+	} else {
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", DEFAULT_LIMIT, DEFAULT_OFFSET)
+	}
+
+    // Execute query
 	applications := make([]ApplicationModel, 0)
 	if err := a.Conn.SelectContext(ctx, &applications, query); err != nil {
 		return nil, err

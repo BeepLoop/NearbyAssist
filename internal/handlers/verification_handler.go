@@ -132,7 +132,8 @@ func (h *verificationHandler) HandleGetAllIdentityVerification(c echo.Context) e
 		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
-	requests, err := ident_verification.FindAll()
+    params := utils.ParseQuery(c.QueryString())
+	requests, err := ident_verification.FindAll(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving verification requests")
 	}

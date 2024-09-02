@@ -79,27 +79,13 @@ func (h *applicationHandler) HandleCount(c echo.Context) error {
 }
 
 func (h *applicationHandler) HandleGetAllApplications(c echo.Context) error {
-	param := c.QueryParam("filter")
-	var filter models.ApplicationStatusFilter
-	switch param {
-	case "all":
-		filter = models.APPLICATION_STATUS_ALL
-	case "pending":
-		filter = models.APPLICATION_STATUS_PENDING
-	case "approved":
-		filter = models.APPLICATION_STATUS_REJECTED
-	case "rejected":
-		filter = models.APPLICATION_STATUS_REJECTED
-	default:
-		return echo.NewHTTPError(http.StatusInternalServerError, "Invalid parameter found")
-	}
-
 	application := models.NewApplicationModel(h.server.IdGen, h.server.DB)
 	if application == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
-	applications, err := application.FindAll(filter)
+    params := utils.ParseQuery(c.QueryString())
+	applications, err := application.FindAll(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving applications")
 	}

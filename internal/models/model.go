@@ -8,6 +8,9 @@ import (
 
 const (
 	MODEL_INIT_ERROR = "Error initializing model"
+
+	DEFAULT_LIMIT  = 10
+	DEFAULT_OFFSET = 0
 )
 
 type Model struct {

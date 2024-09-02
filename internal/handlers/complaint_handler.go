@@ -102,7 +102,8 @@ func (h *complaintHandler) HandleGetSystemComplaint(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
 	}
 
-	complaints, err := systemComplaint.FindAll()
+    params := utils.ParseQuery(c.QueryString())
+	complaints, err := systemComplaint.FindAll(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

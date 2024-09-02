@@ -2,7 +2,9 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/id_generator"
+	"strconv"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -123,11 +125,36 @@ func (i *IdentityVerificationModel) FindById(id string) (*IdentityVerificationMo
 	return i, nil
 }
 
-func (i *IdentityVerificationModel) FindAll() ([]IdentityVerificationModel, error) {
+func (i *IdentityVerificationModel) FindAll(params map[string]string) ([]IdentityVerificationModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, user as userId, createdAt FROM IdentityVerification"
+
+	// Order by id and createdAt (deterministic order)
+	query += " ORDER BY id, createdAt"
+
+	// Paginate using limit and offset
+	if page, ok := params["page"]; ok {
+		pageNumber, err := strconv.Atoi(page)
+		if err != nil {
+			return nil, err
+		}
+
+		pageSize := DEFAULT_LIMIT
+		if limit, ok := params["limit"]; ok {
+			if size, err := strconv.Atoi(limit); err != nil {
+				return nil, err
+			} else {
+				pageSize = size
+			}
+		}
+
+		offset := (pageNumber - 1) * pageSize
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, offset)
+	} else {
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", DEFAULT_LIMIT, DEFAULT_OFFSET)
+	}
 
 	requests := make([]IdentityVerificationModel, 0)
 	if err := i.Conn.SelectContext(ctx, &requests, query); err != nil {

@@ -2,7 +2,9 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/id_generator"
+	"strconv"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -124,11 +126,36 @@ func (s *SystemComplaintModel) FindById(id string) (*SystemComplaintModel, error
 	return s, nil
 }
 
-func (s *SystemComplaintModel) FindAll() ([]*SystemComplaintModel, error) {
+func (s *SystemComplaintModel) FindAll(params map[string]string) ([]*SystemComplaintModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := "SELECT id, title FROM SystemComplaint"
+
+	// Order by id and createdAt (deterministic order)
+	query += " ORDER BY id, createdAt"
+
+	// Paginate using limit and offset
+	if page, ok := params["page"]; ok {
+		pageNumber, err := strconv.Atoi(page)
+		if err != nil {
+			return nil, err
+		}
+
+		pageSize := DEFAULT_LIMIT
+		if limit, ok := params["limit"]; ok {
+			if size, err := strconv.Atoi(limit); err != nil {
+				return nil, err
+			} else {
+				pageSize = size
+			}
+		}
+
+		offset := (pageNumber - 1) * pageSize
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, offset)
+	} else {
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", DEFAULT_LIMIT, DEFAULT_OFFSET)
+	}
 
 	complaints := make([]*SystemComplaintModel, 0)
 	if err := s.Conn.SelectContext(ctx, &complaints, query); err != nil {
