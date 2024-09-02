@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"nearbyassist/internal/authenticator"
+	"nearbyassist/internal/models"
 	"net/http"
 	"strings"
 
@@ -14,9 +15,11 @@ func CheckAuth(jwtChecker authenticator.Authenticator) echo.MiddlewareFunc {
 			authHeader := c.Request().Header.Get("Authorization")
 			token := strings.TrimPrefix(authHeader, "Bearer ")
 
-			err := jwtChecker.ValidateToken(token)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Token has expired")
+			if err := jwtChecker.ValidateToken(token); err != nil {
+				return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+					Message: "Invalid token",
+					Error:   err.Error(),
+				})
 			}
 
 			return next(c)

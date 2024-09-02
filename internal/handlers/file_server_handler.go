@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"mime"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/server"
 	"net/http"
 	"os"
@@ -25,17 +26,26 @@ func (h *fileServerHandler) HandleFileServer(c echo.Context) error {
 
 	wd, err := os.Getwd()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting working directory",
+            Error:   err.Error(),
+        })
 	}
 
 	bytes, err := os.ReadFile(wd + path)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error reading file",
+            Error:   err.Error(),
+        })
 	}
 
 	decrypted, err := h.server.Encrypt.DecryptFile(bytes)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error decrypting file",
+            Error:   err.Error(),
+        })
 	}
 
 	contentType := mime.TypeByExtension(filepath.Ext(path))

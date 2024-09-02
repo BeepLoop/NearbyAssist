@@ -39,17 +39,26 @@ func (h *userHandler) HandleCount(c echo.Context) error {
 	case "unverified":
 		filter = models.USER_STATUS_UNVERIFIED
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter found")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Invalid filter",
+            Error:   "Invalid filter",
+        })
 	}
 
 	user := models.NewUserModel(h.server.IdGen, h.server.DB)
 	if user == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	count, err := user.Count(filter)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error retrieving user count")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting user count",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -61,17 +70,26 @@ func (h *userHandler) HandleCheckVerification(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Error getting claims",
+            Error:   err.Error(),
+        })
 	}
 
 	id, ok := claims["userId"].(string)
 	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "User ID not found in JWT",
+            Error:   "User ID not found in JWT",
+        })
 	}
 
 	user := models.NewUserModel(h.server.IdGen, h.server.DB)
 	if user == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 	user.Id = id
 	isVerified := user.IsVerified()
@@ -86,28 +104,46 @@ func (h *userHandler) HandleGetMyDetails(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Error getting claims",
+            Error:   err.Error(),
+        })
 	}
 
 	id, ok := claims["userId"].(string)
 	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "User ID not found in JWT",
+            Error:   "User ID not found in JWT",
+        })
 	}
 
 	user := models.NewUserModel(h.server.IdGen, h.server.DB)
 	if user == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if _, err := user.FindById(id); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "User not found")
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+            Message: "User not found",
+            Error:   err.Error(),
+        })
 	}
 
 	if _, err := user.DecryptName(h.server.Encrypt.DecryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error decrypting name",
+            Error:   encryption.DECRYPTION_ERR,
+        })
 	}
 	if _, err := user.DecryptEmail(h.server.Encrypt.DecryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error decrypting email",
+            Error:   encryption.DECRYPTION_ERR,
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

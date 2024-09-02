@@ -48,7 +48,7 @@ func RegisterRoutes(s *server.Server) {
 			{
 				handler := handlers.NewUserHandler(s)
 				user.GET("/me", handler.HandleGetMyDetails)
-                user.GET("/verified", handler.HandleCheckVerification)
+				user.GET("/verified", handler.HandleCheckVerification)
 			}
 
 			vendor := public.Group("/vendors")
@@ -85,7 +85,7 @@ func RegisterRoutes(s *server.Server) {
 				transaction.POST("", handler.HandleNewTransaction)
 				transaction.GET("/ongoing", handler.HandleOngoingTransaction)
 				transaction.GET("/history", handler.HandleGetMyHistory)
-                transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
+				transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
 			}
 
 			application := public.Group("/application")

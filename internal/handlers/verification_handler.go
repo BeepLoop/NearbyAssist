@@ -29,7 +29,10 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 
 	req := models.NewIdentityVerificationModel(h.server.IdGen, h.server.DB)
 	if req == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	} else {
 		req.Name = name
 		req.Address = address
@@ -39,7 +42,10 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 
 	files, err := filehandler.FormParser(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to parse submitted files")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error parsing form",
+            Error:   err.Error(),
+        })
 	}
 
 	for _, file := range files {
@@ -49,16 +55,25 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 		case "frontId":
 			url, err := handler.SavePhoto(file, h.server.Storage.SaveFrontId)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save front id")
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error saving front ID",
+                    Error:   err.Error(),
+                })
 			}
 
 			frontId := models.NewFrontIdModelWithImageUrl(url, h.server.IdGen, h.server.DB)
 			if frontId == nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error initializing model",
+                    Error:   models.MODEL_INIT_ERROR,
+                })
 			}
 
 			if _, err := frontId.Create(); err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save front id to db")
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error creating front ID",
+                    Error:   err.Error(),
+                })
 			} else {
 				req.FrontId = frontId.Id
 			}
@@ -66,16 +81,25 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 		case "backId":
 			url, err := handler.SavePhoto(file, h.server.Storage.SaveBackId)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save back id")
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error saving back ID",
+                    Error:   err.Error(),
+                })
 			}
 
 			backId := models.NewBackIdModelWithImageUrl(url, h.server.IdGen, h.server.DB)
 			if backId == nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error initializing model",
+                    Error:   models.MODEL_INIT_ERROR,
+                })
 			}
 
 			if _, err := backId.Create(); err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save back id to db")
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error creating back ID",
+                    Error:   err.Error(),
+                })
 			} else {
 				req.BackId = backId.Id
 			}
@@ -83,16 +107,25 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 		case "face":
 			url, err := handler.SavePhoto(file, h.server.Storage.SaveFace)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save face")
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error saving face",
+                    Error:   err.Error(),
+                })
 			}
 
 			face := models.NewFaceModelWithImageUrl(url, h.server.IdGen, h.server.DB)
 			if face == nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error initializing model",
+                    Error:   models.MODEL_INIT_ERROR,
+                })
 			}
 
 			if _, err := face.Create(); err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save face to db")
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+                    Message: "Error creating face",
+                    Error:   err.Error(),
+                })
 			} else {
 				req.Face = face.Id
 			}
@@ -101,23 +134,38 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 	}
 
 	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Error validating request body",
+            Error:   err.Error(),
+        })
 	}
 
 	if _, err := req.EncryptName(h.server.Encrypt.EncryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error encrypting name",
+            Error:   encryption.ENCRYPTION_ERR,
+        })
 	}
 
 	if _, err := req.EncryptAddress(h.server.Encrypt.EncryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error encrypting address",
+            Error:   encryption.ENCRYPTION_ERR,
+        })
 	}
 
 	if _, err := req.EncryptIdNumber(h.server.Encrypt.EncryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error encrypting ID number",
+            Error:   encryption.ENCRYPTION_ERR,
+        })
 	}
 
 	if _, err := req.Create(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while creating identity verify")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error creating identity verification",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
@@ -129,13 +177,19 @@ func (h *verificationHandler) HandleVerifyIdentity(c echo.Context) error {
 func (h *verificationHandler) HandleGetAllIdentityVerification(c echo.Context) error {
 	ident_verification := models.NewIdentityVerificationModel(h.server.IdGen, h.server.DB)
 	if ident_verification == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
-    params := utils.ParseQuery(c.QueryString())
+	params := utils.ParseQuery(c.QueryString())
 	requests, err := ident_verification.FindAll(params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving verification requests")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting identity verifications",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -146,28 +200,46 @@ func (h *verificationHandler) HandleGetAllIdentityVerification(c echo.Context) e
 func (h *verificationHandler) HandleGetIdentityVerification(c echo.Context) error {
 	verificationId := c.Param("verificationId")
 	if verificationId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Verification ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Verification ID is required",
+            Error:   "Verification ID is required",
+        })
 	}
 
 	ident_verification := models.NewIdentityVerificationModel(h.server.IdGen, h.server.DB)
 	if ident_verification == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if _, err := ident_verification.FindById(verificationId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Verification request not found")
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+            Message: "Identity verification not found",
+            Error:   err.Error(),
+        })
 	}
 
 	if _, err := ident_verification.DecryptName(h.server.Encrypt.DecryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error decrypting name",
+            Error:   encryption.DECRYPTION_ERR,
+        })
 	}
 
 	if _, err := ident_verification.DecryptAddress(h.server.Encrypt.DecryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error decrypting address",
+            Error:   encryption.DECRYPTION_ERR,
+        })
 	}
 
 	if _, err := ident_verification.DecryptIdNumber(h.server.Encrypt.DecryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error decrypting ID number",
+            Error:   encryption.DECRYPTION_ERR,
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

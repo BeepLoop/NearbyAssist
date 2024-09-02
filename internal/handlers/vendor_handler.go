@@ -36,17 +36,26 @@ func (h *vendorHandler) HandleCount(c echo.Context) error {
 	case "unrestricted":
 		filter = models.VENDOR_STATUS_UNRESTRICTED
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter found")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Invalid filter",
+            Error:   "Invalid filter",
+        })
 	}
 
 	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
 	if vendor == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	count, err := vendor.Count(filter)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error retrieving vendor count")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting vendor count",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -57,16 +66,25 @@ func (h *vendorHandler) HandleCount(c echo.Context) error {
 func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	if vendorId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "user ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Vendor ID must be a number",
+            Error:   "Vendor ID must be a number",
+        })
 	}
 
 	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
 	if vendor == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if _, err := vendor.FindById(vendorId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Vendor not found")
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+            Message: "Vendor not found",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -77,16 +95,25 @@ func (h *vendorHandler) HandleGetVendor(c echo.Context) error {
 func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	if vendorId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Vendor ID must be a number",
+            Error:   "Vendor ID must be a number",
+        })
 	}
 
 	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
 	if vendor == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if err := vendor.Restrict(vendorId); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while restricting vendor")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error restricting vendor",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -97,16 +124,25 @@ func (h *vendorHandler) HandleRestrict(c echo.Context) error {
 func (h *vendorHandler) HandleUnrestrict(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	if vendorId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "vendor ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Vendor ID must be a number",
+            Error:   "Vendor ID must be a number",
+        })
 	}
 
 	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
 	if vendor == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if err := vendor.Unrestrict(vendorId); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while unrestricting vendor")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error unrestricting vendor",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

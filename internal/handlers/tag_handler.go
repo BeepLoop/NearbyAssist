@@ -22,12 +22,18 @@ func NewTagHandler(server *server.Server) *tagHandler {
 func (h *tagHandler) HandleGetTags(c echo.Context) error {
 	tag := models.NewTagModel(h.server.IdGen, h.server.DB)
 	if tag == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	tags, err := tag.FindAll()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting tags",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

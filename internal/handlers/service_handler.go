@@ -26,12 +26,18 @@ func NewServiceHandler(server *server.Server) *serviceHandler {
 func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	services, err := service.FindAll()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting services",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -42,12 +48,18 @@ func (h *serviceHandler) HandleGetServices(c echo.Context) error {
 func (h *serviceHandler) HandleCount(c echo.Context) error {
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	count, err := service.Count()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while counting services")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting service count",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -58,44 +70,71 @@ func (h *serviceHandler) HandleCount(c echo.Context) error {
 func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if err := c.Bind(service); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Error occurred binding request data")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Invalid request data",
+            Error:   err.Error(),
+        })
 	}
 
 	if err := c.Validate(service); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Missing required fields",
+            Error:   err.Error(),
+        })
 	}
 
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Error getting claims",
+            Error:   err.Error(),
+        })
 	}
 
 	id, ok := claims["userId"].(string)
 	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "User ID not found in JWT",
+            Error:   "User ID not found in JWT",
+        })
 	}
 
 	// Validate that the user is a registered vendor
 	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
 	if vendor == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if _, err := vendor.FindById(id); err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "User is not a registered vendor")
+		return echo.NewHTTPError(http.StatusForbidden, models.Error{
+            Message: "You are not a registered vendor",
+            Error:   err.Error(),
+        })
 	}
 
 	if _, err := service.EncryptDescription(h.server.Encrypt.EncryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error encrypting description",
+            Error:   encryption.ENCRYPTION_ERR,
+        })
 	}
 
 	if _, err := service.Create(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while creating service")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error creating service",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
@@ -106,21 +145,33 @@ func (h *serviceHandler) HandleRegisterService(c echo.Context) error {
 func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	serviceId := c.Param("serviceId")
 	if serviceId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Service ID must be a number",
+            Error:   "Service ID must be a number",
+        })
 	}
 
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	// Get service  info
 	if _, err := service.FindById(serviceId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "service not found")
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+            Message: "Service not found",
+            Error:   err.Error(),
+        })
 	}
 
 	if tags, err := service.GetTags(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service tags")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting service tags",
+            Error:   err.Error(),
+        })
 	} else {
 		service.Tags = tags
 	}
@@ -128,21 +179,33 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	// Get vendor info
 	vendor := models.NewVendorModel(h.server.IdGen, h.server.DB)
 	if vendor == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if _, err := vendor.FindByServiceId(service.Id); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Vendor of the service not found")
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+            Message: "Vendor not found",
+            Error:   err.Error(),
+        })
 	}
 
 	if _, err := vendor.DecryptVendor(h.server.Encrypt.DecryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.DECRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error decrypting vendor",
+            Error:   encryption.DECRYPTION_ERR,
+        })
 	}
 
 	// Get count per review rating
 	reviews, err := service.GetReviews()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting reviews",
+            Error:   err.Error(),
+        })
 	}
 
 	countPerRating := response.NewCountPerRating()
@@ -164,7 +227,10 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 	// Get service images
 	photos, err := service.GetPhotos()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting service images",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -178,48 +244,78 @@ func (h *serviceHandler) HandleGetDetails(c echo.Context) error {
 func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 	serviceId := c.Param("serviceId")
 	if serviceId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Service ID must be a number",
+            Error:   "Service ID must be a number",
+        })
 	}
 
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if err := c.Bind(service); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request data")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Invalid request data",
+            Error:   err.Error(),
+        })
 	}
 
 	if err := c.Validate(service); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Missing required fields")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Missing required fields",
+            Error:   err.Error(),
+        })
 	}
 
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Error getting claims",
+            Error:   err.Error(),
+        })
 	}
 
 	id, ok := claims["userId"].(string)
 	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "User ID not found in JWT",
+            Error:   "User ID not found in JWT",
+        })
 	}
 
 	// Validate if the service id  is owned by the requester
 	if vendor, err := service.GetVendor(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service vendor")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting vendor",
+            Error:   err.Error(),
+        })
 	} else {
 		if vendor.VendorId != id {
-			return echo.NewHTTPError(http.StatusUnauthorized, "You do not own this service")
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+                Message: "You do not own this service",
+                Error:   "You do not own this service",
+            })
 		}
 	}
 
 	if _, err := service.EncryptDescription(h.server.Encrypt.EncryptString); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, encryption.ENCRYPTION_ERR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error encrypting description",
+            Error:   encryption.ENCRYPTION_ERR,
+        })
 	}
 
 	if err := service.Update(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while updating service")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error updating service",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -231,36 +327,57 @@ func (h *serviceHandler) HandleUpdateService(c echo.Context) error {
 func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 	serviceId := c.Param("serviceId")
 	if serviceId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Service ID must be a number",
+            Error:   "Service ID must be a number",
+        })
 	}
 
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting claims",
+            Error:   err.Error(),
+        })
 	}
 
 	id, ok := claims["userId"].(string)
 	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "User ID not found in JWT")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "User ID not found in JWT",
+            Error:   "User ID not found in JWT",
+        })
 	}
 
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	// Validate if the service is owned by the requester
 	if vendor, err := service.GetVendor(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving service vendor")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting vendor",
+            Error:   err.Error(),
+        })
 	} else {
 		if vendor.VendorId != id {
-			return echo.NewHTTPError(http.StatusUnauthorized, "You do not own this service")
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+                Message: "You do not own this service",
+                Error:   "You do not own this service",
+            })
 		}
 	}
 
 	if err := service.Delete(); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while deleting service")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error deleting service",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusNoContent, nil)
@@ -269,13 +386,19 @@ func (h *serviceHandler) HandleDeleteService(c echo.Context) error {
 func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	params := utils.ParseQuery(c.QueryString())
 	result, err := service.GeoSpatialSearch(params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Error occurred while searching services")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Error searching services",
+            Error:   err.Error(),
+        })
 	}
 
 	// TODO: rank services by suggestability
@@ -306,7 +429,10 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 	}
 
 	if scoreError != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, scoreError.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error generating suggestability score",
+            Error:   scoreError.Error(),
+        })
 	}
 
 	// sort services by Suggestability
@@ -322,17 +448,26 @@ func (h *serviceHandler) HandleSearchService(c echo.Context) error {
 func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
 	vendorId := c.Param("vendorId")
 	if vendorId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "owner ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Vendor ID must be a number",
+            Error:   "Vendor ID must be a number",
+        })
 	}
 
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	services, err := service.FindByAllVendorId(vendorId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Error occurred while retrieving services")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error getting services",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -344,27 +479,42 @@ func (h *serviceHandler) HandleGetByVendor(c echo.Context) error {
 func (h *serviceHandler) HandleFindRoute(c echo.Context) error {
 	serviceId := c.Param("serviceId")
 	if serviceId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "service ID must be a number")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Service ID must be a number",
+            Error:   "Service ID must be a number",
+        })
 	}
 
 	service := models.NewServiceModel(h.server.IdGen, h.server.DB)
 	if service == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.MODEL_INIT_ERROR)
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error initializing model",
+            Error:   models.MODEL_INIT_ERROR,
+        })
 	}
 
 	if _, err := service.FindById(serviceId); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "service not found")
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+            Message: "Service not found",
+            Error:   err.Error(),
+        })
 	}
 
 	origin, err := parseOrigin(c.QueryParam("origin"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid origin coordinates")
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+            Message: "Invalid origin",
+            Error:   err.Error(),
+        })
 	}
 
 	destination := models.NewGeoGeoSpatialModelWithData(service.Latitude, service.Longitude)
 	polyline, err := h.server.RouteEngine.FindRoute(origin, destination)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not find routes at the moment")
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+            Message: "Error finding route",
+            Error:   err.Error(),
+        })
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
