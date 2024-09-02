@@ -24,6 +24,10 @@ func TestParseQuery(t *testing.T) {
 			},
 		},
 		{
+			input:    "filter=",
+			expected: map[string]string{},
+		},
+		{
 			input:    "",
 			expected: map[string]string{},
 		},

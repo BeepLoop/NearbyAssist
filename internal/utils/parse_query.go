@@ -8,9 +8,15 @@ func ParseQuery(query string) map[string]string {
 	params := make(map[string]string)
 	for _, q := range queries {
 		param := strings.Split(q, "=")
-		if len(param) == 2 {
-			params[param[0]] = param[1]
+		if len(param) != 2 {
+			continue
 		}
+
+        if param[1] == "" {
+            continue
+        }
+
+		params[param[0]] = param[1]
 	}
 
 	return params
