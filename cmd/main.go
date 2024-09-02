@@ -5,7 +5,7 @@ import (
 
 	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/db/mysql"
+	"nearbyassist/internal/db"
 	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/hash"
 	"nearbyassist/internal/id_generator"
@@ -26,12 +26,12 @@ func main() {
 	store.Initialize()
 
 	// Load database configuration
-	db := mysql.NewMysqlDatabase(config)
+	mysql := db.NewMysql(config)
 
 	serverConfig := server.ServerConfig{
 		Config:           config,
 		Websocket:        websocket.NewWebsocket(),
-		DB:               db.Conn,
+		DB:               mysql.Conn,
 		Storage:          store,
 		RouteEngine:      routing_engine.NewOSRM(config),
 		SuggestionEngine: suggestion_engine.NewCourtier(),
