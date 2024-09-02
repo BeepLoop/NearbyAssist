@@ -36,6 +36,12 @@ func NewAdminModel(idGenerator id_generator.IdGenerator, conn *sqlx.DB) *AdminMo
 	}
 }
 
+func NewAdminModelWithId(id string, conn *sqlx.DB) *AdminModel {
+	return &AdminModel{
+		Model: Model{Id: id, Conn: conn},
+	}
+}
+
 func (a *AdminModel) EncryptUsername(encryptFunc func(string) (string, error)) (*AdminModel, error) {
 	if encrypted, err := encryptFunc(a.Username); err != nil {
 		return nil, err
@@ -66,7 +72,7 @@ func (a *AdminModel) EncryptPassword() (*AdminModel, error) {
 }
 
 func (a *AdminModel) HashUsername(plainUsername string, hashFunc func([]byte) (string, error)) (*AdminModel, error) {
-	if hash, err := hashFunc([]byte(a.Username)); err != nil {
+	if hash, err := hashFunc([]byte(plainUsername)); err != nil {
 		return nil, err
 	} else {
 		a.UsernameHash = hash

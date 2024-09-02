@@ -61,6 +61,15 @@ func (u *UserModel) DecryptEmail(decryptFunc func(string) (string, error)) (*Use
 	return u, nil
 }
 
+func (u *UserModel) HashEmail(plainEmail string, hashFunc func([]byte) (string, error)) (*UserModel, error) {
+	if hash, err := hashFunc([]byte(plainEmail)); err != nil {
+		return nil, err
+	} else {
+		u.Hash = hash
+	}
+	return u, nil
+}
+
 func (u *UserModel) Create() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
