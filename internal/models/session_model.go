@@ -32,7 +32,7 @@ func (s *SessionModel) Create() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "INSERT INTO Session (id, token) VALUES (:id, :token)"
+	query := "INSERT INTO Session (id, refreshToken) VALUES (:id, :refreshToken)"
 	if _, err := s.Conn.NamedExecContext(ctx, query, s); err != nil {
 		return "", err
 	}
@@ -48,22 +48,8 @@ func (s *SessionModel) Logout() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	tx, err := s.Conn.BeginTxx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	logout := "UPDATE Session SET status = 'offline' WHERE id = ?"
-	if _, err := tx.ExecContext(ctx, logout, s.Id); err != nil {
-		return err
-	}
-
-	blacklist := "INSERT INTO Blacklist (token) VALUES (?)"
-	if _, err := tx.ExecContext(ctx, blacklist, s.RefreshToken); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
+	query := "UPDATE Session SET status = 'offline' WHERE id = ?"
+	if _, err := s.Conn.ExecContext(ctx, query, s.Id); err != nil {
 		return err
 	}
 
@@ -78,7 +64,7 @@ func (s *SessionModel) FindByToken() (*SessionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, token, status FROM Session WHERE token = ?"
+	query := "SELECT id, refreshToken, status FROM Session WHERE refreshToken = ?"
 
 	err := s.Conn.GetContext(ctx, s, query, s.RefreshToken)
 	if err != nil {
@@ -96,7 +82,7 @@ func (s *SessionModel) GetIfActive() (*SessionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, token, status FROM Session WHERE token = ? AND status = 'online'"
+	query := "SELECT id, refreshToken, status FROM Session WHERE refreshToken = ? AND status = 'online'"
 
 	err := s.Conn.GetContext(ctx, s, query, s.RefreshToken)
 	if err != nil {
@@ -110,33 +96,15 @@ func (s *SessionModel) GetIfActive() (*SessionModel, error) {
 	return s, nil
 }
 
-// func (s *SessionModel) Blacklist() error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-// 	defer cancel()
-//
-// 	query := "INSERT INTO Blacklist (token) VALUES (?)"
-//
-// 	_, err := s.Conn.ExecContext(ctx, query, s.RefreshToken)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	if ctx.Err() == context.DeadlineExceeded {
-// 		return context.DeadlineExceeded
-// 	}
-//
-// 	return nil
-// }
-
 func (s *SessionModel) IsBlacklisted() (bool, error) {
 	blacklist := NewBlacklistModel(s.IdGenerator, s.Conn)
 	if blacklist == nil {
-        return true, errors.New(MODEL_INIT_ERROR)
+		return true, errors.New(MODEL_INIT_ERROR)
 	}
 
 	if result, err := blacklist.FindByToken(s.RefreshToken); err == nil && result != nil {
-        return true, nil
+		return true, nil
 	}
 
-    return false, nil
+	return false, nil
 }

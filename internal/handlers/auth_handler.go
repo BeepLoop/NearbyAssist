@@ -261,6 +261,21 @@ func (h *authHandler) HandleLogout(c echo.Context) error {
 		})
 	}
 
+	blacklist := models.NewBlacklistModelWithToken(session.RefreshToken, h.server.IdGen, h.server.DB)
+	if blacklist == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error initializing model",
+			Error:   models.MODEL_INIT_ERROR,
+		})
+	}
+
+	if _, err := blacklist.Create(); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error blacklisting token",
+			Error:   err.Error(),
+		})
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"message": "Logout successful",
 	})
