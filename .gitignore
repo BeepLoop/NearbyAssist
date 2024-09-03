@@ -33,3 +33,4 @@ test_payload/
 test/
 bin/
 output/
+logs/
