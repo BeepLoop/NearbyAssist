@@ -10,17 +10,24 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type DefaultIdentityVerificationData struct {
+	Name     string
+	Address  string
+	IdType   string
+	IdNumber string
+}
+
 type IdentityVerificationModel struct {
 	Model
 	UpdateableModel
-	UserId   string `json:"userId" db:"userId" validate:"required"`
-	Name     string `json:"name" db:"name" validate:"required"`
-	Address  string `json:"address" db:"address" validate:"required"`
-	IdType   string `json:"idType" db:"idType" validate:"required"`
-	IdNumber string `json:"idNumber" db:"idNumber" validate:"required"`
-	FrontId  string `json:"frontId" db:"frontId" validate:"required"`
-	BackId   string `json:"backId" db:"backId" validate:"required"`
-	Face     string `json:"face" db:"face" validate:"required"`
+	UserId          string `json:"userId" db:"userId" validate:"required"`
+	Name            string `json:"name" db:"name" validate:"required"`
+	Address         string `json:"address" db:"address" validate:"required"`
+	IdType          string `json:"idType" db:"idType" validate:"required"`
+	IdNumber        string `json:"idNumber" db:"idNumber" validate:"required"`
+	FrontIdImageUrl string `json:"frontIdImageUrl" db:"frontIdImageUrl" validate:"required"`
+	BackIdImageUrl  string `json:"backIdImageUrl" db:"backIdImageUrl" validate:"required"`
+	FaceImageUrl    string `json:"faceImageUrl" db:"faceImageUrl" validate:"required"`
 }
 
 func NewIdentityVerificationModel(idGenerator id_generator.IdGenerator, conn *sqlx.DB) *IdentityVerificationModel {
@@ -32,6 +39,14 @@ func NewIdentityVerificationModel(idGenerator id_generator.IdGenerator, conn *sq
 	return &IdentityVerificationModel{
 		Model: Model{Id: id, Conn: conn},
 	}
+}
+
+func (i *IdentityVerificationModel) SetDefaultValues(data DefaultIdentityVerificationData) *IdentityVerificationModel {
+	i.Name = data.Name
+	i.Address = data.Address
+	i.IdType = data.IdType
+	i.IdNumber = data.IdNumber
+	return i
 }
 
 func (i *IdentityVerificationModel) EncryptName(encryptFunc func(string) (string, error)) (*IdentityVerificationModel, error) {
