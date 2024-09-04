@@ -11,6 +11,12 @@ import (
 func handleAdminRoutes(r *echo.Group, s *server.Server) {
 	r.Use(middleware.CheckRole(s.Auth))
 
+	analytics := r.Group("/analytics")
+    {
+        handler := handlers.NewAnalyticsHandler(s)
+        analytics.GET("", handler.HandleAnalytics)
+    }
+
 	management := r.Group("/management")
 	{
 		handler := handlers.NewAdminHandler(s)
