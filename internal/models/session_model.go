@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"errors"
 	"nearbyassist/internal/id_generator"
 	"time"
 
@@ -66,8 +65,7 @@ func (s *SessionModel) FindByToken() (*SessionModel, error) {
 
 	query := "SELECT id, refreshToken, status FROM Session WHERE refreshToken = ?"
 
-	err := s.Conn.GetContext(ctx, s, query, s.RefreshToken)
-	if err != nil {
+	if err := s.Conn.GetContext(ctx, s, query, s.RefreshToken); err != nil {
 		return nil, err
 	}
 
@@ -96,15 +94,3 @@ func (s *SessionModel) GetIfActive() (*SessionModel, error) {
 	return s, nil
 }
 
-func (s *SessionModel) IsBlacklisted() (bool, error) {
-	blacklist := NewBlacklistModel(s.IdGenerator, s.Conn)
-	if blacklist == nil {
-		return true, errors.New(MODEL_INIT_ERROR)
-	}
-
-	if result, err := blacklist.FindByToken(s.RefreshToken); err == nil && result != nil {
-		return true, nil
-	}
-
-	return false, nil
-}

@@ -306,15 +306,17 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 	}
 
 	if _, err := session.FindByToken(); err != nil {
+		println("Error finding session by token")
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
 			Message: "Session not found",
 			Error:   err.Error(),
 		})
 	}
 
-	if blacklisted, err := session.IsBlacklisted(); err != nil || blacklisted {
+	blacklist := models.NewBlacklistModel(h.server.IdGen, h.server.DB)
+	if _, err := blacklist.FindByToken(req.Token); err == nil {
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
-			Message: "Session is blacklisted",
+			Message: "Session token is blacklisted",
 			Error:   err.Error(),
 		})
 	}

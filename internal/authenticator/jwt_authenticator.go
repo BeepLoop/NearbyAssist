@@ -88,20 +88,13 @@ func (j *jwtAuthenticator) ValidateToken(tokenString string) error {
 }
 
 func (j *jwtAuthenticator) GetClaims(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("Unexpected signing method")
 		}
 
 		return []byte(j.secret), nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	if token.Valid == false {
-		return nil, errors.New("Invalid token")
-	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
