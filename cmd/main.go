@@ -27,6 +27,7 @@ func main() {
 
 	// Load database configuration
 	mysql := db.NewMysql(config)
+    defer mysql.Conn.Close()
 
 	serverConfig := server.ServerConfig{
 		Config:           config,
