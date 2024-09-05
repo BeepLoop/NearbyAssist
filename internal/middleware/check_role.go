@@ -12,9 +12,7 @@ import (
 func CheckRole(jwtChecker authenticator.Authenticator) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			authHeader := c.Request().Header.Get("Authorization")
-			token := strings.TrimPrefix(authHeader, "Bearer ")
-
+			token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 			if err := jwtChecker.ValidateToken(token); err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 					Message: "Invalid token",
@@ -43,9 +41,9 @@ func CheckRole(jwtChecker authenticator.Authenticator) echo.MiddlewareFunc {
 			iAdminRoute := strings.Contains(url, "/admin")
 			if iAdminRoute && role != "admin" {
 				return echo.NewHTTPError(http.StatusForbidden, models.Error{
-                    Message: "Unauthorized access",
-                    Error:   "Unauthorized access",
-                })
+					Message: "Unauthorized access",
+					Error:   "Unauthorized access",
+				})
 			}
 
 			return next(c)

@@ -39,7 +39,7 @@ func NewUserModel(idGenerator id_generator.IdGenerator, conn *sqlx.DB) *UserMode
 
 func NewUserModelWithId(id string, conn *sqlx.DB) *UserModel {
 	return &UserModel{
-		Model: Model{Id: id},
+		Model: Model{Id: id, Conn: conn},
 	}
 }
 

@@ -401,13 +401,13 @@ func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
 			})
 		}
 
-		if _, err := user.DecryptName(h.server.Encrypt.EncryptString); err != nil {
+		if _, err := user.DecryptName(h.server.Encrypt.DecryptString); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 				Message: encryption.DECRYPTION_ERR,
 				Error:   err.Error(),
 			})
 		}
-		if _, err := user.DecryptEmail(h.server.Encrypt.EncryptString); err != nil {
+		if _, err := user.DecryptEmail(h.server.Encrypt.DecryptString); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 				Message: encryption.DECRYPTION_ERR,
 				Error:   err.Error(),

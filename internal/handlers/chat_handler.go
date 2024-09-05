@@ -32,9 +32,9 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	conn, err := h.server.Websocket.Upgrade(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error upgrading connection",
-            Error:   err.Error(),
-        })
+			Message: "Error upgrading connection",
+			Error:   err.Error(),
+		})
 	}
 	defer conn.Close()
 
@@ -42,16 +42,16 @@ func (h *chatHandler) HandleWebsocket(c echo.Context) error {
 	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
-            Message: "Error getting claims",
-            Error:   err.Error(),
-        })
+			Message: "Error getting claims",
+			Error:   err.Error(),
+		})
 	}
 	id, ok := claims["userId"].(string)
 	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-            Message: "User ID not found in JWT",
-            Error:   "User ID not found in JWT",
-        })
+			Message: "User ID not found in JWT",
+			Error:   "User ID not found in JWT",
+		})
 	}
 
 	h.server.Websocket.Clients[id] = conn
@@ -82,35 +82,35 @@ func (h *chatHandler) HandleGetMessages(c echo.Context) error {
 	otherUser := c.Param("otherUserId")
 	if otherUser == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-            Message: "Other user ID is required",
-            Error:   "Other user ID is required",
-        })
+			Message: "Other user ID is required",
+			Error:   "Other user ID is required",
+		})
 	}
 
-	token := c.Request().Header.Get("Authorization")
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error getting claims",
-            Error:   err.Error(),
-        })
+			Message: "Error getting claims",
+			Error:   err.Error(),
+		})
 	}
 
 	id, ok := claims["userId"].(string)
 	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-            Message: "User ID not found in JWT",
-            Error:   "User ID not found in JWT",
-        })
+			Message: "User ID not found in JWT",
+			Error:   "User ID not found in JWT",
+		})
 	}
 
 	user := models.NewUserModelWithId(id, h.server.DB)
 	messages, err := user.GetMessages(otherUser)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-            Message: "Error getting messages",
-            Error:   err.Error(),
-        })
+			Message: "Error getting messages",
+			Error:   err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -119,38 +119,38 @@ func (h *chatHandler) HandleGetMessages(c echo.Context) error {
 }
 
 func (h *chatHandler) HandleGetConversations(c echo.Context) error {
-	token := c.Request().Header.Get("Authorization")
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	claims, err := h.server.Auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error getting claims",
-            Error:   err.Error(),
-        })
+			Message: "Error getting claims",
+			Error:   err.Error(),
+		})
 	}
 
 	id, ok := claims["userId"].(string)
 	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-            Message: "User ID not found in JWT",
-            Error:   "User ID not found in JWT",
-        })
+			Message: "User ID not found in JWT",
+			Error:   "User ID not found in JWT",
+		})
 	}
 
 	user := models.NewUserModelWithId(id, h.server.DB)
 	conversations, err := user.GetConversations()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error getting conversations",
-            Error:   err.Error(),
-        })
+			Message: "Error getting conversations",
+			Error:   err.Error(),
+		})
 	}
 
 	for _, conversation := range conversations {
 		if _, err := conversation.DecryptName(h.server.Encrypt.DecryptString); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-                Message: "Error decrypting name",
-                Error:   encryption.DECRYPTION_ERR,
-            })
+				Message: "Error decrypting name",
+				Error:   encryption.DECRYPTION_ERR,
+			})
 		}
 	}
 
