@@ -3,6 +3,7 @@ package store
 import "nearbyassist/internal/models"
 
 type AdminStore interface {
+	Create(data *models.AdminModel) error
 	FindById(id string) (*models.AdminModel, error)
 	FindByUsernameHash(hash string) (*models.AdminModel, error)
 	Login(data *models.SessionModel) error

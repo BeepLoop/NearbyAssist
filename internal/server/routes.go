@@ -12,7 +12,7 @@ func (s *Server) routes() {
 	{
 		adminRoute := v1.Group("/admin")
 		{
-			adminStore := store.NewAdminStore(s.DB)
+			adminStore := store.NewMysqlAdminStore(s.DB)
 			h := service.NewAdminService(adminStore)
 
 			adminRoute.GET("", h.BaseRoute)

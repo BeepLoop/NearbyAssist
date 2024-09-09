@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
+	store "nearbyassist/internal/store/nanoid"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -13,13 +14,19 @@ type MysqlAdminStore struct {
 	db *sqlx.DB
 }
 
-func NewAdminStore(db *sqlx.DB) *MysqlAdminStore {
+func NewMysqlAdminStore(db *sqlx.DB) *MysqlAdminStore {
 	return &MysqlAdminStore{db: db}
 }
 
 func (s *MysqlAdminStore) Create(data *models.AdminModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
+	if id, err := store.GenerateNanoId(); err != nil {
+		return err
+	} else {
+		data.Id = id
+	}
 
 	query := "INSERT INTO Admin (id, username, password, usernameHash, role) VALUES (:id, :username, :password, :usernameHash, :role)"
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
@@ -36,6 +43,12 @@ func (s *MysqlAdminStore) Create(data *models.AdminModel) error {
 func (s *MysqlAdminStore) Login(data *models.SessionModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
+	if id, err := store.GenerateNanoId(); err != nil {
+		return err
+	} else {
+		data.Id = id
+	}
 
 	query := "INSERT INTO Session (id, refreshToken) VALUES (:id, :refreshToken)"
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {

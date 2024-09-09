@@ -7,9 +7,8 @@ type SessionModel struct {
 	RefreshToken string `json:"refreshToken" db:"refreshToken"`
 }
 
-func NewSessionModel(id, refreshToken string) *SessionModel {
+func NewSessionModel(refreshToken string) *SessionModel {
 	return &SessionModel{
-		Model:        Model{Id: id},
 		RefreshToken: refreshToken,
 	}
 }

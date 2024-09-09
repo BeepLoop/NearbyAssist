@@ -69,21 +69,7 @@ func (h *AdminService) Login(c echo.Context) error {
 		})
 	}
 
-	sessionId, err := auth.GenerateNanoId()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: auth.NANO_ID_ERR,
-			Error:   err.Error(),
-		})
-	}
-	session := models.NewSessionModel(sessionId, refreshToken)
-	if session == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error initializing model",
-			Error:   models.MODEL_INIT_ERROR,
-		})
-	}
-
+	session := models.NewSessionModel(refreshToken)
 	if err := h.store.Login(session); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating session",
