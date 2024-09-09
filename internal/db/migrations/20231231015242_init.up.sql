@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS VendorComplaint (
     INDEX(id, vendorId)
 );
 
-create table if not exists SystemComplaint (
+CREATE TABLE IF NOT EXISTS SystemComplaint (
     id VARCHAR(255) NOT NULL,
     title VARCHAR(255) NOT NULL,
     detail Text NOT NULL,
@@ -156,7 +156,7 @@ create table if not exists SystemComplaint (
     INDEX(id, title)
 );
 
-create table if not exists SystemComplaintImage (
+CREATE TABLE IF NOT EXISTS SystemComplaintImage (
     id VARCHAR(255) NOT NULL,
     complaintId VARCHAR(255) NOT NULL,
     url VARCHAR(255) NOT NULL,
