@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"nearbyassist/internal/models"
 	"time"
 
@@ -82,4 +83,46 @@ func (s *AdminStore) FindByUsernameHash(hash string) (*models.AdminModel, error)
 	}
 
 	return admin, nil
+}
+
+func (s *AdminStore) DoesRefreshTokenExists(refreshToken string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	count := 0
+	query := "SELECT COUNT(id) FROM Session WHERE refreshToken = ?"
+	if err := s.db.GetContext(ctx, &count, query, refreshToken); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	return errors.New("refreshToken not found")
+}
+
+func (s *AdminStore) IsRefreshTokenBlacklisted(refreshToken string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	count := 0
+	query := "SELECT COUNT(id) FROM Blacklist WHERE token = ?"
+	if err := s.db.GetContext(ctx, &count, query, refreshToken); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	return errors.New("refreshToken blacklisted")
 }

@@ -23,3 +23,11 @@ func (m *MockAdminStore) FindById(id string) (*models.AdminModel, error) {
 func (m *MockAdminStore) FindByUsernameHash(hash string) (*models.AdminModel, error) {
 	return nil, nil
 }
+
+func (m *MockAdminStore) DoesRefreshTokenExists(refreshToken string) error {
+	return nil
+}
+
+func (m *MockAdminStore) IsRefreshTokenBlacklisted(refreshToken string) error {
+	return nil
+}
