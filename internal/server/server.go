@@ -75,8 +75,8 @@ func NewServer(options ServerConfig) (*Server, error) {
 func (s *Server) Start() error {
 	s.Echo.Validator = &utils.Validator{Validator: validator.New()}
 
+	s.middlewares()
 	s.routes()
-	s.registerMiddleware()
 
 	if err := s.Echo.Start(":" + s.Port); err != nil {
 		s.LOG_FILE.Close()

@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func (s *Server) registerMiddleware() {
+func (s *Server) middlewares() {
 	s.Echo.Pre(middleware.RemoveTrailingSlash())
 	s.Echo.Use(middleware.Recover())
 	s.Echo.Use(middleware.RequestID())
