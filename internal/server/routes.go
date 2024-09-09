@@ -2,9 +2,9 @@ package server
 
 import (
 	"nearbyassist/internal/middleware"
-	service "nearbyassist/internal/service/admin"
-	"nearbyassist/internal/service/user"
-	store "nearbyassist/internal/store/admin"
+	"nearbyassist/internal/service"
+	"nearbyassist/internal/store/admin"
+	"nearbyassist/internal/store/user"
 )
 
 func (s *Server) routes() {
@@ -12,7 +12,7 @@ func (s *Server) routes() {
 	{
 		adminRoute := v1.Group("/admin")
 		{
-			adminStore := store.NewMysqlAdminStore(s.DB)
+			adminStore := admin.NewMysqlAdminStore(s.DB)
 			h := service.NewAdminService(adminStore)
 
 			adminRoute.GET("", h.BaseRoute)
@@ -22,7 +22,9 @@ func (s *Server) routes() {
 
 		userRoute := v1.Group("/user")
 		{
-			h := user.NewHandler()
+			userStore := user.NewMysqlUserStore(s.DB)
+			h := service.NewUserService(userStore)
+
 			userRoute.GET("", h.BaseRoute)
 			userRoute.POST("/login", h.Login)
 			userRoute.POST("/refresh", h.Refresh, middleware.CheckAuth)

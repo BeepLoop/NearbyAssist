@@ -1,4 +1,4 @@
-package store
+package admin
 
 import "nearbyassist/internal/models"
 

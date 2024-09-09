@@ -1,10 +1,10 @@
-package store
+package admin
 
 import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
-	store "nearbyassist/internal/store/nanoid"
+	"nearbyassist/internal/store"
 	"time"
 
 	"github.com/jmoiron/sqlx"
