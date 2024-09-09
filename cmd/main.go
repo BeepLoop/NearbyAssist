@@ -9,12 +9,13 @@ import (
 	"nearbyassist/internal/encryption"
 	"nearbyassist/internal/hash"
 	"nearbyassist/internal/id_generator"
-	"nearbyassist/internal/routes"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/storage"
 	"nearbyassist/internal/suggestion_engine"
 	"nearbyassist/internal/websocket"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -26,13 +27,24 @@ func main() {
 	store.Initialize()
 
 	// Load database configuration
-	mysql := db.NewMysql(config)
-    defer mysql.Conn.Close()
+	mysql, err := db.NewMysql(mysql.Config{
+		User:                 config.DB_User,
+		Passwd:               config.DB_Password,
+		Net:                  "tcp",
+		Addr:                 config.DB_Host + ":" + config.DB_Port,
+		DBName:               config.DB_Name,
+		AllowNativePasswords: true,
+		ParseTime:            true,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer mysql.Close()
 
 	serverConfig := server.ServerConfig{
 		Config:           config,
 		Websocket:        websocket.NewWebsocket(),
-		DB:               mysql.Conn,
+		DB:               mysql,
 		Storage:          store,
 		RouteEngine:      routing_engine.NewOSRM(config),
 		SuggestionEngine: suggestion_engine.NewCourtier(),
@@ -47,8 +59,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	routes.RegisterRoutes(server)
 
 	go server.Websocket.SaveMessages()
 	go server.Websocket.ForwardMessages()

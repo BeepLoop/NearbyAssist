@@ -1,20 +1,20 @@
 package request
 
-type AdminLogin struct {
-	Username string `json:"username" db:"username" validate:"required"`
-	Password string `json:"password" db:"password" validate:"required"`
+type AdminLoginPayload struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
-type UserLogin struct {
-	Name  string `json:"name" db:"name" validate:"required"`
-	Email string `json:"email" db:"email" validate:"required"`
-	Image string `json:"image" db:"image" validate:"required"`
+type UserLoginPayload struct {
+	Name  string `json:"name" validate:"required"`
+	Email string `json:"email" validate:"required"`
+	Image string `json:"image" validate:"required"`
 }
 
-type RefreshToken struct {
+type TokenRefreshPayload struct {
 	Token string `json:"token" validate:"required"`
 }
 
-type Logout struct {
+type LogoutPayload struct {
 	Token string `json:"token" validate:"required"`
 }

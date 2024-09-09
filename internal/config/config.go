@@ -20,11 +20,12 @@ const (
 )
 
 type Config struct {
-	DB_User                  string
-	DB_Password              string
-	DB_Name                  string
-	DB_Host                  string
-	DB_Port                  string
+	DB_User     string
+	DB_Password string
+	DB_Name     string
+	DB_Host     string
+	DB_Port     string
+
 	Port                     string
 	LOG_FILE                 string
 	AllowedOrigins           []string

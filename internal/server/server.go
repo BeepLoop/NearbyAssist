@@ -72,18 +72,16 @@ func NewServer(options ServerConfig) (*Server, error) {
 	return NewServer, nil
 }
 
-func (s *Server) configure() {
-	s.Echo.Validator = &utils.Validator{Validator: validator.New()}
-}
-
 func (s *Server) Start() error {
-	s.configure()
+	s.Echo.Validator = &utils.Validator{Validator: validator.New()}
+
+	s.routes()
 	s.registerMiddleware()
 
-    if err := s.Echo.Start(":" + s.Port); err != nil {
-        s.LOG_FILE.Close()
-        return err
-    }
+	if err := s.Echo.Start(":" + s.Port); err != nil {
+		s.LOG_FILE.Close()
+		return err
+	}
 
-    return nil
+	return nil
 }

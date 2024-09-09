@@ -29,7 +29,7 @@ func (h *authHandler) HandleBaseRoute(c echo.Context) error {
 
 func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 	// Bind request body
-	req := new(request.AdminLogin)
+	req := new(request.AdminLoginPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error binding request body",
@@ -117,7 +117,7 @@ func (h *authHandler) HandleAdminLogin(c echo.Context) error {
 }
 
 func (h *authHandler) HandleClientLogin(c echo.Context) error {
-	req := new(request.UserLogin)
+	req := new(request.UserLoginPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error binding request body",
@@ -224,7 +224,7 @@ func (h *authHandler) HandleClientLogin(c echo.Context) error {
 }
 
 func (h *authHandler) HandleLogout(c echo.Context) error {
-	req := new(request.Logout)
+	req := new(request.LogoutPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error binding request body",
@@ -282,7 +282,7 @@ func (h *authHandler) HandleLogout(c echo.Context) error {
 }
 
 func (h *authHandler) HandleTokenRefresh(c echo.Context) error {
-	req := new(request.RefreshToken)
+	req := new(request.TokenRefreshPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error binding request body",

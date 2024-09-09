@@ -4,8 +4,6 @@ import (
 	"context"
 	"nearbyassist/internal/id_generator"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type SessionModel struct {
@@ -15,14 +13,14 @@ type SessionModel struct {
 	RefreshToken string `json:"refreshToken" db:"refreshToken"`
 }
 
-func NewSessionModel(refreshToken string, idGenerator id_generator.IdGenerator, conn *sqlx.DB) *SessionModel {
+func NewSessionModel(refreshToken string, idGenerator id_generator.IdGenerator) *SessionModel {
 	id, err := idGenerator.Generate()
 	if err != nil {
 		return nil
 	}
 
 	return &SessionModel{
-		Model:        Model{Id: id, Conn: conn},
+		Model:        Model{Id: id},
 		RefreshToken: refreshToken,
 	}
 }
@@ -93,4 +91,3 @@ func (s *SessionModel) GetIfActive() (*SessionModel, error) {
 
 	return s, nil
 }
-
