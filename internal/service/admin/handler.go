@@ -1,21 +1,15 @@
-package admin
+package service
 
 import (
-	"nearbyassist/internal/authenticator"
-	"nearbyassist/internal/id_generator"
 	store "nearbyassist/internal/store/admin"
 )
 
-type Handler struct {
-	store store.IAdminStore
-	jwt   authenticator.Authenticator
-	idGen id_generator.IdGenerator
+type AdminService struct {
+	store store.AdminStore
 }
 
-func NewHandler(store store.IAdminStore, jwt authenticator.Authenticator, idGen id_generator.IdGenerator) *Handler {
-	return &Handler{
+func NewAdminService(store store.AdminStore) *AdminService {
+	return &AdminService{
 		store: store,
-		jwt:   jwt,
-		idGen: idGen,
 	}
 }

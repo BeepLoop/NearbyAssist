@@ -2,7 +2,7 @@ package store
 
 import "nearbyassist/internal/models"
 
-type IAdminStore interface {
+type AdminStore interface {
 	FindById(id string) (*models.AdminModel, error)
 	FindByUsernameHash(hash string) (*models.AdminModel, error)
 	Login(data *models.SessionModel) error

@@ -1,11 +1,5 @@
 package models
 
-import (
-	"context"
-	"nearbyassist/internal/id_generator"
-	"time"
-)
-
 type SessionModel struct {
 	Model
 	UpdateableModel
@@ -13,81 +7,76 @@ type SessionModel struct {
 	RefreshToken string `json:"refreshToken" db:"refreshToken"`
 }
 
-func NewSessionModel(refreshToken string, idGenerator id_generator.IdGenerator) *SessionModel {
-	id, err := idGenerator.Generate()
-	if err != nil {
-		return nil
-	}
-
+func NewSessionModel(id, refreshToken string) *SessionModel {
 	return &SessionModel{
 		Model:        Model{Id: id},
 		RefreshToken: refreshToken,
 	}
 }
 
-func (s *SessionModel) Create() (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := "INSERT INTO Session (id, refreshToken) VALUES (:id, :refreshToken)"
-	if _, err := s.Conn.NamedExecContext(ctx, query, s); err != nil {
-		return "", err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return "", context.DeadlineExceeded
-	}
-
-	return s.Id, nil
-}
-
-func (s *SessionModel) Logout() error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := "UPDATE Session SET status = 'offline' WHERE id = ?"
-	if _, err := s.Conn.ExecContext(ctx, query, s.Id); err != nil {
-		return err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	return nil
-}
-
-func (s *SessionModel) FindByToken() (*SessionModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := "SELECT id, refreshToken, status FROM Session WHERE refreshToken = ?"
-
-	if err := s.Conn.GetContext(ctx, s, query, s.RefreshToken); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return s, nil
-}
-
-func (s *SessionModel) GetIfActive() (*SessionModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := "SELECT id, refreshToken, status FROM Session WHERE refreshToken = ? AND status = 'online'"
-
-	err := s.Conn.GetContext(ctx, s, query, s.RefreshToken)
-	if err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return s, nil
-}
+// func (s *SessionModel) Create() (string, error) {
+// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+// 	defer cancel()
+//
+// 	query := "INSERT INTO Session (id, refreshToken) VALUES (:id, :refreshToken)"
+// 	if _, err := s.Conn.NamedExecContext(ctx, query, s); err != nil {
+// 		return "", err
+// 	}
+//
+// 	if ctx.Err() == context.DeadlineExceeded {
+// 		return "", context.DeadlineExceeded
+// 	}
+//
+// 	return s.Id, nil
+// }
+//
+// func (s *SessionModel) Logout() error {
+// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+// 	defer cancel()
+//
+// 	query := "UPDATE Session SET status = 'offline' WHERE id = ?"
+// 	if _, err := s.Conn.ExecContext(ctx, query, s.Id); err != nil {
+// 		return err
+// 	}
+//
+// 	if ctx.Err() == context.DeadlineExceeded {
+// 		return context.DeadlineExceeded
+// 	}
+//
+// 	return nil
+// }
+//
+// func (s *SessionModel) FindByToken() (*SessionModel, error) {
+// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+// 	defer cancel()
+//
+// 	query := "SELECT id, refreshToken, status FROM Session WHERE refreshToken = ?"
+//
+// 	if err := s.Conn.GetContext(ctx, s, query, s.RefreshToken); err != nil {
+// 		return nil, err
+// 	}
+//
+// 	if ctx.Err() == context.DeadlineExceeded {
+// 		return nil, context.DeadlineExceeded
+// 	}
+//
+// 	return s, nil
+// }
+//
+// func (s *SessionModel) GetIfActive() (*SessionModel, error) {
+// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+// 	defer cancel()
+//
+// 	query := "SELECT id, refreshToken, status FROM Session WHERE refreshToken = ? AND status = 'online'"
+//
+// 	err := s.Conn.GetContext(ctx, s, query, s.RefreshToken)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	if ctx.Err() == context.DeadlineExceeded {
+// 		return nil, context.DeadlineExceeded
+// 	}
+//
+// 	return s, nil
+// }

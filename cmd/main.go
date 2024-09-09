@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 
-	"nearbyassist/internal/authenticator"
+	// "nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/encryption"
-	"nearbyassist/internal/hash"
-	"nearbyassist/internal/id_generator"
+	// "nearbyassist/internal/hash"
+	// "nearbyassist/internal/id_generator"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/storage"
@@ -48,10 +48,10 @@ func main() {
 		Storage:          store,
 		RouteEngine:      routing_engine.NewOSRM(config),
 		SuggestionEngine: suggestion_engine.NewCourtier(),
-		IdGen:            id_generator.NewNanoIdGenerator(),
-		Encrypt:          encryption.NewAes(config),
-		Hash:             hash.NewSha(),
-		Auth:             authenticator.NewJWTAuthenticator(config),
+		// IdGen:            id_generator.NewNanoIdGenerator(),
+		Encrypt: encryption.NewAes(config),
+		// Hash:             hash.NewSha(),
+		// Auth:             authenticator.NewJWTAuthenticator(config),
 	}
 
 	// Create and start the server

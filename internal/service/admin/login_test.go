@@ -1,8 +1,6 @@
-package admin
+package service
 
 import (
-	"nearbyassist/internal/authenticator"
-	"nearbyassist/internal/id_generator"
 	store "nearbyassist/internal/store/admin"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -17,9 +15,7 @@ import (
 
 func TestAdminLogin(t *testing.T) {
 	adminStore := store.NewMockAdminStore()
-	jwt := authenticator.NewMockAuthenticator()
-	idGen := id_generator.NewMockGenerator()
-	handler := NewHandler(adminStore, jwt, idGen)
+	handler := NewAdminService(adminStore)
 
 	t.Run("Should fail if payload is invalid", func(t *testing.T) {
 		tests := []struct {

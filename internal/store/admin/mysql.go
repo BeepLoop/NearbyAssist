@@ -9,15 +9,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type AdminStore struct {
+type MysqlAdminStore struct {
 	db *sqlx.DB
 }
 
-func NewAdminStore(db *sqlx.DB) *AdminStore {
-	return &AdminStore{db: db}
+func NewAdminStore(db *sqlx.DB) *MysqlAdminStore {
+	return &MysqlAdminStore{db: db}
 }
 
-func (s *AdminStore) Create(data *models.AdminModel) error {
+func (s *MysqlAdminStore) Create(data *models.AdminModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -33,7 +33,7 @@ func (s *AdminStore) Create(data *models.AdminModel) error {
 	return nil
 }
 
-func (s *AdminStore) Login(data *models.SessionModel) error {
+func (s *MysqlAdminStore) Login(data *models.SessionModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -49,7 +49,7 @@ func (s *AdminStore) Login(data *models.SessionModel) error {
 	return nil
 }
 
-func (s *AdminStore) FindById(id string) (*models.AdminModel, error) {
+func (s *MysqlAdminStore) FindById(id string) (*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -67,7 +67,7 @@ func (s *AdminStore) FindById(id string) (*models.AdminModel, error) {
 	return admin, nil
 }
 
-func (s *AdminStore) FindByUsernameHash(hash string) (*models.AdminModel, error) {
+func (s *MysqlAdminStore) FindByUsernameHash(hash string) (*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -85,7 +85,7 @@ func (s *AdminStore) FindByUsernameHash(hash string) (*models.AdminModel, error)
 	return admin, nil
 }
 
-func (s *AdminStore) DoesRefreshTokenExists(refreshToken string) error {
+func (s *MysqlAdminStore) DoesRefreshTokenExists(refreshToken string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -106,7 +106,7 @@ func (s *AdminStore) DoesRefreshTokenExists(refreshToken string) error {
 	return errors.New("refreshToken not found")
 }
 
-func (s *AdminStore) IsRefreshTokenBlacklisted(refreshToken string) error {
+func (s *MysqlAdminStore) IsRefreshTokenBlacklisted(refreshToken string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 

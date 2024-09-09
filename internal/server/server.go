@@ -1,11 +1,11 @@
 package server
 
 import (
-	"nearbyassist/internal/authenticator"
+	// "nearbyassist/internal/authenticator"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/encryption"
-	"nearbyassist/internal/hash"
-	"nearbyassist/internal/id_generator"
+	// "nearbyassist/internal/hash"
+	// "nearbyassist/internal/id_generator"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/storage"
 	"nearbyassist/internal/suggestion_engine"
@@ -25,10 +25,10 @@ type ServerConfig struct {
 	Storage          storage.Storage
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
-	IdGen            id_generator.IdGenerator
-	Encrypt          encryption.Encryption
-	Hash             hash.Hash
-	Auth             authenticator.Authenticator
+	// IdGen            id_generator.IdGenerator
+	Encrypt encryption.Encryption
+	// Hash             hash.Hash
+	// Auth             authenticator.Authenticator
 }
 
 type Server struct {
@@ -39,12 +39,12 @@ type Server struct {
 	Storage          storage.Storage
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
-	IdGen            id_generator.IdGenerator
-	Encrypt          encryption.Encryption
-	Hash             hash.Hash
-	Auth             authenticator.Authenticator
-	Port             string
-	AllowedOrigins   []string
+	// IdGen            id_generator.IdGenerator
+	Encrypt encryption.Encryption
+	// Hash             hash.Hash
+	// Auth           authenticator.Authenticator
+	Port           string
+	AllowedOrigins []string
 }
 
 func NewServer(options ServerConfig) (*Server, error) {
@@ -61,12 +61,12 @@ func NewServer(options ServerConfig) (*Server, error) {
 		Storage:          options.Storage,
 		RouteEngine:      options.RouteEngine,
 		SuggestionEngine: options.SuggestionEngine,
-		IdGen:            options.IdGen,
-		Encrypt:          options.Encrypt,
-		Hash:             options.Hash,
-		Auth:             options.Auth,
-		Port:             options.Config.Port,
-		AllowedOrigins:   options.Config.AllowedOrigins,
+		// IdGen:            options.IdGen,
+		Encrypt: options.Encrypt,
+		// Hash:             options.Hash,
+		// Auth:           options.Auth,
+		Port:           options.Config.Port,
+		AllowedOrigins: options.Config.AllowedOrigins,
 	}
 
 	return NewServer, nil

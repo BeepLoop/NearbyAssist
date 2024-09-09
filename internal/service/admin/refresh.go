@@ -1,16 +1,16 @@
-package admin
+package service
 
 import (
-	"nearbyassist/internal/authenticator"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) Refresh(c echo.Context) error {
+func (h *AdminService) Refresh(c echo.Context) error {
 	req := new(request.TokenRefreshPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -44,7 +44,7 @@ func (h *Handler) Refresh(c echo.Context) error {
 
 	// Generate new accessToken
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := h.jwt.GetClaims(token)
+	claims, err := auth.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
 			Message: "Error getting claims",
@@ -67,14 +67,14 @@ func (h *Handler) Refresh(c echo.Context) error {
 		})
 	}
 
-	accessToken, err := h.jwt.GenerateAdminAccessToken(authenticator.AdminOptions{
+	accessToken, err := auth.GenerateAdminAccessToken(auth.AdminOptions{
 		Id:       adminId,
 		Username: admin.Username,
 		Role:     admin.Role,
 	})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: authenticator.ACCESS_TOKEN_ERR,
+			Message: auth.ACCESS_TOKEN_ERR,
 			Error:   err.Error(),
 		})
 	}

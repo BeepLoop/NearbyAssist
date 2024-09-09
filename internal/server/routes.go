@@ -1,7 +1,8 @@
 package server
 
 import (
-	"nearbyassist/internal/service/admin"
+	"nearbyassist/internal/middleware"
+	service "nearbyassist/internal/service/admin"
 	"nearbyassist/internal/service/user"
 	store "nearbyassist/internal/store/admin"
 )
@@ -12,11 +13,11 @@ func (s *Server) routes() {
 		adminRoute := v1.Group("/admin")
 		{
 			adminStore := store.NewAdminStore(s.DB)
-			h := admin.NewHandler(adminStore, s.Auth, s.IdGen)
+			h := service.NewAdminService(adminStore)
 
 			adminRoute.GET("", h.BaseRoute)
 			adminRoute.POST("/login", h.Login)
-			adminRoute.POST("/refresh", h.Refresh)
+			adminRoute.POST("/refresh", h.Refresh, middleware.CheckAuth)
 		}
 
 		userRoute := v1.Group("/user")
@@ -24,7 +25,7 @@ func (s *Server) routes() {
 			h := user.NewHandler()
 			userRoute.GET("", h.BaseRoute)
 			userRoute.POST("/login", h.Login)
-			userRoute.POST("/refresh", h.Refresh)
+			userRoute.POST("/refresh", h.Refresh, middleware.CheckAuth)
 		}
 	}
 }
