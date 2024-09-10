@@ -30,7 +30,7 @@ func (s *Server) routes() {
 
 			adminRoute.GET("", h.BaseRoute)
 			adminRoute.POST("/login", h.Login)
-			adminRoute.POST("/refresh", h.Refresh, middleware.CheckAuth(s.JWT))
+			adminRoute.POST("/refresh", h.Refresh)
 			adminRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
 		}
 
@@ -41,7 +41,7 @@ func (s *Server) routes() {
 
 			userRoute.GET("", h.BaseRoute)
 			userRoute.POST("/login", h.Login)
-			userRoute.POST("/refresh", h.Refresh, middleware.CheckAuth(s.JWT))
+			userRoute.POST("/refresh", h.Refresh)
 			userRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
 		}
 
