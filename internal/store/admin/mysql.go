@@ -62,6 +62,41 @@ func (s *MysqlAdminStore) Login(data *models.SessionModel) error {
 	return nil
 }
 
+func (s *MysqlAdminStore) Logout(refreshToken string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	updateSession := "UPDATE Session SET status = 'offline' WHERE refreshToken = ? AND status = 'online'"
+	if _, err := s.db.ExecContext(ctx, updateSession, refreshToken); err != nil {
+		return err
+	}
+
+	id, err := store.GenerateNanoId()
+	if err != nil {
+		return err
+	}
+
+	blacklistToken := `INSERT INTO Blacklist (id, token) VALUES (?, ?)`
+	if _, err := tx.ExecContext(ctx, blacklistToken, id, refreshToken); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlAdminStore) FindById(id string) (*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

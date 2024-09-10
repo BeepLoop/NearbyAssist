@@ -184,3 +184,36 @@ func (s *AdminService) Refresh(c echo.Context) error {
 		"accessToken": accessToken,
 	})
 }
+
+func (s *AdminService) Logout(c echo.Context) error {
+	req := new(request.LogoutPayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := s.store.DoesRefreshTokenExists(req.RefreshToken); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+			Message: "Session not found",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := s.store.Logout(req.RefreshToken); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error logging out",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}

@@ -18,6 +18,7 @@ func (s *Server) routes() {
 			adminRoute.GET("", h.BaseRoute)
 			adminRoute.POST("/login", h.Login)
 			adminRoute.POST("/refresh", h.Refresh, middleware.CheckAuth)
+			adminRoute.POST("/logout", h.Logout, middleware.CheckAuth)
 		}
 
 		userRoute := v1.Group("/user")

@@ -16,5 +16,5 @@ type TokenRefreshPayload struct {
 }
 
 type LogoutPayload struct {
-	Token string `json:"token" validate:"required"`
+	RefreshToken string `json:"refreshToken" validate:"required"`
 }

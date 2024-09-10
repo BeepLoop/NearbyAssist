@@ -16,6 +16,10 @@ func (m *MockAdminStore) Login(data *models.SessionModel) error {
 	return nil
 }
 
+func (s *MockAdminStore) Logout(refreshToken string) error {
+	return nil
+}
+
 func (m *MockAdminStore) FindById(id string) (*models.AdminModel, error) {
 	return nil, nil
 }

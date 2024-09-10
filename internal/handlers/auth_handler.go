@@ -239,7 +239,7 @@ func (h *authHandler) HandleLogout(c echo.Context) error {
 		})
 	}
 
-	session := models.NewSessionModel(req.Token, h.server.IdGen, h.server.DB)
+	session := models.NewSessionModel(req.RefreshToken, h.server.IdGen, h.server.DB)
 	if session == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error initializing model",
