@@ -10,6 +10,19 @@ import (
 func (s *Server) routes() {
 	v1 := s.Echo.Group("/api/v1")
 	{
+		healthRoute := v1.Group("/health")
+		{
+			h := service.NewHealthService()
+			healthRoute.GET("", h.BaseRoute)
+
+			protected := healthRoute.Group("/protected")
+			{
+				protected.Use(middleware.CheckAuth)
+
+				protected.GET("", h.BaseRoute)
+			}
+		}
+
 		adminRoute := v1.Group("/admin")
 		{
 			adminStore := admin.NewMysqlAdminStore(s.DB)
