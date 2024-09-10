@@ -103,7 +103,7 @@ func (s *MysqlAdminStore) DoesRefreshTokenExists(refreshToken string) error {
 	defer cancel()
 
 	count := 0
-	query := "SELECT COUNT(id) FROM Session WHERE refreshToken = ?"
+	query := "SELECT COUNT(id) FROM Session WHERE refreshToken = ? AND status = 'online'"
 	if err := s.db.GetContext(ctx, &count, query, refreshToken); err != nil {
 		return err
 	}
