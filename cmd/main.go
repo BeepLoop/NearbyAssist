@@ -45,6 +45,7 @@ func main() {
 		RouteEngine:      routing_engine.NewOSRM(config),
 		SuggestionEngine: suggestion_engine.NewCourtier(),
 		Encrypt:          auth.NewAES([]byte(config.EncryptionKey)),
+		JWT:              auth.NewJWTAuthenticator(config.JwtSecret, config.JwtDuration),
 	}
 
 	// Create and start the server

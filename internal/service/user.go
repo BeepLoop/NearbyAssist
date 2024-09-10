@@ -14,12 +14,14 @@ import (
 type UserService struct {
 	store     user.UserStore
 	encryptor auth.Encryption
+	jwt       auth.Authenticator
 }
 
-func NewUserService(store user.UserStore, encryptor auth.Encryption) *UserService {
+func NewUserService(store user.UserStore, encryptor auth.Encryption, jwt auth.Authenticator) *UserService {
 	return &UserService{
 		store:     store,
 		encryptor: encryptor,
+		jwt:       jwt,
 	}
 }
 
@@ -57,7 +59,7 @@ func (s *UserService) Login(c echo.Context) error {
 		return s.Register(req, emailHash, c)
 	}
 
-	accessToken, err := auth.GenerateUserAccessToken(auth.UserJWTClaims{
+	accessToken, err := s.jwt.GenerateUserAccessToken(auth.UserJWTClaims{
 		Id:    existingUser.Id,
 		Name:  req.Name,
 		Email: req.Email,
@@ -69,7 +71,7 @@ func (s *UserService) Login(c echo.Context) error {
 		})
 	}
 
-	refreshToken, err := auth.GenerateRefreshToken()
+	refreshToken, err := s.jwt.GenerateRefreshToken()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: auth.REFRESH_TOKEN_ERR,
@@ -128,7 +130,7 @@ func (s *UserService) Register(req *request.UserLoginPayload, emailHash string, 
 		})
 	}
 
-	accessToken, err := auth.GenerateUserAccessToken(auth.UserJWTClaims{
+	accessToken, err := s.jwt.GenerateUserAccessToken(auth.UserJWTClaims{
 		Id:    newUser.Id,
 		Name:  req.Name,
 		Email: req.Email,
@@ -140,7 +142,7 @@ func (s *UserService) Register(req *request.UserLoginPayload, emailHash string, 
 		})
 	}
 
-	refreshToken, err := auth.GenerateRefreshToken()
+	refreshToken, err := s.jwt.GenerateRefreshToken()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: auth.REFRESH_TOKEN_ERR,
@@ -195,7 +197,7 @@ func (s *UserService) Refresh(c echo.Context) error {
 
 	// Generate new accessToken
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := auth.GetClaims(token)
+	claims, err := s.jwt.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
 			Message: "Error getting claims",
@@ -236,7 +238,7 @@ func (s *UserService) Refresh(c echo.Context) error {
 		user.Email = plain
 	}
 
-	accessToken, err := auth.GenerateUserAccessToken(auth.UserJWTClaims{
+	accessToken, err := s.jwt.GenerateUserAccessToken(auth.UserJWTClaims{
 		Id:    user.Id,
 		Name:  user.Name,
 		Email: user.Email,

@@ -17,7 +17,7 @@ func (s *Server) routes() {
 
 			protected := healthRoute.Group("/protected")
 			{
-				protected.Use(middleware.CheckAuth)
+				protected.Use(middleware.CheckAuth(s.JWT))
 
 				protected.GET("", h.BaseRoute)
 			}
@@ -26,29 +26,29 @@ func (s *Server) routes() {
 		adminRoute := v1.Group("/admin")
 		{
 			adminStore := admin.NewMysqlAdminStore(s.DB)
-			h := service.NewAdminService(adminStore, s.Encrypt)
+			h := service.NewAdminService(adminStore, s.Encrypt, s.JWT)
 
 			adminRoute.GET("", h.BaseRoute)
 			adminRoute.POST("/login", h.Login)
-			adminRoute.POST("/refresh", h.Refresh, middleware.CheckAuth)
-			adminRoute.POST("/logout", h.Logout, middleware.CheckAuth)
+			adminRoute.POST("/refresh", h.Refresh, middleware.CheckAuth(s.JWT))
+			adminRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
 		}
 
 		userRoute := v1.Group("/user")
 		{
 			userStore := user.NewMysqlUserStore(s.DB)
-			h := service.NewUserService(userStore, s.Encrypt)
+			h := service.NewUserService(userStore, s.Encrypt, s.JWT)
 
 			userRoute.GET("", h.BaseRoute)
 			userRoute.POST("/login", h.Login)
-			userRoute.POST("/refresh", h.Refresh, middleware.CheckAuth)
-			userRoute.POST("/logout", h.Logout, middleware.CheckAuth)
+			userRoute.POST("/refresh", h.Refresh, middleware.CheckAuth(s.JWT))
+			userRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
 		}
 
 		resourceRoute := v1.Group("/resource")
 		{
-			resourceRoute.Use(middleware.CheckAuth)
-			resourceRoute.Use(middleware.CheckRole)
+			resourceRoute.Use(middleware.CheckAuth(s.JWT))
+			resourceRoute.Use(middleware.CheckRole(s.JWT))
 
 			h := service.NewResourceService(s.Encrypt)
 

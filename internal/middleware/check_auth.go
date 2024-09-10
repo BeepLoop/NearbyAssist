@@ -8,24 +8,26 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		token := c.Request().Header.Get("Authorization")
-		if token == "" {
-			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
-				Message: "Missing token",
-				Error:   "Missing token",
-			})
-		}
+func CheckAuth(jwt auth.Authenticator) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			token := c.Request().Header.Get("Authorization")
+			if token == "" {
+				return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+					Message: "Missing token",
+					Error:   "Missing token",
+				})
+			}
 
-		token = token[len("Bearer "):]
-		if err := auth.ValidateToken(token); err != nil {
-			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
-				Message: "Invalid token",
-				Error:   err.Error(),
-			})
-		}
+			token = token[len("Bearer "):]
+			if err := jwt.ValidateToken(token); err != nil {
+				return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+					Message: "Invalid token",
+					Error:   err.Error(),
+				})
+			}
 
-		return next(c)
+			return next(c)
+		}
 	}
 }

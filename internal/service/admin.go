@@ -14,12 +14,14 @@ import (
 type AdminService struct {
 	store     admin.AdminStore
 	encryptor auth.Encryption
+	jwt       auth.Authenticator
 }
 
-func NewAdminService(store admin.AdminStore, encryptor auth.Encryption) *AdminService {
+func NewAdminService(store admin.AdminStore, encryptor auth.Encryption, jwt auth.Authenticator) *AdminService {
 	return &AdminService{
 		store:     store,
 		encryptor: encryptor,
+		jwt:       jwt,
 	}
 }
 
@@ -66,7 +68,7 @@ func (s *AdminService) Login(c echo.Context) error {
 		})
 	}
 
-	accessToken, err := auth.GenerateAdminAccessToken(auth.AdminJWTClaims{
+	accessToken, err := s.jwt.GenerateAdminAccessToken(auth.AdminJWTClaims{
 		Id:       admin.Id,
 		Username: req.Username,
 		Role:     admin.Role,
@@ -78,7 +80,7 @@ func (s *AdminService) Login(c echo.Context) error {
 		})
 	}
 
-	refreshToken, err := auth.GenerateRefreshToken()
+	refreshToken, err := s.jwt.GenerateRefreshToken()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: auth.REFRESH_TOKEN_ERR,
@@ -136,7 +138,7 @@ func (s *AdminService) Refresh(c echo.Context) error {
 
 	// Generate new accessToken
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := auth.GetClaims(token)
+	claims, err := s.jwt.GetClaims(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
 			Message: "Error getting claims",
@@ -168,7 +170,7 @@ func (s *AdminService) Refresh(c echo.Context) error {
 		admin.Username = plain
 	}
 
-	accessToken, err := auth.GenerateAdminAccessToken(auth.AdminJWTClaims{
+	accessToken, err := s.jwt.GenerateAdminAccessToken(auth.AdminJWTClaims{
 		Id:       adminId,
 		Username: admin.Username,
 		Role:     admin.Role,

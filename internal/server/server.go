@@ -23,19 +23,23 @@ type ServerConfig struct {
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
 	Encrypt          auth.Encryption
+	JWT              auth.Authenticator
 }
 
 type Server struct {
-	LOG_FILE         *os.File
-	Echo             *echo.Echo
+	LOG_FILE *os.File
+
+	Echo           *echo.Echo
+	Port           string
+	AllowedOrigins []string
+
 	Websocket        *websocket.Websocket
 	DB               *sqlx.DB
 	Storage          storage.Storage
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
 	Encrypt          auth.Encryption
-	Port             string
-	AllowedOrigins   []string
+	JWT              auth.Authenticator
 }
 
 func NewServer(options ServerConfig) (*Server, error) {
@@ -45,16 +49,19 @@ func NewServer(options ServerConfig) (*Server, error) {
 	}
 
 	NewServer := &Server{
-		LOG_FILE:         file,
-		Echo:             echo.New(),
+		LOG_FILE: file,
+
+		Echo:           echo.New(),
+		Port:           options.Config.Port,
+		AllowedOrigins: options.Config.AllowedOrigins,
+
 		Websocket:        options.Websocket,
 		DB:               options.DB,
 		Storage:          options.Storage,
 		RouteEngine:      options.RouteEngine,
 		SuggestionEngine: options.SuggestionEngine,
 		Encrypt:          options.Encrypt,
-		Port:             options.Config.Port,
-		AllowedOrigins:   options.Config.AllowedOrigins,
+		JWT:              options.JWT,
 	}
 
 	return NewServer, nil
