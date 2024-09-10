@@ -11,23 +11,23 @@ const (
 	REFRESH_TOKEN_ERR = "Error generating refresh token"
 )
 
-type AdminOptions struct {
+type AdminJWTClaims struct {
 	Id       string
 	Username string
 	Role     models.AdminRole
 }
 
-type UserOptions struct {
+type UserJWTClaims struct {
 	Id    string
 	Name  string
 	Email string
 }
 
-func GenerateAdminAccessToken(options AdminOptions) (string, error) {
+func GenerateAdminAccessToken(options AdminJWTClaims) (string, error) {
 	return "", nil
 }
 
-func GenerateUserAccessToken(options UserOptions) (string, error) {
+func GenerateUserAccessToken(options UserJWTClaims) (string, error) {
 	return "", nil
 }
 

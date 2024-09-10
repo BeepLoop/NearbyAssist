@@ -23,7 +23,7 @@ func (s *Server) routes() {
 		userRoute := v1.Group("/user")
 		{
 			userStore := user.NewMysqlUserStore(s.DB)
-			h := service.NewUserService(userStore)
+			h := service.NewUserService(userStore, s.Encrypt)
 
 			userRoute.GET("", h.BaseRoute)
 			userRoute.POST("/login", h.Login)

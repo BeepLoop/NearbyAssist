@@ -64,7 +64,7 @@ func (s *AdminService) Login(c echo.Context) error {
 		})
 	}
 
-	accessToken, err := auth.GenerateAdminAccessToken(auth.AdminOptions{
+	accessToken, err := auth.GenerateAdminAccessToken(auth.AdminJWTClaims{
 		Id:       admin.Id,
 		Username: req.Username,
 		Role:     admin.Role,
@@ -157,7 +157,7 @@ func (s *AdminService) Refresh(c echo.Context) error {
 		})
 	}
 
-	accessToken, err := auth.GenerateAdminAccessToken(auth.AdminOptions{
+	accessToken, err := auth.GenerateAdminAccessToken(auth.AdminJWTClaims{
 		Id:       adminId,
 		Username: admin.Username,
 		Role:     admin.Role,

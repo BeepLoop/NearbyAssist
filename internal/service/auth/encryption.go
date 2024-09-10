@@ -1,4 +1,4 @@
-package encryption
+package auth
 
 import (
 	"crypto/aes"
@@ -6,20 +6,51 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"nearbyassist/internal/config"
 )
 
-type Aes struct {
+const (
+	ENCRYPTION_ERR = "Error occurred while encrypting"
+	DECRYPTION_ERR = "Error occurred while decrypting"
+)
+
+type Encryption interface {
+	EncryptString(text string) (string, error)
+	DecryptString(text string) (string, error)
+	EncryptFile(source []byte) ([]byte, error)
+	DecryptFile(source []byte) ([]byte, error)
+}
+
+type MockEncryptor struct{}
+
+func NewMockEncryptor() *MockEncryptor {
+	return &MockEncryptor{}
+}
+
+func (m *MockEncryptor) EncryptString(text string) (string, error) {
+	return text, nil
+}
+
+func (m *MockEncryptor) DecryptString(text string) (string, error) {
+	return text, nil
+}
+
+func (m *MockEncryptor) EncryptFile(source []byte) ([]byte, error) {
+	return source, nil
+}
+
+func (m *MockEncryptor) DecryptFile(source []byte) ([]byte, error) {
+	return source, nil
+}
+
+type AES struct {
 	key []byte
 }
 
-func NewAes(conf *config.Config) *Aes {
-	return &Aes{
-		key: []byte(conf.EncryptionKey),
-	}
+func NewAES(key []byte) *AES {
+	return &AES{key: key}
 }
 
-func (e *Aes) Encrypt(source []byte) ([]byte, error) {
+func (e *AES) Encrypt(source []byte) ([]byte, error) {
 	block, err := aes.NewCipher(e.key)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -41,7 +72,7 @@ func (e *Aes) Encrypt(source []byte) ([]byte, error) {
 	return encrypted, nil
 }
 
-func (e *Aes) Decrypt(source []byte) ([]byte, error) {
+func (e *AES) Decrypt(source []byte) ([]byte, error) {
 	block, err := aes.NewCipher(e.key)
 	if err != nil {
 		return nil, err
@@ -64,7 +95,7 @@ func (e *Aes) Decrypt(source []byte) ([]byte, error) {
 	return decrypted, nil
 }
 
-func (e *Aes) EncryptString(plaintext string) (string, error) {
+func (e *AES) EncryptString(plaintext string) (string, error) {
 	bytes := []byte(plaintext)
 
 	encrypted, err := e.Encrypt(bytes)
@@ -75,7 +106,7 @@ func (e *Aes) EncryptString(plaintext string) (string, error) {
 	return hex.EncodeToString(encrypted), nil
 }
 
-func (e *Aes) DecryptString(encrypted string) (string, error) {
+func (e *AES) DecryptString(encrypted string) (string, error) {
 	bytes, err := hex.DecodeString(encrypted)
 	if err != nil {
 		return "", err
@@ -89,7 +120,7 @@ func (e *Aes) DecryptString(encrypted string) (string, error) {
 	return string(decrypted), nil
 }
 
-func (e *Aes) EncryptFile(source []byte) ([]byte, error) {
+func (e *AES) EncryptFile(source []byte) ([]byte, error) {
 	encrypted, err := e.Encrypt(source)
 	if err != nil {
 		return nil, err
@@ -98,7 +129,7 @@ func (e *Aes) EncryptFile(source []byte) ([]byte, error) {
 	return encrypted, nil
 }
 
-func (e *Aes) DecryptFile(source []byte) ([]byte, error) {
+func (e *AES) DecryptFile(source []byte) ([]byte, error) {
 	decrypted, err := e.Decrypt(source)
 	if err != nil {
 		return nil, err
