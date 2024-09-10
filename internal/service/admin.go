@@ -12,12 +12,14 @@ import (
 )
 
 type AdminService struct {
-	store admin.AdminStore
+	store     admin.AdminStore
+	encryptor auth.Encryption
 }
 
-func NewAdminService(store admin.AdminStore) *AdminService {
+func NewAdminService(store admin.AdminStore, encryptor auth.Encryption) *AdminService {
 	return &AdminService{
-		store: store,
+		store:     store,
+		encryptor: encryptor,
 	}
 }
 
@@ -155,6 +157,15 @@ func (s *AdminService) Refresh(c echo.Context) error {
 			Message: "Admin not found",
 			Error:   "Admin not found",
 		})
+	}
+
+	if plain, err := s.encryptor.DecryptString(admin.Username); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: auth.DECRYPTION_ERR,
+			Error:   err.Error(),
+		})
+	} else {
+		admin.Username = plain
 	}
 
 	accessToken, err := auth.GenerateAdminAccessToken(auth.AdminJWTClaims{

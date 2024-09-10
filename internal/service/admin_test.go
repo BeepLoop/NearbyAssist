@@ -1,6 +1,7 @@
 package service
 
 import (
+	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/store/admin"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -15,7 +16,8 @@ import (
 
 func TestAdminLogin(t *testing.T) {
 	adminStore := admin.NewMockAdminStore()
-	handler := NewAdminService(adminStore)
+	encryptor := auth.NewMockEncryptor()
+	handler := NewAdminService(adminStore, encryptor)
 
 	t.Run("Should fail if payload is invalid", func(t *testing.T) {
 		tests := []struct {
@@ -65,7 +67,8 @@ func TestAdminLogin(t *testing.T) {
 
 func TestAdminRefresh(t *testing.T) {
 	adminStore := admin.NewMockAdminStore()
-	handler := NewAdminService(adminStore)
+	encryptor := auth.NewMockEncryptor()
+	handler := NewAdminService(adminStore, encryptor)
 
 	t.Run("Should fail if payload is invalid", func(t *testing.T) {
 		tests := []struct {

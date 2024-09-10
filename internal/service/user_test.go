@@ -48,3 +48,38 @@ func TestUserLogin(t *testing.T) {
 		}
 	})
 }
+
+func TestUserRefresh(t *testing.T) {
+	userStore := user.NewMockUserStore()
+	encryptor := auth.NewMockEncryptor()
+	handler := NewUserService(userStore, encryptor)
+
+	t.Run("Should fail if payload is invalid", func(t *testing.T) {
+		tests := []struct {
+			payload      string
+			expectedCode int
+		}{
+			{
+				`{}`,
+				http.StatusBadRequest,
+			},
+			{
+				`{"Token": ""}`,
+				http.StatusBadRequest,
+			},
+		}
+
+		for _, test := range tests {
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/user/refresh", strings.NewReader(test.payload))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+			rec := httptest.NewRecorder()
+
+			router := echo.New()
+			router.Validator = &utils.Validator{Validator: validator.New()}
+			c := router.NewContext(req, rec)
+
+			assert.Error(t, handler.Refresh(c), "Should return error")
+		}
+	})
+}

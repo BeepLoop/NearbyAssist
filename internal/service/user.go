@@ -154,5 +154,93 @@ func (s *UserService) Register(req *request.UserLoginPayload, emailHash string, 
 }
 
 func (s *UserService) Refresh(c echo.Context) error {
-	return c.JSON(http.StatusOK, "")
+	req := new(request.TokenRefreshPayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	// Check if refreshToken exists
+	if err := s.store.DoesRefreshTokenExists(req.RefreshToken); err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, models.Error{
+			Message: "Session not found",
+			Error:   err.Error(),
+		})
+	}
+
+	// Check if refreshToken is blacklisted
+	if err := s.store.IsRefreshTokenBlacklisted(req.RefreshToken); err == nil {
+		return echo.NewHTTPError(http.StatusForbidden, models.Error{
+			Message: "Token blacklisted",
+			Error:   "Token blacklisted",
+		})
+	}
+
+	// Generate new accessToken
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := auth.GetClaims(token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, models.Error{
+			Message: "Error getting claims",
+			Error:   err.Error(),
+		})
+	}
+	userId, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusForbidden, models.Error{
+			Message: "User Id not found in claims",
+			Error:   "User Id not found in claims",
+		})
+	}
+
+	user, err := s.store.FindById(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+			Message: "User not found",
+			Error:   "User not found",
+		})
+	}
+
+	if plain, err := s.encryptor.DecryptString(user.Name); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: auth.DECRYPTION_ERR,
+			Error:   err.Error(),
+		})
+	} else {
+		user.Name = plain
+	}
+
+	if plain, err := s.encryptor.DecryptString(user.Email); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: auth.DECRYPTION_ERR,
+			Error:   err.Error(),
+		})
+	} else {
+		user.Email = plain
+	}
+
+	accessToken, err := auth.GenerateUserAccessToken(auth.UserJWTClaims{
+		Id:    user.Id,
+		Name:  user.Name,
+		Email: user.Email,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: auth.ACCESS_TOKEN_ERR,
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"accessToken": accessToken,
+	})
 }
