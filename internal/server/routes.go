@@ -29,6 +29,7 @@ func (s *Server) routes() {
 			userRoute.GET("", h.BaseRoute)
 			userRoute.POST("/login", h.Login)
 			userRoute.POST("/refresh", h.Refresh, middleware.CheckAuth)
+			userRoute.POST("/logout", h.Logout, middleware.CheckAuth)
 		}
 
 		resourceRoute := v1.Group("/resource")

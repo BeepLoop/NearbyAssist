@@ -16,6 +16,10 @@ func (m *MockUserStore) Login(data *models.SessionModel) error {
 	return nil
 }
 
+func (m *MockUserStore) Logout(refreshToken string) error {
+	return nil
+}
+
 func (m *MockUserStore) FindById(id string) (*models.UserModel, error) {
 	return nil, nil
 }
