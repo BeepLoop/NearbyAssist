@@ -42,6 +42,28 @@ func (s *MysqlUserStore) CreateUser(user *models.UserModel) (string, error) {
 	return id, nil
 }
 
+func (s *MysqlUserStore) Login(data *models.SessionModel) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	if id, err := store.GenerateNanoId(); err != nil {
+		return err
+	} else {
+		data.Id = id
+	}
+
+	query := "INSERT INTO Session (id, refreshToken) VALUES (:id, :refreshToken)"
+	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlUserStore) FindById(id string) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

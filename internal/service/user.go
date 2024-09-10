@@ -77,6 +77,14 @@ func (s *UserService) Login(c echo.Context) error {
 		})
 	}
 
+	session := models.NewSessionModel(refreshToken)
+	if err := s.store.Login(session); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error creating session",
+			Error:   err.Error(),
+		})
+	}
+
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"user": models.UserModel{
 			Model:    models.Model{Id: existingUser.Id},

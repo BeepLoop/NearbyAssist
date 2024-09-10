@@ -12,6 +12,10 @@ func (m *MockUserStore) CreateUser(user *models.UserModel) (string, error) {
 	return "", nil
 }
 
+func (m *MockUserStore) Login(data *models.SessionModel) error {
+	return nil
+}
+
 func (m *MockUserStore) FindById(id string) (*models.UserModel, error) {
 	return nil, nil
 }
