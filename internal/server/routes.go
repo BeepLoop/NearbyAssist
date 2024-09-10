@@ -29,5 +29,15 @@ func (s *Server) routes() {
 			userRoute.POST("/login", h.Login)
 			userRoute.POST("/refresh", h.Refresh, middleware.CheckAuth)
 		}
+
+		resourceRoute := v1.Group("/resource")
+		{
+			resourceRoute.Use(middleware.CheckAuth)
+			resourceRoute.Use(middleware.CheckRole)
+
+			h := service.NewResourceService(s.Encrypt)
+
+			resourceRoute.GET("/:path", h.GetFile)
+		}
 	}
 }
