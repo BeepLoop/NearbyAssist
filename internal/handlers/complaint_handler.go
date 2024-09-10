@@ -85,16 +85,16 @@ func (h *complaintHandler) HandleSystemComplaint(c echo.Context) error {
 		image := models.NewSystemComplaintImageWithData(imageData, h.server.IdGen, h.server.DB)
 		if image == nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-                Message: "Error initializing image model",
-                Error:   models.MODEL_INIT_ERROR,
-            })
+				Message: "Error initializing image model",
+				Error:   models.MODEL_INIT_ERROR,
+			})
 		}
 
 		if _, err := image.Create(); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-                Message: "Error creating image",
-                Error:   err.Error(),
-            })
+				Message: "Error creating image",
+				Error:   err.Error(),
+			})
 		}
 	}
 
@@ -108,17 +108,17 @@ func (h *complaintHandler) HandleSystemComplaintCount(c echo.Context) error {
 	systemComplaint := models.NewSystemComplaintModel(h.server.IdGen, h.server.DB)
 	if systemComplaint == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error initializing model",
-            Error:   models.MODEL_INIT_ERROR,
-        })
+			Message: "Error initializing model",
+			Error:   models.MODEL_INIT_ERROR,
+		})
 	}
 
 	count, err := systemComplaint.Count()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error getting system complaint count",
-            Error:   err.Error(),
-        })
+			Message: "Error getting system complaint count",
+			Error:   err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
@@ -130,26 +130,26 @@ func (h *complaintHandler) HandleGetSystemComplaint(c echo.Context) error {
 	systemComplaint := models.NewSystemComplaintModel(h.server.IdGen, h.server.DB)
 	if systemComplaint == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error initializing model",
-            Error:   models.MODEL_INIT_ERROR,
-        })
+			Message: "Error initializing model",
+			Error:   models.MODEL_INIT_ERROR,
+		})
 	}
 
 	params := utils.ParseQuery(c.QueryString())
 	complaints, err := systemComplaint.FindAll(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error getting system complaints",
-            Error:   err.Error(),
-        })
+			Message: "Error getting system complaints",
+			Error:   err.Error(),
+		})
 	}
 
 	for _, complaint := range complaints {
 		if _, err := complaint.DecryptTitle(h.server.Encrypt.DecryptString); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-                Message: "Error decrypting title",
-                Error:   encryption.DECRYPTION_ERR,
-            })
+				Message: "Error decrypting title",
+				Error:   encryption.DECRYPTION_ERR,
+			})
 		}
 	}
 
@@ -162,46 +162,46 @@ func (h *complaintHandler) HandleGetSystemComplaintById(c echo.Context) error {
 	complaintId := c.Param("complaintId")
 	if complaintId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-            Message: "Complaint ID is required",
-            Error:   "Complaint ID is required",
-        })
+			Message: "Complaint ID is required",
+			Error:   "Complaint ID is required",
+		})
 	}
 
 	systemComplaint := models.NewSystemComplaintModel(h.server.IdGen, h.server.DB)
 	if systemComplaint == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error initializing model",
-            Error:   models.MODEL_INIT_ERROR,
-        })
+			Message: "Error initializing model",
+			Error:   models.MODEL_INIT_ERROR,
+		})
 	}
 
 	if _, err := systemComplaint.FindById(complaintId); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, models.Error{
-            Message: "Complaint not found",
-            Error:   err.Error(),
-        })
+			Message: "Complaint not found",
+			Error:   err.Error(),
+		})
 	}
 
 	if _, err := systemComplaint.DecryptTitle(h.server.Encrypt.DecryptString); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error decrypting title",
-            Error:   encryption.DECRYPTION_ERR,
-        })
+			Message: "Error decrypting title",
+			Error:   encryption.DECRYPTION_ERR,
+		})
 	}
 
 	if _, err := systemComplaint.DecryptDetail(h.server.Encrypt.DecryptString); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error decrypting detail",
-            Error:   encryption.DECRYPTION_ERR,
-        })
+			Message: "Error decrypting detail",
+			Error:   encryption.DECRYPTION_ERR,
+		})
 	}
 
 	images, err := systemComplaint.GetPhotos()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-            Message: "Error getting complaint images",
-            Error:   err.Error(),
-        })
+			Message: "Error getting complaint images",
+			Error:   err.Error(),
+		})
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{

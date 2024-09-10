@@ -24,11 +24,11 @@ func TestBubbleSort(t *testing.T) {
 				{Suggestability: 0.1},
 			},
 			expected: []response.SearchResult{
-                {Suggestability: 0.5},
-                {Suggestability: 0.4},
-                {Suggestability: 0.3},
+				{Suggestability: 0.5},
+				{Suggestability: 0.4},
+				{Suggestability: 0.3},
 				{Suggestability: 0.2},
-                {Suggestability: 0.1},
+				{Suggestability: 0.1},
 			},
 		},
 		{
@@ -39,8 +39,8 @@ func TestBubbleSort(t *testing.T) {
 				{Suggestability: 0.03},
 			},
 			expected: []response.SearchResult{
-                {Suggestability: 0.03},
-                {Suggestability: 0.02},
+				{Suggestability: 0.03},
+				{Suggestability: 0.02},
 				{Suggestability: 0.001},
 			},
 		},
@@ -50,7 +50,7 @@ func TestBubbleSort(t *testing.T) {
 		result := BubbleSort(test.input)
 
 		if reflect.DeepEqual(result, test.expected) == false {
-            t.Logf("Test: %v\n", test.name)
+			t.Logf("Test: %v\n", test.name)
 			t.Errorf("\nExpected: %v \nGot: %v\n", test.expected, result)
 		}
 	}

@@ -12,9 +12,9 @@ func ParseQuery(query string) map[string]string {
 			continue
 		}
 
-        if param[1] == "" {
-            continue
-        }
+		if param[1] == "" {
+			continue
+		}
 
 		params[param[0]] = param[1]
 	}

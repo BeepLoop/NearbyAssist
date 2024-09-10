@@ -118,10 +118,10 @@ func (a *ApplicationModel) FindAll(params map[string]string) ([]ApplicationModel
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-    // Initial query
+	// Initial query
 	query := "SELECT id, applicantId, status, createdAt FROM Application"
 
-    // Apply filters
+	// Apply filters
 	if filter, ok := params["filter"]; ok {
 		switch filter {
 		case "all":
@@ -164,7 +164,7 @@ func (a *ApplicationModel) FindAll(params map[string]string) ([]ApplicationModel
 		query += fmt.Sprintf(" LIMIT %d OFFSET %d", DEFAULT_LIMIT, DEFAULT_OFFSET)
 	}
 
-    // Execute query
+	// Execute query
 	applications := make([]ApplicationModel, 0)
 	if err := a.Conn.SelectContext(ctx, &applications, query); err != nil {
 		return nil, err

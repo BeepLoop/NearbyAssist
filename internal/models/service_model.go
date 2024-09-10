@@ -506,6 +506,7 @@ func (s *ServiceModel) GetVendor() (*VendorModel, error) {
 
 	return vendor, nil
 }
+
 //
 // func StringSliceContains(slice []string, target string) bool {
 // 	for _, item := range slice {
