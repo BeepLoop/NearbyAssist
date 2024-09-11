@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/middleware"
 	"nearbyassist/internal/service"
 	"nearbyassist/internal/store/admin"
+	"nearbyassist/internal/store/service"
 	"nearbyassist/internal/store/tag"
 	"nearbyassist/internal/store/user"
 	"nearbyassist/internal/store/vendor"
@@ -15,7 +16,7 @@ func (s *Server) routes() {
 		// ===== HEALTH =======
 		healthRoute := v1.Group("/health")
 		{
-			h := service.NewHealthService()
+			h := handler.NewHealthService()
 			healthRoute.GET("", h.BaseRoute)
 
 			protected := healthRoute.Group("/protected")
@@ -30,7 +31,7 @@ func (s *Server) routes() {
 		adminRoute := v1.Group("/admin")
 		{
 			adminStore := admin.NewMysqlAdminStore(s.DB)
-			h := service.NewAdminService(adminStore, s.Encrypt, s.JWT)
+			h := handler.NewAdminService(adminStore, s.Encrypt, s.JWT)
 
 			adminRoute.GET("", h.BaseRoute)
 			adminRoute.POST("/login", h.Login)
@@ -48,7 +49,7 @@ func (s *Server) routes() {
 		userRoute := v1.Group("/user")
 		{
 			userStore := user.NewMysqlUserStore(s.DB)
-			h := service.NewUserService(userStore, s.Encrypt, s.JWT)
+			h := handler.NewUserService(userStore, s.Encrypt, s.JWT)
 
 			userRoute.POST("/login", h.Login)
 			userRoute.POST("/refresh", h.Refresh)
@@ -69,7 +70,7 @@ func (s *Server) routes() {
 			resourceRoute.Use(middleware.CheckAuth(s.JWT))
 			resourceRoute.Use(middleware.CheckRole(s.JWT))
 
-			h := service.NewResourceService(s.Encrypt)
+			h := handler.NewResourceService(s.Encrypt)
 
 			resourceRoute.GET("/:path", h.GetFile)
 		}
@@ -78,7 +79,7 @@ func (s *Server) routes() {
 		tagRoute := v1.Group("/tags")
 		{
 			tagStore := tag.NewMysqlTagStore(s.DB)
-			h := service.NewTagService(tagStore)
+			h := handler.NewTagService(tagStore)
 
 			tagRoute.GET("", h.BaseRoute)
 		}
@@ -89,9 +90,27 @@ func (s *Server) routes() {
 			vendorRoute.Use(middleware.CheckAuth(s.JWT))
 
 			vendorStore := vendor.NewMysqlVendorStore(s.DB)
-			h := service.NewVendorService(vendorStore)
+			h := handler.NewVendorService(vendorStore)
 
 			vendorRoute.GET("/:vendorId", h.GetVendor)
+		}
+
+		// ===== SERVICES =======
+		serviceRoute := v1.Group("/services")
+		{
+			serviceRoute.Use(middleware.CheckAuth(s.JWT))
+
+			serviceStore := service.NewMysqlServiceStore(s.DB)
+			h := handler.NewServiceService(serviceStore, s.Encrypt, s.JWT, s.RouteEngine, s.SuggestionEngine)
+
+			serviceRoute.GET("", h.GetServices)
+			serviceRoute.POST("", h.Create)
+			serviceRoute.GET("/search", h.Search)
+			serviceRoute.GET("/:serviceId", h.GetService)
+			serviceRoute.PUT("/:serviceId", h.Update)
+			serviceRoute.DELETE("/:serviceId", h.Delete)
+			serviceRoute.GET("/vendor/:vendorId", h.GetVendorServices)
+			serviceRoute.GET("/route/:serviceId", h.FindRoute)
 		}
 	}
 }
