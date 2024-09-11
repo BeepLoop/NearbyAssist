@@ -88,11 +88,11 @@ func RegisterRoutes(s *server.Server) {
 			// 	transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
 			// }
 
-			application := public.Group("/application")
-			{
-				handler := handlers.NewApplicationHandler(s)
-				application.POST("", handler.HandleNewApplication)
-			}
+			// application := public.Group("/application")
+			// {
+			// 	handler := handlers.NewApplicationHandler(s)
+			// 	application.POST("", handler.HandleNewApplication)
+			// }
 
 			review := public.Group("/reviews")
 			{

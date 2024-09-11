@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/service"
 	"nearbyassist/internal/store/admin"
 	"nearbyassist/internal/store/application"
+	"nearbyassist/internal/store/review"
 	"nearbyassist/internal/store/service"
 	"nearbyassist/internal/store/tag"
 	"nearbyassist/internal/store/transaction"
@@ -140,6 +141,17 @@ func (s *Server) routes() {
 			h := handler.NewApplicationService(appStore)
 
 			applicationRoute.POST("", h.Create)
+		}
+
+		// ===== REVIEW =======
+		reviewRoute := v1.Group("/reviews")
+		{
+			reviewStore := review.NewMysqlReviewStore(s.DB)
+			h := handler.NewReviewService(reviewStore, s.JWT)
+
+			reviewRoute.POST("", h.Create)
+			reviewRoute.GET("/:reviewId", h.GetById)
+			reviewRoute.GET("/service/:serviceId", h.GetByService)
 		}
 	}
 }
