@@ -39,10 +39,16 @@ func (s *Server) routes() {
 			userStore := user.NewMysqlUserStore(s.DB)
 			h := service.NewUserService(userStore, s.Encrypt, s.JWT)
 
-			userRoute.GET("", h.BaseRoute)
 			userRoute.POST("/login", h.Login)
 			userRoute.POST("/refresh", h.Refresh)
-			userRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
+
+			protected := userRoute.Group("/protected")
+			{
+				protected.Use(middleware.CheckAuth(s.JWT))
+
+				protected.POST("/logout", h.Logout)
+				protected.GET("/me", h.BaseRoute)
+			}
 		}
 
 		resourceRoute := v1.Group("/resource")

@@ -8,38 +8,38 @@ import (
 
 func RegisterRoutes(s *server.Server) {
 	// Routes
-	healthHandler := handlers.NewHealthHandler(s)
-
-	rootHandler := handlers.NewHandler(s)
-	s.Echo.RouteNotFound("/*", rootHandler.HandleUnknownRoute)
-	s.Echo.GET("", rootHandler.HandleBaseRoute)
-	s.Echo.GET("/health", healthHandler.HandleHealthCheck)
-
-	// Auth Routes
-	auth := s.Echo.Group("/auth")
-	{
-		handler := handlers.NewAuthHandler(s)
-
-		auth.GET("/health", healthHandler.HandleHealthCheck)
-		auth.GET("", handler.HandleBaseRoute)
-		auth.POST("/refresh", handler.HandleTokenRefresh)
-		auth.POST("/logout", handler.HandleLogout)
-
-		auth.POST("/admin/login", handler.HandleAdminLogin)
-		auth.POST("/client/login", handler.HandleClientLogin)
-	}
+	// healthHandler := handlers.NewHealthHandler(s)
+	//
+	// rootHandler := handlers.NewHandler(s)
+	// s.Echo.RouteNotFound("/*", rootHandler.HandleUnknownRoute)
+	// s.Echo.GET("", rootHandler.HandleBaseRoute)
+	// s.Echo.GET("/health", healthHandler.HandleHealthCheck)
+	//
+	// // Auth Routes
+	// auth := s.Echo.Group("/auth")
+	// {
+	// 	handler := handlers.NewAuthHandler(s)
+	//
+	// 	auth.GET("/health", healthHandler.HandleHealthCheck)
+	// 	auth.GET("", handler.HandleBaseRoute)
+	// 	auth.POST("/refresh", handler.HandleTokenRefresh)
+	// 	auth.POST("/logout", handler.HandleLogout)
+	//
+	// 	auth.POST("/admin/login", handler.HandleAdminLogin)
+	// 	auth.POST("/client/login", handler.HandleClientLogin)
+	// }
 
 	// V1 routes
 	v1 := s.Echo.Group("/v1")
 	{
-		v1.Use(middleware.CheckAuth(s.Auth))
-
-		v1.GET("/health", healthHandler.HandleHealthCheck)
-		v1.GET("", rootHandler.HandleV1BaseRoute)
-
-		// Admin only routes
-		admin := v1.Group("/admin")
-		handleAdminRoutes(admin, s)
+		// v1.Use(middleware.CheckAuth(s.Auth))
+		//
+		// v1.GET("/health", healthHandler.HandleHealthCheck)
+		// v1.GET("", rootHandler.HandleV1BaseRoute)
+		//
+		// // Admin only routes
+		// admin := v1.Group("/admin")
+		// handleAdminRoutes(admin, s)
 
 		// Public routes
 		public := v1.Group("/public")

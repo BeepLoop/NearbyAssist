@@ -26,7 +26,52 @@ func NewUserService(store user.UserStore, encryptor auth.Encryption, jwt auth.Au
 }
 
 func (s *UserService) BaseRoute(c echo.Context) error {
-	return c.JSON(http.StatusOK, "me")
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := s.jwt.GetClaims(token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error getting claims",
+			Error:   err.Error(),
+		})
+	}
+
+	userId, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "User ID not found in JWT",
+			Error:   "User ID not found in JWT",
+		})
+	}
+
+	user, err := s.store.FindById(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+			Message: "User not found",
+			Error:   err.Error(),
+		})
+	}
+
+	if plain, err := s.encryptor.DecryptString(user.Name); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error decrypting name",
+			Error:   auth.DECRYPTION_ERR,
+		})
+	} else {
+		user.Name = plain
+	}
+
+	if plain, err := s.encryptor.DecryptString(user.Email); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error decrypting name",
+			Error:   auth.DECRYPTION_ERR,
+		})
+	} else {
+		user.Email = plain
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"user": user,
+	})
 }
 
 func (s *UserService) Login(c echo.Context) error {
