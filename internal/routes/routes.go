@@ -2,7 +2,7 @@ package routes
 
 import (
 	"nearbyassist/internal/handlers"
-	"nearbyassist/internal/middleware"
+	// "nearbyassist/internal/middleware"
 	"nearbyassist/internal/server"
 )
 
@@ -57,19 +57,19 @@ func RegisterRoutes(s *server.Server) {
 			// 	vendor.GET("", handler.HandleBaseRoute)
 			// 	vendor.GET("/:vendorId", handler.HandleGetVendor)
 			// }
-
-			service := public.Group("/services")
-			{
-				handler := handlers.NewServiceHandler(s)
-				service.GET("", handler.HandleGetServices)
-				service.POST("", handler.HandleRegisterService)
-				service.GET("/search", handler.HandleSearchService)
-				service.GET("/:serviceId", handler.HandleGetDetails)
-				service.PUT("/:serviceId", handler.HandleUpdateService)
-				service.DELETE("/:serviceId", handler.HandleDeleteService)
-				service.GET("/vendor/:vendorId", handler.HandleGetByVendor)
-				service.GET("/route/:serviceId", handler.HandleFindRoute)
-			}
+			//
+			// service := public.Group("/services")
+			// {
+			// 	handler := handlers.NewServiceHandler(s)
+			// 	service.GET("", handler.HandleGetServices)
+			// 	service.POST("", handler.HandleRegisterService)
+			// 	service.GET("/search", handler.HandleSearchService)
+			// 	service.GET("/:serviceId", handler.HandleGetDetails)
+			// 	service.PUT("/:serviceId", handler.HandleUpdateService)
+			// 	service.DELETE("/:serviceId", handler.HandleDeleteService)
+			// 	service.GET("/vendor/:vendorId", handler.HandleGetByVendor)
+			// 	service.GET("/route/:serviceId", handler.HandleFindRoute)
+			// }
 
 			complaint := public.Group("/complaints")
 			{

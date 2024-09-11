@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/store/admin"
 	"nearbyassist/internal/store/service"
 	"nearbyassist/internal/store/tag"
+	"nearbyassist/internal/store/transaction"
 	"nearbyassist/internal/store/user"
 	"nearbyassist/internal/store/vendor"
 )
@@ -111,6 +112,22 @@ func (s *Server) routes() {
 			serviceRoute.DELETE("/:serviceId", h.Delete)
 			serviceRoute.GET("/vendor/:vendorId", h.GetVendorServices)
 			serviceRoute.GET("/route/:serviceId", h.FindRoute)
+		}
+
+		// ===== TRANSACTIONS =======
+		transactionRoute := v1.Group("/transactions")
+		{
+			transactionRoute.Use(middleware.CheckAuth(s.JWT))
+
+			transactionStore := transaction.NewMysqlTransactionStore(s.DB)
+			h := handler.NewTransactionService(transactionStore, s.JWT, s.Encrypt)
+
+			transactionRoute.POST("", h.Create)
+			transactionRoute.GET("", h.GetAll)
+			transactionRoute.GET("/mine", h.GetMyTransactions)
+			transactionRoute.GET("/ongoing", h.GetOngoing)
+			transactionRoute.GET("/history", h.GetHistory)
+			transactionRoute.POST("/complete/:transactionId", h.Complete)
 		}
 	}
 }
