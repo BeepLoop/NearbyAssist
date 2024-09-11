@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"fmt"
+	"io/fs"
 	"nearbyassist/internal/config"
 	"os"
 	"path/filepath"
@@ -15,15 +17,15 @@ type DiskStorage struct {
 	FrontIdLocation          string
 	BackIdLocation           string
 	FaceLocation             string
-	storagePermission        os.FileMode
+	storagePermission        fs.FileMode
 }
 
-func newDiskStorage(conf *config.Config) *DiskStorage {
+func NewDiskStorage(conf *config.Config) *DiskStorage {
 	return &DiskStorage{
-		ApplicationProofLocation: conf.ApplicationProofLocation,
-		ServicePhotoLocation:     conf.ServicePhotoLocation,
-		SystemComplaintLocation:  conf.SystemComplaintLocation,
-		storagePermission:        0777,
+		ApplicationProofLocation: conf.APPLICATION_PROOF_DIR,
+		ServicePhotoLocation:     conf.SERVICE_PHOTO_DIR,
+		SystemComplaintLocation:  conf.SYS_COMPLAINT_DIR,
+		storagePermission:        0666,
 	}
 }
 
@@ -52,6 +54,7 @@ func (s *DiskStorage) Initialize() error {
 		return err
 	}
 
+	fmt.Println("Initialized disk storage")
 	return nil
 }
 

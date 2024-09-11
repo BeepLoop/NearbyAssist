@@ -8,70 +8,75 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type StorageType string
-type DatabaseType string
-
-const (
-	STORAGE_DISK  StorageType = "disk"
-	STORAGE_DUMMY StorageType = "dummy"
-
-	DATABASE_MYSQL DatabaseType = "mysql"
-	DATABASE_DUMMY DatabaseType = "dummy"
-)
-
 type Config struct {
-	DB_User     string
-	DB_Password string
-	DB_Name     string
-	DB_Host     string
-	DB_Port     string
+	PORT            string
+	LOG_FILE        string
+	ALLOWED_ORIGINS []string
 
-	Port                     string
-	LOG_FILE                 string
-	AllowedOrigins           []string
-	JwtSecret                string
-	JwtDuration              int
-	EncryptionKey            string
-	StorageType              StorageType
-	DatabaseType             DatabaseType
-	ApplicationProofLocation string
-	ServicePhotoLocation     string
-	SystemComplaintLocation  string
-	FrontIdLocation          string
-	BackIdLocation           string
-	FaceLocation             string
-	RouteEngineUrl           string
+	DB_USER string
+	DB_PWD  string
+	DB_NAME string
+	DB_HOST string
+	DB_PORT string
+	DB_NET  string
+
+	JWT_SECRET   string
+	JWT_DURATION int
+
+	ENCRYPTION_KEY string
+
+	ROUTE_ENGINE_URL string
+
+	APPLICATION_PROOF_DIR string
+	SERVICE_PHOTO_DIR     string
+	SYS_COMPLAINT_DIR     string
+	ID_FRONT_DIR          string
+	ID_BACK_DIR           string
+	FACE_IMG_DIR          string
 }
 
 func LoadConfig() *Config {
 	godotenv.Load()
 
-	jwtDuration := os.Getenv("JWT_DURATION")
+	jwtDuration := getEnv("JWT_DURATION", "60")
 	duration, err := strconv.Atoi(jwtDuration)
 	if err != nil {
 		panic("JWT_DURATION must be an integer value (in seconds)")
 	}
 
 	return &Config{
-		DB_User:                  os.Getenv("DB_USER"),
-		DB_Password:              os.Getenv("DB_PASSWORD"),
-		DB_Name:                  os.Getenv("DB_NAME"),
-		DB_Host:                  os.Getenv("DB_HOST"),
-		DB_Port:                  os.Getenv("DB_PORT"),
-		Port:                     os.Getenv("PORT"),
-		LOG_FILE:                 os.Getenv("LOG_FILE"),
-		AllowedOrigins:           strings.Split(os.Getenv("ALLOWED_ORIGINS"), ","),
-		JwtSecret:                os.Getenv("JWT_SECRET"),
-		JwtDuration:              duration,
-		EncryptionKey:            os.Getenv("ENCRYPTION_KEY"),
-		StorageType:              StorageType(os.Getenv("STORAGE_TYPE")),
-		DatabaseType:             DatabaseType(os.Getenv("DATABASE_TYPE")),
-		ApplicationProofLocation: os.Getenv("APPLICATION_PROOF_LOCATION"),
-		ServicePhotoLocation:     os.Getenv("SERVICE_PHOTO_LOCATION"),
-		SystemComplaintLocation:  os.Getenv("SYSTEM_COMPLAINT_LOCATION"),
-		FrontIdLocation:          os.Getenv("VERIFICATION_FRONT_ID"),
-		BackIdLocation:           os.Getenv("VERIFICATION_BACK_ID"),
-		FaceLocation:             os.Getenv("VERIFICATION_FACE"),
-		RouteEngineUrl:           os.Getenv("ROUTE_ENGINE_URL"),
+		PORT:            getEnv("PORT", "3000"),
+		LOG_FILE:        getEnv("LOG_FILE", "logs/server.log"),
+		ALLOWED_ORIGINS: strings.Split(getEnv("ALLOWED_ORIGINS", "http://127.0.0.1:3001"), ","),
+
+		DB_USER: getEnv("DB_USER", "root"),
+		DB_PWD:  getEnv("DB_PASSWORD", "secret"),
+		DB_NAME: getEnv("DB_NAME", "nearbyassist"),
+		DB_HOST: getEnv("DB_HOST", "127.0.0.1"),
+		DB_PORT: getEnv("DB_PORT", "3306"),
+		DB_NET:  getEnv("DB_NET", "tcp"),
+
+		JWT_SECRET:   getEnv("JWT_SECRET", "secret"),
+		JWT_DURATION: duration,
+
+		ENCRYPTION_KEY: getEnv("ENCRYPTION_KEY", "key"),
+
+		APPLICATION_PROOF_DIR: getEnv("APPLICATION_PROOF_DIR", "uploads/application_proof"),
+		SERVICE_PHOTO_DIR:     getEnv("SERVICE_PHOTO_DIR", "uploads/service_photo"),
+		SYS_COMPLAINT_DIR:     getEnv("SYSTEM_COMPLAINT_DIR", "uploads/system_complaint"),
+		ID_FRONT_DIR:          getEnv("VERIFICATION_FRONT_ID_DIR", "uploads/verification/front_id"),
+		ID_BACK_DIR:           getEnv("VERIFICATION_BACK_ID_DIR", "uploads/verification/back_id"),
+		FACE_IMG_DIR:          getEnv("VERIFICATION_FACE_DIR", "uploads/verification/face"),
+
+		ROUTE_ENGINE_URL: getEnv("ROUTE_ENGINE_URL", "http://127.0.0.1:5000"),
 	}
+}
+
+func getEnv(key string, fallback string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		return fallback
+	}
+
+	return value
 }

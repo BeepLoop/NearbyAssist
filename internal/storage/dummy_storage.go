@@ -11,7 +11,7 @@ func newDummyStorage() *DummyStorage {
 }
 
 func (s *DummyStorage) Initialize() error {
-	log.Print("Initializing dummy storage\n")
+	log.Println("Initialed dummy storage")
 	return nil
 }
 

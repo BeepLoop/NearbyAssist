@@ -49,19 +49,20 @@ func NewServer(options ServerConfig) (*Server, error) {
 	}
 
 	NewServer := &Server{
-		LOG_FILE: file,
-
 		Echo:           echo.New(),
-		Port:           options.Config.Port,
-		AllowedOrigins: options.Config.AllowedOrigins,
+		Port:           options.Config.PORT,
+		AllowedOrigins: options.Config.ALLOWED_ORIGINS,
+		LOG_FILE:       file,
+
+		DB:      options.DB,
+		Storage: options.Storage,
+
+		Encrypt: options.Encrypt,
+		JWT:     options.JWT,
 
 		Websocket:        options.Websocket,
-		DB:               options.DB,
-		Storage:          options.Storage,
 		RouteEngine:      options.RouteEngine,
 		SuggestionEngine: options.SuggestionEngine,
-		Encrypt:          options.Encrypt,
-		JWT:              options.JWT,
 	}
 
 	return NewServer, nil

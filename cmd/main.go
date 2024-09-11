@@ -18,17 +18,17 @@ func main() {
 	// Load configuration file
 	config := config.LoadConfig()
 
-	// Load file store
-	store := storage.NewStorage(config)
-	store.Initialize()
+	// Load file disk
+	disk := storage.NewDiskStorage(config)
+	disk.Initialize()
 
 	// Load database configuration
 	mysql, err := db.NewMysql(mysql.Config{
-		User:                 config.DB_User,
-		Passwd:               config.DB_Password,
-		Net:                  "tcp",
-		Addr:                 config.DB_Host + ":" + config.DB_Port,
-		DBName:               config.DB_Name,
+		User:                 config.DB_USER,
+		Passwd:               config.DB_PWD,
+		Net:                  config.DB_NET,
+		Addr:                 config.DB_HOST + ":" + config.DB_PORT,
+		DBName:               config.DB_NAME,
 		AllowNativePasswords: true,
 		ParseTime:            true,
 	})
@@ -39,13 +39,13 @@ func main() {
 
 	serverConfig := server.ServerConfig{
 		Config:           config,
-		Websocket:        websocket.NewWebsocket(),
 		DB:               mysql,
-		Storage:          store,
+		Storage:          disk,
+		JWT:              auth.NewJWTAuthenticator(config.JWT_SECRET, config.JWT_DURATION),
+		Encrypt:          auth.NewAES([]byte(config.ENCRYPTION_KEY)),
+		Websocket:        websocket.NewWebsocket(),
 		RouteEngine:      routing_engine.NewOSRM(config),
 		SuggestionEngine: suggestion_engine.NewCourtier(),
-		Encrypt:          auth.NewAES([]byte(config.EncryptionKey)),
-		JWT:              auth.NewJWTAuthenticator(config.JwtSecret, config.JwtDuration),
 	}
 
 	// Create and start the server

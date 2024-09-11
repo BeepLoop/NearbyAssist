@@ -18,9 +18,9 @@ type jwtAuthenticator struct {
 
 func NewJWTAuthenticator(conf *config.Config) *jwtAuthenticator {
 	return &jwtAuthenticator{
-		secret:        conf.JwtSecret,
+		secret:        conf.JWT_SECRET,
 		signMethod:    jwt.SigningMethodHS512,
-		tokenDuration: time.Second * time.Duration(conf.JwtDuration),
+		tokenDuration: time.Second * time.Duration(conf.JWT_DURATION),
 	}
 }
 func (j *jwtAuthenticator) GenerateAdminAccessToken(options AdminOptions) (string, error) {

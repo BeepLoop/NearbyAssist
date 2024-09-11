@@ -28,7 +28,7 @@ type OSRM struct {
 
 func NewOSRM(conf *config.Config) *OSRM {
 	return &OSRM{
-		engineUrl:      conf.RouteEngineUrl,
+		engineUrl:      conf.ROUTE_ENGINE_URL,
 		requestTimeout: 5 * time.Second,
 	}
 }
