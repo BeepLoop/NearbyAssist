@@ -138,18 +138,11 @@ func (s *AdminService) Refresh(c echo.Context) error {
 
 	// Generate new accessToken
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := s.jwt.GetClaims(token)
+	adminId, err := utils.GetAdminIdFromToken(token, s.jwt.GetClaims)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
 			Message: "Error getting claims",
 			Error:   err.Error(),
-		})
-	}
-	adminId, ok := claims["adminId"].(string)
-	if !ok {
-		return echo.NewHTTPError(http.StatusForbidden, models.Error{
-			Message: "Admin Id not found in claims",
-			Error:   "Admin Id not found in claims",
 		})
 	}
 

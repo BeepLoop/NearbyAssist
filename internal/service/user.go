@@ -27,19 +27,11 @@ func NewUserService(store user.UserStore, encryptor auth.Encryption, jwt auth.Au
 
 func (s *UserService) BaseRoute(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := s.jwt.GetClaims(token)
+	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error getting claims",
 			Error:   err.Error(),
-		})
-	}
-
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "User ID not found in JWT",
-			Error:   "User ID not found in JWT",
 		})
 	}
 
@@ -242,18 +234,11 @@ func (s *UserService) Refresh(c echo.Context) error {
 
 	// Generate new accessToken
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := s.jwt.GetClaims(token)
+	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
 			Message: "Error getting claims",
 			Error:   err.Error(),
-		})
-	}
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return echo.NewHTTPError(http.StatusForbidden, models.Error{
-			Message: "User Id not found in claims",
-			Error:   "User Id not found in claims",
 		})
 	}
 
@@ -335,19 +320,11 @@ func (s *UserService) Logout(c echo.Context) error {
 
 func (s *UserService) Verified(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := s.jwt.GetClaims(token)
+	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error getting claims",
 			Error:   err.Error(),
-		})
-	}
-
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "User ID not found in JWT",
-			Error:   "User ID not found in JWT",
 		})
 	}
 

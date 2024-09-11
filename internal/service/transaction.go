@@ -78,19 +78,11 @@ func (s *TransactionService) Create(c echo.Context) error {
 
 func (s *TransactionService) GetMyTransactions(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := s.jwt.GetClaims(token)
+	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error getting claims",
 			Error:   err.Error(),
-		})
-	}
-
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "User ID not found in JWT",
-			Error:   "User ID not found in JWT",
 		})
 	}
 
@@ -143,19 +135,11 @@ func (s *TransactionService) GetAll(c echo.Context) error {
 
 func (s *TransactionService) GetOngoing(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := s.jwt.GetClaims(token)
+	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error getting claims",
 			Error:   err.Error(),
-		})
-	}
-
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "User ID not found in JWT",
-			Error:   "User ID not found in JWT",
 		})
 	}
 
@@ -174,19 +158,11 @@ func (s *TransactionService) GetOngoing(c echo.Context) error {
 
 func (s *TransactionService) GetHistory(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := s.jwt.GetClaims(token)
+	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error getting claims",
 			Error:   err.Error(),
-		})
-	}
-
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "User ID not found in JWT",
-			Error:   "User ID not found in JWT",
 		})
 	}
 
@@ -213,19 +189,11 @@ func (s *TransactionService) Complete(c echo.Context) error {
 	}
 
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
-	claims, err := s.jwt.GetClaims(token)
+	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error getting claims",
 			Error:   err.Error(),
-		})
-	}
-
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "User ID not found in JWT",
-			Error:   "User ID not found in JWT",
 		})
 	}
 

@@ -94,14 +94,14 @@ func RegisterRoutes(s *server.Server) {
 			// 	application.POST("", handler.HandleNewApplication)
 			// }
 
-			review := public.Group("/reviews")
-			{
-				handler := handlers.NewReviewHandler(s)
-				review.GET("", handler.HandleBaseRoute)
-				review.POST("", handler.HandleNewReview)
-				review.GET("/:reviewId", handler.HandleGetReview)
-				review.GET("/service/:serviceId", handler.HandleServiceReview)
-			}
+			// review := public.Group("/reviews")
+			// {
+			// 	handler := handlers.NewReviewHandler(s)
+			// 	review.GET("", handler.HandleBaseRoute)
+			// 	review.POST("", handler.HandleNewReview)
+			// 	review.GET("/:reviewId", handler.HandleGetReview)
+			// 	review.GET("/service/:serviceId", handler.HandleServiceReview)
+			// }
 
 			chat := public.Group("/chat")
 			{

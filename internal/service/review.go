@@ -56,6 +56,12 @@ func (s *ReviewService) Create(c echo.Context) error {
 
 	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, models.Error{
+			Message: "Error getting claims",
+			Error:   err.Error(),
+		})
+	}
 
 	transaction, err := s.store.GetTransactionById(req.TransactionId)
 	if err != nil {
