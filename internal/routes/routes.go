@@ -78,15 +78,15 @@ func RegisterRoutes(s *server.Server) {
 				complaint.POST("/vendor", handler.HandleVendorComplaint)
 			}
 
-			transaction := public.Group("/transactions")
-			{
-				handler := handlers.NewTransactionHandler(s)
-				transaction.GET("", handler.HandleGetMyTransactions)
-				transaction.POST("", handler.HandleNewTransaction)
-				transaction.GET("/ongoing", handler.HandleOngoingTransaction)
-				transaction.GET("/history", handler.HandleGetMyHistory)
-				transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
-			}
+			// transaction := public.Group("/transactions")
+			// {
+			// 	handler := handlers.NewTransactionHandler(s)
+			// 	transaction.GET("", handler.HandleGetMyTransactions)
+			// 	transaction.POST("", handler.HandleNewTransaction)
+			// 	transaction.GET("/ongoing", handler.HandleOngoingTransaction)
+			// 	transaction.GET("/history", handler.HandleGetMyHistory)
+			// 	transaction.POST("/complete/:transactionId", handler.HandleCompleteTransaction)
+			// }
 
 			application := public.Group("/application")
 			{

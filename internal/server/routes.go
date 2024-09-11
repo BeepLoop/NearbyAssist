@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/middleware"
 	"nearbyassist/internal/service"
 	"nearbyassist/internal/store/admin"
+	"nearbyassist/internal/store/application"
 	"nearbyassist/internal/store/service"
 	"nearbyassist/internal/store/tag"
 	"nearbyassist/internal/store/transaction"
@@ -128,6 +129,17 @@ func (s *Server) routes() {
 			transactionRoute.GET("/ongoing", h.GetOngoing)
 			transactionRoute.GET("/history", h.GetHistory)
 			transactionRoute.POST("/complete/:transactionId", h.Complete)
+		}
+
+		// ===== APPLICATION =======
+		applicationRoute := v1.Group("/applications")
+		{
+			applicationRoute.Use(middleware.CheckAuth(s.JWT))
+
+			appStore := application.NewMysqlApplicationStore(s.DB)
+			h := handler.NewApplicationService(appStore)
+
+			applicationRoute.POST("", h.Create)
 		}
 	}
 }
