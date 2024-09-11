@@ -57,6 +57,7 @@ func (s *Server) routes() {
 
 				protected.POST("/logout", h.Logout)
 				protected.GET("/me", h.BaseRoute)
+				protected.GET("/verified", h.Verified)
 			}
 		}
 

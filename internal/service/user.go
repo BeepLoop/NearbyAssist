@@ -332,3 +332,34 @@ func (s *UserService) Logout(c echo.Context) error {
 
 	return c.JSON(http.StatusNoContent, nil)
 }
+
+func (s *UserService) Verified(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	claims, err := s.jwt.GetClaims(token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error getting claims",
+			Error:   err.Error(),
+		})
+	}
+
+	userId, ok := claims["userId"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "User ID not found in JWT",
+			Error:   "User ID not found in JWT",
+		})
+	}
+
+	user, err := s.store.FindById(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+			Message: "User not found",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"verified": user.Verified,
+	})
+}
