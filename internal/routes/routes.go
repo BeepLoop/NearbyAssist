@@ -112,11 +112,11 @@ func RegisterRoutes(s *server.Server) {
 				chat.GET("/conversations", handler.HandleGetConversations)
 			}
 
-			verification := public.Group("/verification")
-			{
-				handler := handlers.NewVerificationHandler(s)
-				verification.POST("/identity", handler.HandleVerifyIdentity)
-			}
+			// verification := public.Group("/verification")
+			// {
+			// 	handler := handlers.NewVerificationHandler(s)
+			// 	verification.POST("/identity", handler.HandleVerifyIdentity)
+			// }
 		}
 	}
 

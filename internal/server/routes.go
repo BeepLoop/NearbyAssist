@@ -11,6 +11,7 @@ import (
 	"nearbyassist/internal/store/transaction"
 	"nearbyassist/internal/store/user"
 	"nearbyassist/internal/store/vendor"
+	"nearbyassist/internal/store/verification"
 )
 
 func (s *Server) routes() {
@@ -146,12 +147,25 @@ func (s *Server) routes() {
 		// ===== REVIEW =======
 		reviewRoute := v1.Group("/reviews")
 		{
+			reviewRoute.Use(middleware.CheckAuth(s.JWT))
+
 			reviewStore := review.NewMysqlReviewStore(s.DB)
 			h := handler.NewReviewService(reviewStore, s.JWT)
 
 			reviewRoute.POST("", h.Create)
 			reviewRoute.GET("/:reviewId", h.GetById)
 			reviewRoute.GET("/service/:serviceId", h.GetByService)
+		}
+
+		// ===== VERIFICATION =======
+		verificationRoute := v1.Group("/verification")
+		{
+			verificationRoute.Use(middleware.CheckAuth(s.JWT))
+
+			verficationStore := verification.NewMysqlVerificationStore(s.DB)
+			h := handler.NewVerificationService(verficationStore, s.Encrypt, s.Storage)
+
+			verificationRoute.POST("/identity", h.Create)
 		}
 	}
 }

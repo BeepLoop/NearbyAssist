@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"nearbyassist/internal/encryption"
+	"nearbyassist/internal/service/auth"
 
 	"github.com/google/uuid"
 )
@@ -23,10 +23,10 @@ const (
 )
 
 type FileHandler struct {
-	encryptor encryption.Encryption
+	encryptor auth.Encryption
 }
 
-func NewFileHandler(encryptor encryption.Encryption) *FileHandler {
+func NewFileHandler(encryptor auth.Encryption) *FileHandler {
 	return &FileHandler{
 		encryptor: encryptor,
 	}
