@@ -51,12 +51,12 @@ func RegisterRoutes(s *server.Server) {
 			// 	user.GET("/verified", handler.HandleCheckVerification)
 			// }
 
-			vendor := public.Group("/vendors")
-			{
-				handler := handlers.NewVendorHandler(s)
-				vendor.GET("", handler.HandleBaseRoute)
-				vendor.GET("/:vendorId", handler.HandleGetVendor)
-			}
+			// vendor := public.Group("/vendors")
+			// {
+			// 	handler := handlers.NewVendorHandler(s)
+			// 	vendor.GET("", handler.HandleBaseRoute)
+			// 	vendor.GET("/:vendorId", handler.HandleGetVendor)
+			// }
 
 			service := public.Group("/services")
 			{
@@ -120,11 +120,11 @@ func RegisterRoutes(s *server.Server) {
 		}
 	}
 
-	tags := s.Echo.Group("/tags")
-	{
-		handler := handlers.NewTagHandler(s)
-		tags.GET("", handler.HandleGetTags)
-	}
+	// tags := s.Echo.Group("/tags")
+	// {
+	// 	handler := handlers.NewTagHandler(s)
+	// 	tags.GET("", handler.HandleGetTags)
+	// }
 
 	// websocket route
 	// NOTE: this route is separated because it is not possible to pass

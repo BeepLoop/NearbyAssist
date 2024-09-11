@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/store/admin"
 	"nearbyassist/internal/store/tag"
 	"nearbyassist/internal/store/user"
+	"nearbyassist/internal/store/vendor"
 )
 
 func (s *Server) routes() {
@@ -80,6 +81,17 @@ func (s *Server) routes() {
 			h := service.NewTagService(tagStore)
 
 			tagRoute.GET("", h.BaseRoute)
+		}
+
+		// ===== VENDOR =======
+		vendorRoute := v1.Group("/vendors")
+		{
+			vendorRoute.Use(middleware.CheckAuth(s.JWT))
+
+			vendorStore := vendor.NewMysqlVendorStore(s.DB)
+			h := service.NewVendorService(vendorStore)
+
+			vendorRoute.GET("/:vendorId", h.GetVendor)
 		}
 	}
 }
