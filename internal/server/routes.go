@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/middleware"
 	"nearbyassist/internal/service"
 	"nearbyassist/internal/store/admin"
+	"nearbyassist/internal/store/tag"
 	"nearbyassist/internal/store/user"
 )
 
@@ -70,6 +71,15 @@ func (s *Server) routes() {
 			h := service.NewResourceService(s.Encrypt)
 
 			resourceRoute.GET("/:path", h.GetFile)
+		}
+
+		// ===== TAGS =======
+		tagRoute := v1.Group("/tags")
+		{
+			tagStore := tag.NewMysqlTagStore(s.DB)
+			h := service.NewTagService(tagStore)
+
+			tagRoute.GET("", h.BaseRoute)
 		}
 	}
 }

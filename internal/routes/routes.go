@@ -44,12 +44,12 @@ func RegisterRoutes(s *server.Server) {
 		// Public routes
 		public := v1.Group("/public")
 		{
-			user := public.Group("/users")
-			{
-				handler := handlers.NewUserHandler(s)
-				user.GET("/me", handler.HandleGetMyDetails)
-				user.GET("/verified", handler.HandleCheckVerification)
-			}
+			// user := public.Group("/users")
+			// {
+			// 	handler := handlers.NewUserHandler(s)
+			// 	user.GET("/me", handler.HandleGetMyDetails)
+			// 	user.GET("/verified", handler.HandleCheckVerification)
+			// }
 
 			vendor := public.Group("/vendors")
 			{
@@ -137,10 +137,10 @@ func RegisterRoutes(s *server.Server) {
 		ws.GET("/ws", handler.HandleWebsocket)
 	}
 
-	file := s.Echo.Group("/resource")
-	{
-		handler := handlers.NewFileServerHandler(s)
-
-		file.GET("/:path", handler.HandleFileServer)
-	}
+	// file := s.Echo.Group("/resource")
+	// {
+	// 	handler := handlers.NewFileServerHandler(s)
+	//
+	// 	file.GET("/:path", handler.HandleFileServer)
+	// }
 }
