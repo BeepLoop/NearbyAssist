@@ -10,6 +10,7 @@ import (
 func (s *Server) routes() {
 	v1 := s.Echo.Group("/api/v1")
 	{
+		// ===== HEALTH =======
 		healthRoute := v1.Group("/health")
 		{
 			h := service.NewHealthService()
@@ -23,6 +24,7 @@ func (s *Server) routes() {
 			}
 		}
 
+		// ===== ADMIN =======
 		adminRoute := v1.Group("/admin")
 		{
 			adminStore := admin.NewMysqlAdminStore(s.DB)
@@ -31,9 +33,16 @@ func (s *Server) routes() {
 			adminRoute.GET("", h.BaseRoute)
 			adminRoute.POST("/login", h.Login)
 			adminRoute.POST("/refresh", h.Refresh)
-			adminRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
+
+			protected := adminRoute.Group("/protected")
+			{
+				protected.Use(middleware.CheckAuth(s.JWT))
+
+				protected.POST("/logout", h.Logout)
+			}
 		}
 
+		// ===== USER =======
 		userRoute := v1.Group("/user")
 		{
 			userStore := user.NewMysqlUserStore(s.DB)
@@ -51,6 +60,7 @@ func (s *Server) routes() {
 			}
 		}
 
+		// ===== RESOURCE =======
 		resourceRoute := v1.Group("/resource")
 		{
 			resourceRoute.Use(middleware.CheckAuth(s.JWT))
