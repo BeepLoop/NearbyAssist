@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/service"
 	"nearbyassist/internal/store/admin"
 	"nearbyassist/internal/store/application"
+	"nearbyassist/internal/store/chat"
 	"nearbyassist/internal/store/review"
 	"nearbyassist/internal/store/service"
 	"nearbyassist/internal/store/tag"
@@ -166,6 +167,21 @@ func (s *Server) routes() {
 			h := handler.NewVerificationService(verficationStore, s.Encrypt, s.Storage)
 
 			verificationRoute.POST("/identity", h.Create)
+		}
+
+		// ===== CHAT =======
+		chatRoute := v1.Group("/chat")
+		{
+			chatStore := chat.NewMysqlChatStore(s.DB)
+			h := handler.NewChatService(chatStore, s.JWT, *s.Websocket, s.Encrypt)
+
+			// NOTE: this route is separated because it is not possible to pass
+			// headers to connection request, thus unable to authenticate the user.
+			// Instead, access token is passed as a query parameter
+			chatRoute.GET("/ws", h.Websocket)
+
+			chatRoute.GET("/messages/:otherUserId", h.GetMessages, middleware.CheckAuth(s.JWT))
+			chatRoute.GET("/conversations", h.GetConversations, middleware.CheckAuth(s.JWT))
 		}
 	}
 }

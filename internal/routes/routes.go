@@ -103,14 +103,14 @@ func RegisterRoutes(s *server.Server) {
 			// 	review.GET("/service/:serviceId", handler.HandleServiceReview)
 			// }
 
-			chat := public.Group("/chat")
-			{
-				handler := handlers.NewChatHandler(s)
-				chat.GET("", handler.HandleBaseRoute)
-				chat.GET("/messages/:otherUserId", handler.HandleGetMessages)
-				chat.GET("/ws", handler.HandleWebsocket)
-				chat.GET("/conversations", handler.HandleGetConversations)
-			}
+			// chat := public.Group("/chat")
+			// {
+			// 	handler := handlers.NewChatHandler(s)
+			// 	chat.GET("", handler.HandleBaseRoute)
+			// 	chat.GET("/messages/:otherUserId", handler.HandleGetMessages)
+			// 	chat.GET("/ws", handler.HandleWebsocket)
+			// 	chat.GET("/conversations", handler.HandleGetConversations)
+			// }
 
 			// verification := public.Group("/verification")
 			// {
@@ -127,15 +127,12 @@ func RegisterRoutes(s *server.Server) {
 	// }
 
 	// websocket route
-	// NOTE: this route is separated because it is not possible to pass
-	// headers to connection request, thus unable to authenticate the user.
-	// Instead, access token is passed as a query parameter
-	ws := s.Echo.Group("/chat")
-	{
-		handler := handlers.NewChatHandler(s)
-
-		ws.GET("/ws", handler.HandleWebsocket)
-	}
+	// ws := s.Echo.Group("/chat")
+	// {
+	// 	handler := handlers.NewChatHandler(s)
+	//
+	// 	ws.GET("/ws", handler.HandleWebsocket)
+	// }
 
 	// file := s.Echo.Group("/resource")
 	// {
