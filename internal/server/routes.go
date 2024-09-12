@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/middleware"
 	"nearbyassist/internal/service"
 	"nearbyassist/internal/store/admin"
+	"nearbyassist/internal/store/analytics"
 	"nearbyassist/internal/store/application"
 	"nearbyassist/internal/store/chat"
 	"nearbyassist/internal/store/review"
@@ -41,12 +42,16 @@ func (s *Server) routes() {
 			adminRoute.GET("", h.BaseRoute)
 			adminRoute.POST("/login", h.Login)
 			adminRoute.POST("/refresh", h.Refresh)
+			adminRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
 
-			protected := adminRoute.Group("/protected")
+			management := adminRoute.Group("/management")
 			{
-				protected.Use(middleware.CheckAuth(s.JWT))
+				management.Use(middleware.CheckAuth(s.JWT))
 
-				protected.POST("/logout", h.Logout)
+				analyticStore := analytics.NewMysqlAnalyticsStore(s.DB)
+				h := handler.NewAnalyticsService(analyticStore)
+
+				management.GET("/analytics", h.Analytics)
 			}
 		}
 
@@ -58,12 +63,12 @@ func (s *Server) routes() {
 
 			userRoute.POST("/login", h.Login)
 			userRoute.POST("/refresh", h.Refresh)
+			userRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
 
 			protected := userRoute.Group("/protected")
 			{
 				protected.Use(middleware.CheckAuth(s.JWT))
 
-				protected.POST("/logout", h.Logout)
 				protected.GET("/me", h.BaseRoute)
 				protected.GET("/verified", h.Verified)
 			}
