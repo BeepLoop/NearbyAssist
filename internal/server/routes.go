@@ -7,6 +7,7 @@ import (
 	"nearbyassist/internal/store/analytics"
 	"nearbyassist/internal/store/application"
 	"nearbyassist/internal/store/chat"
+	"nearbyassist/internal/store/complaint"
 	"nearbyassist/internal/store/review"
 	"nearbyassist/internal/store/service"
 	"nearbyassist/internal/store/tag"
@@ -187,6 +188,16 @@ func (s *Server) routes() {
 
 			chatRoute.GET("/messages/:otherUserId", h.GetMessages, middleware.CheckAuth(s.JWT))
 			chatRoute.GET("/conversations", h.GetConversations, middleware.CheckAuth(s.JWT))
+		}
+
+		// ===== CHAT =======
+		complaintRoute := v1.Group("/complaints")
+		{
+			complaintStore := complaint.NewMysqlComplaintStore(s.DB)
+			h := handler.NewComplaintService(complaintStore, s.Encrypt)
+
+			complaintRoute.POST("/system", h.SystemComplaint)
+			complaintRoute.POST("/vendor", h.VendorComplaint)
 		}
 	}
 }

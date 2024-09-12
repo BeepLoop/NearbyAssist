@@ -13,8 +13,10 @@ import (
 type SystemComplaintModel struct {
 	Model
 	UpdateableModel
-	Title  string `json:"title" db:"title" validate:"required"`
-	Detail string `json:"detail" db:"detail" validate:"required"`
+	Title  string `json:"title" db:"title"`
+	Detail string `json:"detail" db:"detail"`
+
+	Images []string `json:"images"`
 }
 
 func NewSystemComplaintModel(idGenerator id_generator.IdGenerator, conn *sqlx.DB) *SystemComplaintModel {
