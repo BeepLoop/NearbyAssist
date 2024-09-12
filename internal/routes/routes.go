@@ -71,12 +71,12 @@ func RegisterRoutes(s *server.Server) {
 			// 	service.GET("/route/:serviceId", handler.HandleFindRoute)
 			// }
 
-			complaint := public.Group("/complaints")
-			{
-				handler := handlers.NewComplaintHandler(s)
-				complaint.POST("/system", handler.HandleSystemComplaint)
-				complaint.POST("/vendor", handler.HandleVendorComplaint)
-			}
+			// complaint := public.Group("/complaints")
+			// {
+			// 	handler := handlers.NewComplaintHandler(s)
+			// 	complaint.POST("/system", handler.HandleSystemComplaint)
+			// 	complaint.POST("/vendor", handler.HandleVendorComplaint)
+			// }
 
 			// transaction := public.Group("/transactions")
 			// {
