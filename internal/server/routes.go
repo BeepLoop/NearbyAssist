@@ -2,12 +2,13 @@ package server
 
 import (
 	"nearbyassist/internal/middleware"
-	"nearbyassist/internal/service"
+	handler "nearbyassist/internal/service"
 	"nearbyassist/internal/store/admin"
 	"nearbyassist/internal/store/analytics"
 	"nearbyassist/internal/store/application"
 	"nearbyassist/internal/store/chat"
 	"nearbyassist/internal/store/complaint"
+	"nearbyassist/internal/store/management"
 	"nearbyassist/internal/store/review"
 	"nearbyassist/internal/store/service"
 	"nearbyassist/internal/store/tag"
@@ -45,14 +46,25 @@ func (s *Server) routes() {
 			adminRoute.POST("/refresh", h.Refresh)
 			adminRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
 
-			management := adminRoute.Group("/management")
+			dashboardRoute := adminRoute.Group("/dashboard")
 			{
-				management.Use(middleware.CheckAuth(s.JWT))
+				dashboardRoute.Use(middleware.CheckAuth(s.JWT))
 
 				analyticStore := analytics.NewMysqlAnalyticsStore(s.DB)
 				h := handler.NewAnalyticsService(analyticStore)
 
-				management.GET("/analytics", h.Analytics)
+				dashboardRoute.GET("/analytics", h.Analytics)
+			}
+
+			managementRoute := adminRoute.Group("/management")
+			{
+				managementRoute.Use(middleware.CheckAuth(s.JWT))
+				managementRoute.Use(middleware.CheckRole(s.JWT))
+
+				managementStore := management.NewMysqlManagementStore(s.DB)
+				h := handler.NewManagementService(managementStore, s.Encrypt)
+
+				managementRoute.POST("/staff", h.CreateStaff)
 			}
 		}
 
