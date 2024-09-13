@@ -46,6 +46,7 @@ func (s *Server) routes() {
 			adminRoute.POST("/refresh", h.Refresh)
 			adminRoute.POST("/logout", h.Logout, middleware.CheckAuth(s.JWT))
 
+			// ===== DASHBOARD =======
 			dashboardRoute := adminRoute.Group("/dashboard")
 			{
 				dashboardRoute.Use(middleware.CheckAuth(s.JWT))
@@ -56,6 +57,7 @@ func (s *Server) routes() {
 				dashboardRoute.GET("/analytics", h.Analytics)
 			}
 
+			// ===== USER MANAGEMENT =======
 			managementRoute := adminRoute.Group("/management")
 			{
 				managementRoute.Use(middleware.CheckAuth(s.JWT))
