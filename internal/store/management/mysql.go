@@ -38,3 +38,47 @@ func (s *MysqlManagementStore) CreateStaff(data *models.AdminModel) (string, err
 
 	return data.Id, nil
 }
+
+func (s *MysqlManagementStore) GetUserById(id string) (*models.UserModel, error) {
+	return nil, nil
+}
+
+func (s *MysqlManagementStore) RestrictVendor(id string) error {
+	return nil
+}
+
+func (s *MysqlManagementStore) UnrestrictVendor(id string) error {
+	return nil
+}
+
+func (s *MysqlManagementStore) GetApplications(filter map[string]string) ([]*models.ApplicationModel, error) {
+	return nil, nil
+}
+
+func (s *MysqlManagementStore) ApproveApplication(id string) error {
+	return nil
+}
+
+func (s *MysqlManagementStore) RejectApplication(id string) error {
+	return nil
+}
+
+func (s *MysqlManagementStore) GetTransaction(id string) (*models.TransactionModel, error) {
+	return nil, nil
+}
+
+func (s *MysqlManagementStore) GetSystemComplaints(filter map[string]string) ([]*models.ComplaintModel, error) {
+	return nil, nil
+}
+
+func (s *MysqlManagementStore) GetSystemComplaintById(id string) (*models.ComplaintModel, error) {
+	return nil, nil
+}
+
+func (s *MysqlManagementStore) GetVerificationRequests(filter map[string]string) ([]*models.IdentityVerificationModel, error) {
+	return nil, nil
+}
+
+func (s *MysqlManagementStore) GetVerificationRequestById(id string) (*models.IdentityVerificationModel, error) {
+	return nil, nil
+}

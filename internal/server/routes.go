@@ -64,9 +64,44 @@ func (s *Server) routes() {
 				managementRoute.Use(middleware.CheckRole(s.JWT))
 
 				managementStore := management.NewMysqlManagementStore(s.DB)
-				h := handler.NewManagementService(managementStore, s.Encrypt)
+				h := handler.NewManagementService(managementStore, s.JWT, s.Encrypt)
 
 				managementRoute.POST("/staff", h.CreateStaff)
+
+				userRoute := managementRoute.Group("/user")
+				{
+					userRoute.GET("/:userId", h.GetUser)
+				}
+
+				vendorRoute := managementRoute.Group("/vendor")
+				{
+					vendorRoute.PUT("/restrict/:vendorId", h.RestrictVendor)
+					vendorRoute.PUT("/unrestrict/:vendorId", h.UnrestrictVendor)
+				}
+
+				applicationRoute := managementRoute.Group("/application")
+				{
+					applicationRoute.GET("", h.GetApplications)
+					applicationRoute.PUT("/approve/:applicationId", h.ApproveApplication)
+					applicationRoute.PUT("/reject/:applicationId", h.RejectApplication)
+				}
+
+				transactionRoute := managementRoute.Group("/transaction")
+				{
+					transactionRoute.GET("/:transactionId", h.GetTransaction)
+				}
+
+				complaintRoute := managementRoute.Group("/complaint")
+				{
+					complaintRoute.GET("/system", h.GetSystemComplaints)
+					complaintRoute.GET("system/:complaintId", h.GetSystemComplaint)
+				}
+
+				verificationRoute := managementRoute.Group("/verification")
+				{
+					verificationRoute.GET("/identity", h.GetVerificationRequests)
+					verificationRoute.GET("/identity/:verificationId", h.HandleGetIdentityVerification)
+				}
 			}
 		}
 

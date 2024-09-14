@@ -13,12 +13,14 @@ import (
 
 type ManagementService struct {
 	store     management.ManagementStore
+	jwt       auth.Authenticator
 	encryptor auth.Encryption
 }
 
-func NewManagementService(store management.ManagementStore, encryptor auth.Encryption) *ManagementService {
+func NewManagementService(store management.ManagementStore, jwt auth.Authenticator, encryptor auth.Encryption) *ManagementService {
 	return &ManagementService{
 		store:     store,
+		jwt:       jwt,
 		encryptor: encryptor,
 	}
 }
@@ -77,5 +79,214 @@ func (s *ManagementService) CreateStaff(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"adminId": adminId,
+	})
+}
+
+func (s *ManagementService) GetUser(c echo.Context) error {
+	userId := c.Param("userId")
+	if userId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "User ID must be a number",
+			Error:   "User ID must be a number",
+		})
+	}
+
+	user, err := s.store.GetUserById(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Failed to get user",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"user": user,
+	})
+}
+
+func (s *ManagementService) RestrictVendor(c echo.Context) error {
+	vendorId := c.Param("vendorId")
+	if vendorId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Vendor ID must be a number",
+			Error:   "Vendor ID must be a number",
+		})
+	}
+
+	if err := s.store.RestrictVendor(vendorId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error restricting vendor",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (s *ManagementService) UnrestrictVendor(c echo.Context) error {
+	vendorId := c.Param("vendorId")
+	if vendorId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Vendor ID must be a number",
+			Error:   "Vendor ID must be a number",
+		})
+	}
+
+	if err := s.store.UnrestrictVendor(vendorId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error restricting vendor",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (s *ManagementService) GetApplications(c echo.Context) error {
+	params := utils.ParseQuery(c.QueryString())
+	applications, err := s.store.GetApplications(params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting applications",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"applications": applications,
+	})
+}
+
+func (s *ManagementService) ApproveApplication(c echo.Context) error {
+	applicationId := c.Param("applicationId")
+	if applicationId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Application ID is required",
+			Error:   "Application ID is required",
+		})
+	}
+
+	if err := s.store.ApproveApplication(applicationId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error approving application",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (s *ManagementService) RejectApplication(c echo.Context) error {
+	applicationId := c.Param("applicationId")
+	if applicationId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Application ID is required",
+			Error:   "Application ID is required",
+		})
+	}
+
+	if err := s.store.RejectApplication(applicationId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error approving application",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (s *ManagementService) GetTransaction(c echo.Context) error {
+	transactionId := c.Param("transactionId")
+	if transactionId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Transaction ID is required",
+			Error:   "Transaction ID is required",
+		})
+	}
+
+	transaction, err := s.store.GetTransaction(transactionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting transaction",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"transaction": transaction,
+	})
+}
+
+func (s *ManagementService) GetSystemComplaints(c echo.Context) error {
+	params := utils.ParseQuery(c.QueryString())
+	complaints, err := s.store.GetSystemComplaints(params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting system complaints",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"complaints": complaints,
+	})
+}
+
+func (s *ManagementService) GetSystemComplaint(c echo.Context) error {
+	complaintId := c.Param("complaintId")
+	if complaintId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Complaint ID is required",
+			Error:   "Complaint ID is required",
+		})
+	}
+
+	complaint, err := s.store.GetSystemComplaintById(complaintId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting system complaint",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"complaint": complaint,
+	})
+}
+
+func (s *ManagementService) GetVerificationRequests(c echo.Context) error {
+	params := utils.ParseQuery(c.QueryString())
+	requests, err := s.store.GetVerificationRequests(params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting verification requests",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"requests": requests,
+	})
+}
+
+func (s *ManagementService) HandleGetIdentityVerification(c echo.Context) error {
+	verificationId := c.Param("verificationId")
+	if verificationId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Verification ID is required",
+			Error:   "Verification ID is required",
+		})
+	}
+
+	request, err := s.store.GetVerificationRequestById(verificationId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting verification request",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"request": request,
 	})
 }
