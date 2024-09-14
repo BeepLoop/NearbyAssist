@@ -39,7 +39,7 @@ func (s *Server) routes() {
 		adminRoute := v1.Group("/admin")
 		{
 			adminStore := admin.NewMysqlAdminStore(s.DB)
-			h := handler.NewAdminService(adminStore, s.Encrypt, s.JWT)
+			h := handler.NewAdminService(adminStore, s.Encrypt, s.JWT, s.Hash)
 
 			adminRoute.GET("", h.BaseRoute)
 			adminRoute.POST("/login", h.Login)
@@ -64,7 +64,7 @@ func (s *Server) routes() {
 				managementRoute.Use(middleware.CheckRole(s.JWT))
 
 				managementStore := management.NewMysqlManagementStore(s.DB)
-				h := handler.NewManagementService(managementStore, s.JWT, s.Encrypt)
+				h := handler.NewManagementService(managementStore, s.JWT, s.Encrypt, s.Hash)
 
 				managementRoute.POST("/staff", h.CreateStaff)
 
@@ -109,7 +109,7 @@ func (s *Server) routes() {
 		userRoute := v1.Group("/user")
 		{
 			userStore := user.NewMysqlUserStore(s.DB)
-			h := handler.NewUserService(userStore, s.Encrypt, s.JWT)
+			h := handler.NewUserService(userStore, s.Encrypt, s.JWT, s.Hash)
 
 			userRoute.POST("/login", h.Login)
 			userRoute.POST("/refresh", h.Refresh)

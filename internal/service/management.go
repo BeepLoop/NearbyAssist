@@ -15,13 +15,15 @@ type ManagementService struct {
 	store     management.ManagementStore
 	jwt       auth.Authenticator
 	encryptor auth.Encryption
+	hash      auth.Hash
 }
 
-func NewManagementService(store management.ManagementStore, jwt auth.Authenticator, encryptor auth.Encryption) *ManagementService {
+func NewManagementService(store management.ManagementStore, jwt auth.Authenticator, encryptor auth.Encryption, hash auth.Hash) *ManagementService {
 	return &ManagementService{
 		store:     store,
 		jwt:       jwt,
 		encryptor: encryptor,
+		hash:      hash,
 	}
 }
 
@@ -40,7 +42,7 @@ func (s *ManagementService) CreateStaff(c echo.Context) error {
 
 	newAdmin := new(models.AdminModel)
 
-	usernameHash, err := auth.Sha256([]byte(req.Username))
+	usernameHash, err := s.hash.Generate([]byte(req.Username))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Failed to hash username",

@@ -15,13 +15,15 @@ type AdminService struct {
 	store     admin.AdminStore
 	encryptor auth.Encryption
 	jwt       auth.Authenticator
+	hash      auth.Hash
 }
 
-func NewAdminService(store admin.AdminStore, encryptor auth.Encryption, jwt auth.Authenticator) *AdminService {
+func NewAdminService(store admin.AdminStore, encryptor auth.Encryption, jwt auth.Authenticator, hash auth.Hash) *AdminService {
 	return &AdminService{
 		store:     store,
 		encryptor: encryptor,
 		jwt:       jwt,
+		hash:      hash,
 	}
 }
 
@@ -45,7 +47,7 @@ func (s *AdminService) Login(c echo.Context) error {
 		})
 	}
 
-	usernameHash, err := auth.Sha256([]byte(req.Username))
+	usernameHash, err := s.hash.Generate([]byte(req.Username))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error hashing username",

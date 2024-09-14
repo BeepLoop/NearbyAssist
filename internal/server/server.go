@@ -16,14 +16,19 @@ import (
 )
 
 type ServerConfig struct {
-	Config           *config.Config
-	Websocket        *websocket.Websocket
-	DB               *sqlx.DB
-	Storage          storage.Storage
+	Config *config.Config
+
+	Websocket *websocket.Websocket
+
+	DB      *sqlx.DB
+	Storage storage.Storage
+
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
-	Encrypt          auth.Encryption
-	JWT              auth.Authenticator
+
+	Hash    auth.Hash
+	Encrypt auth.Encryption
+	JWT     auth.Authenticator
 }
 
 type Server struct {
@@ -33,13 +38,17 @@ type Server struct {
 	Port           string
 	AllowedOrigins []string
 
-	Websocket        *websocket.Websocket
-	DB               *sqlx.DB
-	Storage          storage.Storage
+	Websocket *websocket.Websocket
+
+	DB      *sqlx.DB
+	Storage storage.Storage
+
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
-	Encrypt          auth.Encryption
-	JWT              auth.Authenticator
+
+	Hash    auth.Hash
+	Encrypt auth.Encryption
+	JWT     auth.Authenticator
 }
 
 func NewServer(options ServerConfig) (*Server, error) {
@@ -57,6 +66,7 @@ func NewServer(options ServerConfig) (*Server, error) {
 		DB:      options.DB,
 		Storage: options.Storage,
 
+		Hash:    options.Hash,
 		Encrypt: options.Encrypt,
 		JWT:     options.JWT,
 

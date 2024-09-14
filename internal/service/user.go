@@ -15,13 +15,15 @@ type UserService struct {
 	store     user.UserStore
 	encryptor auth.Encryption
 	jwt       auth.Authenticator
+	hash      auth.Hash
 }
 
-func NewUserService(store user.UserStore, encryptor auth.Encryption, jwt auth.Authenticator) *UserService {
+func NewUserService(store user.UserStore, encryptor auth.Encryption, jwt auth.Authenticator, hash auth.Hash) *UserService {
 	return &UserService{
 		store:     store,
 		encryptor: encryptor,
 		jwt:       jwt,
+		hash:      hash,
 	}
 }
 
@@ -82,7 +84,7 @@ func (s *UserService) Login(c echo.Context) error {
 		})
 	}
 
-	emailHash, err := auth.Sha256([]byte(req.Email))
+	emailHash, err := s.hash.Generate([]byte(req.Email))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error hashing username",
