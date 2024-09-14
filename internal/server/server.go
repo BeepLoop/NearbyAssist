@@ -4,7 +4,7 @@ import (
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/service/auth"
-	"nearbyassist/internal/storage"
+	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/suggestion_engine"
 	"nearbyassist/internal/utils"
 	"nearbyassist/internal/websocket"
@@ -20,8 +20,8 @@ type ServerConfig struct {
 
 	Websocket *websocket.Websocket
 
-	DB      *sqlx.DB
-	Storage storage.Storage
+	DB *sqlx.DB
+	FS fs.FileStorage
 
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
@@ -40,8 +40,8 @@ type Server struct {
 
 	Websocket *websocket.Websocket
 
-	DB      *sqlx.DB
-	Storage storage.Storage
+	DB *sqlx.DB
+	FS fs.FileStorage
 
 	RouteEngine      routing_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
@@ -63,8 +63,8 @@ func NewServer(options ServerConfig) (*Server, error) {
 		AllowedOrigins: options.Config.ALLOWED_ORIGINS,
 		LOG_FILE:       file,
 
-		DB:      options.DB,
-		Storage: options.Storage,
+		DB: options.DB,
+		FS: options.FS,
 
 		Hash:    options.Hash,
 		Encrypt: options.Encrypt,

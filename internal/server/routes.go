@@ -130,7 +130,7 @@ func (s *Server) routes() {
 			resourceRoute.Use(middleware.CheckAuth(s.JWT))
 			resourceRoute.Use(middleware.CheckRole(s.JWT))
 
-			h := handler.NewResourceService(s.Encrypt)
+			h := handler.NewResourceService(s.Encrypt, s.FS)
 
 			resourceRoute.GET("/:path", h.GetFile)
 		}
@@ -219,7 +219,7 @@ func (s *Server) routes() {
 			verificationRoute.Use(middleware.CheckAuth(s.JWT))
 
 			verficationStore := verification.NewMysqlVerificationStore(s.DB)
-			h := handler.NewVerificationService(verficationStore, s.Encrypt, s.Storage)
+			h := handler.NewVerificationService(verficationStore, s.Encrypt, s.FS)
 
 			verificationRoute.POST("/identity", h.Create)
 		}

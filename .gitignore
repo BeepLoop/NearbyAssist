@@ -34,3 +34,4 @@ test/
 bin/
 output/
 logs/
+*.log

@@ -4,7 +4,7 @@ import (
 	filehandler "nearbyassist/internal/file"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/auth"
-	"nearbyassist/internal/storage"
+	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/store/verification"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -14,15 +14,15 @@ import (
 
 type VerificationService struct {
 	store     verification.VerificationStore
-	disk      storage.Storage
 	encryptor auth.Encryption
+	fs        fs.FileStorage
 }
 
-func NewVerificationService(store verification.VerificationStore, encryptor auth.Encryption, disk storage.Storage) *VerificationService {
+func NewVerificationService(store verification.VerificationStore, encryptor auth.Encryption, fs fs.FileStorage) *VerificationService {
 	return &VerificationService{
 		store:     store,
-		disk:      disk,
 		encryptor: encryptor,
+		fs:        fs,
 	}
 }
 
@@ -53,38 +53,66 @@ func (s *VerificationService) Create(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		handler := filehandler.NewFileHandler(s.encryptor)
+		// Read bytes
+		bytes, err := utils.FileToBytes(file)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Error reading file",
+				Error:   err.Error(),
+			})
+		}
+
+		// Encrypt the file
+		cipher, err := s.encryptor.EncryptFile(bytes)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Error encrypting file",
+				Error:   err.Error(),
+			})
+		}
 
 		switch file.Filename {
 		case "frontId":
-			url, err := handler.SavePhoto(file, s.disk.SaveFrontId)
-			if err != nil {
+			fileData := fs.File{
+				Data:     cipher,
+				Category: fs.ID_FRONT,
+			}
+			if url, err := s.fs.SaveFile(fileData); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 					Message: "Error saving front ID",
 					Error:   err.Error(),
 				})
+			} else {
+				req.FrontIdImageUrl = url
 			}
-			req.FrontIdImageUrl = url
 
 		case "backId":
-			url, err := handler.SavePhoto(file, s.disk.SaveBackId)
-			if err != nil {
+			fileData := fs.File{
+				Data:     cipher,
+				Category: fs.ID_BACK,
+			}
+			if url, err := s.fs.SaveFile(fileData); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 					Message: "Error saving back ID",
 					Error:   err.Error(),
 				})
+			} else {
+				req.BackIdImageUrl = url
 			}
-			req.BackIdImageUrl = url
 
 		case "face":
-			url, err := handler.SavePhoto(file, s.disk.SaveFace)
-			if err != nil {
+			fileData := fs.File{
+				Data:     cipher,
+				Category: fs.FACE,
+			}
+			if url, err := s.fs.SaveFile(fileData); err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 					Message: "Error saving face",
 					Error:   err.Error(),
 				})
+			} else {
+				req.FaceImageUrl = url
 			}
-			req.FaceImageUrl = url
 
 		default:
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{

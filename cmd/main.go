@@ -7,7 +7,7 @@ import (
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/auth"
-	"nearbyassist/internal/storage"
+	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/suggestion_engine"
 	"nearbyassist/internal/websocket"
 
@@ -18,9 +18,11 @@ func main() {
 	// Load configuration file
 	config := config.LoadConfig()
 
+	// Load hashing algorithm
+	hash := auth.NewSha256()
+
 	// Load file disk
-	disk := storage.NewDiskStorage(config)
-	disk.Initialize()
+	storage := fs.NewDiskStorage(config, hash)
 
 	// Load database configuration
 	mysql, err := db.NewMysql(mysql.Config{
@@ -38,12 +40,17 @@ func main() {
 	defer mysql.Close()
 
 	serverConfig := server.ServerConfig{
-		Config:           config,
-		DB:               mysql,
-		Storage:          disk,
-		JWT:              auth.NewJWTAuthenticator(config.JWT_SECRET, config.JWT_DURATION),
-		Encrypt:          auth.NewAES([]byte(config.ENCRYPTION_KEY)),
-		Websocket:        websocket.NewWebsocket(),
+		Config: config,
+
+		DB: mysql,
+		FS: storage,
+
+		Websocket: websocket.NewWebsocket(),
+
+		JWT:     auth.NewJWTAuthenticator(config.JWT_SECRET, config.JWT_DURATION),
+		Encrypt: auth.NewAES([]byte(config.ENCRYPTION_KEY)),
+		Hash:    hash,
+
 		RouteEngine:      routing_engine.NewOSRM(config),
 		SuggestionEngine: suggestion_engine.NewCourtier(),
 	}
