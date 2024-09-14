@@ -21,6 +21,7 @@ test:
 clean:
 	@echo "Cleaning..."
 	@rm -rf bin 
+	@rm -rf test
 
 # Live Reload
 watch:

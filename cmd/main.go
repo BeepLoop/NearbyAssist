@@ -22,7 +22,16 @@ func main() {
 	hash := auth.NewSha256()
 
 	// Load file disk
-	storage := fs.NewDiskStorage(config, hash)
+	directories := map[fs.Category]string{
+		fs.ID_BACK:               config.ID_BACK_DIR,
+		fs.ID_FRONT:              config.ID_FRONT_DIR,
+		fs.FACE:                  config.FACE_IMG_DIR,
+		fs.APPLICATION_PROOF_DIR: config.APPLICATION_PROOF_DIR,
+		fs.SERVICE_PHOTO_DIR:     config.SERVICE_PHOTO_DIR,
+		fs.SYS_COMPLAINT_DIR:     config.SYS_COMPLAINT_DIR,
+	}
+
+	storage := fs.NewDiskStorage(directories, hash)
 
 	// Load database configuration
 	mysql, err := db.NewMysql(mysql.Config{

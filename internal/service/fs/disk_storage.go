@@ -2,7 +2,6 @@ package fs
 
 import (
 	"errors"
-	"nearbyassist/internal/config"
 	"nearbyassist/internal/service/auth"
 	"os"
 	"path/filepath"
@@ -13,18 +12,11 @@ type DiskStorage struct {
 	hash              auth.Hash
 }
 
-func NewDiskStorage(config *config.Config, hash auth.Hash) *DiskStorage {
+func NewDiskStorage(directory map[Category]string, hash auth.Hash) *DiskStorage {
 
 	return &DiskStorage{
-		hash: hash,
-		categoryDirectory: map[Category]string{
-			ID_BACK:               config.ID_BACK_DIR,
-			ID_FRONT:              config.ID_FRONT_DIR,
-			FACE:                  config.FACE_IMG_DIR,
-			APPLICATION_PROOF_DIR: config.APPLICATION_PROOF_DIR,
-			SERVICE_PHOTO_DIR:     config.SERVICE_PHOTO_DIR,
-			SYS_COMPLAINT_DIR:     config.SYS_COMPLAINT_DIR,
-		},
+		hash:              hash,
+		categoryDirectory: directory,
 	}
 }
 
