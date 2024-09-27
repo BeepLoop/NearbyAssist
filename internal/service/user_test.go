@@ -17,8 +17,9 @@ import (
 func TestUserLogin(t *testing.T) {
 	userStore := user.NewMockUserStore()
 	encryptor := auth.NewMockEncryptor()
+	hash := auth.NewSha256()
 	jwt := auth.NewMockAuthenticator()
-	handler := NewUserService(userStore, encryptor, jwt)
+	handler := NewUserService(userStore, encryptor, jwt, hash)
 
 	t.Run("Should fail if payload is invalid", func(t *testing.T) {
 		tests := []struct {
@@ -53,8 +54,9 @@ func TestUserLogin(t *testing.T) {
 func TestUserRefresh(t *testing.T) {
 	userStore := user.NewMockUserStore()
 	encryptor := auth.NewMockEncryptor()
+	hash := auth.NewSha256()
 	jwt := auth.NewMockAuthenticator()
-	handler := NewUserService(userStore, encryptor, jwt)
+	handler := NewUserService(userStore, encryptor, jwt, hash)
 
 	t.Run("Should fail if payload is invalid", func(t *testing.T) {
 		tests := []struct {

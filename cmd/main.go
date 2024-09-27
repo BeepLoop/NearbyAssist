@@ -8,8 +8,9 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/websocket"
+	"nearbyassist/internal/store/chat"
 	"nearbyassist/internal/suggestion_engine"
-	"nearbyassist/internal/websocket"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -18,8 +19,14 @@ func main() {
 	// Load configuration file
 	config := config.LoadConfig()
 
+	// Load encryption algorithm
+	encrypt := auth.NewAES([]byte(config.ENCRYPTION_KEY))
+
 	// Load hashing algorithm
 	hash := auth.NewSha256()
+
+	// Load JWT authenticator
+	jwt := auth.NewJWTAuthenticator(config.JWT_SECRET, config.JWT_DURATION)
 
 	// Load file disk
 	directories := map[fs.Category]string{
@@ -30,7 +37,6 @@ func main() {
 		fs.SERVICE_PHOTO_DIR:     config.SERVICE_PHOTO_DIR,
 		fs.SYS_COMPLAINT_DIR:     config.SYS_COMPLAINT_DIR,
 	}
-
 	storage := fs.NewDiskStorage(directories, hash)
 
 	// Load database configuration
@@ -48,16 +54,19 @@ func main() {
 	}
 	defer mysql.Close()
 
+	chatStore := chat.NewMysqlChatStore(mysql)
+	ws := websocket.NewWebsocket(chatStore)
+
 	serverConfig := server.ServerConfig{
 		Config: config,
+
+		WS: ws,
 
 		DB: mysql,
 		FS: storage,
 
-		Websocket: websocket.NewWebsocket(),
-
-		JWT:     auth.NewJWTAuthenticator(config.JWT_SECRET, config.JWT_DURATION),
-		Encrypt: auth.NewAES([]byte(config.ENCRYPTION_KEY)),
+		JWT:     jwt,
+		Encrypt: encrypt,
 		Hash:    hash,
 
 		RouteEngine:      routing_engine.NewOSRM(config),
@@ -69,9 +78,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	go server.Websocket.SaveMessages()
-	go server.Websocket.ForwardMessages()
 
 	if err := server.Start(); err != nil {
 		log.Fatal(err)

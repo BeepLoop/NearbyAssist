@@ -1,11 +1,10 @@
 package handler
 
 import (
-	filehandler "nearbyassist/internal/file"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/auth"
-	"nearbyassist/internal/storage"
+	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/store/complaint"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -16,13 +15,14 @@ import (
 type ComplaintService struct {
 	store     complaint.ComplaintStore
 	encryptor auth.Encryption
-	disk      storage.Storage
+	fs        fs.FileStorage
 }
 
-func NewComplaintService(store complaint.ComplaintStore, encryptor auth.Encryption) *ComplaintService {
+func NewComplaintService(store complaint.ComplaintStore, encryptor auth.Encryption, fs fs.FileStorage) *ComplaintService {
 	return &ComplaintService{
 		store:     store,
 		encryptor: encryptor,
+		fs:        fs,
 	}
 }
 
@@ -45,7 +45,7 @@ func (s *ComplaintService) SystemComplaint(c echo.Context) error {
 	newComplaint.Title = req.Title
 	newComplaint.Detail = req.Detail
 
-	files, err := filehandler.FormParser(c)
+	files, err := utils.FormParser(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error parsing form",
@@ -54,8 +54,27 @@ func (s *ComplaintService) SystemComplaint(c echo.Context) error {
 	}
 
 	for _, file := range files {
-		handler := filehandler.NewFileHandler(s.encryptor)
-		url, err := handler.SavePhoto(file, s.disk.SaveSystemComplaint)
+		bytes, err := utils.FileToBytes(file)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Error reading file",
+				Error:   err.Error(),
+			})
+		}
+
+		cipher, err := s.encryptor.EncryptFile(bytes)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Error encrypting file",
+				Error:   auth.ENCRYPTION_ERR,
+			})
+		}
+
+		fileData := fs.File{
+			Data:     cipher,
+			Category: fs.SYS_COMPLAINT_DIR,
+		}
+		url, err := s.fs.SaveFile(fileData)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 				Message: "Error saving photo",

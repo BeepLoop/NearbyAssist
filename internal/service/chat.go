@@ -3,9 +3,9 @@ package handler
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/auth"
+	ws "nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/store/chat"
 	"nearbyassist/internal/utils"
-	ws "nearbyassist/internal/websocket"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -14,12 +14,12 @@ import (
 
 type ChatService struct {
 	store     chat.ChatStore
-	ws        ws.Websocket
+	ws        *ws.Websocket
 	jwt       auth.Authenticator
 	encryptor auth.Encryption
 }
 
-func NewChatService(store chat.ChatStore, jwt auth.Authenticator, ws ws.Websocket, encryptor auth.Encryption) *ChatService {
+func NewChatService(store chat.ChatStore, jwt auth.Authenticator, ws *ws.Websocket, encryptor auth.Encryption) *ChatService {
 	return &ChatService{
 		store:     store,
 		jwt:       jwt,
@@ -64,7 +64,7 @@ func (s *ChatService) Websocket(c echo.Context) error {
 			continue
 		}
 
-		s.ws.MessageChan <- *message
+		s.ws.MessageChan <- message
 	}
 }
 

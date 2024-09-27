@@ -1,24 +1,8 @@
 package models
 
-import (
-	"nearbyassist/internal/id_generator"
-
-	"github.com/jmoiron/sqlx"
-)
-
-const (
-	MODEL_INIT_ERROR = "Error initializing model"
-
-	DEFAULT_LIMIT  = 10
-	DEFAULT_OFFSET = 0
-)
-
 type Model struct {
 	Id        string `json:"id" db:"id"`
 	CreatedAt string `json:"createdAt" db:"createdAt"`
-
-	Conn        *sqlx.DB                 `json:"-" db:"-"`
-	IdGenerator id_generator.IdGenerator `json:"-" db:"-"`
 }
 
 type UpdateableModel struct {

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	filehandler "nearbyassist/internal/file"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
@@ -44,7 +43,7 @@ func (s *VerificationService) Create(c echo.Context) error {
 	req.IdType = idType
 	req.IdNumber = idNumber
 
-	files, err := filehandler.FormParser(c)
+	files, err := utils.FormParser(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error parsing form",

@@ -5,9 +5,9 @@ import (
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/suggestion_engine"
 	"nearbyassist/internal/utils"
-	"nearbyassist/internal/websocket"
 	"os"
 
 	"github.com/go-playground/validator"
@@ -18,7 +18,7 @@ import (
 type ServerConfig struct {
 	Config *config.Config
 
-	Websocket *websocket.Websocket
+	WS *websocket.Websocket
 
 	DB *sqlx.DB
 	FS fs.FileStorage
@@ -38,7 +38,7 @@ type Server struct {
 	Port           string
 	AllowedOrigins []string
 
-	Websocket *websocket.Websocket
+	WS *websocket.Websocket
 
 	DB *sqlx.DB
 	FS fs.FileStorage
@@ -63,6 +63,8 @@ func NewServer(options ServerConfig) (*Server, error) {
 		AllowedOrigins: options.Config.ALLOWED_ORIGINS,
 		LOG_FILE:       file,
 
+		WS: options.WS,
+
 		DB: options.DB,
 		FS: options.FS,
 
@@ -70,7 +72,6 @@ func NewServer(options ServerConfig) (*Server, error) {
 		Encrypt: options.Encrypt,
 		JWT:     options.JWT,
 
-		Websocket:        options.Websocket,
 		RouteEngine:      options.RouteEngine,
 		SuggestionEngine: options.SuggestionEngine,
 	}
@@ -83,6 +84,9 @@ func (s *Server) Start() error {
 
 	s.middlewares()
 	s.routes()
+
+	go s.WS.SaveMessages()
+	go s.WS.ForwardMessages()
 
 	if err := s.Echo.Start(":" + s.Port); err != nil {
 		s.LOG_FILE.Close()

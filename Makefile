@@ -14,7 +14,6 @@ run:
 # Test the application
 test:
 	@echo "Testing..."
-	@go clean -testcache
 	@grc go test -v -cover -failfast ./...
 
 # Clean the binary

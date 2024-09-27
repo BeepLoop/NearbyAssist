@@ -15,6 +15,9 @@ func NewMysqlChatStore(db *sqlx.DB) *MysqlChatStore {
 		db: db,
 	}
 }
+func (s *MysqlChatStore) Create(data *models.MessageModel) (string, error) {
+	return "", nil
+}
 
 func (s *MysqlChatStore) GetMessages(user1, user2 string) ([]*models.MessageModel, error) {
 	return nil, nil

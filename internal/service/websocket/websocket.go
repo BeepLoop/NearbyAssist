@@ -3,6 +3,7 @@ package websocket
 import (
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/store/chat"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -11,15 +12,17 @@ import (
 
 type Websocket struct {
 	Clients       map[string]*websocket.Conn
-	MessageChan   chan models.MessageModel
-	BroadcastChan chan models.MessageModel
+	MessageChan   chan *models.MessageModel
+	BroadcastChan chan *models.MessageModel
+	store         chat.ChatStore
 }
 
-func NewWebsocket() *Websocket {
+func NewWebsocket(store chat.ChatStore) *Websocket {
 	return &Websocket{
 		Clients:       make(map[string]*websocket.Conn),
-		MessageChan:   make(chan models.MessageModel),
-		BroadcastChan: make(chan models.MessageModel),
+		MessageChan:   make(chan *models.MessageModel),
+		BroadcastChan: make(chan *models.MessageModel),
+		store:         store,
 	}
 }
 
@@ -27,7 +30,7 @@ func (w *Websocket) SaveMessages() {
 	for {
 		message := <-w.MessageChan
 
-		if _, err := message.Create(); err != nil {
+		if _, err := w.store.Create(message); err != nil {
 			fmt.Printf("error saving message: %s\n", err.Error())
 			continue
 		}

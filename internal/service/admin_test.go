@@ -17,8 +17,9 @@ import (
 func TestAdminLogin(t *testing.T) {
 	adminStore := admin.NewMockAdminStore()
 	encryptor := auth.NewMockEncryptor()
+	hash := auth.NewSha256()
 	jwt := auth.NewMockAuthenticator()
-	handler := NewAdminService(adminStore, encryptor, jwt)
+	handler := NewAdminService(adminStore, encryptor, jwt, hash)
 
 	t.Run("Should fail if payload is invalid", func(t *testing.T) {
 		tests := []struct {
@@ -69,8 +70,9 @@ func TestAdminLogin(t *testing.T) {
 func TestAdminRefresh(t *testing.T) {
 	adminStore := admin.NewMockAdminStore()
 	encryptor := auth.NewMockEncryptor()
+	hash := auth.NewSha256()
 	jwt := auth.NewMockAuthenticator()
-	handler := NewAdminService(adminStore, encryptor, jwt)
+	handler := NewAdminService(adminStore, encryptor, jwt, hash)
 
 	t.Run("Should fail if payload is invalid", func(t *testing.T) {
 		tests := []struct {

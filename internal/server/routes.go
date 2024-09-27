@@ -228,7 +228,7 @@ func (s *Server) routes() {
 		chatRoute := v1.Group("/chat")
 		{
 			chatStore := chat.NewMysqlChatStore(s.DB)
-			h := handler.NewChatService(chatStore, s.JWT, *s.Websocket, s.Encrypt)
+			h := handler.NewChatService(chatStore, s.JWT, s.WS, s.Encrypt)
 
 			// NOTE: this route is separated because it is not possible to pass
 			// headers to connection request, thus unable to authenticate the user.
@@ -239,11 +239,11 @@ func (s *Server) routes() {
 			chatRoute.GET("/conversations", h.GetConversations, middleware.CheckAuth(s.JWT))
 		}
 
-		// ===== CHAT =======
+		// ===== COMPLAINT =======
 		complaintRoute := v1.Group("/complaints")
 		{
 			complaintStore := complaint.NewMysqlComplaintStore(s.DB)
-			h := handler.NewComplaintService(complaintStore, s.Encrypt)
+			h := handler.NewComplaintService(complaintStore, s.Encrypt, s.FS)
 
 			complaintRoute.POST("/system", h.SystemComplaint)
 			complaintRoute.POST("/vendor", h.VendorComplaint)
