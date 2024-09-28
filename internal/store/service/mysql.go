@@ -441,7 +441,7 @@ func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*model
 		if len(location) != 2 {
 			return nil, fmt.Errorf("Malformed location parameter 'l'")
 		}
-		condition := fmt.Sprintf(" AND ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(%v, %v))", location[0], location[1])
+		condition := fmt.Sprintf(" AND ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(%v, %v))", location[1], location[0])
 		query += condition
 	} else {
 		return nil, fmt.Errorf("Missing location parameter 'l'")
