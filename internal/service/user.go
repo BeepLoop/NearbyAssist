@@ -86,8 +86,9 @@ func (s *UserService) Login(c echo.Context) error {
 
 	emailHash, err := s.hash.Generate([]byte(req.Email))
 	if err != nil {
+		println("error hashing email")
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error hashing username",
+			Message: "Error hashing email",
 			Error:   err.Error(),
 		})
 	}
@@ -164,7 +165,7 @@ func (s *UserService) Register(req *request.UserLoginPayload, emailHash string, 
 
 	if _, err := s.store.CreateUser(newUser); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error creating user",
+			Message: "Error registering user",
 			Error:   err.Error(),
 		})
 	}
@@ -185,6 +186,14 @@ func (s *UserService) Register(req *request.UserLoginPayload, emailHash string, 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: auth.REFRESH_TOKEN_ERR,
+			Error:   err.Error(),
+		})
+	}
+
+	session := models.NewSessionModel(refreshToken)
+	if err := s.store.Login(session); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error creating session",
 			Error:   err.Error(),
 		})
 	}

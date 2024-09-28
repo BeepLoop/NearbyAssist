@@ -30,7 +30,7 @@ func (s *MysqlUserStore) CreateUser(user *models.UserModel) (string, error) {
 	}
 	user.Id = id
 
-	query := "INSERT INTO User (id, name, email, imageUrl, emailHash) VALUES (:id, :name, :email, :imageUrl, :hash)"
+	query := "INSERT INTO User (id, name, email, imageUrl, emailHash) VALUES (:id, :name, :email, :imageUrl, :emailHash)"
 	if _, err := s.db.NamedExecContext(ctx, query, user); err != nil {
 		return "", err
 	}
