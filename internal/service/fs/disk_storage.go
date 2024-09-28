@@ -13,6 +13,17 @@ type DiskStorage struct {
 }
 
 func NewDiskStorage(directory map[Category]string, hash auth.Hash) *DiskStorage {
+	keys := make([]Category, 0, len(directory))
+	for c := range directory {
+		keys = append(keys, c)
+	}
+
+	for _, key := range keys {
+		path := directory[key]
+		if err := os.MkdirAll(path, os.ModePerm); err != nil {
+			println(err.Error())
+		}
+	}
 
 	return &DiskStorage{
 		hash:              hash,
