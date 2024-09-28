@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/store/application"
 	"nearbyassist/internal/store/chat"
 	"nearbyassist/internal/store/complaint"
+	"nearbyassist/internal/store/e2ee"
 	"nearbyassist/internal/store/management"
 	"nearbyassist/internal/store/review"
 	"nearbyassist/internal/store/service"
@@ -247,6 +248,19 @@ func (s *Server) routes() {
 
 			complaintRoute.POST("/system", h.SystemComplaint)
 			complaintRoute.POST("/vendor", h.VendorComplaint)
+		}
+
+		// ===== E2EE =======
+		e2eeRoute := v1.Group("/e2ee")
+		{
+			e2eeRoute.Use(middleware.CheckAuth(s.JWT))
+
+			e2eeStore := e2ee.NewMysqlE2EEStore(s.DB)
+			h := handler.NewE2EEService(e2eeStore, s.JWT, s.Encrypt)
+
+			e2eeRoute.POST("", h.SaveKeys)
+			e2eeRoute.GET("/keys", h.GetKeys)
+			e2eeRoute.GET("/key/:userId", h.GetPublicKey)
 		}
 	}
 }
