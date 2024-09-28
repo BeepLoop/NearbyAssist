@@ -162,6 +162,15 @@ func (s *ServiceService) GetService(c echo.Context) error {
 		})
 	}
 
+	if decrypted, err := s.encryptor.DecryptString(vendor.Vendor); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: auth.DECRYPTION_ERR,
+			Error:   err.Error(),
+		})
+	} else {
+		vendor.Vendor = decrypted
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"serviceInfo":    service,
 		"vendorInfo":     vendor,

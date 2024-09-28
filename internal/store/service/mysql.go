@@ -128,6 +128,7 @@ func (s *MysqlServiceStore) FindById(id string) (*models.ServiceModel, error) {
 	query := `
         SELECT
             id,
+            vendorId,
             description,
             format(rate, 2) as rate,
             latitude, 
@@ -184,10 +185,9 @@ func (s *MysqlServiceStore) GetVendorInfo(vendorId string) (*models.VendorModel,
             u.imageUrl as imageUrl
         FROM
             Vendor v
-            JOIN Service s ON s.vendorId = v.vendorId
             JOIN User u ON u.id = v.vendorId
         WHERE 
-            s.id = ?
+            v.vendorId = ?
     `
 	if err := s.db.GetContext(ctx, vendor, query, vendorId); err != nil {
 		return nil, err
