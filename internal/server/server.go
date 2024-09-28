@@ -52,6 +52,10 @@ type Server struct {
 }
 
 func NewServer(options ServerConfig) (*Server, error) {
+	if err := os.MkdirAll("logs", os.ModePerm); err != nil {
+		return nil, err
+	}
+
 	file, err := os.OpenFile(options.Config.LOG_FILE, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
