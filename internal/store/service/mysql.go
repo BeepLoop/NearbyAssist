@@ -417,6 +417,7 @@ func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*model
             ServiceTag st
             JOIN Service s ON s.id = st.serviceId
             JOIN User u ON u.id = s.vendorId
+            JOIN Tag t ON t.id = st.tagId
         WHERE
     `
 
@@ -425,9 +426,9 @@ func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*model
 		tags := strings.Split(q, ",")
 		for i, tag := range tags {
 			if i == 0 {
-				condition += fmt.Sprintf(" st.tagId = (SELECT id from Tag WHERE title = '%s')", tag)
+				condition += fmt.Sprintf(" t.title = '%s'", tag)
 			} else {
-				condition += fmt.Sprintf(" OR st.tagId = (SELECT id from Tag WHERE title = '%s')", tag)
+				condition += fmt.Sprintf(" OR t.title = '%s'", tag)
 			}
 		}
 
@@ -449,8 +450,6 @@ func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*model
 
 	if r, ok := params["r"]; ok {
 		query += fmt.Sprintf(" < %v", r)
-	} else {
-		return nil, fmt.Errorf("Missing radius parameter 'r'")
 	}
 
 	services := make([]*models.ServiceSearchResult, 0)
