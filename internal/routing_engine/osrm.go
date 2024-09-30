@@ -37,7 +37,25 @@ func (e *OSRM) constructUrl(origin, destination models.GeoSpatialModel) string {
 	return e.engineUrl + "/route/v1/driving/" + origin.StringReverseOrder() + ";" + destination.StringReverseOrder()
 }
 
-func (e *OSRM) FindRoute(origin, destination *models.GeoSpatialModel) (PolylineCode, error) {
+func (e *OSRM) GetPolyline(origin, destination *models.GeoSpatialModel) (PolylineCode, error) {
+	data, err := e.findRoute(origin, destination)
+	if err != nil {
+		return "", err
+	}
+
+	return PolylineCode(data.Routes[0].Geometry), nil
+}
+
+func (e *OSRM) GetDistance(origin, destination *models.GeoSpatialModel) (float32, error) {
+	data, err := e.findRoute(origin, destination)
+	if err != nil {
+		return 0, err
+	}
+
+	return data.Routes[0].Distance, nil
+}
+
+func (e *OSRM) findRoute(origin, destination *models.GeoSpatialModel) (*osrmResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), e.requestTimeout)
 	defer cancel()
 
@@ -45,25 +63,25 @@ func (e *OSRM) FindRoute(origin, destination *models.GeoSpatialModel) (PolylineC
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	bytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	data := new(osrmResponse)
 	if err := json.Unmarshal(bytes, &data); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return PolylineCode(data.Routes[0].Geometry), nil
+	return data, nil
 }

@@ -5,8 +5,8 @@ import (
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
-	"nearbyassist/internal/suggestion_engine"
 	"nearbyassist/internal/utils"
 	"os"
 

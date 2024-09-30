@@ -24,5 +24,5 @@ type ServiceStore interface {
 
 	GetAllByVendorId(vendorId string) ([]*models.ServiceModel, error)
 
-	GeoSpatialSearch(params map[string]string) ([]*models.ServiceSearchResult, error)
+	GeoSpatialSearch(params map[string]string) ([]*models.GeoSpatialSearchResult, error)
 }

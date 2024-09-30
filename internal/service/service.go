@@ -1,15 +1,17 @@
 package handler
 
 import (
+	"cmp"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/store/service"
-	"nearbyassist/internal/suggestion_engine"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"slices"
 
 	"github.com/labstack/echo/v4"
 )
@@ -294,7 +296,8 @@ func (s *ServiceService) Delete(c echo.Context) error {
 
 func (s *ServiceService) Search(c echo.Context) error {
 	params := utils.ParseQuery(c.QueryString())
-	result, err := s.store.GeoSpatialSearch(params)
+
+	services, err := s.store.GeoSpatialSearch(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error searching services",
@@ -302,45 +305,51 @@ func (s *ServiceService) Search(c echo.Context) error {
 		})
 	}
 
-	// TODO: rank services by suggestability
-	searchResult := make([]response.SearchResult, 0)
-	var scoreError error
-	for _, service := range result {
-		score, err := s.suggest.GenerateSuggestability(service)
-		if err != nil {
-			scoreError = err
-			break
+	// Compute service distance
+	for _, service := range services {
+		origin := new(models.GeoSpatialModel)
+		if location, ok := params["l"]; ok {
+			if err := origin.FromString(location); err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+					Message: "Error Constructing origin",
+					Error:   err.Error(),
+				})
+			}
 		}
 
-		decrypted, err := s.encryptor.DecryptString(service.Vendor)
-		if err != nil {
-			scoreError = err
-			break
-		}
+		destination := new(models.GeoSpatialModel)
+		destination.Latitude = service.Latitude
+		destination.Longitude = service.Longitude
 
-		res := response.SearchResult{
-			Id:             service.Id,
-			Suggestability: score,
-			Vendor:         decrypted,
-			Latitude:       service.Latitude,
-			Longitude:      service.Longitude,
+		if distance, err := s.route.GetDistance(origin, destination); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Error getting distance",
+				Error:   err.Error(),
+			})
+		} else {
+			service.Distance = distance
 		}
-
-		searchResult = append(searchResult, res)
 	}
 
-	if scoreError != nil {
+	// Compute service suggestability score
+	scoredServices, err := s.suggest.GenerateSuggestions(services)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error generating suggestability score",
-			Error:   scoreError.Error(),
+			Error:   err.Error(),
 		})
 	}
 
-	// sort services by Suggestability
-	sortedResult := utils.BubbleSort(searchResult)
+	// Rank services
+	slices.SortFunc(scoredServices, func(a, b *response.SearchResult) int {
+		return cmp.Compare(b.Score, a.Score)
+	})
+	for i, service := range scoredServices {
+		service.Rank = i + 1
+	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"services": sortedResult,
+		"services": scoredServices,
 	})
 }
 
@@ -411,7 +420,7 @@ func (s *ServiceService) FindRoute(c echo.Context) error {
 		Longitude: service.Longitude,
 	}
 
-	polyline, err := s.route.FindRoute(origin, distination)
+	polyline, err := s.route.GetPolyline(origin, distination)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error finding route",

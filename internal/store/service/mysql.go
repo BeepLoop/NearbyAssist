@@ -400,7 +400,7 @@ func (s *MysqlServiceStore) GetAllByVendorId(vendorId string) ([]*models.Service
 	return services, nil
 }
 
-func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*models.ServiceSearchResult, error) {
+func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*models.GeoSpatialSearchResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -408,11 +408,20 @@ func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*model
         SELECT 
             s.id,
             s.vendorId,
-            u.name as vendor,
-            s.description,
-            format(s.rate, 2) as rate,
+            u.name AS vendorName,
+            format(s.rate, 2) AS rate,
             s.latitude,
-            s.longitude
+            s.longitude,
+            (
+                SELECT v.rating
+                FROM Vendor v
+                WHERE v.vendorId = s.vendorId
+            ) AS rating,
+            (
+                SELECT COUNT(id)
+                FROM Transaction t
+                WHERE t.vendorId = s.vendorId AND t.status = 'done'
+            ) AS transactions
         FROM 
             ServiceTag st
             JOIN Service s ON s.id = st.serviceId
@@ -452,7 +461,7 @@ func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*model
 		query += fmt.Sprintf(" < %v", r)
 	}
 
-	services := make([]*models.ServiceSearchResult, 0)
+	services := make([]*models.GeoSpatialSearchResult, 0)
 	err := s.db.SelectContext(ctx, &services, query)
 	if err != nil {
 		return nil, err

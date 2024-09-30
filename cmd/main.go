@@ -8,9 +8,9 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/store/chat"
-	"nearbyassist/internal/suggestion_engine"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -70,7 +70,7 @@ func main() {
 		Hash:    hash,
 
 		RouteEngine:      routing_engine.NewOSRM(config),
-		SuggestionEngine: suggestion_engine.NewCourtier(),
+		SuggestionEngine: suggestion_engine.NewWeightedScoring(),
 	}
 
 	// Create and start the server
