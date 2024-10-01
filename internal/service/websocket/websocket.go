@@ -43,16 +43,6 @@ func (w *Websocket) ForwardMessages() {
 	for {
 		message := <-w.BroadcastChan
 
-		if socket, ok := w.Clients[message.Sender]; ok {
-			err := socket.WriteJSON(message)
-			if err != nil {
-				fmt.Printf("error sending message to sender: %s\n", err.Error())
-			}
-		} else {
-			fmt.Printf("Sender not found\n")
-			continue
-		}
-
 		if socket, ok := w.Clients[message.Receiver]; ok {
 			err := socket.WriteJSON(message)
 			if err != nil {
@@ -60,8 +50,16 @@ func (w *Websocket) ForwardMessages() {
 			}
 		} else {
 			// When receiver is not online
-			fmt.Printf("Receiver not found!\n")
-			continue
+			fmt.Printf("Receiver not online!\n")
+		}
+
+		if socket, ok := w.Clients[message.Sender]; ok {
+			err := socket.WriteJSON(message)
+			if err != nil {
+				fmt.Printf("error sending message to sender: %s\n", err.Error())
+			}
+		} else {
+			fmt.Printf("Sender not online\n")
 		}
 	}
 }
