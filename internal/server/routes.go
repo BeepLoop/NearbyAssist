@@ -196,7 +196,7 @@ func (s *Server) routes() {
 			applicationRoute.Use(middleware.CheckAuth(s.JWT))
 
 			appStore := application.NewMysqlApplicationStore(s.DB)
-			h := handler.NewApplicationService(appStore)
+			h := handler.NewApplicationService(appStore, s.JWT, s.Encrypt, s.FS)
 
 			applicationRoute.POST("", h.Create)
 		}

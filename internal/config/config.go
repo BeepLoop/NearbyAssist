@@ -28,6 +28,7 @@ type Config struct {
 	ROUTE_ENGINE_URL string
 
 	APPLICATION_PROOF_DIR string
+	POLICE_CLEARANCE_DIR  string
 	SERVICE_PHOTO_DIR     string
 	SYS_COMPLAINT_DIR     string
 	ID_FRONT_DIR          string
@@ -62,6 +63,7 @@ func LoadConfig() *Config {
 		ENCRYPTION_KEY: getEnv("ENCRYPTION_KEY", "key"),
 
 		APPLICATION_PROOF_DIR: getEnv("APPLICATION_PROOF_DIR", "uploads/application_proof"),
+		POLICE_CLEARANCE_DIR:  getEnv("POLICE_CLEARANCE_DIR", "uploads/police_clearance"),
 		SERVICE_PHOTO_DIR:     getEnv("SERVICE_PHOTO_DIR", "uploads/service_photo"),
 		SYS_COMPLAINT_DIR:     getEnv("SYSTEM_COMPLAINT_DIR", "uploads/system_complaint"),
 		ID_FRONT_DIR:          getEnv("VERIFICATION_FRONT_ID_DIR", "uploads/verification/front_id"),

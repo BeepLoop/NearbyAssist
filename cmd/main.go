@@ -36,6 +36,7 @@ func main() {
 		fs.APPLICATION_PROOF_DIR: config.APPLICATION_PROOF_DIR,
 		fs.SERVICE_PHOTO_DIR:     config.SERVICE_PHOTO_DIR,
 		fs.SYS_COMPLAINT_DIR:     config.SYS_COMPLAINT_DIR,
+		fs.POLICE_CLEARANCE_DIR:  config.POLICE_CLEARANCE_DIR,
 	}
 	storage := fs.NewDiskStorage(directories, hash)
 

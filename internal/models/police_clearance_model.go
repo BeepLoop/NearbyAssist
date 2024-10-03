@@ -1,6 +1,6 @@
 package models
 
-type ApplicationProofModel struct {
+type PoliceClearanceModel struct {
 	Model
 	UpdateableModel
 	ApplicationId string `db:"applicationId"`

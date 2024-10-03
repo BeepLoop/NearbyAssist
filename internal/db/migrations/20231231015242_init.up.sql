@@ -241,6 +241,18 @@ CREATE TABLE IF NOT EXISTS ApplicationProof (
     FOREIGN KEY(applicantId) REFERENCES Application(applicantId)
 );
 
+CREATE TABLE IF NOT EXISTS PoliceClearance (
+    id VARCHAR(255) NOT NULL,
+    applicationId VARCHAR(255) NOT NULL,
+    applicantId VARCHAR(255) NOT NULL,
+    url VARCHAR(255) NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    FOREIGN KEY(applicationId) REFERENCES Application(id),
+    FOREIGN KEY(applicantId) REFERENCES Application(applicantId)
+);
+
 DELIMITER //
 
 CREATE TRIGGER update_vendor_rating
