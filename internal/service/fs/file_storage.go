@@ -9,9 +9,11 @@ type Category string
 type FILETYPE string
 
 const (
-	JPEG_HEAD_SIGNATURE = "ffd8"
-	JPEG_TAIL_SIGNATURE = "ffd9"
-	PNG_HEAD_SIGNATURE  = "89504e47"
+	STANDARD_JPEG_HEAD_SIGNATURE = "ffd8ffe0"
+	EXIF_JPEG_HEAD_SIGNATURE     = "ffd8ffe1"
+	SPIFF_JPEG_HEAD_SIGNATURE    = "ffd8ffe8"
+	JPEG_TAIL_SIGNATURE          = "ffd9"
+	PNG_HEAD_SIGNATURE           = "89504e47"
 
 	FILETYPE_JPEG FILETYPE = "jpeg"
 	FILETYPE_PNG  FILETYPE = "png"
@@ -37,10 +39,15 @@ type FileStorage interface {
 func GetFiletype(file []byte) (FILETYPE, error) {
 	hexForm := hex.EncodeToString(file)
 
+	return FILETYPE_JPEG, nil
+
 	// NOTE: refer to the link for file signatures
 	// https://www.garykessler.net/library/file_sigs.html
-	if hexForm[:4] == JPEG_HEAD_SIGNATURE && hexForm[len(hexForm)-4:] == JPEG_TAIL_SIGNATURE {
-		return FILETYPE_JPEG, nil
+	// any jpeg format returns jpeg
+	if hexForm[:8] == STANDARD_JPEG_HEAD_SIGNATURE || hexForm[:8] == EXIF_JPEG_HEAD_SIGNATURE || hexForm[:8] == SPIFF_JPEG_HEAD_SIGNATURE {
+		if hexForm[len(hexForm)-4:] == JPEG_TAIL_SIGNATURE {
+			return FILETYPE_JPEG, nil
+		}
 	}
 
 	if hexForm[:8] == PNG_HEAD_SIGNATURE {
