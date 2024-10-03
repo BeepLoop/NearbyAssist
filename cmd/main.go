@@ -4,10 +4,10 @@ import (
 	"log"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
-	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/store/chat"
@@ -69,7 +69,7 @@ func main() {
 		Encrypt: encrypt,
 		Hash:    hash,
 
-		RouteEngine:      routing_engine.NewOSRM(config),
+		RouteEngine:      route_engine.NewOSRM(config),
 		SuggestionEngine: suggestion_engine.NewWeightedScoring(),
 	}
 

@@ -1,4 +1,4 @@
-package routing_engine
+package route_engine
 
 import "nearbyassist/internal/models"
 

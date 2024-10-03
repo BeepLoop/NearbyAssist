@@ -115,7 +115,7 @@ func (s *TransactionService) GetMyTransactions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transaction": transactions,
+		"transactions": transactions,
 	})
 }
 

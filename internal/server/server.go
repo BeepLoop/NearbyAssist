@@ -2,9 +2,9 @@ package server
 
 import (
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
@@ -23,7 +23,7 @@ type ServerConfig struct {
 	DB *sqlx.DB
 	FS fs.FileStorage
 
-	RouteEngine      routing_engine.Engine
+	RouteEngine      route_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
 
 	Hash    auth.Hash
@@ -43,7 +43,7 @@ type Server struct {
 	DB *sqlx.DB
 	FS fs.FileStorage
 
-	RouteEngine      routing_engine.Engine
+	RouteEngine      route_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
 
 	Hash    auth.Hash

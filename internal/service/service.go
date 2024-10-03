@@ -5,8 +5,8 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
-	"nearbyassist/internal/routing_engine"
 	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/store/service"
 	"nearbyassist/internal/utils"
@@ -20,11 +20,11 @@ type ServiceService struct {
 	store     service.ServiceStore
 	jwt       auth.Authenticator
 	encryptor auth.Encryption
-	route     routing_engine.Engine
+	route     route_engine.Engine
 	suggest   suggestion_engine.Engine
 }
 
-func NewServiceService(store service.ServiceStore, encryptor auth.Encryption, jwt auth.Authenticator, route routing_engine.Engine, suggest suggestion_engine.Engine) *ServiceService {
+func NewServiceService(store service.ServiceStore, encryptor auth.Encryption, jwt auth.Authenticator, route route_engine.Engine, suggest suggestion_engine.Engine) *ServiceService {
 	return &ServiceService{
 		store:     store,
 		encryptor: encryptor,
