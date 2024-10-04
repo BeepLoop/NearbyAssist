@@ -82,7 +82,8 @@ func (s *Server) routes() {
 
 				applicationRoute := managementRoute.Group("/application")
 				{
-					applicationRoute.GET("", h.GetApplications)
+					applicationRoute.GET("", h.GetAllApplications)
+					applicationRoute.GET("/:applicationId", h.GetApplication)
 					applicationRoute.PUT("/approve/:applicationId", h.ApproveApplication)
 					applicationRoute.PUT("/reject/:applicationId", h.RejectApplication)
 				}

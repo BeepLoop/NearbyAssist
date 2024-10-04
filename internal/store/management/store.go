@@ -1,6 +1,9 @@
 package management
 
-import "nearbyassist/internal/models"
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
+)
 
 type ManagementStore interface {
 	CreateStaff(data *models.AdminModel) (string, error)
@@ -11,6 +14,7 @@ type ManagementStore interface {
 	UnrestrictVendor(id string) error
 
 	GetApplications(params map[string]string) ([]*models.ApplicationModel, error)
+	GetApplicationById(id string) (*response.ApplicationDetail, error)
 	ApproveApplication(id string) error
 	RejectApplication(id string) error
 

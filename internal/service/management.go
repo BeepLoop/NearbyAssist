@@ -145,7 +145,7 @@ func (s *ManagementService) UnrestrictVendor(c echo.Context) error {
 	return c.JSON(http.StatusNoContent, nil)
 }
 
-func (s *ManagementService) GetApplications(c echo.Context) error {
+func (s *ManagementService) GetAllApplications(c echo.Context) error {
 	params := utils.ParseQuery(c.QueryString())
 	results, err := s.store.GetApplications(params)
 	if err != nil {
@@ -167,6 +167,28 @@ func (s *ManagementService) GetApplications(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"applications": applications,
+	})
+}
+
+func (s *ManagementService) GetApplication(c echo.Context) error {
+	applicationId := c.Param("applicationId")
+	if applicationId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Application ID is required",
+			Error:   "Application ID is required",
+		})
+	}
+
+	application, err := s.store.GetApplicationById(applicationId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, models.Error{
+			Message: "Application not found",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"application": application,
 	})
 }
 

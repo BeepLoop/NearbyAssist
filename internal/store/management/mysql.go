@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/store"
 	"strconv"
 	"time"
@@ -121,6 +122,34 @@ func (s *MysqlManagementStore) GetApplications(params map[string]string) ([]*mod
 	}
 
 	return applications, nil
+}
+
+func (s *MysqlManagementStore) GetApplicationById(id string) (*response.ApplicationDetail, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	application := new(response.ApplicationDetail)
+	query := `
+        SELECT 
+            a.id AS id,
+            a.applicantId AS applicantId,
+            a.job AS job,
+            a.status AS status,
+            a.createdAt AS createdAt,
+            p.url AS proofUrl
+        FROM 
+            Application a
+            JOIN ApplicationProof p ON a.id = p.applicationId
+        WHERE 
+            a.id = ?
+    `
+	s.db.GetContext(ctx, application, query, id)
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return application, nil
 }
 
 func (s *MysqlManagementStore) ApproveApplication(id string) error {
