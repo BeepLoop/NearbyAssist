@@ -10,7 +10,7 @@ type ManagementStore interface {
 	RestrictVendor(id string) error
 	UnrestrictVendor(id string) error
 
-	GetApplications(filter map[string]string) ([]*models.ApplicationModel, error)
+	GetApplications(params map[string]string) ([]*models.ApplicationModel, error)
 	ApproveApplication(id string) error
 	RejectApplication(id string) error
 

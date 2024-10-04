@@ -3,6 +3,7 @@ package handler
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/store/management"
 	"nearbyassist/internal/utils"
@@ -146,11 +147,21 @@ func (s *ManagementService) UnrestrictVendor(c echo.Context) error {
 
 func (s *ManagementService) GetApplications(c echo.Context) error {
 	params := utils.ParseQuery(c.QueryString())
-	applications, err := s.store.GetApplications(params)
+	results, err := s.store.GetApplications(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error getting applications",
 			Error:   err.Error(),
+		})
+	}
+
+	applications := make([]response.ApplicationPayload, 0)
+	for _, result := range results {
+		applications = append(applications, response.ApplicationPayload{
+			Id:          result.Id,
+			ApplicantId: result.ApplicantId,
+			Status:      string(result.Status),
+			CreatedAt:   result.CreatedAt,
 		})
 	}
 
