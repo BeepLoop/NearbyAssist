@@ -13,13 +13,15 @@ import (
 
 type VerificationService struct {
 	store     verification.VerificationStore
+	jwt       auth.Authenticator
 	encryptor auth.Encryption
 	fs        fs.FileStorage
 }
 
-func NewVerificationService(store verification.VerificationStore, encryptor auth.Encryption, fs fs.FileStorage) *VerificationService {
+func NewVerificationService(store verification.VerificationStore, jwt auth.Authenticator, encryptor auth.Encryption, fs fs.FileStorage) *VerificationService {
 	return &VerificationService{
 		store:     store,
+		jwt:       jwt,
 		encryptor: encryptor,
 		fs:        fs,
 	}
@@ -37,11 +39,45 @@ func (s *VerificationService) Create(c echo.Context) error {
 		})
 	}
 
+	token := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	userId, err := utils.GetUserIdFromToken(token, s.jwt.GetClaims)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, models.Error{
+			Message: "Error getting claims",
+			Error:   err.Error(),
+		})
+	}
+
+	encryptedName, err := s.encryptor.EncryptString(name)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error encrypting name",
+			Error:   auth.ENCRYPTION_ERR,
+		})
+	}
+
+	encryptedAddress, err := s.encryptor.EncryptString(address)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error encrypting name",
+			Error:   auth.ENCRYPTION_ERR,
+		})
+	}
+
+	encryptedIdNumber, err := s.encryptor.EncryptString(idNumber)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error encrypting name",
+			Error:   auth.ENCRYPTION_ERR,
+		})
+	}
+
 	req := new(models.IdentityVerificationModel)
-	req.Name = name
-	req.Address = address
+	req.UserId = userId
+	req.Name = encryptedName
+	req.Address = encryptedAddress
 	req.IdType = idType
-	req.IdNumber = idNumber
+	req.IdNumber = encryptedIdNumber
 
 	files, err := utils.FormParser(c)
 	if err != nil {
@@ -128,34 +164,8 @@ func (s *VerificationService) Create(c echo.Context) error {
 		})
 	}
 
-	if cipher, err := s.encryptor.EncryptString(req.Name); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error encrypting name",
-			Error:   auth.ENCRYPTION_ERR,
-		})
-	} else {
-		req.Name = cipher
-	}
-
-	if cipher, err := s.encryptor.EncryptString(req.Address); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error encrypting name",
-			Error:   auth.ENCRYPTION_ERR,
-		})
-	} else {
-		req.Address = cipher
-	}
-
-	if cipher, err := s.encryptor.EncryptString(req.IdNumber); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error encrypting name",
-			Error:   auth.ENCRYPTION_ERR,
-		})
-	} else {
-		req.IdNumber = cipher
-	}
-
-	if _, err := s.store.Create(req); err != nil {
+	verificationId, err := s.store.Create(req)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating identity verification",
 			Error:   err.Error(),
@@ -163,6 +173,6 @@ func (s *VerificationService) Create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"verification": req.Id,
+		"verification": verificationId,
 	})
 }

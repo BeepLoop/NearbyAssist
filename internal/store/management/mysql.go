@@ -143,7 +143,9 @@ func (s *MysqlManagementStore) GetApplicationById(id string) (*response.Applicat
         WHERE 
             a.id = ?
     `
-	s.db.GetContext(ctx, application, query, id)
+	if err := s.db.GetContext(ctx, application, query, id); err != nil {
+		return nil, err
+	}
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
@@ -172,10 +174,58 @@ func (s *MysqlManagementStore) GetSystemComplaintById(id string) (*models.Compla
 	return nil, nil
 }
 
-func (s *MysqlManagementStore) GetVerificationRequests(filter map[string]string) ([]*models.IdentityVerificationModel, error) {
-	return nil, nil
+func (s *MysqlManagementStore) GetVerificationRequests(filter map[string]string) ([]*response.IdentityVerification, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	requests := make([]*response.IdentityVerification, 0)
+	query := `
+        SELECT 
+            id, user as userId, status, createdAt
+        FROM 
+            IdentityVerification
+    `
+	if err := s.db.SelectContext(ctx, &requests, query); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return requests, nil
 }
 
 func (s *MysqlManagementStore) GetVerificationRequestById(id string) (*models.IdentityVerificationModel, error) {
-	return nil, nil
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	request := new(models.IdentityVerificationModel)
+	query := `
+        SELECT 
+            id,
+            user as userId,
+            name,
+            address,
+            idType,
+            idNumber,
+            status,
+            frontIdImageUrl,
+            backIdImageUrl,
+            faceImageUrl,
+            createdAt
+        FROM 
+            IdentityVerification
+        WHERE
+            id = ?
+    `
+	if err := s.db.GetContext(ctx, request, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return request, nil
 }

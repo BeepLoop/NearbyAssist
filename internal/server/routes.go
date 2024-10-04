@@ -221,7 +221,7 @@ func (s *Server) routes() {
 			verificationRoute.Use(middleware.CheckAuth(s.JWT))
 
 			verficationStore := verification.NewMysqlVerificationStore(s.DB)
-			h := handler.NewVerificationService(verficationStore, s.Encrypt, s.FS)
+			h := handler.NewVerificationService(verficationStore, s.JWT, s.Encrypt, s.FS)
 
 			verificationRoute.POST("/identity", h.Create)
 		}

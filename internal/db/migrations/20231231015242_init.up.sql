@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS IdentityVerification (
     frontIdImageUrl VARCHAR(255) NOT NULL,
     backIdImageUrl VARCHAR(255) NOT NULL,
     faceImageUrl VARCHAR(255) NOT NULL,
+    status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id, user, idType),

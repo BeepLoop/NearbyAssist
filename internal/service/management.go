@@ -321,6 +321,33 @@ func (s *ManagementService) HandleGetIdentityVerification(c echo.Context) error 
 		})
 	}
 
+	if decryptedName, err := s.encryptor.DecryptString(request.Name); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: auth.DECRYPTION_ERR,
+			Error:   err.Error(),
+		})
+	} else {
+		request.Name = decryptedName
+	}
+
+	if decryptedAddress, err := s.encryptor.DecryptString(request.Address); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: auth.DECRYPTION_ERR,
+			Error:   err.Error(),
+		})
+	} else {
+		request.Address = decryptedAddress
+	}
+
+	if decryptedIdNumber, err := s.encryptor.DecryptString(request.IdNumber); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: auth.DECRYPTION_ERR,
+			Error:   err.Error(),
+		})
+	} else {
+		request.IdNumber = decryptedIdNumber
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"request": request,
 	})

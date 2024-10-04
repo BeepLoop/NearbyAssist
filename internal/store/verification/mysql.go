@@ -30,8 +30,10 @@ func (s *MysqlVerificationStore) Create(data *models.IdentityVerificationModel) 
 	}
 
 	query := `
-        INSERT INTO IdentityVerification (id, name, address, idType, idNumber, frontId, backId, face)
-        VALUES ( :id, :name, :address, :idType, :idNumber, :frontId, :backId, :face)
+        INSERT INTO IdentityVerification 
+            (id, user, name, address, idType, idNumber, frontIdImageUrl, backIdImageUrl, faceImageUrl)
+        VALUES 
+            ( :id, :userId, :name, :address, :idType, :idNumber, :frontIdImageUrl, :backIdImageUrl, :faceImageUrl)
     `
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
 		return "", err
