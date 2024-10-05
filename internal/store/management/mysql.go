@@ -174,6 +174,42 @@ func (s *MysqlManagementStore) GetSystemComplaintById(id string) (*models.Compla
 	return nil, nil
 }
 
+func (s *MysqlManagementStore) ApproveIdentityVerification(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	updateStatus := "UPDATE IdentityVerification SET status = 'approved' WHERE id = ?"
+	if _, err := tx.ExecContext(ctx, updateStatus, id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+		return err
+	}
+
+	updateUser := "UPDATE User SET verified = 1 WHERE id = (SELECT user FROM IdentityVerification WHERE id = ?)"
+	if _, err := tx.ExecContext(ctx, updateUser, id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlManagementStore) GetVerificationRequests(filter map[string]string) ([]*response.IdentityVerification, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -185,6 +221,23 @@ func (s *MysqlManagementStore) GetVerificationRequests(filter map[string]string)
         FROM 
             IdentityVerification
     `
+	if filter, ok := filter["status"]; ok {
+		switch filter {
+		case "all":
+			query += " WHERE status = 'approved' OR status = 'rejected' OR status = 'pending'"
+		case "approved":
+			query += " WHERE status = 'approved'"
+		case "rejected":
+			query += " WHERE status = 'rejected'"
+		case "pending":
+			query += " WHERE status = 'pending'"
+		default:
+			return nil, errors.New("Invalid parameter found")
+		}
+	} else {
+		query += " WHERE status = 'approved' OR status = 'rejected' OR status = 'pending'"
+	}
+
 	if err := s.db.SelectContext(ctx, &requests, query); err != nil {
 		return nil, err
 	}

@@ -352,3 +352,22 @@ func (s *ManagementService) HandleGetIdentityVerification(c echo.Context) error 
 		"request": request,
 	})
 }
+
+func (s *ManagementService) ApproveIdentityVerification(c echo.Context) error {
+	verificationId := c.Param("verificationId")
+	if verificationId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Verification ID is required",
+			Error:   "Verification ID is required",
+		})
+	}
+
+	if err := s.store.ApproveIdentityVerification(verificationId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error approving verification request",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}

@@ -23,6 +23,7 @@ type ManagementStore interface {
 	GetSystemComplaints(filter map[string]string) ([]*models.ComplaintModel, error)
 	GetSystemComplaintById(id string) (*models.ComplaintModel, error)
 
+	ApproveIdentityVerification(id string) error
 	GetVerificationRequests(filter map[string]string) ([]*response.IdentityVerification, error)
 	GetVerificationRequestById(id string) (*models.IdentityVerificationModel, error)
 }

@@ -103,6 +103,7 @@ func (s *Server) routes() {
 				{
 					verificationRoute.GET("/identity", h.GetVerificationRequests)
 					verificationRoute.GET("/identity/:verificationId", h.HandleGetIdentityVerification)
+					verificationRoute.POST("/identity/approve/:verificationId", h.ApproveIdentityVerification)
 				}
 			}
 		}
