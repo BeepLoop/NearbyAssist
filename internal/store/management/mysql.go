@@ -136,10 +136,12 @@ func (s *MysqlManagementStore) GetApplicationById(id string) (*response.Applicat
             a.job AS job,
             a.status AS status,
             a.createdAt AS createdAt,
-            p.url AS proofUrl
+            p.url AS proofUrl,
+            c.url AS policeClearance
         FROM 
             Application a
             JOIN ApplicationProof p ON a.id = p.applicationId
+            JOIN PoliceClearance c ON a.id = c.applicationId
         WHERE 
             a.id = ?
     `
