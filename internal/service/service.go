@@ -84,6 +84,8 @@ func (s *ServiceService) Create(c echo.Context) error {
 	newService.Description = encryptedDesc
 	newService.Rate = req.Rate
 	newService.Tags = req.Tags
+	newService.Latitude = req.Latitude
+	newService.Longitude = req.Longitude
 
 	serviceId, err := s.store.Create(newService)
 	if err != nil {
