@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/store/vendor"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -30,8 +31,15 @@ func (s *VendorService) GetVendor(c echo.Context) error {
 
 	vendor, err := s.store.FindById(vendorId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, models.Error{
-			Message: "Vendor not found",
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "Vendor not found",
+				Error:   "Vendor not found",
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error finding vendor",
 			Error:   err.Error(),
 		})
 	}
