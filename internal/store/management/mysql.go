@@ -157,6 +157,57 @@ func (s *MysqlManagementStore) GetApplicationById(id string) (*response.Applicat
 }
 
 func (s *MysqlManagementStore) ApproveApplication(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	updateApplicationStatus := "UPDATE Application SET status = 'approved' WHERE id = ?"
+	if _, err := tx.ExecContext(ctx, updateApplicationStatus, id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	generatedId, err := store.GenerateNanoId()
+	if err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	newVendorQuery := `
+        INSERT INTO Vendor (id, vendorId, job)
+        SELECT
+            ?,
+            a.applicantId,
+            a.job
+        FROM Application a
+        WHERE a.id = ?
+    `
+	if _, err := tx.ExecContext(ctx, newVendorQuery, generatedId, id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
 	return nil
 }
 
