@@ -135,25 +135,21 @@ func (s *MysqlUserStore) FindByEmailHash(emailHash string) (*models.UserModel, e
 	return user, nil
 }
 
-func (s *MysqlUserStore) DoesRefreshTokenExists(refreshToken string) error {
+func (s *MysqlUserStore) FindSessionByToken(refreshToken string) (*models.SessionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	count := 0
-	query := "SELECT COUNT(id) FROM Session WHERE refreshToken = ? AND status = 'online'"
-	if err := s.db.GetContext(ctx, &count, query, refreshToken); err != nil {
-		return err
+	session := new(models.SessionModel)
+	query := "SELECT id, status, refreshToken FROM Session WHERE refreshToken = ? AND status = 'online'"
+	if err := s.db.GetContext(ctx, session, query, refreshToken); err != nil {
+		return nil, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
+		return nil, context.DeadlineExceeded
 	}
 
-	if count > 0 {
-		return nil
-	}
-
-	return errors.New("refreshToken not found")
+	return session, nil
 }
 
 func (s *MysqlUserStore) IsRefreshTokenBlacklisted(refreshToken string) error {

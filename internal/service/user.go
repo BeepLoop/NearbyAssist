@@ -228,7 +228,7 @@ func (s *UserService) Refresh(c echo.Context) error {
 	}
 
 	// Check if refreshToken exists
-	if err := s.store.DoesRefreshTokenExists(req.RefreshToken); err != nil {
+	if _, err := s.store.FindSessionByToken(req.RefreshToken); err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, models.Error{
 			Message: "Session not found",
 			Error:   err.Error(),
@@ -312,7 +312,7 @@ func (s *UserService) Logout(c echo.Context) error {
 		})
 	}
 
-	if err := s.store.DoesRefreshTokenExists(req.RefreshToken); err != nil {
+	if _, err := s.store.FindSessionByToken(req.RefreshToken); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, models.Error{
 			Message: "Session not found",
 			Error:   err.Error(),

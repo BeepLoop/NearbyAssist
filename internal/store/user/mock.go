@@ -28,8 +28,8 @@ func (m *MockUserStore) FindByEmailHash(emailHash string) (*models.UserModel, er
 	return nil, nil
 }
 
-func (m *MockUserStore) DoesRefreshTokenExists(refreshToken string) error {
-	return nil
+func (m *MockUserStore) FindSessionByToken(refreshToken string) (*models.SessionModel, error) {
+	return nil, nil
 }
 
 func (m *MockUserStore) IsRefreshTokenBlacklisted(refreshToken string) error {

@@ -12,7 +12,7 @@ type UserStore interface {
 	Logout(refreshToken string) error
 
 	// Check if refreshToken exists, if exists return nil else return error
-	DoesRefreshTokenExists(refreshToken string) error
+	FindSessionByToken(refreshToken string) (*models.SessionModel, error)
 
 	// Check if refreshToken is blacklisted, if blacklisted return nil else return error
 	IsRefreshTokenBlacklisted(refreshToken string) error
