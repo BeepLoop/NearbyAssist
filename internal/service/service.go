@@ -382,6 +382,7 @@ func (s *ServiceService) GetVendorServices(c echo.Context) error {
 	}
 
 	for _, service := range services {
+		// Decrypt description
 		if plain, err := s.encryptor.DecryptString(service.Description); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 				Message: auth.DECRYPTION_ERR,
@@ -389,6 +390,15 @@ func (s *ServiceService) GetVendorServices(c echo.Context) error {
 			})
 		} else {
 			service.Description = plain
+		}
+
+		if tags, err := s.store.GetTags(service.Id); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Error getting service tags",
+				Error:   err.Error(),
+			})
+		} else {
+			service.Tags = tags
 		}
 	}
 
