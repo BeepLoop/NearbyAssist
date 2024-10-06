@@ -434,10 +434,11 @@ func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*model
 		condition := ""
 		tags := strings.Split(q, ",")
 		for i, tag := range tags {
+			cleaned := strings.ReplaceAll(tag, "_", " ")
 			if i == 0 {
-				condition += fmt.Sprintf(" t.title = '%s'", tag)
+				condition += fmt.Sprintf(" t.title = '%s'", cleaned)
 			} else {
-				condition += fmt.Sprintf(" OR t.title = '%s'", tag)
+				condition += fmt.Sprintf(" OR t.title = '%s'", cleaned)
 			}
 		}
 
