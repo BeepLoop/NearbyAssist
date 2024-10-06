@@ -438,7 +438,7 @@ func (s *MysqlServiceStore) GeoSpatialSearch(params map[string]string) ([]*model
             (
                 SELECT COUNT(id)
                 FROM Transaction t
-                WHERE t.vendorId = s.vendorId AND t.status = 'done'
+                WHERE t.vendorId = s.vendorId AND t.status = 'done' AND t.serviceId = s.id
             ) AS transactions
         FROM 
             ServiceTag st
