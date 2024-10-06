@@ -12,6 +12,7 @@ type ServiceModel struct {
 	VendorId    string `json:"vendorId" db:"vendorId" validate:"required"`
 	Description string `json:"description" db:"description" validate:"required"`
 	Rate        string `json:"rate" db:"rate" validate:"required"`
+	Signature   string `db:"signature"`
 
 	// Additional fields for joins
 	Tags []string `json:"tags" db:"tags" validate:"required"`

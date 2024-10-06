@@ -41,7 +41,7 @@ func (s *MysqlServiceStore) Create(data *models.ServiceModel) (string, error) {
 	registerService := `
 	        INSERT INTO
 	            Service
-	                (id, vendorId, description, rate, latitude, longitude)
+	                (id, vendorId, description, rate, latitude, longitude, signature)
 	        VALUES 
                 (
                     :id,
@@ -49,7 +49,8 @@ func (s *MysqlServiceStore) Create(data *models.ServiceModel) (string, error) {
                     :description,
                     :rate,
                     :latitude,
-                    :longitude
+                    :longitude,
+                    :signature
                 )
 	    `
 	if _, err := tx.NamedExecContext(ctx, registerService, data); err != nil {
@@ -139,6 +140,23 @@ func (s *MysqlServiceStore) FindById(id string) (*models.ServiceModel, error) {
             id = ?
     `
 	if err := s.db.GetContext(ctx, service, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return service, nil
+}
+
+func (s *MysqlServiceStore) FindBySignature(signature string) (*models.ServiceModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	service := new(models.ServiceModel)
+	query := "SELECT id, vendorId, description, rate, latitude, longitude FROM Service WHERE signature = ?"
+	if err := s.db.GetContext(ctx, service, query, signature); err != nil {
 		return nil, err
 	}
 

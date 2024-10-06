@@ -6,6 +6,7 @@ type ServiceStore interface {
 	Create(data *models.ServiceModel) (string, error)
 	FindAll() ([]*models.ServiceModel, error)
 	FindById(id string) (*models.ServiceModel, error)
+	FindBySignature(signature string) (*models.ServiceModel, error)
 
 	Update(data *models.ServiceModel) error
 

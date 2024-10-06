@@ -164,7 +164,7 @@ func (s *Server) routes() {
 			serviceRoute.Use(middleware.CheckAuth(s.JWT))
 
 			serviceStore := service.NewMysqlServiceStore(s.DB)
-			h := handler.NewServiceService(serviceStore, s.Encrypt, s.JWT, s.RouteEngine, s.SuggestionEngine)
+			h := handler.NewServiceService(serviceStore, s.Encrypt, s.JWT, s.Hash, s.RouteEngine, s.SuggestionEngine)
 
 			serviceRoute.GET("", h.GetServices)
 			serviceRoute.POST("", h.Create)

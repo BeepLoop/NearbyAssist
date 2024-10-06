@@ -94,11 +94,12 @@ CREATE TABLE IF NOT EXISTS Service (
     rate Double NOT NULL,
     latitude Decimal(12, 10) NOT NULL,
     longitude Decimal(13, 10) NOT NULL,
+    signature VARCHAR(64) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES User(id),
-    INDEX(id, vendorId)
+    INDEX(id, vendorId, signature)
 );
 
 CREATE TABLE IF NOT EXISTS ServiceTag (

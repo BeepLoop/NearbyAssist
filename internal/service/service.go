@@ -2,6 +2,7 @@ package handler
 
 import (
 	"cmp"
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
@@ -20,15 +21,17 @@ type ServiceService struct {
 	store     service.ServiceStore
 	jwt       auth.Authenticator
 	encryptor auth.Encryption
+	hash      auth.Hash
 	route     route_engine.Engine
 	suggest   suggestion_engine.Engine
 }
 
-func NewServiceService(store service.ServiceStore, encryptor auth.Encryption, jwt auth.Authenticator, route route_engine.Engine, suggest suggestion_engine.Engine) *ServiceService {
+func NewServiceService(store service.ServiceStore, encryptor auth.Encryption, jwt auth.Authenticator, hash auth.Hash, route route_engine.Engine, suggest suggestion_engine.Engine) *ServiceService {
 	return &ServiceService{
 		store:     store,
 		encryptor: encryptor,
 		jwt:       jwt,
+		hash:      hash,
 		route:     route,
 		suggest:   suggest,
 	}
@@ -79,6 +82,22 @@ func (s *ServiceService) Create(c echo.Context) error {
 		})
 	}
 
+	toSign := fmt.Sprintf("%s_%s_%f_%f", req.VendorId, req.Description, req.Latitude, req.Longitude)
+	signature, err := s.hash.Generate([]byte(toSign))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error generating service signature",
+			Error:   err.Error(),
+		})
+	}
+
+	if service, err := s.store.FindBySignature(signature); err == nil && service != nil {
+		return echo.NewHTTPError(http.StatusConflict, models.Error{
+			Message: "Service already exists",
+			Error:   "Service already exists",
+		})
+	}
+
 	newService := new(models.ServiceModel)
 	newService.VendorId = req.VendorId
 	newService.Description = encryptedDesc
@@ -86,6 +105,7 @@ func (s *ServiceService) Create(c echo.Context) error {
 	newService.Tags = req.Tags
 	newService.Latitude = req.Latitude
 	newService.Longitude = req.Longitude
+	newService.Signature = signature
 
 	serviceId, err := s.store.Create(newService)
 	if err != nil {
