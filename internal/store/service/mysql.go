@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/store"
-	"nearbyassist/internal/utils"
 	"strings"
 	"time"
 
@@ -276,10 +275,11 @@ func (s *MysqlServiceStore) GetPhotos(serviceId string) ([]*models.ServicePhotoM
 	return images, nil
 }
 
-func (s *MysqlServiceStore) Update(data *models.ServiceModel) error {
+func (s *MysqlServiceStore) Update(updatedService *models.ServiceModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	// Start transaction
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
@@ -296,8 +296,7 @@ func (s *MysqlServiceStore) Update(data *models.ServiceModel) error {
         WHERE
             id = :id
     `
-
-	if _, err = tx.NamedExecContext(ctx, updateService, s); err != nil {
+	if _, err = tx.NamedExecContext(ctx, updateService, updatedService); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
@@ -305,20 +304,21 @@ func (s *MysqlServiceStore) Update(data *models.ServiceModel) error {
 		return err
 	}
 
-	currentServiceTagsQuery := `
+	getCurrentTags := `
         SELECT
             st.id,
             st.serviceId,
-            t.title AS tag
+            t.title
         FROM
             ServiceTag st
             JOIN Tag t ON t.id = st.tagId
         WHERE
-            st.serviceId = ?;
+            st.serviceId = ?
     `
 
-	currentServiceTags := make([]models.ServiceTagModel, 0)
-	if err := tx.SelectContext(ctx, &currentServiceTags, currentServiceTagsQuery, data.Id); err != nil {
+	// Retrieve current tags
+	currentSvcTag := make([]models.ServiceTagModel, 0)
+	if err := tx.SelectContext(ctx, &currentSvcTag, getCurrentTags, updatedService.Id); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
@@ -326,29 +326,10 @@ func (s *MysqlServiceStore) Update(data *models.ServiceModel) error {
 		return err
 	}
 
+	// Delete old tags
 	deleteTag := "DELETE FROM ServiceTag WHERE id = ?"
-	insertTag := "INSERT INTO ServiceTag (serviceId, tagId) VALUES (?, (SELECT id FROM Tag WHERE title = ?))"
-
-	newTags := data.Tags
-	for _, tag := range currentServiceTags {
-		exists := utils.StringSliceContains(newTags, tag.TagId)
-		if exists {
-			// Remove item from newTags
-			newTags = utils.RemoveStringFromSlice(newTags, tag.TagId)
-		} else {
-			// Append to tagsToBeDeleted
-			if _, err := tx.ExecContext(ctx, deleteTag, tag.Id); err != nil {
-				if err := tx.Rollback(); err != nil {
-					return err
-				}
-
-				return err
-			}
-		}
-	}
-
-	for _, tag := range newTags {
-		if _, err := tx.ExecContext(ctx, insertTag, data.Id, tag); err != nil {
+	for _, tag := range currentSvcTag {
+		if _, err := tx.ExecContext(ctx, deleteTag, tag.Id); err != nil {
 			if err := tx.Rollback(); err != nil {
 				return err
 			}
@@ -357,6 +338,29 @@ func (s *MysqlServiceStore) Update(data *models.ServiceModel) error {
 		}
 	}
 
+	// Insert new tags
+	insertTag := `
+        INSERT INTO ServiceTag (id, serviceId, tagId) 
+        SELECT ?, ?, t.id
+        FROM Tag t 
+        WHERE t.title = ?
+    `
+	for _, tag := range updatedService.Tags {
+		generatedId, err := store.GenerateNanoId()
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.ExecContext(ctx, insertTag, generatedId, updatedService.Id, tag); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
+
+			return err
+		}
+	}
+
+	// Commit transaction
 	if err := tx.Commit(); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err

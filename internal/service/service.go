@@ -82,6 +82,7 @@ func (s *ServiceService) Create(c echo.Context) error {
 		})
 	}
 
+	// Compute signature
 	toSign := fmt.Sprintf("%s_%s_%f_%f", req.VendorId, req.Description, req.Latitude, req.Longitude)
 	signature, err := s.hash.Generate([]byte(toSign))
 	if err != nil {
@@ -260,9 +261,12 @@ func (s *ServiceService) Update(c echo.Context) error {
 	}
 
 	updatedService := new(models.ServiceModel)
-	updatedService.Id = req.VendorId
+	updatedService.Id = req.Id
+	updatedService.VendorId = req.VendorId
 	updatedService.Rate = req.Rate
 	updatedService.Tags = req.Tags
+	updatedService.Latitude = req.Latitude
+	updatedService.Longitude = req.Longitude
 
 	if cipher, err := s.encryptor.EncryptString(req.Description); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
@@ -271,6 +275,25 @@ func (s *ServiceService) Update(c echo.Context) error {
 		})
 	} else {
 		updatedService.Description = cipher
+	}
+
+	// Recompute signature
+	toSign := fmt.Sprintf("%s_%s_%f_%f", req.VendorId, req.Description, req.Latitude, req.Longitude)
+	if signature, err := s.hash.Generate([]byte(toSign)); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error generating service signature",
+			Error:   err.Error(),
+		})
+	} else {
+		updatedService.Signature = signature
+	}
+
+	if err := c.Validate(updatedService); err != nil {
+		fmt.Println(err)
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Invalid request data",
+			Error:   err.Error(),
+		})
 	}
 
 	if err := s.store.Update(updatedService); err != nil {
@@ -362,7 +385,7 @@ func (s *ServiceService) Search(c echo.Context) error {
 		}
 	}
 
-	// Compute service suggestability score
+	// Compute service suggestibility score
 	scoredServices, err := s.suggest.GenerateSuggestions(services)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
