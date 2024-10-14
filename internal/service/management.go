@@ -147,6 +147,7 @@ func (s *ManagementService) UnrestrictVendor(c echo.Context) error {
 
 func (s *ManagementService) GetAllApplications(c echo.Context) error {
 	params := utils.ParseQuery(c.QueryString())
+
 	results, err := s.store.GetApplications(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
@@ -291,6 +292,7 @@ func (s *ManagementService) GetSystemComplaint(c echo.Context) error {
 
 func (s *ManagementService) GetVerificationRequests(c echo.Context) error {
 	params := utils.ParseQuery(c.QueryString())
+
 	requests, err := s.store.GetVerificationRequests(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{

@@ -263,7 +263,7 @@ func (s *MysqlManagementStore) ApproveIdentityVerification(id string) error {
 	return nil
 }
 
-func (s *MysqlManagementStore) GetVerificationRequests(filter map[string]string) ([]*response.IdentityVerification, error) {
+func (s *MysqlManagementStore) GetVerificationRequests(params map[string]string) ([]*response.IdentityVerification, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -274,7 +274,7 @@ func (s *MysqlManagementStore) GetVerificationRequests(filter map[string]string)
         FROM 
             IdentityVerification
     `
-	if filter, ok := filter["status"]; ok {
+	if filter, ok := params["status"]; ok {
 		switch filter {
 		case "all":
 			query += " WHERE status = 'approved' OR status = 'rejected' OR status = 'pending'"
@@ -289,6 +289,31 @@ func (s *MysqlManagementStore) GetVerificationRequests(filter map[string]string)
 		}
 	} else {
 		query += " WHERE status = 'approved' OR status = 'rejected' OR status = 'pending'"
+	}
+
+	// Order by id and createdAt (deterministic order)
+	query += " ORDER BY id, createdAt"
+
+	// Paginate using limit and offset
+	if page, ok := params["page"]; ok {
+		pageNumber, err := strconv.Atoi(page)
+		if err != nil {
+			return nil, err
+		}
+
+		pageSize := s.DEFAULT_LIMIT
+		if limit, ok := params["limit"]; ok {
+			if size, err := strconv.Atoi(limit); err != nil {
+				return nil, err
+			} else {
+				pageSize = size
+			}
+		}
+
+		offset := (pageNumber - 1) * pageSize
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, offset)
+	} else {
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", s.DEFAULT_LIMIT, s.DEFAULT_OFFSET)
 	}
 
 	if err := s.db.SelectContext(ctx, &requests, query); err != nil {
