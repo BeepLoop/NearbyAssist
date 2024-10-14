@@ -1,0 +1,52 @@
+package pages
+
+import "nearbyassist/views/partials"
+
+templ Applications() {
+	@partials.Head()
+	<div class="grid h-screen grid-cols-[16rem_1fr] text-sm">
+		@partials.Sidebar()
+		<main class="overflow-scroll mb-8">
+			@partials.Header()
+			<div class="flex-1 p-4">
+				@partials.PageBanner("Vendor Applications", "View and manage vendor applications")
+				@applicationsData()
+			</div>
+		</main>
+	</div>
+}
+
+templ applicationsData() {
+	<table class="w-full rounded-lg border table-auto">
+		<thead>
+			<tr class="bg-primary-greener">
+				<th class="px-6 py-3 text-left font-medium text-white">
+					ID
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Applicant ID
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Date Applied
+				</th>
+				<th class="flex justify-center px-6 py-3 font-medium text-white">
+					Action
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="border">
+				<td class="px-6 py-4">{  }</td>
+				<td class="px-6 py-4">{  }</td>
+				<td class="px-6 py-4">{  }</td>
+				<td class="flex justify-center px-6 py-4">
+					<ul>
+						<a href="" class="text-blue hover:underline">
+							View Application
+						</a>
+					</ul>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+}

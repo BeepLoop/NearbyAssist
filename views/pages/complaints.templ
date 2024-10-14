@@ -1,0 +1,50 @@
+package pages
+
+import "nearbyassist/views/partials"
+
+templ Complaints() {
+	@partials.Head()
+	<div class="grid h-screen grid-cols-[16rem_1fr] text-sm">
+		@partials.Sidebar()
+		<main class="overflow-scroll mb-8">
+			@partials.Header()
+			<div class="flex-1 p-4">
+				@partials.PageBanner("Complaints", "Manage user complaints and feedback")
+				@complaintData()
+			</div>
+		</main>
+	</div>
+}
+
+templ complaintData() {
+	<table class="mt-4 w-full rounded-lg border">
+		<thead>
+			<tr class="bg-primary-greener">
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Complaint ID
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Complainant Name
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Action
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Date and Time
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="border">
+				<td class="px-6 py-4">1</td>
+				<td class="px-6 py-4">Jane Doe</td>
+				<td class="px-6 py-4">
+					<a href="/complaints" class="text-blue hover:underline">
+						View Details
+					</a>
+				</td>
+				<td class="px-6 py-4">lskjfalj</td>
+			</tr>
+		</tbody>
+	</table>
+}

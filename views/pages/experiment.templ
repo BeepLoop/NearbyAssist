@@ -1,0 +1,14 @@
+package pages
+
+import "nearbyassist/views/partials"
+
+templ Experiment() {
+	@partials.Head()
+	<div class="grid h-screen grid-cols-[16rem_1fr] text-sm">
+		@partials.Sidebar()
+		<main class="overflow-scroll mb-8">
+			@partials.Header()
+			<h1>experiment</h1>
+		</main>
+	</div>
+}

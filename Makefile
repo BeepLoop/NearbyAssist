@@ -22,6 +22,18 @@ clean:
 	@rm -rf bin 
 	@rm -rf test
 
+templates:
+	@templ generate
+
+templates-watch:
+	@templ generate --watch
+
+css: 
+	@pnpm tailwindcss -i ./static/style/tailwind.css -o ./static/style/style.css
+
+css-watch:
+	@pnpm tailwindcss -i ./static/style/tailwind.css -o ./static/style/style.css --watch
+
 # Live Reload
 watch:
 	@if [ -x "$(GOPATH)/bin/air" ]; then \
@@ -40,13 +52,3 @@ watch:
 	fi
 
 .PHONY: all build run test clean
-
-migrate-up:
-	@echo "running up migration..."
-	@go run internal/db/migrations/migration.go -up=true
-	@echo "done"
-
-migrate-down:
-	@echo "running down migration..."
-	@go run internal/db/migrations/migration.go -down=true
-	@echo "done"

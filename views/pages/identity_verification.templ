@@ -1,0 +1,50 @@
+package pages
+
+import "nearbyassist/views/partials"
+
+templ IdentityVerification() {
+	@partials.Head()
+	<div class="grid h-screen grid-cols-[16rem_1fr] text-sm">
+		@partials.Sidebar()
+		<main class="overflow-scroll mb-8">
+			@partials.Header()
+			<div class="flex-1 p-4">
+				@partials.PageBanner("Verification requests", "View and manage identity verification requests")
+				@requestsData()
+			</div>
+		</main>
+	</div>
+}
+
+templ requestsData() {
+	<table class="mt-4 w-full rounded-lg border">
+		<thead>
+			<tr class="bg-primary-greener">
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Request ID
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Date Applied
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Status
+				</th>
+				<th class="px-6 py-3 text-center font-medium text-white">
+					Action
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="border">
+				<td class="px-6 py-4">{  }</td>
+				<td class="px-6 py-4">{  }</td>
+				<td class="px-6 py-4 text-orange">{  }</td>
+				<td class="flex justify-center px-6 py-4">
+					<a href="" class="text-blue hover:underline">
+						View Request
+					</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+}

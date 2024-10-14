@@ -88,6 +88,7 @@ func (s *Server) Start() error {
 
 	s.middlewares()
 	s.routes()
+	s.api()
 
 	go s.WS.SaveMessages()
 	go s.WS.ForwardMessages()
