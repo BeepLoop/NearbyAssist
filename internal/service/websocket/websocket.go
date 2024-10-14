@@ -11,56 +11,20 @@ import (
 )
 
 type Websocket struct {
-	Clients       map[string]*websocket.Conn
-	MessageChan   chan *models.MessageModel
-	BroadcastChan chan *models.MessageModel
-	store         chat.ChatStore
+	clients     map[string]*websocket.Conn
+	messageChan chan *models.MessageModel
+	senderChan  chan *models.MessageModel
+	saverChan   chan *models.MessageModel
+	store       chat.ChatStore
 }
 
 func NewWebsocket(store chat.ChatStore) *Websocket {
 	return &Websocket{
-		Clients:       make(map[string]*websocket.Conn),
-		MessageChan:   make(chan *models.MessageModel),
-		BroadcastChan: make(chan *models.MessageModel),
-		store:         store,
-	}
-}
-
-func (w *Websocket) SaveMessages() {
-	for {
-		message := <-w.MessageChan
-
-		if _, err := w.store.Create(message); err != nil {
-			fmt.Printf("error saving message: %s\n", err.Error())
-			continue
-		}
-
-		w.BroadcastChan <- message
-	}
-}
-
-func (w *Websocket) ForwardMessages() {
-	for {
-		message := <-w.BroadcastChan
-
-		if socket, ok := w.Clients[message.Receiver]; ok {
-			err := socket.WriteJSON(message)
-			if err != nil {
-				fmt.Printf("error sending message to recipient: %s\n", err.Error())
-			}
-		} else {
-			// When receiver is not online
-			fmt.Printf("Receiver not online!\n")
-		}
-
-		if socket, ok := w.Clients[message.Sender]; ok {
-			err := socket.WriteJSON(message)
-			if err != nil {
-				fmt.Printf("error sending message to sender: %s\n", err.Error())
-			}
-		} else {
-			fmt.Printf("Sender not online\n")
-		}
+		clients:     make(map[string]*websocket.Conn),
+		messageChan: make(chan *models.MessageModel),
+		senderChan:  make(chan *models.MessageModel),
+		saverChan:   make(chan *models.MessageModel),
+		store:       store,
 	}
 }
 
@@ -77,4 +41,69 @@ func (w *Websocket) Upgrade(c echo.Context) (*websocket.Conn, error) {
 	}
 
 	return conn, nil
+}
+
+func (w *Websocket) RegisterClient(userId string, conn *websocket.Conn) {
+	w.clients[userId] = conn
+}
+
+func (w *Websocket) UnregisterClient(userId string) {
+	delete(w.clients, userId)
+}
+
+func (w *Websocket) NewMessage(message *models.MessageModel) {
+	w.messageChan <- message
+}
+
+func (w *Websocket) Start() {
+	go w.listen()
+	go w.processMessages()
+}
+
+func (w *Websocket) listen() {
+	for {
+		select {
+		case msg := <-w.messageChan:
+			w.saverChan <- msg
+			w.senderChan <- msg
+		}
+	}
+}
+
+func (w *Websocket) processMessages() {
+	for {
+		select {
+		case msg := <-w.saverChan:
+			w.storeMessage(msg)
+		case msg := <-w.senderChan:
+			w.forwardMessage(msg)
+		}
+	}
+}
+
+func (w *Websocket) storeMessage(message *models.MessageModel) {
+	if _, err := w.store.Create(message); err != nil {
+		fmt.Printf("error saving message: %s\n", err.Error())
+	}
+}
+
+func (w *Websocket) forwardMessage(message *models.MessageModel) {
+
+	if socket, ok := w.clients[message.Receiver]; ok {
+		err := socket.WriteJSON(message)
+		if err != nil {
+			fmt.Printf("error sending message to recipient: %s\n", err.Error())
+		}
+	} else {
+		fmt.Printf("Receiver not online!\n")
+	}
+
+	if socket, ok := w.clients[message.Sender]; ok {
+		err := socket.WriteJSON(message)
+		if err != nil {
+			fmt.Printf("error sending message to sender: %s\n", err.Error())
+		}
+	} else {
+		fmt.Printf("Sender not online\n")
+	}
 }

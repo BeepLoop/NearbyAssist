@@ -47,16 +47,14 @@ func (s *ChatService) Websocket(c echo.Context) error {
 		})
 	}
 
-	s.ws.Clients[userId] = conn
+	s.ws.RegisterClient(userId, conn)
 
 	for {
 		message := new(models.MessageModel)
 		err := conn.ReadJSON(message)
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				if _, ok := s.ws.Clients[userId]; ok {
-					delete(s.ws.Clients, userId)
-				}
+				s.ws.UnregisterClient(userId)
 
 				return nil
 			}
@@ -64,7 +62,7 @@ func (s *ChatService) Websocket(c echo.Context) error {
 			continue
 		}
 
-		s.ws.MessageChan <- message
+		s.ws.NewMessage(message)
 	}
 }
 

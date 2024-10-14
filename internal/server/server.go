@@ -89,8 +89,7 @@ func (s *Server) Start() error {
 	s.middlewares()
 	s.routes()
 
-	go s.WS.SaveMessages()
-	go s.WS.ForwardMessages()
+	s.WS.Start()
 
 	if err := s.Echo.Start(":" + s.Port); err != nil {
 		s.LOG_FILE.Close()
