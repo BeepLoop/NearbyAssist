@@ -13,7 +13,12 @@ import (
 	"nearbyassist/views/partials"
 )
 
-func Map() templ.Component {
+type Marker struct {
+	Lat float64 `json:"lat"`
+	Lon float64 `json:"lon"`
+}
+
+func Map(markers []Marker) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -54,7 +59,7 @@ func Map() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = mapComponent().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = mapComponent(markers).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -70,7 +75,7 @@ func Map() templ.Component {
 
 var openLayers = templ.NewOnceHandle()
 
-func mapComponent() templ.Component {
+func mapComponent(markers []Marker) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -113,7 +118,15 @@ func mapComponent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"map\" class=\"h-[70vh] outline outline-1\"></div><script>\n        map = new OpenLayers.Map(\"map\");\n        let mapnik = new OpenLayers.Layer.OSM();\n        let fromProjection = new OpenLayers.Projection(\"EPSG:4326\");   // Transform from WGS 1984\n        let toProjection = new OpenLayers.Projection(\"EPSG:900913\"); // to Spherical Mercator Projection\n        let position = new OpenLayers.LonLat(125.80942522476553, 7.447220876004841).transform(fromProjection, toProjection);\n        let zoom = 14;\n\n        map.addLayer(mapnik);\n        map.setCenter(position, zoom);\n    </script>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"map\" class=\"h-[70vh] outline outline-1\"></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.JSONScript("markers", markers).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script>\n        map = new OpenLayers.Map(\"map\");\n        let mapnik = new OpenLayers.Layer.OSM();\n        let fromProjection = new OpenLayers.Projection(\"EPSG:4326\");   // Transform from WGS 1984\n        let toProjection = new OpenLayers.Projection(\"EPSG:900913\"); // to Spherical Mercator Projection\n        let position = new OpenLayers.LonLat(125.80942522476553, 7.447220876004841).transform(fromProjection, toProjection);\n        let zoom = 14;\n\n        let markers = new OpenLayers.Layer.Markers(\"Markers\");\n\n        try{\n            const markersJson = document.getElementById(\"markers\").textContent;\n            const coordinates = JSON.parse(markersJson);\n\n            for (const coordinate of coordinates) {\n                const marker = new OpenLayers.LonLat(coordinate.lon, coordinate.lat).transform(fromProjection, toProjection);\n                markers.addMarker(new OpenLayers.Marker(marker));\n            }\n        } catch (e) {\n            console.error(\"Error parsing markers\", e);\n        }\n\n        map.addLayer(mapnik);\n        map.addLayer(markers);\n        map.setCenter(position, zoom);\n\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

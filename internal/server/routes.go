@@ -35,7 +35,9 @@ func (s *Server) routes() {
 	})
 
 	s.Echo.GET("/map", func(c echo.Context) error {
-		page := pages.Map()
+		markers := make([]pages.Marker, 0)
+
+		page := pages.Map(markers)
 		return s.render(c, http.StatusOK, page)
 	})
 
