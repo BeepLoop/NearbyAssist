@@ -1,14 +1,15 @@
 package pages
 
-import "nearbyassist/views/partials"
+import "nearbyassist/views/layout"
 
 templ Login() {
-	@partials.Head()
-	<div>
-		<form action="/login" method="POST">
-			username: <input type="text" name="username" id="username"/>
-			password: <input type="text" name="password" id="password"/>
-			<button type="submit">login</button>
-		</form>
-	</div>
+	@layout.NoLayout() {
+		<div>
+			<form action="/login" method="POST">
+				username: <input type="text" name="username" id="username"/>
+				password: <input type="text" name="password" id="password"/>
+				<button type="submit">login</button>
+			</form>
+		</div>
+	}
 }

@@ -1,19 +1,15 @@
 package pages
 
-import "nearbyassist/views/partials"
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
 
 templ Dashboard() {
-	@partials.Head()
-	<div class="grid h-screen grid-cols-[16rem_1fr] text-sm">
-		@partials.Sidebar()
-		<main class="overflow-scroll mb-8">
-			@partials.Header()
-			<div class="flex-1 p-4">
-				@partials.PageBanner("dashboard", "Monitor your activities")
-				@dashboardData()
-			</div>
-		</main>
-	</div>
+	@layout.Layout() {
+		@partials.PageBanner("dashboard", "Monitor your activities")
+		@dashboardData()
+	}
 }
 
 templ dashboardData() {

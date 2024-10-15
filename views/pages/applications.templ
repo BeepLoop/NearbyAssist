@@ -1,19 +1,15 @@
 package pages
 
-import "nearbyassist/views/partials"
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
 
 templ Applications() {
-	@partials.Head()
-	<div class="grid h-screen grid-cols-[16rem_1fr] text-sm">
-		@partials.Sidebar()
-		<main class="overflow-scroll mb-8">
-			@partials.Header()
-			<div class="flex-1 p-4">
-				@partials.PageBanner("Vendor Applications", "View and manage vendor applications")
-				@applicationsData()
-			</div>
-		</main>
-	</div>
+	@layout.Layout() {
+		@partials.PageBanner("Vendor Applications", "View and manage vendor applications")
+		@applicationsData()
+	}
 }
 
 templ applicationsData() {

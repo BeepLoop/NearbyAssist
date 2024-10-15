@@ -1,10 +1,11 @@
 package pages
 
-import "nearbyassist/views/partials"
+import "nearbyassist/views/layout"
 
 templ Index() {
-	@partials.Head()
-	<div>
-		<h1>Welcome to NearbyAssist Control Center</h1>
-	</div>
+	@layout.NoLayout() {
+		<div>
+			<h1>Welcome to NearbyAssist Control Center</h1>
+		</div>
+	}
 }
