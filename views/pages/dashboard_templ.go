@@ -50,7 +50,7 @@ func Dashboard() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -89,7 +89,7 @@ func dashboardData() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid grid-cols-1 gap-4 md:grid-cols-3\"><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Users:</h2><p class=\"text-3xl font-bold text-blue-400\">0</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Verified Users</h2><p class=\"text-3xl font-bold text-yellow-400\">0</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Complaints</h2><p class=\"text-3xl font-bold text-red-400\">0</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Service Vendors</h2><p class=\"text-3xl font-bold text-green-400\">0</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Pending Applications</h2><p class=\"text-3xl font-bold text-orange-400\">0</p></div></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

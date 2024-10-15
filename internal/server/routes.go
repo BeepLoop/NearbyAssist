@@ -34,6 +34,11 @@ func (s *Server) routes() {
 		return s.render(c, http.StatusOK, page)
 	})
 
+	s.Echo.GET("/map", func(c echo.Context) error {
+		page := pages.Map()
+		return s.render(c, http.StatusOK, page)
+	})
+
 	s.Echo.GET("/complaints", func(c echo.Context) error {
 		page := pages.Complaints()
 		return s.render(c, http.StatusOK, page)

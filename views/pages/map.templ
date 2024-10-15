@@ -1,0 +1,33 @@
+package pages
+
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ Map() {
+	@layout.Layout() {
+		@partials.PageBanner("Map", "")
+		@mapComponent()
+	}
+}
+
+var openLayers = templ.NewOnceHandle()
+
+templ mapComponent() {
+	@openLayers.Once() {
+		<script src="/static/script/OpenLayers.js"></script>
+	}
+	<div id="map" class="h-[70vh] outline outline-1"></div>
+	<script>
+        map = new OpenLayers.Map("map");
+        let mapnik = new OpenLayers.Layer.OSM();
+        let fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
+        let toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
+        let position = new OpenLayers.LonLat(125.80942522476553, 7.447220876004841).transform(fromProjection, toProjection);
+        let zoom = 14;
+
+        map.addLayer(mapnik);
+        map.setCenter(position, zoom);
+    </script>
+}

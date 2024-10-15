@@ -50,7 +50,7 @@ func IdentityVerification() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -89,7 +89,7 @@ func requestsData() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"mt-4 w-full rounded-lg border\"><thead><tr class=\"bg-primary-greener\"><th class=\"px-6 py-3 text-left font-medium text-white\">Request ID</th><th class=\"px-6 py-3 text-left font-medium text-white\">Date Applied</th><th class=\"px-6 py-3 text-left font-medium text-white\">Status</th><th class=\"px-6 py-3 text-center font-medium text-white\">Action</th></tr></thead> <tbody><tr class=\"border\"><td class=\"px-6 py-4\"></td><td class=\"px-6 py-4\"></td><td class=\"px-6 py-4 text-orange\"></td><td class=\"flex justify-center px-6 py-4\"><a href=\"\" class=\"text-blue hover:underline\">View Request</a></td></tr></tbody></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

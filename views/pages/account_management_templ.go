@@ -50,7 +50,7 @@ func AccountManagement() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -89,7 +89,7 @@ func accountsData() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"w-full rounded-lg border border-gray\"><thead><tr class=\"border bg-primary-greener\"><th class=\"px-6 py-3 text-left font-medium text-white\">Name</th><th class=\"px-4 py-3 text-left font-medium text-white\">View Profile</th><th class=\"px-4 py-3 text-left font-medium text-white\">Status</th></tr></thead> <tbody><tr class=\"border\"><td class=\"px-4 py-2\">John Doe</td><td class=\"px-4 py-2\"><ul><button class=\"text-blue hover:underline\">View Profile</button></ul></td><td class=\"rounded-md px-4 py-2 font-semibold text-primary\">Active</td></tr><tr class=\"border\"><td class=\"px-4 py-2\">Jane Smith</td><td class=\"px-4 py-2\"><ul><button class=\"text-blue hover:underline\">View Profile</button></ul></td><td class=\"rounded-md px-4 py-2 font-semibold text-gray\">Not Active</td></tr></tbody></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -50,7 +50,7 @@ func Complaints() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -89,7 +89,7 @@ func complaintData() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"mt-4 w-full rounded-lg border\"><thead><tr class=\"bg-primary-greener\"><th class=\"px-6 py-3 text-left font-medium text-white\">Complaint ID</th><th class=\"px-6 py-3 text-left font-medium text-white\">Complainant Name</th><th class=\"px-6 py-3 text-left font-medium text-white\">Action</th><th class=\"px-6 py-3 text-left font-medium text-white\">Date and Time</th></tr></thead> <tbody><tr class=\"border\"><td class=\"px-6 py-4\">1</td><td class=\"px-6 py-4\">Jane Doe</td><td class=\"px-6 py-4\"><a href=\"/complaints\" class=\"text-blue hover:underline\">View Details</a></td><td class=\"px-6 py-4\">lskjfalj</td></tr></tbody></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

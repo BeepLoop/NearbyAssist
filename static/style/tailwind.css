@@ -5,3 +5,7 @@
 .active {
     background-color: green;
 }
+
+.olControlAttribution {
+    bottom: 0 !important;
+}
