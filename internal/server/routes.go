@@ -22,7 +22,7 @@ func (s *Server) routes() {
 	})
 
 	s.Echo.POST("/login", func(c echo.Context) error {
-		return c.String(http.StatusOK, "logged in")
+		return c.Redirect(http.StatusSeeOther, "/dashboard")
 	})
 
 	s.Echo.POST("/logout", func(c echo.Context) error {
