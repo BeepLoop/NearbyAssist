@@ -17,15 +17,15 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	r.GET("/dashboard", adminHandler.GetDashboard, middleware.CheckSession)
 
-	r.GET("/map", adminHandler.GetMap)
+	r.GET("/map", adminHandler.GetMap, middleware.CheckSession)
 
-	r.GET("/complaints", adminHandler.GetComplaints)
+	r.GET("/complaints", adminHandler.GetComplaints, middleware.CheckSession)
 
-	r.GET("/vendor-applications", adminHandler.GetVendorApplication)
+	r.GET("/vendor-applications", adminHandler.GetVendorApplication, middleware.CheckSession)
 
-	r.GET("/verification-requests", adminHandler.GetIdentityVerification)
+	r.GET("/verification-requests", adminHandler.GetIdentityVerification, middleware.CheckSession)
 
-	r.GET("/account-management", adminHandler.GetAccountManagement)
+	r.GET("/account-management", adminHandler.GetAccountManagement, middleware.CheckSession)
 
-	r.GET("/test", adminHandler.GetExperiment)
+	r.GET("/test", adminHandler.GetExperiment, middleware.CheckSession)
 }
