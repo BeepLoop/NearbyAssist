@@ -1,0 +1,68 @@
+package complaint_service
+
+import (
+	"mime/multipart"
+	"nearbyassist/internal/models"
+	complaint_repo "nearbyassist/internal/repository/complaint"
+	"nearbyassist/internal/request"
+	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/utils"
+)
+
+type Service struct {
+	store   complaint_repo.ComplaintRepository
+	fs      fs.FileStorage
+	encrypt auth.Encryption
+}
+
+func NewService(store complaint_repo.ComplaintRepository, fs fs.FileStorage, encrypt auth.Encryption) *Service {
+	return &Service{store: store, fs: fs, encrypt: encrypt}
+}
+
+func (s *Service) CreateSystemComplaint(req *request.SystemComplaintPayload, files []*multipart.FileHeader) (string, error) {
+	newComplaint := new(models.SystemComplaintModel)
+	newComplaint.Title = req.Title
+	newComplaint.Detail = req.Detail
+
+	for _, file := range files {
+		bytes, err := utils.FileToBytes(file)
+		if err != nil {
+		}
+
+		cipher, err := s.encrypt.EncryptFile(bytes)
+		if err != nil {
+			return "", err
+		}
+
+		fileData := fs.File{
+			Data:     cipher,
+			Category: fs.SYS_COMPLAINT_DIR,
+		}
+		url, err := s.fs.SaveFile(fileData)
+		if err != nil {
+			return "", err
+		}
+
+		newComplaint.Images = append(newComplaint.Images, url)
+	}
+
+	if cipher, err := s.encrypt.EncryptString(req.Title); err != nil {
+		return "", err
+	} else {
+		newComplaint.Title = cipher
+	}
+
+	if cipher, err := s.encrypt.EncryptString(req.Detail); err != nil {
+		return "", err
+	} else {
+		newComplaint.Detail = cipher
+	}
+
+	complaintId, err := s.store.CreateSystemComplaint(newComplaint)
+	if err != nil {
+		return "", err
+	}
+
+	return complaintId, nil
+}

@@ -1,18 +1,19 @@
 package pages
 
 import (
+	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ Complaints() {
+templ Complaints(complaints []models.ComplaintModel) {
 	@layout.Layout() {
 		@partials.PageBanner("Complaints", "Manage user complaints and feedback")
-		@complaintData()
+		@complaintData(complaints)
 	}
 }
 
-templ complaintData() {
+templ complaintData(complaints []models.ComplaintModel) {
 	<table class="mt-4 w-full rounded-lg border">
 		<thead>
 			<tr class="bg-primary-greener">
@@ -20,27 +21,33 @@ templ complaintData() {
 					Complaint ID
 				</th>
 				<th class="px-6 py-3 text-left font-medium text-white">
-					Complainant Name
+					Created At
 				</th>
 				<th class="px-6 py-3 text-left font-medium text-white">
 					Action
 				</th>
-				<th class="px-6 py-3 text-left font-medium text-white">
-					Date and Time
-				</th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr class="border">
-				<td class="px-6 py-4">1</td>
-				<td class="px-6 py-4">Jane Doe</td>
-				<td class="px-6 py-4">
-					<a href="/complaints" class="text-blue hover:underline">
-						View Details
-					</a>
-				</td>
-				<td class="px-6 py-4">lskjfalj</td>
-			</tr>
+			if len(complaints) < 1 {
+				<tr class="border">
+					<td class="px-6 py-4" align="center" colspan="4">No requests</td>
+				</tr>
+			} else {
+				for _, complaint := range complaints {
+					<tr class="border">
+						<td class="px-6 py-4">{ complaint.Id }</td>
+						<td class="px-6 py-4">{ complaint.CreatedAt }</td>
+						<td class="flex justify-center px-6 py-4">
+							<ul>
+								<a href="" class="text-blue hover:underline">
+									View
+								</a>
+							</ul>
+						</td>
+					</tr>
+				}
+			}
 		</tbody>
 	</table>
 }

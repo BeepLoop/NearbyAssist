@@ -1,25 +1,27 @@
 package pages
 
 import (
+	"nearbyassist/internal/response"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
+	"strconv"
 )
 
-templ Dashboard() {
+templ Dashboard(data response.Analytics) {
 	@layout.Layout() {
 		@partials.PageBanner("dashboard", "Monitor your activities")
-		@dashboardData()
+		@dashboardData(data)
 	}
 }
 
-templ dashboardData() {
+templ dashboardData(data response.Analytics) {
 	<section class="grid grid-cols-1 gap-4 md:grid-cols-3">
 		<div class="rounded-md border p-4 shadow-md outline outline-1">
 			<h2 class="mb-2 text-lg font-semibold">
 				Number of Users:
 			</h2>
 			<p class="text-3xl font-bold text-blue-400">
-				0
+				{ strconv.Itoa(data.User) }
 			</p>
 		</div>
 		<div class="rounded-md border p-4 shadow-md outline outline-1">
@@ -27,7 +29,7 @@ templ dashboardData() {
 				Verified Users
 			</h2>
 			<p class="text-3xl font-bold text-yellow-400">
-				0
+				{ strconv.Itoa(data.VerifiedUser) }
 			</p>
 		</div>
 		<div class="rounded-md border p-4 shadow-md outline outline-1">
@@ -35,7 +37,7 @@ templ dashboardData() {
 				Number of Complaints
 			</h2>
 			<p class="text-3xl font-bold text-red-400">
-				0
+				{ strconv.Itoa(data.Complaint) }
 			</p>
 		</div>
 		<div class="rounded-md border p-4 shadow-md outline outline-1">
@@ -43,7 +45,7 @@ templ dashboardData() {
 				Service Vendors
 			</h2>
 			<p class="text-3xl font-bold text-green-400">
-				0
+				{ strconv.Itoa(data.Vendor) }
 			</p>
 		</div>
 		<div class="rounded-md border p-4 shadow-md outline outline-1">
@@ -51,7 +53,7 @@ templ dashboardData() {
 				Pending Applications
 			</h2>
 			<p class="text-3xl font-bold text-orange-400">
-				0
+				{ strconv.Itoa(data.PendingApplication) }
 			</p>
 		</div>
 	</section>

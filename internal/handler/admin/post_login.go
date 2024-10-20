@@ -1,0 +1,47 @@
+package admin
+
+import (
+	"fmt"
+	repository "nearbyassist/internal/repository/admin"
+	admin_service "nearbyassist/internal/service/admin"
+	"net/http"
+
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
+)
+
+func (h *adminHandler) PostLogin(c echo.Context) error {
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	adminService := admin_service.NewService(
+		repository.NewMysqlAdminRepository(h.db),
+		h.encrypt,
+		h.hash,
+	)
+
+	adminModel, err := adminService.Login(username, password)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/login?error=login_error")
+	}
+
+	sess, err := session.Get("session", c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
+	}
+
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   3600,
+		HttpOnly: true,
+	}
+
+	sess.Values["user"] = adminModel
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		fmt.Println("error: ", err.Error())
+		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
+}

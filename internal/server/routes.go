@@ -1,68 +1,23 @@
 package server
 
 import (
-	"nearbyassist/views/pages"
-	"net/http"
-
-	"github.com/labstack/echo/v4"
+	"nearbyassist/internal/handler/web"
 )
 
 func (s *Server) routes() {
 	s.Echo.Static("/static", "static")
 	s.Echo.Static("/public", "public")
 
-	s.Echo.GET("", func(c echo.Context) error {
-		page := pages.Index()
-		return s.render(c, http.StatusOK, page)
-	})
+	s.Echo.GET("", web.GetIndex)
 
-	s.Echo.GET("/login", func(c echo.Context) error {
-		page := pages.Login()
-		return s.render(c, http.StatusOK, page)
-	})
+	api := s.Echo.Group("/api")
+	{
+		v1 := api.Group("/v1")
+		s.v1ApiRoutes(v1)
+	}
 
-	s.Echo.POST("/login", func(c echo.Context) error {
-		return c.Redirect(http.StatusSeeOther, "/dashboard")
-	})
+	admin := s.Echo.Group("/admin")
+	s.AdminRoutes(admin)
 
-	s.Echo.POST("/logout", func(c echo.Context) error {
-		return c.String(http.StatusOK, "logged out")
-	})
-
-	s.Echo.GET("/dashboard", func(c echo.Context) error {
-		page := pages.Dashboard()
-		return s.render(c, http.StatusOK, page)
-	})
-
-	s.Echo.GET("/map", func(c echo.Context) error {
-		markers := make([]pages.Marker, 0)
-
-		page := pages.Map(markers)
-		return s.render(c, http.StatusOK, page)
-	})
-
-	s.Echo.GET("/complaints", func(c echo.Context) error {
-		page := pages.Complaints()
-		return s.render(c, http.StatusOK, page)
-	})
-
-	s.Echo.GET("/vendor-applications", func(c echo.Context) error {
-		page := pages.Applications()
-		return s.render(c, http.StatusOK, page)
-	})
-
-	s.Echo.GET("/verification-requests", func(c echo.Context) error {
-		page := pages.IdentityVerification()
-		return s.render(c, http.StatusOK, page)
-	})
-
-	s.Echo.GET("/account-management", func(c echo.Context) error {
-		page := pages.AccountManagement()
-		return s.render(c, http.StatusOK, page)
-	})
-
-	s.Echo.GET("/test", func(c echo.Context) error {
-		page := pages.Experiment()
-		return s.render(c, http.StatusOK, page)
-	})
+	s.Echo.RouteNotFound("/*", web.GetNotFound)
 }

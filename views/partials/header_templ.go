@@ -66,7 +66,7 @@ func dropdown() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"profile-menu\" class=\"hidden absolute right-2 top-full mt-2 w-44 bg-white shadow-md outline outline-1 outline-primary-greener\"><form action=\"/logout\" method=\"POST\"><button type=\"submit\" class=\"flex w-full items-center gap-2 p-2 text-sm hover:bg-red-200\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-4\" viewBox=\"0 0 24 24\"><path fill=\"red\" d=\"M3 21V3h9v2H5v14h7v2zm13-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z\"></path></svg> Logout</button></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"profile-menu\" class=\"hidden absolute right-2 top-full mt-2 w-44 bg-white shadow-md outline outline-1 outline-primary-greener\"><form action=\"/admin/logout\" method=\"POST\"><button type=\"submit\" class=\"flex w-full items-center gap-2 p-2 text-sm hover:bg-red-200\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-4\" viewBox=\"0 0 24 24\"><path fill=\"red\" d=\"M3 21V3h9v2H5v14h7v2zm13-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z\"></path></svg> Logout</button></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

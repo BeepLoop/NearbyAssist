@@ -1,18 +1,19 @@
 package pages
 
 import (
+	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ Applications() {
+templ Applications(applications []models.ApplicationModel) {
 	@layout.Layout() {
 		@partials.PageBanner("Vendor Applications", "View and manage vendor applications")
-		@applicationsData()
+		@applicationsData(applications)
 	}
 }
 
-templ applicationsData() {
+templ applicationsData(applications []models.ApplicationModel) {
 	<table class="w-full rounded-lg border table-auto">
 		<thead>
 			<tr class="bg-primary-greener">
@@ -31,18 +32,26 @@ templ applicationsData() {
 			</tr>
 		</thead>
 		<tbody>
-			<tr class="border">
-				<td class="px-6 py-4">{  }</td>
-				<td class="px-6 py-4">{  }</td>
-				<td class="px-6 py-4">{  }</td>
-				<td class="flex justify-center px-6 py-4">
-					<ul>
-						<a href="" class="text-blue hover:underline">
-							View Application
-						</a>
-					</ul>
-				</td>
-			</tr>
+			if len(applications) < 1 {
+				<tr class="border">
+					<td class="px-6 py-4" align="center" colspan="4">No applications</td>
+				</tr>
+			} else {
+				for _, application := range applications {
+					<tr class="border">
+						<td class="px-6 py-4">{ application.Id }</td>
+						<td class="px-6 py-4">{ application.ApplicantId }</td>
+						<td class="px-6 py-4">{ application.CreatedAt }</td>
+						<td class="flex justify-center px-6 py-4">
+							<ul>
+								<a href="" class="text-blue hover:underline">
+									View Application
+								</a>
+							</ul>
+						</td>
+					</tr>
+				}
+			}
 		</tbody>
 	</table>
 }

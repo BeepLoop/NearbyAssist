@@ -9,11 +9,13 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"nearbyassist/internal/response"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
+	"strconv"
 )
 
-func Dashboard() templ.Component {
+func Dashboard(data response.Analytics) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -54,7 +56,7 @@ func Dashboard() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = dashboardData().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = dashboardData(data).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -68,7 +70,7 @@ func Dashboard() templ.Component {
 	})
 }
 
-func dashboardData() templ.Component {
+func dashboardData(data response.Analytics) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -89,7 +91,72 @@ func dashboardData() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid grid-cols-1 gap-4 md:grid-cols-3\"><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Users:</h2><p class=\"text-3xl font-bold text-blue-400\">0</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Verified Users</h2><p class=\"text-3xl font-bold text-yellow-400\">0</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Complaints</h2><p class=\"text-3xl font-bold text-red-400\">0</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Service Vendors</h2><p class=\"text-3xl font-bold text-green-400\">0</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Pending Applications</h2><p class=\"text-3xl font-bold text-orange-400\">0</p></div></section>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid grid-cols-1 gap-4 md:grid-cols-3\"><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Users:</h2><p class=\"text-3xl font-bold text-blue-400\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.User))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 24, Col: 29}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Verified Users</h2><p class=\"text-3xl font-bold text-yellow-400\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.VerifiedUser))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 32, Col: 37}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Complaints</h2><p class=\"text-3xl font-bold text-red-400\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.Complaint))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 40, Col: 34}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Service Vendors</h2><p class=\"text-3xl font-bold text-green-400\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.Vendor))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 48, Col: 31}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Pending Applications</h2><p class=\"text-3xl font-bold text-orange-400\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.PendingApplication))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 56, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
