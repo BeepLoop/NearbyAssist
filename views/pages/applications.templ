@@ -1,0 +1,57 @@
+package pages
+
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ Applications(applications []models.ApplicationModel) {
+	@layout.Layout() {
+		@partials.PageBanner("Vendor Applications", "View and manage vendor applications")
+		@applicationsData(applications)
+	}
+}
+
+templ applicationsData(applications []models.ApplicationModel) {
+	<table class="w-full rounded-lg border table-auto">
+		<thead>
+			<tr class="bg-primary-greener">
+				<th class="px-6 py-3 text-left font-medium text-white">
+					ID
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Applicant ID
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Date Applied
+				</th>
+				<th class="flex justify-center px-6 py-3 font-medium text-white">
+					Action
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			if len(applications) < 1 {
+				<tr class="border">
+					<td class="px-6 py-4" align="center" colspan="4">No applications</td>
+				</tr>
+			} else {
+				for _, application := range applications {
+					<tr class="border">
+						<td class="px-6 py-4">{ application.Id }</td>
+						<td class="px-6 py-4">{ application.ApplicantId }</td>
+						<td class="px-6 py-4">{ application.CreatedAt }</td>
+						<td class="flex justify-center px-6 py-4">
+							<ul>
+								<a href="" class="text-blue hover:underline">
+									View Application
+								</a>
+							</ul>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+}

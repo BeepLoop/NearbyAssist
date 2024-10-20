@@ -1,0 +1,13 @@
+package pages
+
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ Experiment() {
+	@layout.Layout() {
+		@partials.PageBanner("Testing area", "This is only available in development environment")
+		<h1>experiment</h1>
+	}
+}

@@ -3,6 +3,8 @@ package server
 import (
 	"net/http"
 
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -29,4 +31,6 @@ func (s *Server) middlewares() {
 	s.Echo.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Output: s.LOG_FILE,
 	}))
+
+	s.Echo.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 }

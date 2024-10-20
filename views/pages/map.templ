@@ -1,0 +1,55 @@
+package pages
+
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+type Marker struct {
+	Lat float64 `json:"lat"`
+	Lon float64 `json:"lon"`
+}
+
+templ Map(markers []Marker) {
+	@layout.Layout() {
+		@partials.PageBanner("Map", "")
+		@mapComponent(markers)
+	}
+}
+
+var openLayers = templ.NewOnceHandle()
+
+templ mapComponent(markers []Marker) {
+	@openLayers.Once() {
+		<script src="/static/script/OpenLayers.js"></script>
+	}
+	<div id="map" class="h-[70vh] outline outline-1"></div>
+	@templ.JSONScript("markers", markers)
+	<script>
+        map = new OpenLayers.Map("map");
+        let mapnik = new OpenLayers.Layer.OSM();
+        let fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
+        let toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
+        let position = new OpenLayers.LonLat(125.80942522476553, 7.447220876004841).transform(fromProjection, toProjection);
+        let zoom = 14;
+
+        let markers = new OpenLayers.Layer.Markers("Markers");
+
+        try{
+            const markersJson = document.getElementById("markers").textContent;
+            const coordinates = JSON.parse(markersJson);
+
+            for (const coordinate of coordinates) {
+                const marker = new OpenLayers.LonLat(coordinate.lon, coordinate.lat).transform(fromProjection, toProjection);
+                markers.addMarker(new OpenLayers.Marker(marker));
+            }
+        } catch (e) {
+            console.error("Error parsing markers", e);
+        }
+
+        map.addLayer(mapnik);
+        map.addLayer(markers);
+        map.setCenter(position, zoom);
+
+    </script>
+}

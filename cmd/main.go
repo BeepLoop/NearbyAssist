@@ -4,13 +4,13 @@ import (
 	"log"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
+	message_repo "nearbyassist/internal/repository/message"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
-	"nearbyassist/internal/store/chat"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -55,7 +55,7 @@ func main() {
 	}
 	defer mysql.Close()
 
-	chatStore := chat.NewMysqlChatStore(mysql)
+	chatStore := message_repo.NewMysqlChatRepository(mysql)
 	ws := websocket.NewWebsocket(chatStore)
 
 	serverConfig := server.ServerConfig{

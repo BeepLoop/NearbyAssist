@@ -3,7 +3,7 @@ package websocket
 import (
 	"fmt"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/store/chat"
+	message_repo "nearbyassist/internal/repository/message"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -15,10 +15,10 @@ type Websocket struct {
 	messageChan chan *models.MessageModel
 	senderChan  chan *models.MessageModel
 	saverChan   chan *models.MessageModel
-	store       chat.ChatStore
+	store       message_repo.MessageRepository
 }
 
-func NewWebsocket(store chat.ChatStore) *Websocket {
+func NewWebsocket(store message_repo.MessageRepository) *Websocket {
 	return &Websocket{
 		clients:     make(map[string]*websocket.Conn),
 		messageChan: make(chan *models.MessageModel),

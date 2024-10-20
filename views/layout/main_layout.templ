@@ -1,0 +1,21 @@
+package layout
+
+import "nearbyassist/views/partials"
+
+templ Layout() {
+	<!DOCTYPE html>
+	<html lang="en">
+		@head()
+		<body>
+			<div class="grid h-screen grid-cols-[14rem_1fr] text-sm">
+				@partials.Sidebar()
+				<main class="overflow-scroll mb-8">
+					@partials.Header()
+					<div class="flex-1 p-4">
+						{ children... }
+					</div>
+				</main>
+			</div>
+		</body>
+	</html>
+}

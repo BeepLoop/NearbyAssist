@@ -1,0 +1,57 @@
+package pages
+
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ IdentityVerification(requests []models.IdentityVerificationModel) {
+	@layout.Layout() {
+		@partials.PageBanner("Verification requests", "View and manage identity verification requests")
+		@requestsData(requests)
+	}
+}
+
+templ requestsData(requests []models.IdentityVerificationModel) {
+	<table class="mt-4 w-full rounded-lg border">
+		<thead>
+			<tr class="bg-primary-greener">
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Request ID
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Date Applied
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Status
+				</th>
+				<th class="px-6 py-3 text-center font-medium text-white">
+					Action
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			if len(requests) < 1 {
+				<tr class="border">
+					<td class="px-6 py-4" align="center" colspan="4">No requests</td>
+				</tr>
+			} else {
+				for _, request := range requests {
+					<tr class="border">
+						<td class="px-6 py-4">{ request.Id }</td>
+						<td class="px-6 py-4">{ request.CreatedAt }</td>
+						<td class="px-6 py-4">{ request.Status }</td>
+						<td class="flex justify-center px-6 py-4">
+							<ul>
+								<a href="" class="text-blue hover:underline">
+									View Request
+								</a>
+							</ul>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+}

@@ -1,0 +1,59 @@
+package pages
+
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ AccountManagement() {
+	@layout.Layout() {
+		@partials.PageBanner("Account Management", "View and manage accounts")
+		@accountsData()
+	}
+}
+
+templ accountsData() {
+	<table class="w-full rounded-lg border border-gray">
+		<thead>
+			<tr class="border bg-primary-greener">
+				<th class="px-6 py-3 text-left font-medium text-white">
+					Name
+				</th>
+				<th class="px-4 py-3 text-left font-medium text-white">
+					View Profile
+				</th>
+				<th class="px-4 py-3 text-left font-medium text-white">
+					Status
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="border">
+				<td class="px-4 py-2">John Doe</td>
+				<td class="px-4 py-2">
+					<ul>
+						<button class="text-blue hover:underline">
+							View Profile
+						</button>
+					</ul>
+				</td>
+				<td class="rounded-md px-4 py-2 font-semibold text-primary">
+					Active
+				</td>
+			</tr>
+			<tr class="border">
+				<td class="px-4 py-2">Jane Smith</td>
+				<td class="px-4 py-2">
+					<ul>
+						<button class="text-blue hover:underline">
+							View Profile
+						</button>
+					</ul>
+				</td>
+				<td class="rounded-md px-4 py-2 font-semibold text-gray">
+					Not Active
+				</td>
+			</tr>
+		</tbody>
+	</table>
+}

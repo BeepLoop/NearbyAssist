@@ -1,7 +1,8 @@
 package server
 
 import (
-	"nearbyassist/internal/config"
+	"encoding/gob"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/route_engine"
@@ -14,22 +15,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
-
-type ServerConfig struct {
-	Config *config.Config
-
-	WS *websocket.Websocket
-
-	DB *sqlx.DB
-	FS fs.FileStorage
-
-	RouteEngine      route_engine.Engine
-	SuggestionEngine suggestion_engine.Engine
-
-	Hash    auth.Hash
-	Encrypt auth.Encryption
-	JWT     auth.Authenticator
-}
 
 type Server struct {
 	LOG_FILE *os.File
@@ -84,6 +69,8 @@ func NewServer(options ServerConfig) (*Server, error) {
 }
 
 func (s *Server) Start() error {
+	gob.Register(models.AdminModel{})
+
 	s.Echo.Validator = &utils.Validator{Validator: validator.New()}
 
 	s.middlewares()

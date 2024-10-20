@@ -1,0 +1,10 @@
+package application_repo
+
+import "nearbyassist/internal/models"
+
+type ApplicationRepository interface {
+	Create(data *models.ApplicationModel) (string, error)
+	FindApplication(id string) (*models.ApplicationModel, error)
+	NewProof(data *models.ApplicationProofModel) (string, error)
+	NewPoliceClearance(data *models.PoliceClearanceModel) (string, error)
+}
