@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	admin_repo "nearbyassist/internal/repository/admin"
+	"nearbyassist/internal/response"
 	admin_service "nearbyassist/internal/service/admin"
 	"nearbyassist/views/pages"
 
@@ -18,9 +19,10 @@ func (h *adminHandler) GetDashboard(c echo.Context) error {
 
 	analytics, err := adminService.Analytics()
 	if err != nil {
-		//
+		page := pages.Dashboard(response.Analytics{})
+		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	page := pages.Dashboard(analytics)
+	page := pages.Dashboard(*analytics)
 	return page.Render(context.Background(), c.Response().Writer)
 }

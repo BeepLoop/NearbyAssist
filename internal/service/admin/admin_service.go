@@ -37,8 +37,38 @@ func (s *service) Login(username, password string) (*models.AdminModel, error) {
 	return admin, nil
 }
 
-func (s *service) Analytics() (response.Analytics, error) {
-	analytics := response.Analytics{}
+func (s *service) Analytics() (*response.Analytics, error) {
+	analytics := new(response.Analytics)
+
+	if count, err := s.store.UserCount(repository.USER_STATUS_ALL); err != nil {
+		return nil, err
+	} else {
+		analytics.User = count
+	}
+
+	if count, err := s.store.UserCount(repository.USER_STATUS_VERIFIED); err != nil {
+		return nil, err
+	} else {
+		analytics.VerifiedUser = count
+	}
+
+	if count, err := s.store.VendorCount(repository.VENDOR_STATUS_ALL); err != nil {
+		return nil, err
+	} else {
+		analytics.Vendor = count
+	}
+
+	if count, err := s.store.ApplicationCount(repository.APPLICATION_STATUS_PENDING); err != nil {
+		return nil, err
+	} else {
+		analytics.PendingApplication = count
+	}
+
+	if count, err := s.store.ComplaintCount(); err != nil {
+		return nil, err
+	} else {
+		analytics.Complaint = count
+	}
 
 	return analytics, nil
 }
