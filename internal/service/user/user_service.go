@@ -31,10 +31,10 @@ func (s *Service) Login(req *request.UserLoginPayload) (map[string]interface{}, 
 		return s.Register(req, emailHash)
 	}
 
-	accessToken, err := s.jwt.GenerateUserAccessToken(auth.UserJWTClaims{
-		Id:    existingUser.Id,
-		Name:  req.Name,
-		Email: req.Email,
+	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
+		UserId: existingUser.Id,
+		Name:   req.Name,
+		Email:  req.Email,
 	})
 	if err != nil {
 		return nil, err
@@ -82,14 +82,15 @@ func (s *Service) Register(req *request.UserLoginPayload, emailHash string) (map
 		newUser.Email = cipher
 	}
 
-	if _, err := s.store.CreateUser(newUser); err != nil {
+	userId, err := s.store.CreateUser(newUser)
+	if err != nil {
 		return nil, err
 	}
 
-	accessToken, err := s.jwt.GenerateUserAccessToken(auth.UserJWTClaims{
-		Id:    newUser.Id,
-		Name:  req.Name,
-		Email: req.Email,
+	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
+		UserId: userId,
+		Name:   req.Name,
+		Email:  req.Email,
 	})
 	if err != nil {
 		return nil, err
@@ -154,10 +155,10 @@ func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
 		user.Email = plain
 	}
 
-	newToken, err := s.jwt.GenerateUserAccessToken(auth.UserJWTClaims{
-		Id:    user.Id,
-		Name:  user.Name,
-		Email: user.Email,
+	newToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
+		UserId: user.Id,
+		Name:   user.Name,
+		Email:  user.Email,
 	})
 	if err != nil {
 		return "", err
