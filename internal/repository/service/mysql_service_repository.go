@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/store"
 	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlServiceRepository struct {
@@ -31,7 +31,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
 		return "", err
 	}
 
-	if id, err := store.GenerateNanoId(); err != nil {
+	if id, err := gonanoid.New(); err != nil {
 		return "", errors.New("Failed to generate id for service")
 	} else {
 		data.Id = id
@@ -67,7 +67,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
             )
     `
 	for _, tag := range data.Tags {
-		tagId, err := store.GenerateNanoId()
+		tagId, err := gonanoid.New()
 		if err != nil {
 			return "", errors.New("Failed to generate id for tag")
 		}
@@ -346,7 +346,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
         WHERE t.title = ?
     `
 	for _, tag := range updatedService.Tags {
-		generatedId, err := store.GenerateNanoId()
+		generatedId, err := gonanoid.New()
 		if err != nil {
 			return err
 		}

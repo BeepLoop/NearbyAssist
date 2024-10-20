@@ -3,10 +3,10 @@ package application_repo
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/store"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlApplicationRepository struct {
@@ -23,7 +23,7 @@ func (s *MysqlApplicationRepository) Create(data *models.ApplicationModel) (stri
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := store.GenerateNanoId(); err != nil {
+	if id, err := gonanoid.New(); err != nil {
 		return "", err
 	} else {
 		data.Id = id
@@ -67,7 +67,7 @@ func (s *MysqlApplicationRepository) NewProof(data *models.ApplicationProofModel
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := store.GenerateNanoId(); err != nil {
+	if id, err := gonanoid.New(); err != nil {
 		return "", err
 	} else {
 		data.Id = id
@@ -94,7 +94,7 @@ func (s *MysqlApplicationRepository) NewPoliceClearance(data *models.PoliceClear
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := store.GenerateNanoId(); err != nil {
+	if id, err := gonanoid.New(); err != nil {
 		return "", err
 	} else {
 		data.Id = id

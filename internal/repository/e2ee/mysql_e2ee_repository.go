@@ -3,10 +3,10 @@ package e2ee_repo
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/store"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlE2EERepository struct {
@@ -23,7 +23,7 @@ func (s *MysqlE2EERepository) NewPublicPem(data *models.PublicKeyModel) (string,
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if id, err := store.GenerateNanoId(); err != nil {
+	if id, err := gonanoid.New(); err != nil {
 		return "", err
 	} else {
 		data.Id = id
@@ -62,7 +62,7 @@ func (s *MysqlE2EERepository) NewPrivatePem(data *models.PrivateKeyModel) (strin
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if id, err := store.GenerateNanoId(); err != nil {
+	if id, err := gonanoid.New(); err != nil {
 		return "", err
 	} else {
 		data.Id = id

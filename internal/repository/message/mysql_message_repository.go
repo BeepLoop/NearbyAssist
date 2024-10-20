@@ -3,10 +3,10 @@ package message_repo
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/store"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlMessageRepository struct {
@@ -22,7 +22,7 @@ func (s *MysqlMessageRepository) Create(data *models.MessageModel) (string, erro
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if generatedId, err := store.GenerateNanoId(); err != nil {
+	if generatedId, err := gonanoid.New(); err != nil {
 		return "", err
 	} else {
 		data.Id = generatedId

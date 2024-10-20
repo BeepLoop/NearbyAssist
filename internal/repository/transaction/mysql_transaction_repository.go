@@ -3,10 +3,10 @@ package transaction_repo
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/store"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlTransactionRepository struct {
@@ -23,7 +23,7 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := store.GenerateNanoId(); err != nil {
+	if id, err := gonanoid.New(); err != nil {
 		return "", err
 	} else {
 		data.Id = id
