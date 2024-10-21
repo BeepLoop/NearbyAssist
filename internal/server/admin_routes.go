@@ -36,42 +36,63 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 	r.POST("/login", authHandler.PostLogin)
 	r.POST("/logout", authHandler.PostLogout)
 
-	dashboardStore := dashboard_repo.NewMysqlDashboardRepository(s.DB)
-	dashboardService := dashboard_service.NewService(dashboardStore)
-	dashboardHandler := dashboard.NewHandler(dashboardService)
+	dashboardRoute := r.Group("/dashboard")
+	{
+		dashboardStore := dashboard_repo.NewMysqlDashboardRepository(s.DB)
+		dashboardService := dashboard_service.NewService(dashboardStore)
+		dashboardHandler := dashboard.NewHandler(dashboardService)
 
-	r.GET("/dashboard", dashboardHandler.GetDashboard, middleware.CheckSession)
+		dashboardRoute.GET("", dashboardHandler.GetDashboard, middleware.CheckSession)
+	}
 
-	mapStore := map_repo.NewMysqlMapRepository(s.DB)
-	mapService := map_service.NewService(mapStore)
-	mapHandler := map_handler.NewHandler(mapService)
+	mapRoute := r.Group("/map")
+	{
+		mapStore := map_repo.NewMysqlMapRepository(s.DB)
+		mapService := map_service.NewService(mapStore)
+		mapHandler := map_handler.NewHandler(mapService)
 
-	r.GET("/map", mapHandler.GetMap, middleware.CheckSession)
+		mapRoute.GET("", mapHandler.GetMap, middleware.CheckSession)
+	}
 
-	complaintStore := complaint_repo.NewMysqlComplaintRepository(s.DB)
-	complaintService := complaint_service.NewService(complaintStore, s.FS, s.Encrypt)
-	complaintHandler := complaint.NewHandler(complaintService)
+	complaintRoute := r.Group("/complaints")
+	{
+		complaintStore := complaint_repo.NewMysqlComplaintRepository(s.DB)
+		complaintService := complaint_service.NewService(complaintStore, s.FS, s.Encrypt)
+		complaintHandler := complaint.NewHandler(complaintService)
 
-	r.GET("/complaints", complaintHandler.GetComplaints, middleware.CheckSession)
+		complaintRoute.GET("", complaintHandler.GetComplaints, middleware.CheckSession)
+	}
 
-	applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
-	applicationService := application_service.NewService(applicationStore, s.FS, s.Encrypt, s.JWT)
-	applicationHandler := application.NewHandler(applicationService)
+	applicationRoute := r.Group("/vendor-applications")
+	{
+		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
+		applicationService := application_service.NewService(applicationStore, s.FS, s.Encrypt, s.JWT)
+		applicationHandler := application.NewHandler(applicationService)
 
-	r.GET("/vendor-applications", applicationHandler.GetVendorApplication, middleware.CheckSession)
+		applicationRoute.GET("", applicationHandler.GetVendorApplication, middleware.CheckSession)
+	}
 
-	requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
-	requestService := verification_service.NewService(requestStore, s.FS, s.Encrypt, s.JWT)
-	requestHandler := verification.NewHandler(requestService)
+	verificationRoute := r.Group("/verification-requests")
+	{
+		requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
+		requestService := verification_service.NewService(requestStore, s.FS, s.Encrypt, s.JWT)
+		requestHandler := verification.NewHandler(requestService)
 
-	r.GET("/verification-requests", requestHandler.GetIdentityVerification, middleware.CheckSession)
+		verificationRoute.GET("", requestHandler.GetIdentityVerification, middleware.CheckSession)
+	}
 
-	managementService := management_service.NewService()
-	managementHandler := management.NewHandler(managementService)
+	managementRoute := r.Group("/account-management")
+	{
+		managementService := management_service.NewService()
+		managementHandler := management.NewHandler(managementService)
 
-	r.GET("/account-management", managementHandler.GetAccountManagement, middleware.CheckSession)
+		managementRoute.GET("", managementHandler.GetAccountManagement, middleware.CheckSession)
+	}
 
-	experimentHandler := experiment.NewHandler()
+	experimentRoute := r.Group("/test")
+	{
+		experimentHandler := experiment.NewHandler()
 
-	r.GET("/test", experimentHandler.GetExperiment, middleware.CheckSession)
+		experimentRoute.GET("", experimentHandler.GetExperiment, middleware.CheckSession)
+	}
 }
