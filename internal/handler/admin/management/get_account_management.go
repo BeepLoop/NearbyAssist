@@ -1,4 +1,4 @@
-package admin
+package management
 
 import (
 	"context"
@@ -7,9 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *adminHandler) GetMap(c echo.Context) error {
-	markers := make([]pages.Marker, 0)
-
-	page := pages.Map(markers)
+func (h *managementHandler) GetAccountManagement(c echo.Context) error {
+	page := pages.AccountManagement()
 	return page.Render(context.Background(), c.Response().Writer)
 }

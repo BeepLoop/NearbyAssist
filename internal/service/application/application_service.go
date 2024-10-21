@@ -98,3 +98,7 @@ func (s *Service) CreateApplication(bearerToken, job string, files []*multipart.
 
 	return applicationId, nil
 }
+
+func (s *Service) GetApplications() ([]models.ApplicationModel, error) {
+	return nil, nil
+}

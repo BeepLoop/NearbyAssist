@@ -1,4 +1,4 @@
-package admin
+package auth
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *adminHandler) PostLogout(c echo.Context) error {
+func (h *authHandler) PostLogout(c echo.Context) error {
 	sess, err := session.Get("session", c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/dashboard?error=session_error")

@@ -107,3 +107,9 @@ func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bea
 
 	return verificationId, nil
 }
+
+func (s *Service) GetIdentityVerificationRequests() ([]models.IdentityVerificationModel, error) {
+	requests := make([]models.IdentityVerificationModel, 0)
+
+	return requests, nil
+}

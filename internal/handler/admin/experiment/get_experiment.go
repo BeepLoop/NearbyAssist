@@ -1,4 +1,4 @@
-package admin
+package experiment
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *adminHandler) GetExperiment(c echo.Context) error {
+func (h *experimentHandler) GetExperiment(c echo.Context) error {
 	page := pages.Experiment()
 	return page.Render(context.Background(), c.Response().Writer)
 }

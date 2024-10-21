@@ -1,9 +1,7 @@
-package admin
+package auth
 
 import (
 	"fmt"
-	repository "nearbyassist/internal/repository/admin"
-	admin_service "nearbyassist/internal/service/admin"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -11,17 +9,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *adminHandler) PostLogin(c echo.Context) error {
+func (h *authHandler) PostLogin(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	adminService := admin_service.NewService(
-		repository.NewMysqlAdminRepository(h.db),
-		h.encrypt,
-		h.hash,
-	)
-
-	adminModel, err := adminService.Login(username, password)
+	adminModel, err := h.adminService.Login(username, password)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/login?error=login_error")
 	}

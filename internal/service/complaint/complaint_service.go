@@ -66,3 +66,7 @@ func (s *Service) CreateSystemComplaint(req *request.SystemComplaintPayload, fil
 
 	return complaintId, nil
 }
+
+func (s *Service) GetComplaints() ([]models.ComplaintModel, error) {
+	return nil, nil
+}
