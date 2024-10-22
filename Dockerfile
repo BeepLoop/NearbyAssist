@@ -1,4 +1,4 @@
-FROM golang:1.21-bookworm AS build-stage
+FROM golang:1.23-bookworm AS build-stage
 
 # Set the Current Working Directory inside the container
 WORKDIR /build
@@ -13,6 +13,9 @@ FROM gcr.io/distroless/base-debian12 AS release-stage
 
 WORKDIR /
 
+COPY views/ views/
+COPY public/ public/
+COPY static/ static/
 COPY --from=build-stage /nearbyassist /nearbyassist
 
 # This container exposes port 3000 to the outside world
