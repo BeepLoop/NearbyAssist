@@ -25,3 +25,7 @@ func (m *Mailer) Start() {
 func (m *Mailer) Add(mail email.Mail) {
 	m.mailChan <- mail
 }
+
+func (m *Mailer) Stop() {
+	close(m.mailChan)
+}

@@ -60,6 +60,12 @@ func (w *Websocket) Start() {
 	go w.processMessages()
 }
 
+func (w *Websocket) Stop() {
+	close(w.messageChan)
+	close(w.senderChan)
+	close(w.saverChan)
+}
+
 func (w *Websocket) listen() {
 	for {
 		select {

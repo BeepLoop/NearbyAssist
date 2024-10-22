@@ -87,6 +87,8 @@ func (s *Server) Start() error {
 
 	if err := s.Echo.Start(":" + s.Port); err != nil {
 		s.LOG_FILE.Close()
+		s.WS.Stop()
+		s.Mailer.Stop()
 		return err
 	}
 
