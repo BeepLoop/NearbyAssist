@@ -4,10 +4,10 @@ import "nearbyassist/internal/service/email"
 
 type Mailer struct {
 	mailChan chan email.Mail
-	mail     email.Email
+	mail     email.MailService
 }
 
-func New(mail email.Email) *Mailer {
+func New(mail email.MailService) *Mailer {
 	return &Mailer{mailChan: make(chan email.Mail)}
 }
 

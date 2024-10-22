@@ -160,9 +160,12 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		applicationRoute.Use(middleware.CheckAuth(s.JWT))
 
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
+
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
 		applicationService := application_service.NewService(applicationStore, s.FS, s.Encrypt, s.JWT)
-		handler := application.NewHandler(applicationService)
+		handler := application.NewHandler(applicationService, userService, s.Mailman)
 
 		applicationRoute.POST("", handler.CreateApplication)
 	}
@@ -186,6 +189,9 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		verificationRoute.Use(middleware.CheckAuth(s.JWT))
 
+		useStore := user_repo.NewMysqlUserRepository(s.DB)
+		userService := user_service.NewService(useStore, s.Encrypt, s.Hash, s.JWT)
+
 		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		verificationService := verification_service.NewService(
 			verificationStore,
@@ -193,7 +199,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.Encrypt,
 			s.JWT,
 		)
-		handler := verification.NewHandler(verificationService)
+		handler := verification.NewHandler(verificationService, userService, s.Mailman)
 
 		verificationRoute.POST("/identity", handler.CreateIdentityVerification)
 	}

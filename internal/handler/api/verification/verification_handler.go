@@ -2,6 +2,8 @@ package verification
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/email"
+	user_service "nearbyassist/internal/service/user"
 	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -11,10 +13,12 @@ import (
 
 type verificationHandler struct {
 	verificationService *verification_service.Service
+	userService         *user_service.Service
+	mailman             email.MailService
 }
 
-func NewHandler(verificationService *verification_service.Service) *verificationHandler {
-	return &verificationHandler{verificationService: verificationService}
+func NewHandler(verificationService *verification_service.Service, userService *user_service.Service, mailman email.MailService) *verificationHandler {
+	return &verificationHandler{verificationService: verificationService, userService: userService, mailman: mailman}
 }
 
 func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
@@ -47,6 +51,16 @@ func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 		bearerToken,
 		files,
 	)
+
+	user, err := h.userService.GetUser(bearerToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error retrieving user information",
+			Error:   err.Error(),
+		})
+	}
+
+	go email.IdentityVerificationMail(h.mailman).To([]string{user.Email}).Send()
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"verification": verificationId,

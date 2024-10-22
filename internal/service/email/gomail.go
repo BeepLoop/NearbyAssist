@@ -28,9 +28,9 @@ func (s *GoMail) SendMail(mail Mail) error {
 	msg.SetHeader("To", mail.To...)
 	msg.SetHeader("Subject", mail.Subject)
 
-	msg.SetBody("text/html", mail.HtmlMessage)
+	msg.SetBody("text/plain", mail.AlternativeBody)
 
-	msg.AddAlternative("text/plain", mail.PlainMessage)
+	msg.AddAlternative("text/html", mail.HtmlBody)
 
 	dialer := gomail.NewDialer("smtp.gmail.com", 587, s.from, s.password)
 

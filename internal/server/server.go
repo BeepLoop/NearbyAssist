@@ -4,8 +4,8 @@ import (
 	"encoding/gob"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/email"
 	"nearbyassist/internal/service/fs"
-	"nearbyassist/internal/service/mailer"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
@@ -26,7 +26,7 @@ type Server struct {
 
 	WS *websocket.Websocket
 
-	Mailer *mailer.Mailer
+	Mailman email.MailService
 
 	DB *sqlx.DB
 	FS fs.FileStorage
@@ -57,7 +57,7 @@ func NewServer(options ServerConfig) (*Server, error) {
 
 		WS: options.WS,
 
-		Mailer: options.Mailer,
+		Mailman: options.Mailman,
 
 		DB: options.DB,
 		FS: options.FS,
@@ -83,12 +83,9 @@ func (s *Server) Start() error {
 
 	s.WS.Start()
 
-	s.Mailer.Start()
-
 	if err := s.Echo.Start(":" + s.Port); err != nil {
 		s.LOG_FILE.Close()
 		s.WS.Stop()
-		s.Mailer.Stop()
 		return err
 	}
 
