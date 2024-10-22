@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/mailer"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
@@ -15,6 +16,8 @@ type ServerConfig struct {
 	Config *config.Config
 
 	WS *websocket.Websocket
+
+	Mailer *mailer.Mailer
 
 	DB *sqlx.DB
 	FS fs.FileStorage

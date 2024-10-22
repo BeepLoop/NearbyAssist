@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/mailer"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
@@ -24,6 +25,8 @@ type Server struct {
 	AllowedOrigins []string
 
 	WS *websocket.Websocket
+
+	Mailer *mailer.Mailer
 
 	DB *sqlx.DB
 	FS fs.FileStorage
@@ -54,6 +57,8 @@ func NewServer(options ServerConfig) (*Server, error) {
 
 		WS: options.WS,
 
+		Mailer: options.Mailer,
+
 		DB: options.DB,
 		FS: options.FS,
 
@@ -77,6 +82,8 @@ func (s *Server) Start() error {
 	s.routes()
 
 	s.WS.Start()
+
+	s.Mailer.Start()
 
 	if err := s.Echo.Start(":" + s.Port); err != nil {
 		s.LOG_FILE.Close()

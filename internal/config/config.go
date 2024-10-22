@@ -20,6 +20,9 @@ type Config struct {
 	DB_PORT string
 	DB_NET  string
 
+	EMAIL_FROM string
+	EMAIL_PASS string
+
 	JWT_SECRET   string
 	JWT_DURATION int
 
@@ -56,6 +59,9 @@ func LoadConfig() *Config {
 		DB_HOST: getEnv("DB_HOST", "127.0.0.1"),
 		DB_PORT: getEnv("DB_PORT", "3306"),
 		DB_NET:  getEnv("DB_NET", "tcp"),
+
+		EMAIL_FROM: getEnv("EMAIL_FROM", ""),
+		EMAIL_PASS: getEnv("EMAIL_PASS", ""),
 
 		JWT_SECRET:   getEnv("JWT_SECRET", "secret"),
 		JWT_DURATION: duration,
