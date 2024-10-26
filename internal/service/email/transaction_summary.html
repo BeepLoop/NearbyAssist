@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Summary</title>
+
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            color: #555;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .info {
+            display: flex;
+            margin: 8px 0;
+        }
+
+        .info span {
+            color: #666;
+            width: 50%;
+        }
+
+        .info .label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: orange;
+        }
+
+        .next-steps {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .contact {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Transaction Summary</h1>
+
+        <div class="section">
+            <div class="section-title">Transaction Details</div>
+            <div class="info">
+                <span class="label">Transaction ID:</span>
+                <span>{{ .Id }}</span>
+            </div>
+            <div class="info">
+                <span class="label">Date Created:</span>
+                <span>{{ .CreatedAt }}</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Parties Involved</div>
+            <div class="info">
+                <span class="label">Service Provider:</span>
+                <span>{{ .ServiceProvider }}</span>
+            </div>
+            <div class="info">
+                <span class="label">Customer:</span>
+                <span>{{ .Client }}</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Service Details</div>
+            <div class="info">
+                <span class="label">Service Title:</span>
+                <span>{{ .ServiceTitle }}</span>
+            </div>
+            <div class="info">
+                <span class="label">Category:</span>
+                <span>{{ .ServiceCategory }}</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Agreed Terms</div>
+            <div class="info">
+                <span class="label">Price:</span>
+                <span>{{ .Price }}</span>
+            </div>
+            <div class="info">
+                <span class="label">Payment Method:</span>
+                <span>Cash Payment</span>
+            </div>
+            <div class="info">
+                <span class="label">Start Date:</span>
+                <span>{{ .StartDate }}</span>
+            </div>
+            <div class="info">
+                <span class="label">Location:</span>
+                <span>{{ .Location }}</span>
+            </div>
+        </div>
+
+        <div class="section next-steps">
+            <div class="section-title">Next Steps</div>
+            <p>Service Provider to arrive at the specified location on {{ .StartDate }}.</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Contact Information</div>
+            <div class="contact">
+                <p><strong>Provider Contact:</strong> {{ .ProviderEmail }}</p>
+                <p><strong>Customer Contact:</strong> {{ .ClientEmail }}</p>
+            </div>
+        </div>
+
+        <div>
+            <p>
+                Please review the transaction summary thoroughly. Make sure that all details are correct and as
+                expected. The transaction is still in <span style="color: orange">pending</span> status, clicking
+                confirm will start the transaction and you are confirming that all information in this summary is
+                correct.
+            </p>
+        </div>
+
+        <div class="button-container">
+            <a class="confirm-button"
+                style="display: inline-block; padding: 12px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-size: 18px; transition: background-color 0.3s ease;"
+                href="{{ .ConfirmationEndpoint }}">
+                Confirm and Start Transaction
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>If you need to make changes, please contact the service provider.</p>
+        </div>
+    </div>
+</body>
+
+</html>

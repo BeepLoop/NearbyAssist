@@ -1,6 +1,20 @@
 package email
 
-import "github.com/labstack/gommon/log"
+import (
+	"bytes"
+	"html/template"
+	"nearbyassist/internal/response"
+
+	"github.com/labstack/gommon/log"
+)
+
+type IdentityVerificationMailType string
+
+const (
+	IDENTITY_REQUEST_ACKNOWLEDGMENT IdentityVerificationMailType = "Identity Verification Request Acknowledgment"
+	IDENTITY_REQUEST_APPROVED       IdentityVerificationMailType = "Identity Verification Request Approved"
+	IDENTITY_REQUEST_REJECTED       IdentityVerificationMailType = "Identity Verification Request Rejected"
+)
 
 type identityVerificationMail struct {
 	mail   Mail
@@ -9,21 +23,48 @@ type identityVerificationMail struct {
 
 func IdentityVerificationMail(mailer MailService) *identityVerificationMail {
 	return &identityVerificationMail{
-		mail: Mail{
-			Subject: "Identity Verification Request Acknowledgement",
-			HtmlBody: `
-                <html>
-                    <body>
-                        <h1>Identity Verification Request Acknowledgement</h1>
-                        <h3>Thank you for using NearbyAssist</h3>
-                        <p>We have received your request for identity verification, we are processing your request and we will get back to you.</p>
-                    </body>
-                </html>
-            `,
-			AlternativeBody: "Identity Verification Request Acknowledgement\n\nThank you for using NearbyAssist. We have received your request for identity verification, we are processing your request and we will get back to you.",
-		},
+		mail:   Mail{},
 		mailer: mailer,
 	}
+}
+
+func (m *identityVerificationMail) SetBody(t IdentityVerificationMailType, data response.BasicEmailPayload) error {
+	var tmpl *template.Template
+
+	switch t {
+	case IDENTITY_REQUEST_ACKNOWLEDGMENT:
+		if t, err := template.ParseFiles("./identity_verification_acknowledgment.html"); err != nil {
+			return err
+		} else {
+			tmpl = t
+		}
+	case IDENTITY_REQUEST_APPROVED:
+		if t, err := template.ParseFiles("./identity_verification_approved.html"); err != nil {
+			return err
+		} else {
+			tmpl = t
+		}
+	case IDENTITY_REQUEST_REJECTED:
+		if t, err := template.ParseFiles("./identity_verification_rejected.html"); err != nil {
+			return err
+		} else {
+			tmpl = t
+		}
+	}
+
+	var htmlBytes bytes.Buffer
+	if err := tmpl.Execute(&htmlBytes, data); err != nil {
+		return err
+	}
+
+	m.mail.HtmlBody = htmlBytes.String()
+
+	return nil
+}
+
+func (m *identityVerificationMail) SetSubject(subject IdentityVerificationMailType) *identityVerificationMail {
+	m.mail.Subject = string(subject)
+	return m
 }
 
 func (m *identityVerificationMail) To(to []string) *identityVerificationMail {

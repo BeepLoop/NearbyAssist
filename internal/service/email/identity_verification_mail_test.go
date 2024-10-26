@@ -1,6 +1,7 @@
 package email
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,6 +10,7 @@ import (
 type mockMailService struct{}
 
 func (m *mockMailService) SendMail(mail Mail) error {
+	fmt.Println(mail)
 	return nil
 }
 

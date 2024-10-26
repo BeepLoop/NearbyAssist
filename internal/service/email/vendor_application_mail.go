@@ -1,6 +1,20 @@
 package email
 
-import "github.com/labstack/gommon/log"
+import (
+	"bytes"
+	"html/template"
+	"nearbyassist/internal/response"
+
+	"github.com/labstack/gommon/log"
+)
+
+type VendorApplicationMailType string
+
+const (
+	VENDOR_APPLICATION_ACKNOWLEDGMENT VendorApplicationMailType = "Vendor Application Request Acknowledgment"
+	VENDOR_APPLICATION_APPROVED       VendorApplicationMailType = "Vendor Application Request Approved"
+	VENDOR_APPLICATION_REJECTED       VendorApplicationMailType = "Vendor Application Request Rejected"
+)
 
 type vendorApplicationMail struct {
 	mail   Mail
@@ -9,21 +23,48 @@ type vendorApplicationMail struct {
 
 func VendorApplicationMail(mailer MailService) *vendorApplicationMail {
 	return &vendorApplicationMail{
-		mail: Mail{
-			Subject: "Vendor Application Request Acknowledgement",
-			HtmlBody: `
-                <html>
-                    <body>
-                        <h1>Vendor Application Request Acknowledgement</h1>
-                        <h3>Thank you for using NearbyAssist</h3>
-                        <p>We have received your vendor application request, we are processing your request and we will get back to you.</p>
-                    </body>
-                </html>
-            `,
-			AlternativeBody: "Identity Verification Request Acknowledgement\n\nThank you for using NearbyAssist. We have received your vendor application request, we are processing your request and we will get back to you.",
-		},
+		mail:   Mail{},
 		mailer: mailer,
 	}
+}
+
+func (m *vendorApplicationMail) SetBody(t VendorApplicationMailType, data response.BasicEmailPayload) error {
+	var tmpl *template.Template
+
+	switch t {
+	case VENDOR_APPLICATION_ACKNOWLEDGMENT:
+		if t, err := template.ParseFiles("./vendor_application_acknowledgment.html"); err != nil {
+			return err
+		} else {
+			tmpl = t
+		}
+	case VENDOR_APPLICATION_APPROVED:
+		if t, err := template.ParseFiles("./vendor_application_approved.html"); err != nil {
+			return err
+		} else {
+			tmpl = t
+		}
+	case VENDOR_APPLICATION_REJECTED:
+		if t, err := template.ParseFiles("./vendor_application_rejected.html"); err != nil {
+			return err
+		} else {
+			tmpl = t
+		}
+	}
+
+	var htmlBytes bytes.Buffer
+	if err := tmpl.Execute(&htmlBytes, data); err != nil {
+		return err
+	}
+
+	m.mail.HtmlBody = htmlBytes.String()
+
+	return nil
+}
+
+func (m *vendorApplicationMail) SetSubject(subject VendorApplicationMailType) *vendorApplicationMail {
+	m.mail.Subject = string(subject)
+	return m
 }
 
 func (m *vendorApplicationMail) To(to []string) *vendorApplicationMail {

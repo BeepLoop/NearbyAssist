@@ -2,6 +2,7 @@ package verification
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/email"
 	user_service "nearbyassist/internal/service/user"
 	verification_service "nearbyassist/internal/service/verification"
@@ -60,7 +61,12 @@ func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 		})
 	}
 
-	go email.IdentityVerificationMail(h.mailman).To([]string{user.Email}).Send()
+	m := email.IdentityVerificationMail(h.mailman).To([]string{user.Email})
+	m.SetSubject(email.IDENTITY_REQUEST_ACKNOWLEDGMENT)
+	m.SetBody(email.IDENTITY_REQUEST_ACKNOWLEDGMENT, response.BasicEmailPayload{
+		User: user.Name,
+	})
+	go m.Send()
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"verification": verificationId,
