@@ -23,7 +23,7 @@ func TransactionSummaryMail(mailer MailService) *transactionSummaryMail {
 }
 
 func (m *transactionSummaryMail) SetBody(data response.TransactionSummary) error {
-	tmpl, err := template.ParseFiles("./transaction_summary.html")
+	tmpl, err := template.ParseFiles("./views/email/transaction_summary.html")
 	if err != nil {
 		return err
 	}

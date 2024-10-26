@@ -33,19 +33,19 @@ func (m *identityVerificationMail) SetBody(t IdentityVerificationMailType, data 
 
 	switch t {
 	case IDENTITY_REQUEST_ACKNOWLEDGMENT:
-		if t, err := template.ParseFiles("./identity_verification_acknowledgment.html"); err != nil {
+		if t, err := template.ParseFiles("./views/email/identity_verification_acknowledgment.html"); err != nil {
 			return err
 		} else {
 			tmpl = t
 		}
 	case IDENTITY_REQUEST_APPROVED:
-		if t, err := template.ParseFiles("./identity_verification_approved.html"); err != nil {
+		if t, err := template.ParseFiles("./views/email/identity_verification_approved.html"); err != nil {
 			return err
 		} else {
 			tmpl = t
 		}
 	case IDENTITY_REQUEST_REJECTED:
-		if t, err := template.ParseFiles("./identity_verification_rejected.html"); err != nil {
+		if t, err := template.ParseFiles("./views/email/identity_verification_rejected.html"); err != nil {
 			return err
 		} else {
 			tmpl = t

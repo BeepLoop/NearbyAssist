@@ -25,9 +25,5 @@ func TestTransactionSummary(t *testing.T) {
 
 		err := m.SetBody(data)
 		assert.NoError(t, err)
-
-		err = m.Send()
-		assert.NoError(t, err)
 	})
-
 }

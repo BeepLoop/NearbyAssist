@@ -33,19 +33,19 @@ func (m *vendorApplicationMail) SetBody(t VendorApplicationMailType, data respon
 
 	switch t {
 	case VENDOR_APPLICATION_ACKNOWLEDGMENT:
-		if t, err := template.ParseFiles("./vendor_application_acknowledgment.html"); err != nil {
+		if t, err := template.ParseFiles("./views/email/vendor_application_acknowledgment.html"); err != nil {
 			return err
 		} else {
 			tmpl = t
 		}
 	case VENDOR_APPLICATION_APPROVED:
-		if t, err := template.ParseFiles("./vendor_application_approved.html"); err != nil {
+		if t, err := template.ParseFiles("./views/email/vendor_application_approved.html"); err != nil {
 			return err
 		} else {
 			tmpl = t
 		}
 	case VENDOR_APPLICATION_REJECTED:
-		if t, err := template.ParseFiles("./vendor_application_rejected.html"); err != nil {
+		if t, err := template.ParseFiles("./views/email/vendor_application_rejected.html"); err != nil {
 			return err
 		} else {
 			tmpl = t

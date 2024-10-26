@@ -61,7 +61,8 @@ func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 		})
 	}
 
-	m := email.IdentityVerificationMail(h.mailman).To([]string{user.Email})
+	m := email.IdentityVerificationMail(h.mailman)
+	m.To([]string{user.Email})
 	m.SetSubject(email.IDENTITY_REQUEST_ACKNOWLEDGMENT)
 	m.SetBody(email.IDENTITY_REQUEST_ACKNOWLEDGMENT, response.BasicEmailPayload{
 		User: user.Name,
