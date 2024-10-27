@@ -1,11 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
+package email
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Identity Verification Request Rejection</title>
-    <style>
+import "nearbyassist/internal/response"
+
+templ IdentityVerificationRejected(data response.BasicEmailPayload) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Identity Verification Request Rejection</title>
+			<style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -57,22 +61,25 @@
             /* Darker blue for hover effect */
         }
     </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1>Identity Verification Request Rejected</h1>
-        <p>Dear {{ .User }},</p>
-        <p>We regret to inform you that your identity verification request has been rejected.</p>
-        <p>This decision was made based on our verification criteria. If you believe this is an error or you have
-            additional information to provide, please reach out to our support team for assistance.</p>
-        <p>Your security is important to us, and we encourage you to verify your information to help us provide a better
-            experience.</p>
-        <a href="{{ .SupportEndpoint }}" class="button">Contact Support</a>
-        <div class="footer">
-            <p>Thank you,<br>The NearbyAssist Team</p>
-        </div>
-    </div>
-</body>
-
-</html>
+		</head>
+		<body>
+			<div class="container">
+				<h1>Identity Verification Request Rejected</h1>
+				<p>Dear { data.User },</p>
+				<p>We regret to inform you that your identity verification request has been rejected.</p>
+				<p>
+					This decision was made based on our verification criteria. If you believe this is an error or you have
+					additional information to provide, please reach out to our support team for assistance.
+				</p>
+				<p>
+					Your security is important to us, and we encourage you to verify your information to help us provide a better
+					experience.
+				</p>
+				<a href={ templ.URL(data.SupportEndpoint) } class="button">Contact Support</a>
+				<div class="footer">
+					<p>Thank you,<br/>The NearbyAssist Team</p>
+				</div>
+			</div>
+		</body>
+	</html>
+}

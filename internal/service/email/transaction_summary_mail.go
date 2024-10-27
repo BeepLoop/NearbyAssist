@@ -2,8 +2,9 @@ package email
 
 import (
 	"bytes"
-	"html/template"
+	"context"
 	"nearbyassist/internal/response"
+	"nearbyassist/views/email"
 
 	"github.com/labstack/gommon/log"
 )
@@ -23,13 +24,10 @@ func TransactionSummaryMail(mailer MailService) *transactionSummaryMail {
 }
 
 func (m *transactionSummaryMail) SetBody(data response.TransactionSummary) error {
-	tmpl, err := template.ParseFiles("./views/email/transaction_summary.html")
-	if err != nil {
-		return err
-	}
+	view := email.TransactionSummary(data)
 
 	var htmlBytes bytes.Buffer
-	if err := tmpl.Execute(&htmlBytes, data); err != nil {
+	if err := view.Render(context.Background(), &htmlBytes); err != nil {
 		return err
 	}
 

@@ -25,21 +25,22 @@ func TestIdentityVerificationMail(t *testing.T) {
 		assert.Equal(t, expected, m.mail.To)
 	})
 
-	t.Run("Test sets correct content", func(t *testing.T) {
+	t.Run("Test setting html body", func(t *testing.T) {
 		mailService := &mockMailService{}
 
 		m := IdentityVerificationMail(mailService)
-		m.SetSubject(IDENTITY_REQUEST_ACKNOWLEDGMENT)
 
-		assert.EqualValues(t, IDENTITY_REQUEST_ACKNOWLEDGMENT, m.mail.Subject)
-
-		err := m.SetBody(IDENTITY_REQUEST_ACKNOWLEDGMENT, response.BasicEmailPayload{User: "foobar"})
-		assert.NoError(t, err)
+		data := response.BasicEmailPayload{
+			User:            "Jane Doe",
+			SupportEndpoint: "http://localhost:3000/support",
+		}
 
 		m.To([]string{"jlmulit68@gmail.com"})
-		assert.EqualValues(t, m.mail.To, []string{"jlmulit68@gmail.com"})
+		assert.EqualValues(t, []string{"jlmulit68@gmail.com"}, m.mail.To)
 
-		err = m.Send()
+		m.SetSubject(IDENTITY_REQUEST_ACKNOWLEDGMENT)
+
+		err := m.SetBody(IDENTITY_REQUEST_ACKNOWLEDGMENT, data)
 		assert.NoError(t, err)
 	})
 }

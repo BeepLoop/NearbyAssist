@@ -1,11 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
+package email
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vendor Application Request Approved</title>
-    <style>
+import "nearbyassist/internal/response"
+
+templ IdentityVerificationApproved(data response.BasicEmailPayload) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Identity Verification Request Approved</title>
+			<style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -57,21 +61,24 @@
             /* Darker green for hover effect */
         }
     </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1>Your Vendor Application Request Has Been Approved!</h1>
-        <p>Dear {{ .User }},</p>
-        <p>We are pleased to inform you that your request has been approved. Thank you for your patience throughout the
-            process.</p>
-        <p>You can now proceed to [next steps or additional instructions]. If you have any questions or require further
-            assistance, feel free to reach out to our support team.</p>
-        <a href="{{ .SupportEndpoint }}" class="button">Contact Support</a>
-        <div class="footer">
-            <p>Thank you,<br>The NearbyAssist Team</p>
-        </div>
-    </div>
-</body>
-
-</html>
+		</head>
+		<body>
+			<div class="container">
+				<h1>Your Identity Verification Request Has Been Approved!</h1>
+				<p>Dear { data.User },</p>
+				<p>
+					We are pleased to inform you that your request has been approved. Thank you for your patience throughout the
+					process.
+				</p>
+				<p>
+					You can now proceed to [next steps or additional instructions]. If you have any questions or require further
+					assistance, feel free to reach out to our support team.
+				</p>
+				<a href={ templ.URL(data.SupportEndpoint) } class="button">Contact Support</a>
+				<div class="footer">
+					<p>Thank you,<br/>The NearbyAssist Team</p>
+				</div>
+			</div>
+		</body>
+	</html>
+}

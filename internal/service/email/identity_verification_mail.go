@@ -2,9 +2,11 @@ package email
 
 import (
 	"bytes"
-	"html/template"
+	"context"
 	"nearbyassist/internal/response"
+	"nearbyassist/views/email"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/gommon/log"
 )
 
@@ -29,31 +31,19 @@ func IdentityVerificationMail(mailer MailService) *identityVerificationMail {
 }
 
 func (m *identityVerificationMail) SetBody(t IdentityVerificationMailType, data response.BasicEmailPayload) error {
-	var tmpl *template.Template
+	var view templ.Component
 
 	switch t {
 	case IDENTITY_REQUEST_ACKNOWLEDGMENT:
-		if t, err := template.ParseFiles("./views/email/identity_verification_acknowledgment.html"); err != nil {
-			return err
-		} else {
-			tmpl = t
-		}
+		view = email.IdentityVerificationAcknowledgment(data)
 	case IDENTITY_REQUEST_APPROVED:
-		if t, err := template.ParseFiles("./views/email/identity_verification_approved.html"); err != nil {
-			return err
-		} else {
-			tmpl = t
-		}
+		view = email.IdentityVerificationApproved(data)
 	case IDENTITY_REQUEST_REJECTED:
-		if t, err := template.ParseFiles("./views/email/identity_verification_rejected.html"); err != nil {
-			return err
-		} else {
-			tmpl = t
-		}
+		view = email.IdentityVerificationRejected(data)
 	}
 
 	var htmlBytes bytes.Buffer
-	if err := tmpl.Execute(&htmlBytes, data); err != nil {
+	if err := view.Render(context.Background(), &htmlBytes); err != nil {
 		return err
 	}
 

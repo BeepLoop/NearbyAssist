@@ -2,9 +2,11 @@ package email
 
 import (
 	"bytes"
-	"html/template"
+	"context"
 	"nearbyassist/internal/response"
+	"nearbyassist/views/email"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/gommon/log"
 )
 
@@ -29,31 +31,19 @@ func VendorApplicationMail(mailer MailService) *vendorApplicationMail {
 }
 
 func (m *vendorApplicationMail) SetBody(t VendorApplicationMailType, data response.BasicEmailPayload) error {
-	var tmpl *template.Template
+	var view templ.Component
 
 	switch t {
 	case VENDOR_APPLICATION_ACKNOWLEDGMENT:
-		if t, err := template.ParseFiles("./views/email/vendor_application_acknowledgment.html"); err != nil {
-			return err
-		} else {
-			tmpl = t
-		}
+		view = email.VendorApplicationAcknowledgment(data)
 	case VENDOR_APPLICATION_APPROVED:
-		if t, err := template.ParseFiles("./views/email/vendor_application_approved.html"); err != nil {
-			return err
-		} else {
-			tmpl = t
-		}
+		view = email.VendorApplicationApproved(data)
 	case VENDOR_APPLICATION_REJECTED:
-		if t, err := template.ParseFiles("./views/email/vendor_application_rejected.html"); err != nil {
-			return err
-		} else {
-			tmpl = t
-		}
+		view = email.VendorApplicationRejected(data)
 	}
 
 	var htmlBytes bytes.Buffer
-	if err := tmpl.Execute(&htmlBytes, data); err != nil {
+	if err := view.Render(context.Background(), &htmlBytes); err != nil {
 		return err
 	}
 
