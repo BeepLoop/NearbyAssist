@@ -9,6 +9,8 @@ func (s *Server) routes() {
 	s.Echo.Static("/public", "public")
 
 	s.Echo.GET("", web.GetIndex)
+	s.Echo.GET("/privacy_policy", web.GetPrivacyPolicy)
+	s.Echo.GET("/terms_and_conditions", web.GetTermsAndConditions)
 
 	api := s.Echo.Group("/api")
 	{
