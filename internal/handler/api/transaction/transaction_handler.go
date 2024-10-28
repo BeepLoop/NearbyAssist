@@ -3,7 +3,9 @@ package transaction
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/service/email"
 	transaction_service "nearbyassist/internal/service/transaction"
+	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -11,11 +13,13 @@ import (
 )
 
 type transactionHandler struct {
-	transactionService transaction_service.Service
+	transactionService *transaction_service.Service
+	userService        *user_service.Service
+	mailman            email.MailService
 }
 
-func NewHandler(transactionService transaction_service.Service) *transactionHandler {
-	return &transactionHandler{transactionService}
+func NewHandler(transactionService *transaction_service.Service, useService *user_service.Service, mailman email.MailService) *transactionHandler {
+	return &transactionHandler{transactionService: transactionService, userService: useService, mailman: mailman}
 }
 
 func (h *transactionHandler) CreateTransaction(c echo.Context) error {
@@ -34,13 +38,46 @@ func (h *transactionHandler) CreateTransaction(c echo.Context) error {
 		})
 	}
 
-	transactionId, err := h.transactionService.CreateTransaction(req)
+	transactionId, confirmCode, err := h.transactionService.CreateTransaction(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating transaction",
 			Error:   err.Error(),
 		})
 	}
+
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	user, err := h.userService.GetUser(bearerToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error retrieving user information",
+			Error:   err.Error(),
+		})
+	}
+
+	summary, err := h.transactionService.GetTransactionSummary(transactionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error retrieving transaction summary",
+			Error:   err.Error(),
+		})
+	}
+
+	// TODO: Implement confirmation endpoint
+	summary.ConfirmationEndpoint = confirmCode
+
+	m := email.TransactionSummaryMail(h.mailman)
+	m.To([]string{user.Email})
+
+	if err := m.SetBody(*summary); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error setting email body",
+			Error:   err.Error(),
+		})
+	}
+
+	go m.Send()
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"transaction": transactionId,

@@ -1,10 +1,14 @@
 package transaction_repo
 
-import "nearbyassist/internal/models"
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
+)
 
 type TransactionRepository interface {
-	Create(data *models.TransactionModel) (string, error)
+	Create(data *models.TransactionModel) (string, string, error)
 	FindById(id string) (*models.TransactionModel, error)
+	GetSummary(id string) (*response.TransactionSummary, error)
 	GetAll() ([]*models.TransactionModel, error)
 
 	GetMyTransactions(id string) ([]*models.TransactionModel, error)

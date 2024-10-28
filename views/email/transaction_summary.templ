@@ -110,7 +110,7 @@ templ TransactionSummary(data response.TransactionSummary) {
 					<div class="section-title">Parties Involved</div>
 					<div class="info">
 						<span class="label">Service Provider:</span>
-						<span>{ data.ServiceProvider }</span>
+						<span>{ data.Vendor }</span>
 					</div>
 					<div class="info">
 						<span class="label">Customer:</span>
@@ -122,10 +122,6 @@ templ TransactionSummary(data response.TransactionSummary) {
 					<div class="info">
 						<span class="label">Service Title:</span>
 						<span>{ data.ServiceTitle }</span>
-					</div>
-					<div class="info">
-						<span class="label">Category:</span>
-						<span>{ data.ServiceCategory }</span>
 					</div>
 				</div>
 				<div class="section">
@@ -143,8 +139,8 @@ templ TransactionSummary(data response.TransactionSummary) {
 						<span>{ data.StartDate }</span>
 					</div>
 					<div class="info">
-						<span class="label">Location:</span>
-						<span>{ data.Location }</span>
+						<span class="label">End Date:</span>
+						<span>{ data.EndDate }</span>
 					</div>
 				</div>
 				<div class="section next-steps">
@@ -154,7 +150,7 @@ templ TransactionSummary(data response.TransactionSummary) {
 				<div class="section">
 					<div class="section-title">Contact Information</div>
 					<div class="contact">
-						<p><strong>Provider Contact:</strong> { data.ProviderEmail }</p>
+						<p><strong>Provider Contact:</strong> { data.VendorEmail }</p>
 						<p><strong>Customer Contact:</strong> { data.ClientEmail }</p>
 					</div>
 				</div>

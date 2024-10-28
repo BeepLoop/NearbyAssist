@@ -25,15 +25,14 @@ func TestTransactionSummary(t *testing.T) {
 
 		data := response.TransactionSummary{
 			Id:                   "Sample transaction ID",
-			ServiceProvider:      "Jane Doe",
+			Vendor:               "Jane Doe",
 			Client:               "John Doe",
 			Price:                "1000",
 			CreatedAt:            time.Now().Format(time.RFC822Z),
 			StartDate:            time.Now().Format(time.RFC822Z),
-			Location:             "Sample location",
+			EndDate:              time.Now().Format(time.RFC822Z),
 			ServiceTitle:         "Sample service title",
-			ServiceCategory:      "Sample service category",
-			ProviderEmail:        "provider@email.com",
+			VendorEmail:          "provider@email.com",
 			ClientEmail:          "client@email.com",
 			ConfirmationEndpoint: "http://localhost:3000/confirm",
 		}

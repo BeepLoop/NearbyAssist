@@ -1,17 +1,16 @@
 package response
 
 type TransactionSummary struct {
-	Id                   string
-	CreatedAt            string
-	ServiceProvider      string
-	Client               string
-	ServiceTitle         string
-	ServiceCategory      string
-	Price                string
-	StartDate            string
-	Location             string
-	ProviderEmail        string
-	ClientEmail          string
+	Id                   string `db:"id"`
+	CreatedAt            string `db:"createdAt"`
+	Vendor               string `db:"vendor"`
+	Client               string `db:"client"`
+	ServiceTitle         string `db:"serviceTitle"`
+	Price                string `db:"price"`
+	StartDate            string `db:"startDate"`
+	EndDate              string `db:"endDate"`
+	VendorEmail          string `db:"vendorEmail"`
+	ClientEmail          string `db:"clientEmail"`
 	ConfirmationEndpoint string
 }
 

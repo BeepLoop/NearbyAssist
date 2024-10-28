@@ -90,6 +90,7 @@ CREATE TABLE IF NOT EXISTS Tag (
 CREATE TABLE IF NOT EXISTS Service (
     id VARCHAR(255) NOT NULL,
     vendorId VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     rate Double NOT NULL,
     latitude Decimal(12, 10) NOT NULL,
@@ -207,9 +208,11 @@ CREATE TABLE IF NOT EXISTS Transaction (
     vendorId VARCHAR(255) NOT NULL,
     clientId VARCHAR(255) NOT NULL,
     serviceId VARCHAR(255) NOT NULL,
-    status Enum('ongoing', 'done', 'cancelled') NOT NULL DEFAULT 'ongoing',
-    start TIMESTAMP NOT NULL,
-    end TIMESTAMP NOT NULL,
+    status Enum('pending', 'ongoing', 'done', 'cancelled') NOT NULL DEFAULT 'pending',
+    price DOUBLE NOT NULL,
+    startDate TIMESTAMP NOT NULL,
+    endDate TIMESTAMP NOT NULL,
+    confirmCode VARCHAR(255) NOT NULL,
     isReviewed TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: not reviewed, 1: reviewed',
     isReported TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: not reported, 1: reported',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -217,7 +220,8 @@ CREATE TABLE IF NOT EXISTS Transaction (
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY(serviceId) REFERENCES Service(id) ON DELETE CASCADE,
-    FOREIGN KEY(clientId) REFERENCES User(id)
+    FOREIGN KEY(clientId) REFERENCES User(id),
+    INDEX(id, confirmCode)
 );
 
 CREATE TABLE IF NOT EXISTS Application (

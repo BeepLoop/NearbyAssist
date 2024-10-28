@@ -3,6 +3,7 @@ package transaction_repo
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -19,32 +20,38 @@ func NewMysqlTransactionRepository(db *sqlx.DB) *MysqlTransactionRepository {
 	}
 }
 
-func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (string, error) {
+func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (string, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	if id, err := gonanoid.New(); err != nil {
-		return "", err
+		return "", "", err
 	} else {
 		data.Id = id
 	}
 
+	if code, err := gonanoid.New(); err != nil {
+		return "", "", err
+	} else {
+		data.ConfirmCode = code
+	}
+
 	query := `
         INSERT INTO
-            Transaction (id, vendorId, clientId, serviceId, start, end)
+            Transaction (id, vendorId, clientId, serviceId, start, end, confirmCode)
         VALUES
-            (:id, :vendorId, :clientId, :serviceId, :start, :end)
+            (:id, :vendorId, :clientId, :serviceId, :start, :end, :confirmCode)
     `
 
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", context.DeadlineExceeded
+		return "", "", context.DeadlineExceeded
 	}
 
-	return data.Id, nil
+	return data.Id, data.ConfirmCode, nil
 }
 
 func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionModel, error) {
@@ -63,6 +70,42 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
 	}
 
 	return transaction, nil
+}
+
+func (s *MysqlTransactionRepository) GetSummary(transactionId string) (*response.TransactionSummary, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	summary := new(response.TransactionSummary)
+	query := `
+        SELECT
+            t.id,
+            t.createdAt,
+            vendor.Name AS vendor,
+            client.Name AS client,
+            s.title AS serviceTitle,
+            t.price,
+            t.startDate,
+            t.endDate,
+            vendor.Email AS vendorEmail,
+            client.Email AS clientEmail
+        FROM
+            Transaction t
+            JOIN User client ON t.clientId = client.id
+            JOIN User vendor ON t.vendorId = vendor.id
+            JOIN Service s ON t.serviceId = s.id
+        WHERE
+            id = ?
+    `
+	if err := s.db.GetContext(ctx, summary, query, transactionId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return summary, nil
 }
 
 func (s *MysqlTransactionRepository) GetAll() ([]*models.TransactionModel, error) {

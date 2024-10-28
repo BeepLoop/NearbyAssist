@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/models"
 	transaction_repo "nearbyassist/internal/repository/transaction"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/utils"
 )
@@ -18,29 +19,68 @@ func NewService(store transaction_repo.TransactionRepository, encrypt auth.Encry
 	return &Service{store: store, encrypt: encrypt, jwt: jwt}
 }
 
-func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string, error) {
+func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string, string, error) {
 	// Validate that the date is valid
 	if err := utils.ValidateDateRange(req.Start, req.End); err != nil {
 		if err.Error() == utils.DATE_PARSE_ERR {
-			return "", err
+			return "", "", err
 		}
 
-		return "", err
+		return "", "", err
 	}
 
 	transaction := new(models.TransactionModel)
 	transaction.ClientId = req.ClientId
 	transaction.VendorId = req.VendorId
 	transaction.ServiceId = req.ServiceId
-	transaction.Start = req.Start
-	transaction.End = req.End
+	transaction.StartDate = req.Start
+	transaction.EndDate = req.End
 
-	transactionId, err := s.store.Create(transaction)
+	transactionId, confirmCode, err := s.store.Create(transaction)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return transactionId, nil
+	return transactionId, confirmCode, nil
+}
+
+func (s *Service) GetTransactionSummary(transactionId string) (*response.TransactionSummary, error) {
+	transactionData, err := s.store.GetSummary(transactionId)
+	if err != nil {
+		return nil, err
+	}
+
+	if plain, err := s.encrypt.DecryptString(transactionData.Vendor); err != nil {
+		return nil, err
+	} else {
+		transactionData.Vendor = plain
+	}
+
+	if plain, err := s.encrypt.DecryptString(transactionData.Client); err != nil {
+		return nil, err
+	} else {
+		transactionData.Client = plain
+	}
+
+	if plain, err := s.encrypt.DecryptString(transactionData.ServiceTitle); err != nil {
+		return nil, err
+	} else {
+		transactionData.ServiceTitle = plain
+	}
+
+	if plain, err := s.encrypt.DecryptString(transactionData.VendorEmail); err != nil {
+		return nil, err
+	} else {
+		transactionData.VendorEmail = plain
+	}
+
+	if plain, err := s.encrypt.DecryptString(transactionData.ClientEmail); err != nil {
+		return nil, err
+	} else {
+		transactionData.ClientEmail = plain
+	}
+
+	return transactionData, nil
 }
 
 func (s *Service) GetUserTransactionList(bearerToken string) ([]*models.TransactionModel, error) {
