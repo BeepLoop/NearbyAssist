@@ -68,7 +68,7 @@ func (s *Service) GetMessages(bearerToken, otherUserId string) ([]*models.Messag
 	return messages, nil
 }
 
-func (s *Service) GetConversationList(bearerToken string) ([]*models.UserModel, error) {
+func (s *Service) GetConversationList(bearerToken string) ([]*models.ConversationModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return nil, err
