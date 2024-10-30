@@ -21,6 +21,9 @@ clean:
 	@echo "Cleaning..."
 	@rm -rf bin 
 	@rm -rf test
+	@sudo rm -rf mysql
+	@rm -rf store
+	@rm -rf logs
 
 templates:
 	@templ generate
