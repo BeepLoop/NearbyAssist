@@ -2,9 +2,7 @@ package application
 
 import (
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/response"
 	application_service "nearbyassist/internal/service/application"
-	"nearbyassist/internal/service/email"
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -15,11 +13,10 @@ import (
 type applicationHandler struct {
 	applicationService *application_service.Service
 	userService        *user_service.Service
-	mailman            email.MailService
 }
 
-func NewHandler(applicationService *application_service.Service, userService *user_service.Service, mailman email.MailService) *applicationHandler {
-	return &applicationHandler{applicationService: applicationService, userService: userService, mailman: mailman}
+func NewHandler(applicationService *application_service.Service, userService *user_service.Service) *applicationHandler {
+	return &applicationHandler{applicationService: applicationService, userService: userService}
 }
 
 func (h *applicationHandler) CreateApplication(c echo.Context) error {
@@ -57,12 +54,8 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 		})
 	}
 
-	m := email.VendorApplicationMail(h.mailman).To([]string{user.Email})
-	m.SetSubject(email.VENDOR_APPLICATION_ACKNOWLEDGMENT)
-	m.SetBody(email.VENDOR_APPLICATION_ACKNOWLEDGMENT, response.BasicEmailPayload{
-		User: user.Name,
-	})
-	go m.Send()
+	// TODO: Handle notifying the user of the application status
+	_ = user
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"application": applicationId,

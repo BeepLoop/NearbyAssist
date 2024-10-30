@@ -3,7 +3,6 @@ package transaction
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
-	"nearbyassist/internal/service/email"
 	transaction_service "nearbyassist/internal/service/transaction"
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
@@ -15,11 +14,10 @@ import (
 type transactionHandler struct {
 	transactionService *transaction_service.Service
 	userService        *user_service.Service
-	mailman            email.MailService
 }
 
-func NewHandler(transactionService *transaction_service.Service, useService *user_service.Service, mailman email.MailService) *transactionHandler {
-	return &transactionHandler{transactionService: transactionService, userService: useService, mailman: mailman}
+func NewHandler(transactionService *transaction_service.Service, useService *user_service.Service) *transactionHandler {
+	return &transactionHandler{transactionService: transactionService, userService: useService}
 }
 
 func (h *transactionHandler) CreateTransaction(c echo.Context) error {
@@ -38,7 +36,7 @@ func (h *transactionHandler) CreateTransaction(c echo.Context) error {
 		})
 	}
 
-	transactionId, confirmCode, err := h.transactionService.CreateTransaction(req)
+	transactionId, err := h.transactionService.CreateTransaction(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating transaction",
@@ -64,20 +62,9 @@ func (h *transactionHandler) CreateTransaction(c echo.Context) error {
 		})
 	}
 
-	// TODO: Implement confirmation endpoint
-	summary.ConfirmationEndpoint = confirmCode
-
-	m := email.TransactionSummaryMail(h.mailman)
-	m.To([]string{user.Email})
-
-	if err := m.SetBody(*summary); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error setting email body",
-			Error:   err.Error(),
-		})
-	}
-
-	go m.Send()
+	// TODO: Handle notifying the parties involved in the transaction
+	_ = user
+	_ = summary
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"transaction": transactionId,

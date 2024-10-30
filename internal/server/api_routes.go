@@ -149,7 +149,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.Encrypt,
 			s.JWT,
 		)
-		handler := transaction.NewHandler(transactionService, userService, s.Mailman)
+		handler := transaction.NewHandler(transactionService, userService)
 
 		transactionRoute.POST("", handler.CreateTransaction)
 		transactionRoute.GET("/mine", handler.GetUserTransactionList)
@@ -168,7 +168,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
 		applicationService := application_service.NewService(applicationStore, s.FS, s.Encrypt, s.JWT)
-		handler := application.NewHandler(applicationService, userService, s.Mailman)
+		handler := application.NewHandler(applicationService, userService)
 
 		applicationRoute.POST("", handler.CreateApplication)
 	}
@@ -202,7 +202,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.Encrypt,
 			s.JWT,
 		)
-		handler := verification.NewHandler(verificationService, userService, s.Mailman)
+		handler := verification.NewHandler(verificationService, userService)
 
 		verificationRoute.POST("/identity", handler.CreateIdentityVerification)
 	}

@@ -2,8 +2,6 @@ package verification
 
 import (
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/response"
-	"nearbyassist/internal/service/email"
 	user_service "nearbyassist/internal/service/user"
 	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
@@ -15,11 +13,10 @@ import (
 type verificationHandler struct {
 	verificationService *verification_service.Service
 	userService         *user_service.Service
-	mailman             email.MailService
 }
 
-func NewHandler(verificationService *verification_service.Service, userService *user_service.Service, mailman email.MailService) *verificationHandler {
-	return &verificationHandler{verificationService: verificationService, userService: userService, mailman: mailman}
+func NewHandler(verificationService *verification_service.Service, userService *user_service.Service) *verificationHandler {
+	return &verificationHandler{verificationService: verificationService, userService: userService}
 }
 
 func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
@@ -61,13 +58,8 @@ func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 		})
 	}
 
-	m := email.IdentityVerificationMail(h.mailman)
-	m.To([]string{user.Email})
-	m.SetSubject(email.IDENTITY_REQUEST_ACKNOWLEDGMENT)
-	m.SetBody(email.IDENTITY_REQUEST_ACKNOWLEDGMENT, response.BasicEmailPayload{
-		User: user.Name,
-	})
-	go m.Send()
+	// TODO: Handle notifying the user of the verification status
+	_ = user
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"verification": verificationId,

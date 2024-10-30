@@ -7,7 +7,6 @@ import (
 	message_repo "nearbyassist/internal/repository/message"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/auth"
-	"nearbyassist/internal/service/email"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
@@ -59,17 +58,10 @@ func main() {
 	chatStore := message_repo.NewMysqlChatRepository(mysql)
 	ws := websocket.NewWebsocket(chatStore)
 
-	mailman, err := email.NewGoMail(config.EMAIL_FROM, config.EMAIL_PASS)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	serverConfig := server.ServerConfig{
 		Config: config,
 
 		WS: ws,
-
-		Mailman: mailman,
 
 		DB: mysql,
 		FS: storage,

@@ -20,20 +20,14 @@ func NewMysqlTransactionRepository(db *sqlx.DB) *MysqlTransactionRepository {
 	}
 }
 
-func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (string, string, error) {
+func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	if id, err := gonanoid.New(); err != nil {
-		return "", "", err
+		return "", err
 	} else {
 		data.Id = id
-	}
-
-	if code, err := gonanoid.New(); err != nil {
-		return "", "", err
-	} else {
-		data.ConfirmCode = code
 	}
 
 	query := `
@@ -44,14 +38,14 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
     `
 
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
-		return "", "", err
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", "", context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return data.Id, data.ConfirmCode, nil
+	return data.Id, nil
 }
 
 func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionModel, error) {

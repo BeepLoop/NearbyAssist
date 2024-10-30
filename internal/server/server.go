@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/auth"
-	"nearbyassist/internal/service/email"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
@@ -25,8 +24,6 @@ type Server struct {
 	AllowedOrigins []string
 
 	WS *websocket.Websocket
-
-	Mailman email.MailService
 
 	DB *sqlx.DB
 	FS fs.FileStorage
@@ -56,8 +53,6 @@ func NewServer(options ServerConfig) (*Server, error) {
 		LOG_FILE:       file,
 
 		WS: options.WS,
-
-		Mailman: options.Mailman,
 
 		DB: options.DB,
 		FS: options.FS,
