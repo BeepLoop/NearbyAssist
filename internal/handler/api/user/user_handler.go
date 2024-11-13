@@ -42,11 +42,7 @@ func (h *userHandler) Login(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, utils.Mapper{
-		"user":         loginResp["user"],
-		"accessToken":  loginResp["accessToken"],
-		"refreshToken": loginResp["refreshToken"],
-	})
+	return c.JSON(http.StatusCreated, loginResp)
 }
 
 func (h *userHandler) Refresh(c echo.Context) error {

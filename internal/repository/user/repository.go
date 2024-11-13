@@ -16,4 +16,6 @@ type UserRepository interface {
 
 	// Check if refreshToken is blacklisted, if blacklisted return nil else return error
 	IsRefreshTokenBlacklisted(refreshToken string) error
+
+	IsVendor(userId string) (bool, error)
 }

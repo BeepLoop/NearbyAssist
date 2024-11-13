@@ -170,3 +170,24 @@ func (s *MysqlUserRepository) IsRefreshTokenBlacklisted(refreshToken string) err
 
 	return errors.New("refreshToken blacklisted")
 }
+
+func (s *MysqlUserRepository) IsVendor(userId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	count := 0
+	query := "SELECT COUNT(id) FROM Vendor WHERE vendorId = ?"
+	if err := s.db.GetContext(ctx, &count, query, userId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}

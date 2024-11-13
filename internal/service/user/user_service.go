@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/models"
 	repository "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/utils"
 )
@@ -19,7 +20,7 @@ func NewService(store repository.UserRepository, encrypt auth.Encryption, hash a
 	return &Service{store: store, encrypt: encrypt, hash: hash, jwt: jwt}
 }
 
-func (s *Service) Login(req *request.UserLoginPayload) (map[string]interface{}, error) {
+func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse, error) {
 	emailHash, err := s.hash.Generate([]byte(req.Email))
 	if err != nil {
 		return nil, err
@@ -29,6 +30,11 @@ func (s *Service) Login(req *request.UserLoginPayload) (map[string]interface{}, 
 	if err != nil {
 		// If user is not found, continue to registration
 		return s.Register(req, emailHash)
+	}
+
+	isVendor, err := s.store.IsVendor(existingUser.Id)
+	if err != nil {
+		return nil, err
 	}
 
 	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
@@ -50,22 +56,23 @@ func (s *Service) Login(req *request.UserLoginPayload) (map[string]interface{}, 
 		return nil, err
 	}
 
-	data := map[string]interface{}{
-		"user": models.UserModel{
-			Model:    models.Model{Id: existingUser.Id},
-			Name:     req.Name,
-			Email:    req.Email,
-			ImageUrl: req.Image,
-			Verified: existingUser.Verified,
+	response := &response.LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User: response.DetailedUser{
+			Id:         existingUser.Id,
+			Name:       req.Name,
+			Email:      req.Email,
+			ImageUrl:   req.Image,
+			IsVerified: existingUser.Verified,
+			IsVendor:   isVendor,
 		},
-		"accessToken":  accessToken,
-		"refreshToken": refreshToken,
 	}
 
-	return data, nil
+	return response, nil
 }
 
-func (s *Service) Register(req *request.UserLoginPayload, emailHash string) (map[string]interface{}, error) {
+func (s *Service) Register(req *request.UserLoginPayload, emailHash string) (*response.LoginResponse, error) {
 	newUser := new(models.UserModel)
 	newUser.EmailHash = emailHash
 	newUser.ImageUrl = req.Image
@@ -106,19 +113,20 @@ func (s *Service) Register(req *request.UserLoginPayload, emailHash string) (map
 		return nil, err
 	}
 
-	data := map[string]interface{}{
-		"user": models.UserModel{
-			Model:    models.Model{Id: newUser.Id},
-			Name:     req.Name,
-			Email:    req.Email,
-			ImageUrl: req.Image,
-			Verified: newUser.Verified,
+	response := &response.LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User: response.DetailedUser{
+			Id:         newUser.Id,
+			Name:       req.Name,
+			Email:      req.Email,
+			ImageUrl:   req.Image,
+			IsVerified: false,
+			IsVendor:   false,
 		},
-		"accessToken":  accessToken,
-		"refreshToken": refreshToken,
 	}
 
-	return data, nil
+	return response, nil
 }
 
 func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
@@ -179,13 +187,18 @@ func (s *Service) Logout(refreshToken string) error {
 	return nil
 }
 
-func (s *Service) GetUser(bearerToken string) (*models.UserModel, error) {
+func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return nil, err
 	}
 
 	user, err := s.store.FindById(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	isVendor, err := s.store.IsVendor(user.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +215,16 @@ func (s *Service) GetUser(bearerToken string) (*models.UserModel, error) {
 		user.Email = plain
 	}
 
-	return user, nil
+	response := &response.DetailedUser{
+		Id:         user.Id,
+		Name:       user.Name,
+		Email:      user.Email,
+		ImageUrl:   user.ImageUrl,
+		IsVerified: user.Verified,
+		IsVendor:   isVendor,
+	}
+
+	return response, nil
 }
 
 func (s *Service) IsVerified(bearerToken string) (bool, error) {
