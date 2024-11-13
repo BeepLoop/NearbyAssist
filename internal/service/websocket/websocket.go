@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/models"
 	message_repo "nearbyassist/internal/repository/message"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -94,6 +95,7 @@ func (w *Websocket) storeMessage(message *models.MessageModel) {
 }
 
 func (w *Websocket) forwardMessage(message *models.MessageModel) {
+	time.Sleep(time.Second * 2)
 
 	if socket, ok := w.clients[message.Receiver]; ok {
 		err := socket.WriteJSON(message)

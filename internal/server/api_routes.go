@@ -221,6 +221,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		chatRoute.GET("/messages/:otherUserId", handler.GetMessages, middleware.CheckAuth(s.JWT))
 		chatRoute.GET("/conversations", handler.GetConversationList, middleware.CheckAuth(s.JWT))
+		chatRoute.POST("/send", handler.SendMessage, middleware.CheckAuth(s.JWT))
 	}
 
 	// ===== COMPLAINT =======

@@ -1,6 +1,7 @@
 package message_service
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	message_repo "nearbyassist/internal/repository/message"
 	"nearbyassist/internal/service/auth"
@@ -36,6 +37,7 @@ func (s *Service) ConnectWebsocket(c echo.Context) error {
 	}
 
 	s.ws.RegisterClient(userId, conn)
+	fmt.Println("User connected: ", userId)
 
 	for {
 		message := new(models.MessageModel)
@@ -43,6 +45,7 @@ func (s *Service) ConnectWebsocket(c echo.Context) error {
 		if err != nil {
 			if gorilla_ws.IsCloseError(err, gorilla_ws.CloseNormalClosure, gorilla_ws.CloseGoingAway, gorilla_ws.CloseAbnormalClosure) {
 				s.ws.UnregisterClient(userId)
+				fmt.Println("User disconnected: ", userId)
 
 				return nil
 			}
@@ -88,4 +91,9 @@ func (s *Service) GetConversationList(bearerToken string) ([]*models.Conversatio
 	}
 
 	return conversations, nil
+}
+
+func (s *Service) SendMessage(message *models.MessageModel) error {
+	s.ws.NewMessage(message)
+	return nil
 }
