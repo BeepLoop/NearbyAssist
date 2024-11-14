@@ -120,9 +120,31 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		vendor.Vendor = decrypted
 	}
 
+	if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
+		return nil, err
+	} else {
+		vendor.Email = decrypted
+	}
+
+	vendorData := struct {
+		Id           string `json:"id"`
+		Name         string `json:"name"`
+		Email        string `json:"email"`
+		ImageUrl     string `json:"imageUrl"`
+		Rating       string `json:"rating"`
+		IsRestricted int    `json:"isRestricted"`
+	}{
+		Id:           vendor.VendorId,
+		Name:         vendor.Vendor,
+		Email:        vendor.Email,
+		ImageUrl:     vendor.ImageUrl,
+		Rating:       vendor.Rating,
+		IsRestricted: vendor.Restricted,
+	}
+
 	data := map[string]interface{}{
 		"serviceInfo":    service,
-		"vendorInfo":     vendor,
+		"vendorInfo":     vendorData,
 		"serviceImages":  photos,
 		"countPerRating": countPerRating,
 	}

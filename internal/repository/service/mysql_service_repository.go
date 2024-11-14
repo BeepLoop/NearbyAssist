@@ -197,9 +197,10 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
         SELECT
             v.vendorId,
             v.rating,
-            v.job,
-            u.name as vendor,
-            u.imageUrl as imageUrl
+            u.name AS vendor,
+            u.email AS email,
+            u.imageUrl AS imageUrl,
+            v.restricted
         FROM
             Vendor v
             JOIN User u ON u.id = v.vendorId
