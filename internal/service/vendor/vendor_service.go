@@ -21,6 +21,18 @@ func (s *Service) GetVendor(vendorId string) (*models.VendorModel, error) {
 		return nil, err
 	}
 
+	if plainText, err := s.encrypt.DecryptString(vendor.Vendor); err != nil {
+		return nil, err
+	} else {
+		vendor.Vendor = plainText
+	}
+
+	if plainText, err := s.encrypt.DecryptString(vendor.Email); err != nil {
+		return nil, err
+	} else {
+		vendor.Email = plainText
+	}
+
 	return vendor, nil
 }
 

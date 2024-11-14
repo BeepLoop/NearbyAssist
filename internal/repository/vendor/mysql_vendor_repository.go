@@ -21,7 +21,22 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	defer cancel()
 
 	vendor := new(models.VendorModel)
-	query := "SELECT id, vendorId, rating, job, restricted FROM Vendor WHERE vendorId = ?"
+	query := `
+        SELECT  
+            v.vendorId AS id,
+            v.rating,
+            v.job,
+            v.restricted,
+            u.name AS vendor,
+            u.email AS email,
+            u.imageUrl AS imageUrl
+        FROM 
+            Vendor  v
+            JOIN User u ON u.id = v.vendorId
+        WHERE 
+            vendorId = ?
+    `
+
 	if err := s.db.GetContext(ctx, vendor, query, id); err != nil {
 		return nil, err
 	}

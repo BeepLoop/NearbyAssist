@@ -2,8 +2,8 @@ package vendor
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	vendor_service "nearbyassist/internal/service/vendor"
-	"nearbyassist/internal/utils"
 	"net/http"
 	"strings"
 
@@ -42,9 +42,30 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"vendor": vendor,
-	})
+	var isRestricted bool
+	if vendor.Restricted == 1 {
+		isRestricted = true
+	} else {
+		isRestricted = false
+	}
+
+	response := struct {
+		Id           string `json:"id"`
+		Name         string `json:"name"`
+		Email        string `json:"email"`
+		ImageUrl     string `json:"imageUrl"`
+		Rating       string `json:"rating"`
+		IsRestricted bool   `json:"isRestricted"`
+	}{
+		Id:           vendor.Id,
+		Name:         vendor.Vendor,
+		Email:        vendor.Email,
+		ImageUrl:     vendor.ImageUrl,
+		Rating:       vendor.Rating,
+		IsRestricted: isRestricted,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
@@ -56,6 +77,14 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		})
 	}
 
+	vendor, err := h.vendorService.GetVendor(vendorId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error retrieving vendor information",
+			Error:   err.Error(),
+		})
+	}
+
 	services, err := h.vendorService.GetVendorServiceList(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
@@ -64,7 +93,48 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"services": services,
-	})
+	var isRestricted bool
+	if vendor.Restricted == 1 {
+		isRestricted = true
+	} else {
+		isRestricted = false
+	}
+
+	response := response.VendorServiceList{
+		Vendor: struct {
+			Id           string `json:"id"`
+			Name         string `json:"name"`
+			Email        string `json:"email"`
+			ImageUrl     string `json:"imageUrl"`
+			Rating       string `json:"rating"`
+			IsRestricted bool   `json:"isRestricted"`
+		}{
+			Id:           vendor.Id,
+			Name:         vendor.Vendor,
+			Email:        vendor.Email,
+			ImageUrl:     vendor.ImageUrl,
+			Rating:       vendor.Rating,
+			IsRestricted: isRestricted,
+		},
+	}
+
+	for _, service := range services {
+		response.Services = append(response.Services, struct {
+			Id          string   `json:"id"`
+			Description string   `json:"description"`
+			Price       string   `json:"price"`
+			Latitude    float64  `json:"latitude"`
+			Longitude   float64  `json:"longitude"`
+			Tags        []string `json:"tags"`
+		}{
+			Id:          service.Id,
+			Description: service.Description,
+			Price:       service.Rate,
+			Latitude:    service.Latitude,
+			Longitude:   service.Longitude,
+			Tags:        service.Tags,
+		})
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
