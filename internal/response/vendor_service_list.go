@@ -7,7 +7,7 @@ type VendorServiceList struct {
 		Email        string `json:"email"`
 		ImageUrl     string `json:"imageUrl"`
 		Rating       string `json:"rating"`
-		IsRestricted bool   `json:"isRestricted"`
+		IsRestricted int    `json:"isRestricted"`
 	} `json:"vendor"`
 	Services []struct {
 		Id          string   `json:"id"`

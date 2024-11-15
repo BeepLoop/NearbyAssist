@@ -42,27 +42,20 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		})
 	}
 
-	var isRestricted bool
-	if vendor.Restricted == 1 {
-		isRestricted = true
-	} else {
-		isRestricted = false
-	}
-
 	response := struct {
 		Id           string `json:"id"`
 		Name         string `json:"name"`
 		Email        string `json:"email"`
 		ImageUrl     string `json:"imageUrl"`
 		Rating       string `json:"rating"`
-		IsRestricted bool   `json:"isRestricted"`
+		IsRestricted int    `json:"isRestricted"`
 	}{
 		Id:           vendor.Id,
 		Name:         vendor.Vendor,
 		Email:        vendor.Email,
 		ImageUrl:     vendor.ImageUrl,
 		Rating:       vendor.Rating,
-		IsRestricted: isRestricted,
+		IsRestricted: vendor.Restricted,
 	}
 
 	return c.JSON(http.StatusOK, response)
@@ -93,13 +86,6 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		})
 	}
 
-	var isRestricted bool
-	if vendor.Restricted == 1 {
-		isRestricted = true
-	} else {
-		isRestricted = false
-	}
-
 	response := response.VendorServiceList{
 		Vendor: struct {
 			Id           string `json:"id"`
@@ -107,14 +93,14 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 			Email        string `json:"email"`
 			ImageUrl     string `json:"imageUrl"`
 			Rating       string `json:"rating"`
-			IsRestricted bool   `json:"isRestricted"`
+			IsRestricted int    `json:"isRestricted"`
 		}{
 			Id:           vendor.Id,
 			Name:         vendor.Vendor,
 			Email:        vendor.Email,
 			ImageUrl:     vendor.ImageUrl,
 			Rating:       vendor.Rating,
-			IsRestricted: isRestricted,
+			IsRestricted: vendor.Restricted,
 		},
 	}
 

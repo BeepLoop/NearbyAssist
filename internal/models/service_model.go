@@ -10,7 +10,7 @@ type ServiceModel struct {
 	UpdateableModel
 	GeoSpatialModel
 	VendorId    string `json:"vendorId" db:"vendorId" validate:"required"`
-	Title       string `db:"title"`
+	Title       string `json:"title" db:"title"`
 	Description string `json:"description" db:"description" validate:"required"`
 	Rate        string `json:"rate" db:"rate" validate:"required"`
 	Signature   string `db:"signature"`
