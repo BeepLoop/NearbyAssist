@@ -6,6 +6,7 @@ import (
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -40,6 +41,13 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 
 	applicationId, err := h.applicationService.CreateApplication(bearerToken, job, files)
 	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "Application already exists",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating application",
 			Error:   err.Error(),
