@@ -56,6 +56,7 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
         SELECT
             id,
             vendorId,
+            title,
             description,
             rate,
             latitude,

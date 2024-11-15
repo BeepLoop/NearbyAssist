@@ -40,11 +40,12 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
 	registerService := `
 	        INSERT INTO
 	            Service
-	                (id, vendorId, description, rate, latitude, longitude, signature)
+	                (id, vendorId, title, description, rate, latitude, longitude, signature)
 	        VALUES 
                 (
                     :id,
                     :vendorId,
+                    :title,
                     :description,
                     :rate,
                     :latitude,
@@ -129,6 +130,7 @@ func (s *MysqlServiceRepository) FindById(id string) (*models.ServiceModel, erro
         SELECT
             id,
             vendorId,
+            title,
             description,
             format(rate, 2) as rate,
             latitude, 
@@ -290,6 +292,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
         UPDATE
             Service
         SET
+            title = :title,
             description = :description,
             rate = :rate,
             latitude = :latitude,

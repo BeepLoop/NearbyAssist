@@ -32,6 +32,11 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 		return "", err
 	}
 
+	encryptedTitle, err := s.encrypt.EncryptString(req.Title)
+	if err != nil {
+		return "", err
+	}
+
 	encryptedDesc, err := s.encrypt.EncryptString(req.Description)
 	if err != nil {
 		return "", err
@@ -50,6 +55,7 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 
 	newService := new(models.ServiceModel)
 	newService.VendorId = req.VendorId
+	newService.Title = encryptedTitle
 	newService.Description = encryptedDesc
 	newService.Rate = req.Rate
 	newService.Tags = req.Tags
@@ -69,6 +75,12 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 	service, err := s.store.FindById(serviceId)
 	if err != nil {
 		return nil, err
+	}
+
+	if cipher, err := s.encrypt.DecryptString(service.Title); err != nil {
+		return nil, err
+	} else {
+		service.Title = cipher
 	}
 
 	if cipher, err := s.encrypt.DecryptString(service.Description); err != nil {
@@ -174,6 +186,12 @@ func (s *Service) UpdateService(bearerToken, serviceId string, req *request.Upda
 	updatedService.Latitude = req.Latitude
 	updatedService.Longitude = req.Longitude
 
+	if cipher, err := s.encrypt.EncryptString(req.Title); err != nil {
+		return err
+	} else {
+		updatedService.Title = cipher
+	}
+
 	if cipher, err := s.encrypt.EncryptString(req.Description); err != nil {
 		return err
 	} else {
@@ -181,7 +199,7 @@ func (s *Service) UpdateService(bearerToken, serviceId string, req *request.Upda
 	}
 
 	// Recompute signature
-	toSign := fmt.Sprintf("%s_%s_%f_%f", req.VendorId, req.Description, req.Latitude, req.Longitude)
+	toSign := fmt.Sprintf("%s_%s_%s_%f_%f", req.VendorId, req.Title, req.Description, req.Latitude, req.Longitude)
 	if signature, err := s.hash.Generate([]byte(toSign)); err != nil {
 		return err
 	} else {

@@ -43,6 +43,12 @@ func (s *Service) GetVendorServiceList(vendorId string) ([]*models.ServiceModel,
 	}
 
 	for _, service := range services {
+		if plain, err := s.encrypt.DecryptString(service.Title); err != nil {
+			return nil, err
+		} else {
+			service.Title = plain
+		}
+
 		if plain, err := s.encrypt.DecryptString(service.Description); err != nil {
 			return nil, err
 		} else {

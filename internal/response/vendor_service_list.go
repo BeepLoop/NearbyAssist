@@ -11,6 +11,7 @@ type VendorServiceList struct {
 	} `json:"vendor"`
 	Services []struct {
 		Id          string   `json:"id"`
+		Title       string   `json:"title"`
 		Description string   `json:"description"`
 		Price       string   `json:"price"`
 		Latitude    float64  `json:"latitude"`

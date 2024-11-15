@@ -121,6 +121,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 	for _, service := range services {
 		response.Services = append(response.Services, struct {
 			Id          string   `json:"id"`
+			Title       string   `json:"title"`
 			Description string   `json:"description"`
 			Price       string   `json:"price"`
 			Latitude    float64  `json:"latitude"`
@@ -128,6 +129,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 			Tags        []string `json:"tags"`
 		}{
 			Id:          service.Id,
+			Title:       service.Title,
 			Description: service.Description,
 			Price:       service.Rate,
 			Latitude:    service.Latitude,
