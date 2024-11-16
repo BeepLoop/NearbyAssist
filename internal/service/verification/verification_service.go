@@ -138,7 +138,7 @@ func (s *Service) GetRequest(id string) (*models.IdentityVerificationModel, erro
 }
 
 func (s *Service) GetIdentityVerificationRequests() ([]*models.IdentityVerificationModel, error) {
-	requests, err := s.store.GetAll()
+	requests, err := s.store.GetAll("pending")
 	if err != nil {
 		return nil, err
 	}

@@ -46,7 +46,7 @@ func (s *MysqlVerificationRepository) Create(data *models.IdentityVerificationMo
 	return data.Id, nil
 }
 
-func (s *MysqlVerificationRepository) GetAll() ([]*models.IdentityVerificationModel, error) {
+func (s *MysqlVerificationRepository) GetAll(status string) ([]*models.IdentityVerificationModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -66,8 +66,10 @@ func (s *MysqlVerificationRepository) GetAll() ([]*models.IdentityVerificationMo
             createdAt
         FROM 
             IdentityVerification
+        WHERE
+            status = ?
     `
-	if err := s.db.SelectContext(ctx, &requests, query); err != nil {
+	if err := s.db.SelectContext(ctx, &requests, query, status); err != nil {
 		return nil, err
 	}
 
