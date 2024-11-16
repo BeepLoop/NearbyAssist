@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS ServicePhoto (
 
 CREATE TABLE IF NOT EXISTS IdentityVerification (
     id VARCHAR(255) NOT NULL,
-    user VARCHAR(255) NOT NULL,
+    userId VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
     idType VARCHAR(255) NOT NULL,
@@ -154,8 +154,8 @@ CREATE TABLE IF NOT EXISTS IdentityVerification (
     status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY(id, user, idType),
-    FOREIGN KEY(user) REFERENCES User(id),
+    PRIMARY KEY(id, userId, idType),
+    FOREIGN KEY(userId) REFERENCES User(id),
     INDEX(id)
 );
 

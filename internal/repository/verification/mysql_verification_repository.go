@@ -31,7 +31,7 @@ func (s *MysqlVerificationRepository) Create(data *models.IdentityVerificationMo
 
 	query := `
         INSERT INTO IdentityVerification 
-            (id, user, name, address, idType, idNumber, frontIdImageUrl, backIdImageUrl, faceImageUrl)
+            (id, userId, name, address, idType, idNumber, frontIdImageUrl, backIdImageUrl, faceImageUrl)
         VALUES 
             ( :id, :userId, :name, :address, :idType, :idNumber, :frontIdImageUrl, :backIdImageUrl, :faceImageUrl)
     `
@@ -54,7 +54,7 @@ func (s *MysqlVerificationRepository) GetAll() ([]*models.IdentityVerificationMo
 	query := `
         SELECT 
             id,
-            user AS userId,
+            userId,
             name,
             address,
             idType,

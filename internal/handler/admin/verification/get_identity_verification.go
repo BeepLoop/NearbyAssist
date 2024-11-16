@@ -2,7 +2,6 @@ package verification
 
 import (
 	"context"
-	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/pages"
 	"time"
@@ -13,7 +12,6 @@ import (
 func (h *verificationHandler) GetIdentityVerification(c echo.Context) error {
 	requests, err := h.verificationService.GetIdentityVerificationRequests()
 	if err != nil {
-		fmt.Println(err)
 		page := pages.IdentityVerification(make([]models.IdentityVerificationModel, 0))
 		return page.Render(context.Background(), c.Response().Writer)
 	}
