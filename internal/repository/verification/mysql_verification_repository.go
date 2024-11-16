@@ -77,3 +77,37 @@ func (s *MysqlVerificationRepository) GetAll() ([]*models.IdentityVerificationMo
 
 	return requests, nil
 }
+
+func (s *MysqlVerificationRepository) FindById(id string) (*models.IdentityVerificationModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	request := new(models.IdentityVerificationModel)
+	query := `
+        SELECT 
+            id,
+            userId,
+            name,
+            address,
+            idType,
+            idNumber,
+            frontIdImageUrl,
+            backIdImageUrl,
+            faceImageUrl,
+            status,
+            createdAt
+        FROM 
+            IdentityVerification
+        WHERE
+            id = ?
+    `
+	if err := s.db.GetContext(ctx, request, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return request, nil
+}

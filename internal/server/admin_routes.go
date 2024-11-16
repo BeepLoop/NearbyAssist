@@ -74,11 +74,14 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	verificationRoute := r.Group("/verification-requests")
 	{
+		verificationRoute.Use(middleware.CheckSession)
+
 		requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		requestService := verification_service.NewService(requestStore, s.FS, s.Encrypt, s.JWT)
 		requestHandler := verification.NewHandler(requestService)
 
-		verificationRoute.GET("", requestHandler.GetIdentityVerification, middleware.CheckSession)
+		verificationRoute.GET("", requestHandler.GetIdentityVerification)
+		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails)
 	}
 
 	managementRoute := r.Group("/account-management")

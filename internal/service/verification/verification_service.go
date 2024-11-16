@@ -1,12 +1,14 @@
 package verification_service
 
 import (
+	"encoding/base64"
 	"mime/multipart"
 	"nearbyassist/internal/models"
 	verification_repo "nearbyassist/internal/repository/verification"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/utils"
+	"net/http"
 )
 
 type Service struct {
@@ -108,6 +110,33 @@ func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bea
 	return verificationId, nil
 }
 
+func (s *Service) GetRequest(id string) (*models.IdentityVerificationModel, error) {
+	request, err := s.store.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	decryptedName, err := s.encrypt.DecryptString(request.Name)
+	if err != nil {
+		return nil, err
+	}
+	request.Name = decryptedName
+
+	decryptedAddress, err := s.encrypt.DecryptString(request.Address)
+	if err != nil {
+		return nil, err
+	}
+	request.Address = decryptedAddress
+
+	decryptedIdNumber, err := s.encrypt.DecryptString(request.IdNumber)
+	if err != nil {
+		return nil, err
+	}
+	request.IdNumber = decryptedIdNumber
+
+	return request, nil
+}
+
 func (s *Service) GetIdentityVerificationRequests() ([]*models.IdentityVerificationModel, error) {
 	requests, err := s.store.GetAll()
 	if err != nil {
@@ -135,4 +164,24 @@ func (s *Service) GetIdentityVerificationRequests() ([]*models.IdentityVerificat
 	}
 
 	return requests, nil
+}
+
+func (s *Service) GetFile(path string) (string, error) {
+	file, err := s.fs.GetFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	decrypted, err := s.encrypt.DecryptFile(file)
+	if err != nil {
+		return "", err
+	}
+
+	base64Img := base64.StdEncoding.EncodeToString(decrypted)
+
+	mime := http.DetectContentType(decrypted)
+
+	base64Img = "data:" + mime + ";base64," + base64Img
+
+	return base64Img, nil
 }
