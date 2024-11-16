@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
@@ -82,7 +83,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(request.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 23, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 24, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -95,7 +96,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(request.Address)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 27, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 28, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -108,7 +109,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(request.IdType)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 31, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 32, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -121,7 +122,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(request.IdNumber)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 35, Col: 42}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 36, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -139,7 +140,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(request.Status)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 42, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 43, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -157,7 +158,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(request.Status)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 46, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 47, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -175,7 +176,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(request.Status)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 50, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 51, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -193,7 +194,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(request.FrontIdImageUrl)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 62, Col: 42}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 63, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -206,7 +207,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(request.BackIdImageUrl)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 69, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 70, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -219,13 +220,31 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(request.FaceImageUrl)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 76, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification_details.templ`, Line: 77, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">View Selfie</button></div><!-- Action Buttons --><div class=\"mt-6 flex gap-4\"><button class=\"flex-1 px-4 py-2 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700\">Approve</button> <button class=\"flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg shadow hover:bg-red-700\">Reject</button></div></div><!-- Right Side: Image Viewer --><div class=\"w-full h-full outline outline-1\"><img id=\"image-viewer\" src=\"https://via.placeholder.com/400x300\" alt=\"Selected Image\" class=\"w-full h-full object-contain bg-gray-200\"></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">View Selfie</button></div><!-- Action Buttons --><div class=\"mt-6 flex gap-4\"><form action=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var14 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/verification-requests/accept/%s", request.Id))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var14)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"POST\"><button type=\"submit\" class=\"flex-1 px-4 py-2 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700\">Approve</button></form><form action=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var15 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/verification-requests/reject/%s", request.Id))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var15)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"POST\"><button type=\"submit\" class=\"flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg shadow hover:bg-red-700\">Reject</button></form></div></div><!-- Right Side: Image Viewer --><div class=\"w-full h-full outline outline-1\"><img id=\"image-viewer\" src=\"https://via.placeholder.com/400x300\" alt=\"Selected Image\" class=\"w-full h-full object-contain bg-gray-200\"></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

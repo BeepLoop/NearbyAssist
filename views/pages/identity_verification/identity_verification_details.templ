@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
@@ -80,16 +81,28 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel) {
 				</div>
 				<!-- Action Buttons -->
 				<div class="mt-6 flex gap-4">
-					<button
-						class="flex-1 px-4 py-2 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700"
+					<form
+						action={ templ.SafeURL(fmt.Sprintf("/admin/verification-requests/accept/%s", request.Id)) }
+						method="POST"
 					>
-						Approve
-					</button>
-					<button
-						class="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg shadow hover:bg-red-700"
+						<button
+							type="submit"
+							class="flex-1 px-4 py-2 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700"
+						>
+							Approve
+						</button>
+					</form>
+					<form
+						action={ templ.SafeURL(fmt.Sprintf("/admin/verification-requests/reject/%s", request.Id)) }
+						method="POST"
 					>
-						Reject
-					</button>
+						<button
+							type="submit"
+							class="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg shadow hover:bg-red-700"
+						>
+							Reject
+						</button>
+					</form>
 				</div>
 			</div>
 			<!-- Right Side: Image Viewer -->

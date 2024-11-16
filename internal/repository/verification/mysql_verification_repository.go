@@ -111,3 +111,64 @@ func (s *MysqlVerificationRepository) FindById(id string) (*models.IdentityVerif
 
 	return request, nil
 }
+
+func (s *MysqlVerificationRepository) AcceptRequest(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	updateStatus := "UPDATE IdentityVerification SET status = 'approved' WHERE id = ?"
+	if _, err := tx.ExecContext(ctx, updateStatus, id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	updateUser := `
+        UPDATE
+            User
+        SET
+            verified = 1
+        WHERE
+            id = (SELECT userId FROM IdentityVerification WHERE id = ?)
+    `
+	if _, err := tx.ExecContext(ctx, updateUser, id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlVerificationRepository) RejectRequest(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "UPDATE IdentityVerification SET status = 'rejected' WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, id); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}

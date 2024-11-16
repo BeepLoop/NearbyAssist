@@ -82,6 +82,8 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		verificationRoute.GET("", requestHandler.GetIdentityVerification)
 		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails)
+		verificationRoute.POST("/accept/:requestId", requestHandler.AcceptRequest)
+		verificationRoute.POST("/reject/:requestId", requestHandler.RejectRequest)
 	}
 
 	managementRoute := r.Group("/account-management")

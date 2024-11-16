@@ -185,3 +185,11 @@ func (s *Service) GetFile(path string) (string, error) {
 
 	return base64Img, nil
 }
+
+func (s *Service) AcceptRequest(id string) error {
+	return s.store.AcceptRequest(id)
+}
+
+func (s *Service) RejectRequest(id string) error {
+	return s.store.RejectRequest(id)
+}
