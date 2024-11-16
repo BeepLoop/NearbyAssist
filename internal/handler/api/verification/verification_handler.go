@@ -6,6 +6,7 @@ import (
 	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -49,6 +50,19 @@ func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 		bearerToken,
 		files,
 	)
+	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "Verification request already exists",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error processing verification request",
+			Error:   err.Error(),
+		})
+	}
 
 	user, err := h.userService.GetUser(bearerToken)
 	if err != nil {
