@@ -21,6 +21,9 @@ templ requestsData(requests []models.IdentityVerificationModel) {
 					Request ID
 				</th>
 				<th class="px-6 py-3 text-left font-medium text-white">
+					Name
+				</th>
+				<th class="px-6 py-3 text-left font-medium text-white">
 					Date Applied
 				</th>
 				<th class="px-6 py-3 text-left font-medium text-white">
@@ -40,8 +43,23 @@ templ requestsData(requests []models.IdentityVerificationModel) {
 				for _, request := range requests {
 					<tr class="border">
 						<td class="px-6 py-4">{ request.Id }</td>
+						<td class="px-6 py-4">{ request.Name }</td>
 						<td class="px-6 py-4">{ request.CreatedAt }</td>
-						<td class="px-6 py-4">{ request.Status }</td>
+						<td class="px-6 py-4">
+							if request.Status == "pending" {
+								<span class="bg-yellow-400 p-2 rounded-sm">
+									{ request.Status }
+								</span>
+							} else if request.Status == "approved" {
+								<span class="bg-green-400 p-2 rounded-sm">
+									{ request.Status }
+								</span>
+							} else {
+								<span class="bg-red-400 p-2 rounded-sm">
+									{ request.Status }
+								</span>
+							}
+						</td>
 						<td class="flex justify-center px-6 py-4">
 							<ul>
 								<a href="" class="text-blue hover:underline">

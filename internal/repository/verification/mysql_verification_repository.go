@@ -45,3 +45,35 @@ func (s *MysqlVerificationRepository) Create(data *models.IdentityVerificationMo
 
 	return data.Id, nil
 }
+
+func (s *MysqlVerificationRepository) GetAll() ([]*models.IdentityVerificationModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	requests := make([]*models.IdentityVerificationModel, 0)
+	query := `
+        SELECT 
+            id,
+            user AS userId,
+            name,
+            address,
+            idType,
+            idNumber,
+            frontIdImageUrl,
+            backIdImageUrl,
+            faceImageUrl,
+            status,
+            createdAt
+        FROM 
+            IdentityVerification
+    `
+	if err := s.db.SelectContext(ctx, &requests, query); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return requests, nil
+}

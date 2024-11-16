@@ -108,8 +108,31 @@ func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bea
 	return verificationId, nil
 }
 
-func (s *Service) GetIdentityVerificationRequests() ([]models.IdentityVerificationModel, error) {
-	requests := make([]models.IdentityVerificationModel, 0)
+func (s *Service) GetIdentityVerificationRequests() ([]*models.IdentityVerificationModel, error) {
+	requests, err := s.store.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, request := range requests {
+		decryptedName, err := s.encrypt.DecryptString(request.Name)
+		if err != nil {
+			return nil, err
+		}
+		request.Name = decryptedName
+
+		decryptedAddress, err := s.encrypt.DecryptString(request.Address)
+		if err != nil {
+			return nil, err
+		}
+		request.Address = decryptedAddress
+
+		decryptedIdNumber, err := s.encrypt.DecryptString(request.IdNumber)
+		if err != nil {
+			return nil, err
+		}
+		request.IdNumber = decryptedIdNumber
+	}
 
 	return requests, nil
 }
