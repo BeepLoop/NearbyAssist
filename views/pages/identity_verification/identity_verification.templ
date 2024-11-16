@@ -38,7 +38,7 @@ templ requestsData(requests []models.IdentityVerificationModel) {
 		<tbody>
 			if len(requests) < 1 {
 				<tr class="border">
-					<td class="px-6 py-4" align="center" colspan="4">No requests</td>
+					<td class="px-6 py-4" align="center" colspan="5">No requests</td>
 				</tr>
 			} else {
 				for _, request := range requests {
