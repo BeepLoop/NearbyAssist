@@ -68,7 +68,7 @@ templ navItem(path, title string) {
                  let currentScript = document.currentScript;
                  let parent = currentScript.closest("a");
                  const path = parent.getAttribute("data-path");
-                 if (path === location.pathname) {
+                 if (location.pathname.includes(path)) {
                      parent.classList.add("active");
                  }
              })()

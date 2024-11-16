@@ -329,7 +329,7 @@ func navItem(path, title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><script>\n            (() => {\n                 let currentScript = document.currentScript;\n                 let parent = currentScript.closest(\"a\");\n                 const path = parent.getAttribute(\"data-path\");\n                 if (path === location.pathname) {\n                     parent.classList.add(\"active\");\n                 }\n             })()\n        </script></a>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><script>\n            (() => {\n                 let currentScript = document.currentScript;\n                 let parent = currentScript.closest(\"a\");\n                 const path = parent.getAttribute(\"data-path\");\n                 if (location.pathname.includes(path)) {\n                     parent.classList.add(\"active\");\n                 }\n             })()\n        </script></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
