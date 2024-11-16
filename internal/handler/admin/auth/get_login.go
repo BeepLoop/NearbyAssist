@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"nearbyassist/views/pages"
+	"nearbyassist/views/pages/auth"
 	"net/http"
 
 	"github.com/labstack/echo-contrib/session"

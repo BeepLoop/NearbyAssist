@@ -2,7 +2,7 @@ package map_handler
 
 import (
 	"context"
-	"nearbyassist/views/pages"
+	"nearbyassist/views/pages/map"
 
 	"github.com/labstack/echo/v4"
 )

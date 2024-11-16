@@ -3,7 +3,7 @@ package complaint
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/views/pages"
+	"nearbyassist/views/pages/complaints"
 
 	"github.com/labstack/echo/v4"
 )

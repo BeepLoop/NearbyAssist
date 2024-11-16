@@ -3,7 +3,7 @@ package verification
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/views/pages"
+	"nearbyassist/views/pages/identity_verification"
 	"time"
 
 	"github.com/labstack/echo/v4"

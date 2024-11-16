@@ -2,7 +2,7 @@ package experiment
 
 import (
 	"context"
-	"nearbyassist/views/pages"
+	"nearbyassist/views/pages/test"
 
 	"github.com/labstack/echo/v4"
 )

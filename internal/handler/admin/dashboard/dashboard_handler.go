@@ -4,7 +4,7 @@ import (
 	"context"
 	"nearbyassist/internal/response"
 	dashboard_service "nearbyassist/internal/service/dashboard"
-	"nearbyassist/views/pages"
+	"nearbyassist/views/pages/dashboard"
 
 	"github.com/labstack/echo/v4"
 )

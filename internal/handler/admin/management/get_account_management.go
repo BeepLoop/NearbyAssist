@@ -2,7 +2,7 @@ package management
 
 import (
 	"context"
-	"nearbyassist/views/pages"
+	"nearbyassist/views/pages/account_management"
 
 	"github.com/labstack/echo/v4"
 )

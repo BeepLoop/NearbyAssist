@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/views/pages"
+	"nearbyassist/views/pages/vendor_application"
 
 	"github.com/labstack/echo/v4"
 )
