@@ -4,7 +4,6 @@ import (
 	"nearbyassist/internal/handler/admin/auth"
 	"nearbyassist/internal/handler/admin/complaint"
 	"nearbyassist/internal/handler/admin/dashboard"
-	"nearbyassist/internal/handler/admin/experiment"
 	"nearbyassist/internal/handler/admin/management"
 	map_handler "nearbyassist/internal/handler/admin/map"
 	application "nearbyassist/internal/handler/admin/vendor_application"
@@ -92,12 +91,5 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		managementHandler := management.NewHandler(managementService)
 
 		managementRoute.GET("", managementHandler.GetAccountManagement, middleware.CheckSession)
-	}
-
-	experimentRoute := r.Group("/test")
-	{
-		experimentHandler := experiment.NewHandler()
-
-		experimentRoute.GET("", experimentHandler.GetExperiment, middleware.CheckSession)
 	}
 }
