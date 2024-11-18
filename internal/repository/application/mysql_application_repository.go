@@ -31,9 +31,9 @@ func (s *MysqlApplicationRepository) Create(data *models.ApplicationModel) (stri
 
 	query := `
         INSERT INTO
-            Application (id, applicantId, job)
+            Application (id, applicantId, job, supportingDocumentUrl, policeClearanceUrl)
         VALUES
-            (:id, :applicantId, :job)
+            (:id, :applicantId, :job, :supportingDocumentUrl, :policeClearanceUrl)
     `
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
 		return "", err

@@ -229,34 +229,12 @@ CREATE TABLE IF NOT EXISTS Application (
     applicantId VARCHAR(255) NOT NULL UNIQUE,
     job VARCHAR(255) NOT NULL,
     status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
+    supportingDocumentUrl VARCHAR(255) NOT NULL,
+    policeClearanceUrl VARCHAR(255) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(applicantId) REFERENCES User(id)
-);
-
-CREATE TABLE IF NOT EXISTS ApplicationProof (
-    id VARCHAR(255) NOT NULL,
-    applicationId VARCHAR(255) NOT NULL,
-    applicantId VARCHAR(255) NOT NULL,
-    url VARCHAR(255) NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY(id),
-    FOREIGN KEY(applicationId) REFERENCES Application(id),
-    FOREIGN KEY(applicantId) REFERENCES Application(applicantId)
-);
-
-CREATE TABLE IF NOT EXISTS PoliceClearance (
-    id VARCHAR(255) NOT NULL,
-    applicationId VARCHAR(255) NOT NULL,
-    applicantId VARCHAR(255) NOT NULL,
-    url VARCHAR(255) NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY(id),
-    FOREIGN KEY(applicationId) REFERENCES Application(id),
-    FOREIGN KEY(applicantId) REFERENCES Application(applicantId)
 );
 
 DELIMITER //

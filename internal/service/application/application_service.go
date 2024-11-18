@@ -31,15 +31,6 @@ func (s *Service) CreateApplication(bearerToken, job string, files []*multipart.
 	application.ApplicantId = userId
 	application.Job = job
 
-	applicationId, err := s.store.Create(application)
-	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
-			return "", err
-		}
-
-		return "", err
-	}
-
 	for _, file := range files {
 		bytes, err := utils.FileToBytes(file)
 		if err != nil {
@@ -62,14 +53,7 @@ func (s *Service) CreateApplication(bearerToken, job string, files []*multipart.
 				return "", err
 			}
 
-			clearance := new(models.PoliceClearanceModel)
-			clearance.ApplicantId = userId
-			clearance.ApplicationId = applicationId
-			clearance.Url = url
-
-			if _, err := s.store.NewPoliceClearance(clearance); err != nil {
-				return "", err
-			}
+			application.PoliceClearanceUrl = url
 
 		case "supportingDocument":
 			fileData := fs.File{
@@ -81,19 +65,21 @@ func (s *Service) CreateApplication(bearerToken, job string, files []*multipart.
 				return "", err
 			}
 
-			proof := new(models.ApplicationProofModel)
-			proof.ApplicantId = userId
-			proof.ApplicationId = applicationId
-			proof.Url = url
-
-			if _, err := s.store.NewProof(proof); err != nil {
-				return "", err
-			}
+			application.SupportingDocumentUrl = url
 
 		default:
 			return "", err
 
 		}
+	}
+
+	applicationId, err := s.store.Create(application)
+	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			return "", err
+		}
+
+		return "", err
 	}
 
 	return applicationId, nil
