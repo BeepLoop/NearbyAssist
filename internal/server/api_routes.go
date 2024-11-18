@@ -19,6 +19,7 @@ import (
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
 	message_repo "nearbyassist/internal/repository/message"
 	review_repo "nearbyassist/internal/repository/review"
+	saved_service_repo "nearbyassist/internal/repository/saved_service"
 	service_repo "nearbyassist/internal/repository/service"
 	tag_repo "nearbyassist/internal/repository/tag"
 	transaction_repo "nearbyassist/internal/repository/transaction"
@@ -31,6 +32,7 @@ import (
 	health_service "nearbyassist/internal/service/health"
 	message_service "nearbyassist/internal/service/message"
 	review_service "nearbyassist/internal/service/review"
+	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
 	tag_service "nearbyassist/internal/service/tag"
 	transaction_service "nearbyassist/internal/service/transaction"
@@ -126,12 +128,19 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.SuggestionEngine,
 			s.RouteEngine,
 		)
-		handler := service.NewHandler(serviceManager)
+
+		savedServiceStore := saved_service_repo.NewMysqlSavedServiceRepository(s.DB)
+		savedServiceService := save_service.NewService(savedServiceStore, serviceStore, s.JWT, s.Encrypt)
+
+		handler := service.NewHandler(serviceManager, savedServiceService)
 
 		serviceRoute.POST("", handler.CreateService)
 		serviceRoute.GET("/search", handler.SearchService)
 		serviceRoute.GET("/:serviceId", handler.GetService)
 		serviceRoute.PUT("/:serviceId", handler.UpdateService)
+		serviceRoute.GET("/get-saved", handler.GetSavedServices)
+		serviceRoute.POST("/save", handler.SaveService)
+		serviceRoute.POST("/unsave", handler.UnsaveService)
 		serviceRoute.GET("/route/:serviceId", handler.FindServiceRoute)
 	}
 

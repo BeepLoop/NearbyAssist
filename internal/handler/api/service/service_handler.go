@@ -3,6 +3,7 @@ package service
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -11,11 +12,12 @@ import (
 )
 
 type serviceHandler struct {
-	service *service_service.Service
+	service_service *service_service.Service
+	save_service    *save_service.Service
 }
 
-func NewHandler(service *service_service.Service) *serviceHandler {
-	return &serviceHandler{service: service}
+func NewHandler(service *service_service.Service, save_service *save_service.Service) *serviceHandler {
+	return &serviceHandler{service_service: service, save_service: save_service}
 }
 
 func (h *serviceHandler) CreateService(c echo.Context) error {
@@ -34,7 +36,7 @@ func (h *serviceHandler) CreateService(c echo.Context) error {
 		})
 	}
 
-	serviceId, err := h.service.CreateService(req)
+	serviceId, err := h.service_service.CreateService(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating service",
@@ -56,7 +58,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 		})
 	}
 
-	data, err := h.service.GetService(serviceId)
+	data, err := h.service_service.GetService(serviceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error while retrieving service information",
@@ -98,7 +100,7 @@ func (h *serviceHandler) UpdateService(c echo.Context) error {
 
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
-	if err := h.service.UpdateService(bearerToken, serviceId, req); err != nil {
+	if err := h.service_service.UpdateService(bearerToken, serviceId, req); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error updating service",
 			Error:   err.Error(),
@@ -108,10 +110,80 @@ func (h *serviceHandler) UpdateService(c echo.Context) error {
 	return c.JSON(http.StatusNoContent, nil)
 }
 
+func (h *serviceHandler) SaveService(c echo.Context) error {
+	req := new(request.SaveServicePayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	if err := h.save_service.SaveService(bearerToken, req.ServiceId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error saving service",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *serviceHandler) UnsaveService(c echo.Context) error {
+	req := new(request.UnsaveServicePayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	if err := h.save_service.UnsaveService(bearerToken, req.ServiceId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error removing service from saves",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *serviceHandler) GetSavedServices(c echo.Context) error {
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	services, err := h.save_service.GetSavedServices(bearerToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error occurred while getting saved services",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, services)
+}
+
 func (h *serviceHandler) SearchService(c echo.Context) error {
 	params := utils.ParseQuery(c.QueryString())
 
-	services, err := h.service.SearchService(params)
+	services, err := h.service_service.SearchService(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error occurred while searching service",
@@ -135,7 +207,7 @@ func (h *serviceHandler) FindServiceRoute(c echo.Context) error {
 
 	origin := c.QueryParam("origin")
 
-	polyline, err := h.service.FindRoute(serviceId, origin)
+	polyline, err := h.service_service.FindRoute(serviceId, origin)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error finding route to given destination",
