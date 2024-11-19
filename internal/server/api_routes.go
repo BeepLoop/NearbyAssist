@@ -80,17 +80,6 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		}
 	}
 
-	// ===== RESOURCE =======
-	// resourceRoute := v1.Group("/resource")
-	// {
-	// 	resourceRoute.Use(middleware.CheckAuth(s.JWT))
-	// 	resourceRoute.Use(middleware.CheckSession)
-	//
-	// 	h := handler.NewResourceService(s.Encrypt, s.FS)
-	//
-	// 	resourceRoute.GET("/:path", h.GetFile)
-	// }
-
 	// ===== TAGS =======
 	tagRoute := v1.Group("/tags")
 	{
