@@ -95,6 +95,7 @@ func (w *Websocket) storeMessage(message *models.MessageModel) {
 }
 
 func (w *Websocket) forwardMessage(message *models.MessageModel) {
+	// TODO: Remove this sleep, this is just for testing purposes
 	time.Sleep(time.Second * 2)
 
 	if socket, ok := w.clients[message.Receiver]; ok {

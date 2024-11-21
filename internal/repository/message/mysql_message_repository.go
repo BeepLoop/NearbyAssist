@@ -60,7 +60,7 @@ func (s *MysqlMessageRepository) GetMessages(user1, user2 string) ([]*models.Mes
         OR
             sender = ? AND receiver = ?
         ORDER BY
-            createdAt
+            createdAt DESC
     `
 
 	messages := make([]*models.MessageModel, 0)
