@@ -10,11 +10,43 @@ type Marker struct {
 	Lon float64 `json:"lon"`
 }
 
-templ Map(markers []Marker) {
+type MapPageData struct {
+	Markers       []Marker
+	Tags          []string
+	PreviousQuery string
+}
+
+templ Map(data MapPageData) {
 	@layout.Layout() {
 		@partials.PageBanner("Map", "")
-		@mapComponent(markers)
+		@searchBar(data.Tags, data.PreviousQuery)
+		@mapComponent(data.Markers)
 	}
+}
+
+templ searchBar(tags []string, previousQuery string) {
+	<div class="flex justify-end gap-4 my-4">
+		<form action="/admin/map" method="POST">
+			<input
+				type="input"
+				name="query"
+				list="tags"
+				class="p-2 rounded-sm outline outline-1"
+				placeholder="service"
+				autofocus
+				value={ previousQuery }
+			/>
+			<datalist id="tags">
+				for _, tag := range tags {
+					<option value={ tag }>{ tag }</option>
+				}
+			</datalist>
+			<button
+				type="submit"
+				class="p-2 rounded-md bg-green-700 hover:bg-green-800"
+			>Search</button>
+		</form>
+	</div>
 }
 
 var openLayers = templ.NewOnceHandle()
@@ -23,7 +55,7 @@ templ mapComponent(markers []Marker) {
 	@openLayers.Once() {
 		<script src="/static/script/OpenLayers.js"></script>
 	}
-	<div id="map" class="h-[70vh] outline outline-1"></div>
+	<div id="map" class="h-[75vh] outline outline-1"></div>
 	@templ.JSONScript("markers", markers)
 	<script>
         map = new OpenLayers.Map("map");
@@ -31,7 +63,7 @@ templ mapComponent(markers []Marker) {
         let fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
         let toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
         let position = new OpenLayers.LonLat(125.80942522476553, 7.447220876004841).transform(fromProjection, toProjection);
-        let zoom = 14;
+        let zoom = 13;
 
         let markers = new OpenLayers.Layer.Markers("Markers");
 
