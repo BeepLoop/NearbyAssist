@@ -14,6 +14,7 @@ import (
 	complaint_repo "nearbyassist/internal/repository/complaint"
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
 	map_repo "nearbyassist/internal/repository/map"
+	tag_repo "nearbyassist/internal/repository/tag"
 	verification_repo "nearbyassist/internal/repository/verification"
 	admin_service "nearbyassist/internal/service/admin"
 	application_service "nearbyassist/internal/service/application"
@@ -21,6 +22,7 @@ import (
 	dashboard_service "nearbyassist/internal/service/dashboard"
 	management_service "nearbyassist/internal/service/management"
 	map_service "nearbyassist/internal/service/map"
+	tag_service "nearbyassist/internal/service/tag"
 	verification_service "nearbyassist/internal/service/verification"
 
 	"github.com/labstack/echo/v4"
@@ -46,11 +48,15 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	mapRoute := r.Group("/map")
 	{
+		tagStore := tag_repo.NewMysqlTagRepository(s.DB)
+		tagService := tag_service.NewService(tagStore)
+
 		mapStore := map_repo.NewMysqlMapRepository(s.DB)
 		mapService := map_service.NewService(mapStore)
-		mapHandler := map_handler.NewHandler(mapService)
+		mapHandler := map_handler.NewHandler(mapService, tagService)
 
 		mapRoute.GET("", mapHandler.GetMap, middleware.CheckSession)
+		mapRoute.POST("", mapHandler.PostMap, middleware.CheckSession)
 	}
 
 	complaintRoute := r.Group("/complaints")
