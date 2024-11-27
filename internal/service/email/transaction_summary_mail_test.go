@@ -27,7 +27,7 @@ func TestTransactionSummary(t *testing.T) {
 			Id:                   "Sample transaction ID",
 			Vendor:               "Jane Doe",
 			Client:               "John Doe",
-			Price:                "1000",
+			Cost:                 "1000",
 			CreatedAt:            time.Now().Format(time.RFC822Z),
 			StartDate:            time.Now().Format(time.RFC822Z),
 			EndDate:              time.Now().Format(time.RFC822Z),

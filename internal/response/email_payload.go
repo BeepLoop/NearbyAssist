@@ -6,7 +6,7 @@ type TransactionSummary struct {
 	Vendor               string `db:"vendor"`
 	Client               string `db:"client"`
 	ServiceTitle         string `db:"serviceTitle"`
-	Price                string `db:"price"`
+	Cost                 string `db:"cost"`
 	StartDate            string `db:"startDate"`
 	EndDate              string `db:"endDate"`
 	VendorEmail          string `db:"vendorEmail"`

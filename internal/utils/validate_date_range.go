@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -11,8 +12,11 @@ const (
 )
 
 func ValidateDateRange(start, end string) error {
+	fmt.Println("start date: ", start)
+	fmt.Println("end date: ", end)
+
 	now := time.Now().UTC()
-	formatDate := "2006-01-02"
+	formatDate := time.RFC1123Z
 
 	startDate, err := time.Parse(formatDate, start)
 	if err != nil {

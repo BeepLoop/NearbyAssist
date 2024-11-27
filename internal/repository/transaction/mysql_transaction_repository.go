@@ -2,6 +2,7 @@ package transaction_repo
 
 import (
 	"context"
+	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/response"
 	"time"
@@ -30,11 +31,21 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
 		data.Id = id
 	}
 
+	count := 0
+	checkDuplicate := "SELECT count(id) FROM Transaction WHERE clientId = ? AND serviceId = ? AND status = 'ongoing' OR status = 'pending'"
+	if err := s.db.GetContext(ctx, &count, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
+		return "", err
+	}
+
+	if count > 0 {
+		return "", errors.New("You already have an ongoing or pending transaction for this service")
+	}
+
 	query := `
         INSERT INTO
-            Transaction (id, vendorId, clientId, serviceId, start, end, confirmCode)
+            Transaction (id, vendorId, clientId, serviceId, startDate, endDate, cost, employmentType)
         VALUES
-            (:id, :vendorId, :clientId, :serviceId, :start, :end, :confirmCode)
+            (:id, :vendorId, :clientId, :serviceId, :startDate, :endDate, :cost, :employmentType)
     `
 
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
@@ -78,7 +89,7 @@ func (s *MysqlTransactionRepository) GetSummary(transactionId string) (*response
             vendor.Name AS vendor,
             client.Name AS client,
             s.title AS serviceTitle,
-            t.price,
+            t.cost,
             t.startDate,
             t.endDate,
             vendor.Email AS vendorEmail,
@@ -89,7 +100,7 @@ func (s *MysqlTransactionRepository) GetSummary(transactionId string) (*response
             JOIN User vendor ON t.vendorId = vendor.id
             JOIN Service s ON t.serviceId = s.id
         WHERE
-            id = ?
+            t.id = ?
     `
 	if err := s.db.GetContext(ctx, summary, query, transactionId); err != nil {
 		return nil, err

@@ -7,6 +7,7 @@ import (
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -38,6 +39,13 @@ func (h *transactionHandler) CreateTransaction(c echo.Context) error {
 
 	transactionId, err := h.transactionService.CreateTransaction(req)
 	if err != nil {
+		if strings.Contains(err.Error(), "You already have an ongoing or pending transaction for this service") {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "You already have an ongoing or pending transaction for this service",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating transaction",
 			Error:   err.Error(),
