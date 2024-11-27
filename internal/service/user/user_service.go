@@ -1,6 +1,7 @@
 package user_service
 
 import (
+	"database/sql"
 	"nearbyassist/internal/models"
 	repository "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/request"
@@ -30,6 +31,22 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 	if err != nil {
 		// If user is not found, continue to registration
 		return s.Register(req, emailHash)
+	}
+
+	if existingUser.Address.Valid {
+		if plain, err := s.encrypt.DecryptString(existingUser.Address.String); err != nil {
+			return nil, err
+		} else {
+			existingUser.Address = sql.NullString{String: plain, Valid: true}
+		}
+	}
+
+	if existingUser.Latitude.Valid == false {
+		existingUser.Latitude = sql.NullFloat64{Float64: 0.0, Valid: true}
+	}
+
+	if existingUser.Longitude.Valid == false {
+		existingUser.Longitude = sql.NullFloat64{Float64: 0.0, Valid: true}
 	}
 
 	isVendor, err := s.store.IsVendor(existingUser.Id)
@@ -66,6 +83,9 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 			ImageUrl:   req.Image,
 			IsVerified: existingUser.Verified,
 			IsVendor:   isVendor,
+			Address:    existingUser.Address.String,
+			Latitude:   existingUser.Latitude.Float64,
+			Longitude:  existingUser.Longitude.Float64,
 		},
 	}
 
@@ -215,6 +235,22 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		user.Email = plain
 	}
 
+	if user.Address.Valid {
+		if plain, err := s.encrypt.DecryptString(user.Address.String); err != nil {
+			return nil, err
+		} else {
+			user.Address = sql.NullString{String: plain, Valid: true}
+		}
+	}
+
+	if user.Latitude.Valid == false {
+		user.Latitude = sql.NullFloat64{Float64: 0.0, Valid: true}
+	}
+
+	if user.Longitude.Valid == false {
+		user.Longitude = sql.NullFloat64{Float64: 0.0, Valid: true}
+	}
+
 	response := &response.DetailedUser{
 		Id:         user.Id,
 		Name:       user.Name,
@@ -222,6 +258,9 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		ImageUrl:   user.ImageUrl,
 		IsVerified: user.Verified,
 		IsVendor:   isVendor,
+		Address:    user.Address.String,
+		Latitude:   user.Latitude.Float64,
+		Longitude:  user.Longitude.Float64,
 	}
 
 	return response, nil

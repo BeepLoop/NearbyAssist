@@ -22,7 +22,7 @@ func NewService(store verification_repo.VerificationRepository, fs fs.FileStorag
 	return &Service{store: store, fs: fs, encrypt: encrypt, jwt: jwt}
 }
 
-func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bearerToken string, files []*multipart.FileHeader) (string, error) {
+func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bearerToken string, latitude, longitude float64, files []*multipart.FileHeader) (string, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return "", err
@@ -49,6 +49,8 @@ func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bea
 	req.Address = encryptedAddress
 	req.IdType = idType
 	req.IdNumber = encryptedIdNumber
+	req.Latitude = latitude
+	req.Longitude = longitude
 
 	for _, file := range files {
 		// Read bytes
