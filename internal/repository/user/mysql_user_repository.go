@@ -102,7 +102,7 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	defer cancel()
 
 	user := new(models.UserModel)
-	query := "SELECT id, name, email, imageUrl, verified FROM User WHERE id = ?"
+	query := "SELECT id, name, email, imageUrl, verified, address, latitude, longitude FROM User WHERE id = ?"
 	err := s.db.GetContext(ctx, user, query, id)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
 
 	user := new(models.UserModel)
 
-	query := "SELECT id, name, email, imageUrl, verified FROM User WHERE emailHash = ?"
+	query := "SELECT id, name, email, imageUrl, verified, address, latitude, longitude FROM User WHERE emailHash = ?"
 	if err := s.db.GetContext(ctx, user, query, emailHash); err != nil {
 		return nil, err
 	}

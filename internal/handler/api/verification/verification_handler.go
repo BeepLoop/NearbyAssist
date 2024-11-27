@@ -6,6 +6,7 @@ import (
 	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -23,9 +24,11 @@ func NewHandler(verificationService *verification_service.Service, userService *
 func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 	name := c.FormValue("name")
 	address := c.FormValue("address")
+	latitude := c.FormValue("latitude")
+	longitude := c.FormValue("longitude")
 	idType := c.FormValue("idType")
 	idNumber := c.FormValue("idNumber")
-	if name == "" || address == "" || idType == "" || idNumber == "" {
+	if name == "" || address == "" || latitude == "" || longitude == "" || idType == "" || idNumber == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Missing required fields",
 			Error:   "Missing required fields",
@@ -42,12 +45,30 @@ func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
+	lat, err := strconv.ParseFloat(latitude, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Invalid latitude",
+			Error:   err.Error(),
+		})
+	}
+
+	long, err := strconv.ParseFloat(longitude, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Invalid longitude",
+			Error:   err.Error(),
+		})
+	}
+
 	verificationId, err := h.verificationService.CreateVerificationRequest(
 		name,
 		address,
 		idType,
 		idNumber,
 		bearerToken,
+		lat,
+		long,
 		files,
 	)
 	if err != nil {

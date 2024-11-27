@@ -31,9 +31,9 @@ func (s *MysqlVerificationRepository) Create(data *models.IdentityVerificationMo
 
 	query := `
         INSERT INTO IdentityVerification 
-            (id, userId, name, address, idType, idNumber, frontIdImageUrl, backIdImageUrl, faceImageUrl)
+            (id, userId, name, address, latitude, longitude, idType, idNumber, frontIdImageUrl, backIdImageUrl, faceImageUrl)
         VALUES 
-            ( :id, :userId, :name, :address, :idType, :idNumber, :frontIdImageUrl, :backIdImageUrl, :faceImageUrl)
+            ( :id, :userId, :name, :address, :latitude, :longitude, :idType, :idNumber, :frontIdImageUrl, :backIdImageUrl, :faceImageUrl)
     `
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
 		return "", err
@@ -134,11 +134,15 @@ func (s *MysqlVerificationRepository) AcceptRequest(id string) error {
 
 	updateUser := `
         UPDATE
-            User
+            User u
+        JOIN IdentityVerification iv ON u.id = iv.userId
         SET
-            verified = 1
+            u.verified = 1,
+            u.address = iv.address,
+            u.latitude = iv.latitude,
+            u.longitude = iv.longitude
         WHERE
-            id = (SELECT userId FROM IdentityVerification WHERE id = ?)
+            iv.id = ?
     `
 	if _, err := tx.ExecContext(ctx, updateUser, id); err != nil {
 		if err := tx.Rollback(); err != nil {

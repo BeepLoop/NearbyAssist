@@ -10,6 +10,7 @@ type DefaultIdentityVerificationData struct {
 type IdentityVerificationModel struct {
 	Model
 	UpdateableModel
+	GeoSpatialModel
 	UserId          string `json:"userId" db:"userId" validate:"required"`
 	Name            string `json:"name" db:"name" validate:"required"`
 	Address         string `json:"address" db:"address" validate:"required"`
