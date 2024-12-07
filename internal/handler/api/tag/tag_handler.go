@@ -30,3 +30,35 @@ func (h *tagHandler) GetTags(c echo.Context) error {
 		"tags": tags,
 	})
 }
+
+func (h *tagHandler) GetExpertise(c echo.Context) error {
+	expertiseWithTags, err := h.tagService.GetExpertise()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting expertise",
+			Error:   err.Error(),
+		})
+	}
+
+	response := []struct {
+		Id    string   `json:"id"`
+		Title string   `json:"title"`
+		Tags  []string `json:"tags"`
+	}{}
+
+	for _, entry := range expertiseWithTags {
+		response = append(response, struct {
+			Id    string   `json:"id"`
+			Title string   `json:"title"`
+			Tags  []string `json:"tags"`
+		}{
+			Id:    entry.Id,
+			Title: entry.Title,
+			Tags:  entry.Tags,
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"expertises": response,
+	})
+}

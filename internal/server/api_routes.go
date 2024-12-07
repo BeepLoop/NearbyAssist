@@ -88,6 +88,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		handler := tag.NewHandler(tagService)
 
 		tagRoute.GET("", handler.GetTags)
+		tagRoute.GET("/expertise", handler.GetExpertise)
 	}
 
 	// ===== VENDOR =======

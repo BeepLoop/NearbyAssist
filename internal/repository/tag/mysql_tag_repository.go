@@ -55,3 +55,42 @@ func (s *MysqlTagRepository) FindAll() ([]*models.TagModel, error) {
 
 	return tags, nil
 }
+
+func (s *MysqlTagRepository) FindAllWithExpertise() ([]*models.ExpertiseModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Get all expertise
+	expertiseQuery := "SELECT id, title from Expertise"
+
+	expertises := make([]*models.ExpertiseModel, 0)
+	if err := s.db.SelectContext(ctx, &expertises, expertiseQuery); err != nil {
+		return nil, err
+	}
+
+	// Get all tags for each expertise
+	tagQuery := `
+        SELECT
+            t.title
+        FROM 
+            Tag t 
+            JOIN ExpertiseTag et ON et.tagId = t.id
+        WHERE
+            et.expertiseId = ?
+    `
+
+	for _, expertise := range expertises {
+		tags := make([]string, 0)
+		if err := s.db.SelectContext(ctx, &tags, tagQuery, expertise.Id); err != nil {
+			return nil, err
+		}
+
+		expertise.Tags = tags
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return expertises, nil
+}

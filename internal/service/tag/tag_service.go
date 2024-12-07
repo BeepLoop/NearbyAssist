@@ -21,3 +21,7 @@ func (s *Service) GetTags() ([]*models.TagModel, error) {
 
 	return tags, nil
 }
+
+func (s *Service) GetExpertise() ([]*models.ExpertiseModel, error) {
+	return s.store.FindAllWithExpertise()
+}
