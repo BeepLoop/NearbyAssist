@@ -25,7 +25,6 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
         SELECT  
             v.vendorId AS id,
             v.rating,
-            v.job,
             v.restricted,
             u.name AS vendor,
             u.email AS email,
@@ -36,6 +35,23 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
         WHERE 
             vendorId = ?
     `
+
+	expertiseQuery := `
+        SELECT
+            e.title
+        FROM
+            Expertise e
+            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+        WHERE
+            ve.vendorId = ?
+    `
+
+	expertise := make([]string, 0)
+	if err := s.db.SelectContext(ctx, expertise, expertiseQuery, id); err != nil {
+		return nil, err
+	}
+
+	vendor.Expertise = expertise
 
 	if err := s.db.GetContext(ctx, vendor, query, id); err != nil {
 		return nil, err

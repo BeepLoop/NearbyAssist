@@ -14,7 +14,7 @@ type ApplicationModel struct {
 	UpdateableModel
 	GeoSpatialModel
 	ApplicantId           string                  `db:"applicantId" validate:"required"`
-	Job                   string                  `db:"job" validate:"required"`
+	ExpertiseId           string                  `db:"expertiseId" validate:"required"`
 	SupportingDocumentUrl string                  `db:"supportingDocumentUrl"`
 	PoliceClearanceUrl    string                  `db:"policeClearanceUrl"`
 	Status                ApplicationStatusFilter `db:"status"`

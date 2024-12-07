@@ -21,7 +21,7 @@ func NewService(store application_repo.ApplicationRepository, fs fs.FileStorage,
 	return &Service{store: store, fs: fs, encrypt: encrypt, jwt: jwt}
 }
 
-func (s *Service) CreateApplication(bearerToken, job string, files []*multipart.FileHeader) (string, error) {
+func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*multipart.FileHeader) (string, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return "", err
@@ -29,7 +29,7 @@ func (s *Service) CreateApplication(bearerToken, job string, files []*multipart.
 
 	application := new(models.ApplicationModel)
 	application.ApplicantId = userId
-	application.Job = job
+	application.ExpertiseId = expertiseId
 
 	for _, file := range files {
 		bytes, err := utils.FileToBytes(file)

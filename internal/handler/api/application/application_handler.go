@@ -21,8 +21,8 @@ func NewHandler(applicationService *application_service.Service, userService *us
 }
 
 func (h *applicationHandler) CreateApplication(c echo.Context) error {
-	job := c.FormValue("job")
-	if job == "" {
+	expertiseId := c.FormValue("expertiseId")
+	if expertiseId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Missing required fields",
 			Error:   "Missing required fields",
@@ -39,7 +39,7 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
-	applicationId, err := h.applicationService.CreateApplication(bearerToken, job, files)
+	applicationId, err := h.applicationService.CreateApplication(bearerToken, expertiseId, files)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{

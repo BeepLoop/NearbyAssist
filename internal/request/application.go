@@ -1,5 +1,5 @@
 package request
 
 type NewApplicationPayload struct {
-	Job string `json:"job" validate:"required"`
+	ExpertiseId string `json:"expertiseId" validate:"required"`
 }
