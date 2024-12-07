@@ -41,20 +41,40 @@ func (h *tagHandler) GetExpertise(c echo.Context) error {
 	}
 
 	response := []struct {
-		Id    string   `json:"id"`
-		Title string   `json:"title"`
-		Tags  []string `json:"tags"`
+		Id    string `json:"id"`
+		Title string `json:"title"`
+		Tags  []struct {
+			Id    string `json:"id"`
+			Title string `json:"title"`
+		} `json:"tags"`
 	}{}
 
 	for _, entry := range expertiseWithTags {
+		tags := make([]struct {
+			Id    string `json:"id"`
+			Title string `json:"title"`
+		}, 0)
+		for _, tag := range entry.Tags {
+			tags = append(tags, struct {
+				Id    string `json:"id"`
+				Title string `json:"title"`
+			}{
+				Id:    tag.Id,
+				Title: tag.Title,
+			})
+		}
+
 		response = append(response, struct {
-			Id    string   `json:"id"`
-			Title string   `json:"title"`
-			Tags  []string `json:"tags"`
+			Id    string `json:"id"`
+			Title string `json:"title"`
+			Tags  []struct {
+				Id    string `json:"id"`
+				Title string `json:"title"`
+			} `json:"tags"`
 		}{
 			Id:    entry.Id,
 			Title: entry.Title,
-			Tags:  entry.Tags,
+			Tags:  tags,
 		})
 	}
 

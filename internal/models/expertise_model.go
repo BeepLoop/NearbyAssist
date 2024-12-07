@@ -5,5 +5,5 @@ type ExpertiseModel struct {
 	UpdateableModel
 	Title string `json:"title" db:"title"`
 
-	Tags []string `json:"tags" db:"tags"`
+	Tags []*TagModel `json:"tags" db:"tags"`
 }

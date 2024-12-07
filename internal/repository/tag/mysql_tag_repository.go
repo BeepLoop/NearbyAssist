@@ -71,6 +71,7 @@ func (s *MysqlTagRepository) FindAllWithExpertise() ([]*models.ExpertiseModel, e
 	// Get all tags for each expertise
 	tagQuery := `
         SELECT
+            t.id,
             t.title
         FROM 
             Tag t 
@@ -80,7 +81,7 @@ func (s *MysqlTagRepository) FindAllWithExpertise() ([]*models.ExpertiseModel, e
     `
 
 	for _, expertise := range expertises {
-		tags := make([]string, 0)
+		tags := make([]*models.TagModel, 0)
 		if err := s.db.SelectContext(ctx, &tags, tagQuery, expertise.Id); err != nil {
 			return nil, err
 		}
