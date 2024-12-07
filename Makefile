@@ -1,3 +1,4 @@
+include .db.env
 # Simple Makefile for a Go project
 
 # Build the application
@@ -36,6 +37,15 @@ css:
 
 css-watch:
 	@pnpm tailwindcss -i ./static/style/tailwind.css -o ./static/style/style.css --watch
+
+migrate-up:
+	@goose mysql ${DSN} -dir migrations up
+
+migrate-reset:
+	@goose mysql ${DSN} -dir migrations reset
+
+migrate-status:
+	@goose mysql ${DSN} -dir migrations status
 
 # Live Reload
 watch:
