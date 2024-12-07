@@ -12,6 +12,8 @@ type TransactionRepository interface {
 	GetAll() ([]*models.TransactionModel, error)
 
 	GetMyTransactions(id string) ([]*models.TransactionModel, error)
+	GetTransactionSent(id string) ([]*models.TransactionModel, error)
+	GetTransactionReceived(id string) ([]*models.TransactionModel, error)
 
 	GetOngoing(id string) ([]*models.TransactionModel, error)
 

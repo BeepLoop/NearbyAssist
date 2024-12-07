@@ -149,6 +149,42 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
 	return transactions, nil
 }
 
+func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.TransactionModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	transactions := make([]*models.TransactionModel, 0)
+
+	query := "SELECT * FROM Transaction WHERE clientId = ?"
+	if err := s.db.SelectContext(ctx, &transactions, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return transactions, nil
+}
+
+func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*models.TransactionModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	transactions := make([]*models.TransactionModel, 0)
+
+	query := "SELECT * FROM Transaction WHERE vendorId = ?"
+	if err := s.db.SelectContext(ctx, &transactions, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return transactions, nil
+}
+
 func (s *MysqlTransactionRepository) GetOngoing(id string) ([]*models.TransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
