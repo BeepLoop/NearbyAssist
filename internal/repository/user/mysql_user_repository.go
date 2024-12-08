@@ -191,3 +191,52 @@ func (s *MysqlUserRepository) IsVendor(userId string) (bool, error) {
 
 	return false, nil
 }
+
+func (s *MysqlUserRepository) GetExpertise(userId string) ([]*models.ExpertiseModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Get vendor expertise
+	expertiseQuery := `
+        SELECT 
+            e.id,
+            e.title
+        FROM 
+            Expertise e
+            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+        WHERE
+            ve.vendorId = ?
+    `
+
+	expertises := make([]*models.ExpertiseModel, 0)
+	if err := s.db.SelectContext(ctx, &expertises, expertiseQuery, userId); err != nil {
+		return nil, err
+	}
+
+	// Get all tags for each expertise
+	tagQuery := `
+        SELECT
+            t.id,
+            t.title
+        FROM 
+            Tag t 
+            JOIN ExpertiseTag et ON et.tagId = t.id
+        WHERE
+            et.expertiseId = ?
+    `
+
+	for _, expertise := range expertises {
+		tags := make([]*models.TagModel, 0)
+		if err := s.db.SelectContext(ctx, &tags, tagQuery, expertise.Id); err != nil {
+			return nil, err
+		}
+
+		expertise.Tags = tags
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return expertises, nil
+}

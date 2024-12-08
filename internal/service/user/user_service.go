@@ -54,6 +54,31 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 		return nil, err
 	}
 
+	vendorExpertises := make([]response.Expertise, 0)
+	if isVendor {
+		expertises, err := s.store.GetExpertise(existingUser.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, expertise := range expertises {
+			expertiseTags := make([]response.Tag, 0)
+
+			for _, tag := range expertise.Tags {
+				expertiseTags = append(expertiseTags, response.Tag{
+					Id:    tag.Id,
+					Title: tag.Title,
+				})
+			}
+
+			vendorExpertises = append(vendorExpertises, response.Expertise{
+				Id:    expertise.Id,
+				Title: expertise.Title,
+				Tags:  expertiseTags,
+			})
+		}
+	}
+
 	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
 		UserId: existingUser.Id,
 		Name:   req.Name,
@@ -86,6 +111,7 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 			Address:    existingUser.Address.String,
 			Latitude:   existingUser.Latitude.Float64,
 			Longitude:  existingUser.Longitude.Float64,
+			Expertises: vendorExpertises,
 		},
 	}
 
@@ -223,6 +249,31 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		return nil, err
 	}
 
+	vendorExpertises := make([]response.Expertise, 0)
+	if isVendor {
+		expertises, err := s.store.GetExpertise(user.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, expertise := range expertises {
+			expertiseTags := make([]response.Tag, 0)
+
+			for _, tag := range expertise.Tags {
+				expertiseTags = append(expertiseTags, response.Tag{
+					Id:    tag.Id,
+					Title: tag.Title,
+				})
+			}
+
+			vendorExpertises = append(vendorExpertises, response.Expertise{
+				Id:    expertise.Id,
+				Title: expertise.Title,
+				Tags:  expertiseTags,
+			})
+		}
+	}
+
 	if plain, err := s.encrypt.DecryptString(user.Name); err != nil {
 		return nil, err
 	} else {
@@ -261,6 +312,7 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		Address:    user.Address.String,
 		Latitude:   user.Latitude.Float64,
 		Longitude:  user.Longitude.Float64,
+		Expertises: vendorExpertises,
 	}
 
 	return response, nil

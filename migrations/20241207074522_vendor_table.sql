@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS Vendor (
     id VARCHAR(255) NOT NULL,
-    vendorId VARCHAR(255) NOT NULL,
+    vendorId VARCHAR(255) NOT NULL UNIQUE,
     rating Decimal(5,1) NOT NULL DEFAULT 0.0,
     restricted TINYINT(1) NOT NULL DEFAULT 0,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

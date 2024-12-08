@@ -18,4 +18,6 @@ type UserRepository interface {
 	IsRefreshTokenBlacklisted(refreshToken string) error
 
 	IsVendor(userId string) (bool, error)
+
+	GetExpertise(userId string) ([]*models.ExpertiseModel, error)
 }
