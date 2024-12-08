@@ -196,7 +196,7 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
 	vendor := new(models.VendorModel)
 	query := `
         SELECT  
-            v.vendorId AS id,
+            v.vendorId,
             v.rating,
             v.restricted,
             u.name AS vendor,
