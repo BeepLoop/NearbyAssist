@@ -47,7 +47,7 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
     `
 
 	expertise := make([]string, 0)
-	if err := s.db.SelectContext(ctx, expertise, expertiseQuery, id); err != nil {
+	if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, id); err != nil {
 		return nil, err
 	}
 
