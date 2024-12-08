@@ -88,12 +88,13 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 
 	response := response.VendorServiceList{
 		Vendor: struct {
-			Id           string `json:"id"`
-			Name         string `json:"name"`
-			Email        string `json:"email"`
-			ImageUrl     string `json:"imageUrl"`
-			Rating       string `json:"rating"`
-			IsRestricted int    `json:"isRestricted"`
+			Id           string   `json:"id"`
+			Name         string   `json:"name"`
+			Email        string   `json:"email"`
+			ImageUrl     string   `json:"imageUrl"`
+			Rating       string   `json:"rating"`
+			IsRestricted int      `json:"isRestricted"`
+			Expertise    []string `json:"expertise"`
 		}{
 			Id:           vendor.Id,
 			Name:         vendor.Vendor,
@@ -101,6 +102,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 			ImageUrl:     vendor.ImageUrl,
 			Rating:       vendor.Rating,
 			IsRestricted: vendor.Restricted,
+			Expertise:    vendor.Expertise,
 		},
 	}
 

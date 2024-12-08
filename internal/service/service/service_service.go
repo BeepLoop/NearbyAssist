@@ -139,12 +139,13 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 	}
 
 	vendorData := struct {
-		Id           string `json:"id"`
-		Name         string `json:"name"`
-		Email        string `json:"email"`
-		ImageUrl     string `json:"imageUrl"`
-		Rating       string `json:"rating"`
-		IsRestricted int    `json:"isRestricted"`
+		Id           string   `json:"id"`
+		Name         string   `json:"name"`
+		Email        string   `json:"email"`
+		ImageUrl     string   `json:"imageUrl"`
+		Rating       string   `json:"rating"`
+		IsRestricted int      `json:"isRestricted"`
+		Expertise    []string `json:"expertise"`
 	}{
 		Id:           vendor.VendorId,
 		Name:         vendor.Vendor,
@@ -152,6 +153,7 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		ImageUrl:     vendor.ImageUrl,
 		Rating:       vendor.Rating,
 		IsRestricted: vendor.Restricted,
+		Expertise:    vendor.Expertise,
 	}
 
 	data := map[string]interface{}{

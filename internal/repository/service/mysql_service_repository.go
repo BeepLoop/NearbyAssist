@@ -194,24 +194,40 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
 	defer cancel()
 
 	vendor := new(models.VendorModel)
-
 	query := `
-        SELECT
-            v.vendorId,
+        SELECT  
+            v.vendorId AS id,
             v.rating,
+            v.restricted,
             u.name AS vendor,
             u.email AS email,
-            u.imageUrl AS imageUrl,
-            v.restricted
-        FROM
-            Vendor v
+            u.imageUrl AS imageUrl
+        FROM 
+            Vendor  v
             JOIN User u ON u.id = v.vendorId
         WHERE 
-            v.vendorId = ?
+            vendorId = ?
     `
 	if err := s.db.GetContext(ctx, vendor, query, vendorId); err != nil {
 		return nil, err
 	}
+
+	expertiseQuery := `
+        SELECT
+            e.title
+        FROM
+            Expertise e
+            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+        WHERE
+            ve.vendorId = ?
+    `
+
+	expertise := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, vendorId); err != nil {
+		return nil, err
+	}
+
+	vendor.Expertise = expertise
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded

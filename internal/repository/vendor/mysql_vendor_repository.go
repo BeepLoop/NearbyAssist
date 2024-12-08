@@ -35,6 +35,9 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
         WHERE 
             vendorId = ?
     `
+	if err := s.db.GetContext(ctx, vendor, query, id); err != nil {
+		return nil, err
+	}
 
 	expertiseQuery := `
         SELECT
@@ -52,10 +55,6 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	}
 
 	vendor.Expertise = expertise
-
-	if err := s.db.GetContext(ctx, vendor, query, id); err != nil {
-		return nil, err
-	}
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
