@@ -89,6 +89,28 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		service.Description = cipher
 	}
 
+	extras := make([]models.ExtraModel, 0)
+	for _, extra := range service.Extras {
+		decryptedTitle, err := s.encrypt.DecryptString(extra.Title)
+		if err != nil {
+			return nil, err
+		}
+
+		decryptedDescription, err := s.encrypt.DecryptString(extra.Description)
+		if err != nil {
+			return nil, err
+		}
+
+		extras = append(extras, models.ExtraModel{
+			Model:           extra.Model,
+			UpdateableModel: extra.UpdateableModel,
+			Title:           decryptedTitle,
+			Description:     decryptedDescription,
+			Price:           extra.Price,
+		})
+	}
+	service.Extras = extras
+
 	if tags, err := s.store.GetTags(serviceId); err != nil {
 		return nil, err
 	} else {

@@ -144,6 +144,25 @@ func (s *MysqlServiceRepository) FindById(id string) (*models.ServiceModel, erro
 		return nil, err
 	}
 
+	extrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN ServiceExtra se ON se.extraId = e.id
+        WHERE
+            se.serviceId = ?
+    `
+
+	extras := make([]models.ExtraModel, 0)
+	if err := s.db.SelectContext(ctx, &extras, extrasQuery, id); err != nil {
+		return nil, err
+	}
+	service.Extras = extras
+
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
@@ -280,7 +299,7 @@ func (s *MysqlServiceRepository) GetPhotos(serviceId string) ([]*models.ServiceP
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, url FROM ServicePhoto WHERE serviceId = ?"
+	query := "SELECT id, serviceId, url, vendorId FROM ServicePhoto WHERE serviceId = ?"
 
 	images := make([]*models.ServicePhotoModel, 0)
 	if err := s.db.SelectContext(ctx, &images, query, serviceId); err != nil {
