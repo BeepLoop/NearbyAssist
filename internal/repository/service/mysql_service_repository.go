@@ -78,6 +78,33 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
 		}
 	}
 
+	registerExtra := `
+        INSERT INTO
+            Extra (id, title, description, price, serviceId)
+        VALUES 
+            (?, ?, ?, ?, ?)
+    `
+	registerServiceExtra := `
+        INSERT INTO 
+            ServiceExtra (serviceId, extraId)
+        VALUES
+            (?, ?)
+    `
+	for _, extra := range data.Extras {
+		extraId, err := gonanoid.New()
+		if err != nil {
+			return "", errors.New("Failed to generate id for service extra")
+		}
+
+		if _, err := tx.ExecContext(ctx, registerExtra, extraId, extra.Title, extra.Description, extra.Price, data.Id); err != nil {
+			return "", err
+		}
+
+		if _, err := tx.ExecContext(ctx, registerServiceExtra, data.Id, extraId); err != nil {
+			return "", err
+		}
+	}
+
 	if err := tx.Commit(); err != nil {
 		return "", err
 	}

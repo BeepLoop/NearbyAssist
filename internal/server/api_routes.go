@@ -117,6 +117,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.JWT,
 			s.SuggestionEngine,
 			s.RouteEngine,
+			s.FS,
 		)
 
 		savedServiceStore := saved_service_repo.NewMysqlSavedServiceRepository(s.DB)

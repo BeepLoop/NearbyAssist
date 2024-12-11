@@ -8,6 +8,11 @@ type NewServicePayload struct {
 	Tags        []string `json:"tags" validate:"required"`
 	Latitude    float64  `json:"latitude" validate:"required"`
 	Longitude   float64  `json:"longitude" validate:"required"`
+	Extras      []struct {
+		Title       string  `json:"title"`
+		Description string  `json:"description"`
+		Price       float64 `json:"price"`
+	} `json:"extras"`
 }
 
 type UpdateServicePayload struct {

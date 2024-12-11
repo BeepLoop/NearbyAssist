@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/utils"
@@ -21,10 +22,11 @@ type Service struct {
 	jwt     auth.Authenticator
 	suggest suggestion_engine.Engine
 	route   route_engine.Engine
+	fs      fs.FileStorage
 }
 
-func NewService(store service_repo.ServiceRepository, encrypt auth.Encryption, hash auth.Hash, jwt auth.Authenticator, suggest suggestion_engine.Engine, route route_engine.Engine) *Service {
-	return &Service{store: store, encrypt: encrypt, hash: hash, jwt: jwt, suggest: suggest, route: route}
+func NewService(store service_repo.ServiceRepository, encrypt auth.Encryption, hash auth.Hash, jwt auth.Authenticator, suggest suggestion_engine.Engine, route route_engine.Engine, fs fs.FileStorage) *Service {
+	return &Service{store: store, encrypt: encrypt, hash: hash, jwt: jwt, suggest: suggest, route: route, fs: fs}
 }
 
 func (s *Service) CreateService(req *request.NewServicePayload) (string, error) {
@@ -53,6 +55,25 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 		return "", err
 	}
 
+	extras := make([]models.ExtraModel, 0)
+	for _, extra := range req.Extras {
+		titleCipher, err := s.encrypt.EncryptString(extra.Title)
+		if err != nil {
+			return "", err
+		}
+
+		descCipher, err := s.encrypt.EncryptString(extra.Description)
+		if err != nil {
+			return "", err
+		}
+
+		extras = append(extras, models.ExtraModel{
+			Title:       titleCipher,
+			Description: descCipher,
+			Price:       extra.Price,
+		})
+	}
+
 	newService := new(models.ServiceModel)
 	newService.VendorId = req.VendorId
 	newService.Title = encryptedTitle
@@ -62,6 +83,7 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 	newService.Latitude = req.Latitude
 	newService.Longitude = req.Longitude
 	newService.Signature = signature
+	newService.Extras = extras
 
 	serviceId, err := s.store.Create(newService)
 	if err != nil {

@@ -1,6 +1,8 @@
 package service_repo
 
-import "nearbyassist/internal/models"
+import (
+	"nearbyassist/internal/models"
+)
 
 type ServiceRepository interface {
 	Create(data *models.ServiceModel) (string, error)
