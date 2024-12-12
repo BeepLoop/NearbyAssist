@@ -52,28 +52,6 @@ func (h *transactionHandler) CreateTransaction(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
-
-	user, err := h.userService.GetUser(bearerToken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error retrieving user information",
-			Error:   err.Error(),
-		})
-	}
-
-	summary, err := h.transactionService.GetTransactionSummary(transactionId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error retrieving transaction summary",
-			Error:   err.Error(),
-		})
-	}
-
-	// TODO: Handle notifying the parties involved in the transaction
-	_ = user
-	_ = summary
-
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"transaction": transactionId,
 	})

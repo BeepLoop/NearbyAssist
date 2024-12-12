@@ -20,23 +20,25 @@ func NewService(store transaction_repo.TransactionRepository, encrypt auth.Encry
 }
 
 func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string, error) {
-	// Validate that the date is valid
-	// if err := utils.ValidateDateRange(req.StartDate, req.EndDate); err != nil {
-	// 	if err.Error() == utils.DATE_PARSE_ERR {
-	// 		return "", err
-	// 	}
-
-	// 	return "", err
-	// }
-
 	transaction := new(models.TransactionModel)
 	transaction.ClientId = req.ClientId
 	transaction.VendorId = req.VendorId
 	transaction.ServiceId = req.ServiceId
-	transaction.StartDate = req.StartDate
-	transaction.EndDate = req.EndDate
 	transaction.Cost = req.Cost
-	transaction.EmploymentType = models.EmploymentType(req.EmploymentType)
+
+	extras := make([]models.ExtraModel, 0)
+	for _, extra := range req.Extras {
+		extras = append(extras, models.ExtraModel{
+			Model: models.Model{
+				Id: extra.Id,
+			},
+			Title:       extra.Title,
+			Description: extra.Description,
+			Price:       extra.Price,
+		})
+	}
+
+	transaction.Extras = extras
 
 	transactionId, err := s.store.Create(transaction)
 	if err != nil {

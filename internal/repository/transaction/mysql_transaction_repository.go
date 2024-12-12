@@ -3,6 +3,7 @@ package transaction_repo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/response"
 	"time"
@@ -31,9 +32,14 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
 		data.Id = id
 	}
 
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return "", err
+	}
+
 	count := 0
-	checkDuplicate := "SELECT count(id) FROM Transaction WHERE clientId = ? AND serviceId = ? AND status = 'ongoing' OR status = 'pending'"
-	if err := s.db.GetContext(ctx, &count, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
+	checkDuplicate := "SELECT count(id) FROM Transaction WHERE (clientId = ? AND serviceId = ?) AND (status = 'ongoing' OR status = 'pending')"
+	if err := tx.GetContext(ctx, &count, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
 		return "", err
 	}
 
@@ -43,12 +49,34 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
 
 	query := `
         INSERT INTO
-            Transaction (id, vendorId, clientId, serviceId, startDate, endDate, cost, employmentType)
+            Transaction (id, vendorId, clientId, serviceId, cost )
         VALUES
-            (:id, :vendorId, :clientId, :serviceId, :startDate, :endDate, :cost, :employmentType)
+            (:id, :vendorId, :clientId, :serviceId, :cost)
     `
 
-	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
+	if _, err := tx.NamedExecContext(ctx, query, data); err != nil {
+		return "", err
+	}
+
+	insertTransactionExtras := `
+        INSERT INTO
+            TransactionExtra (transactionId, extraId)
+        VALUES 
+            (?, ?)
+    `
+	for _, extra := range data.Extras {
+		if _, err := tx.ExecContext(ctx, insertTransactionExtras, data.Id, extra.Id); err != nil {
+			fmt.Println("extra: ", extra)
+			fmt.Println("error: ", err.Error())
+			return "", err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return "", err
+		}
+
 		return "", err
 	}
 
