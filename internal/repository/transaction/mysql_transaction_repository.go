@@ -170,6 +170,27 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
 		return nil, err
 	}
 
+	getExtras := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN TransactionExtra te ON e.id = te.extraId
+        WHERE
+            te.transactionId = ?
+    `
+
+	for _, transaction := range transactions {
+		extras := make([]models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Extras = extras
+	}
+
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
@@ -188,6 +209,27 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
 		return nil, err
 	}
 
+	getExtras := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN TransactionExtra te ON e.id = te.extraId
+        WHERE
+            te.transactionId = ?
+    `
+
+	for _, transaction := range transactions {
+		extras := make([]models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Extras = extras
+	}
+
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
@@ -204,6 +246,27 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
 	query := "SELECT * FROM Transaction WHERE vendorId = ?"
 	if err := s.db.SelectContext(ctx, &transactions, query, id); err != nil {
 		return nil, err
+	}
+
+	getExtras := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN TransactionExtra te ON e.id = te.extraId
+        WHERE
+            te.transactionId = ?
+    `
+
+	for _, transaction := range transactions {
+		extras := make([]models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Extras = extras
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
