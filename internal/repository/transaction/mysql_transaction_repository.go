@@ -91,12 +91,60 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	transaction := new(models.TransactionModel)
+	transactionQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            t.isReviewed,
+            t.isReported,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
+            Transaction t
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            t.id = ?
+    `
 
-	query := "SELECT * FROM Transaction WHERE id = ?"
-	if err := s.db.GetContext(ctx, transaction, query, id); err != nil {
+	transaction := new(models.TransactionModel)
+	if err := s.db.GetContext(ctx, transaction, transactionQuery, id); err != nil {
+		fmt.Println("error get transaction: ", err.Error())
 		return nil, err
 	}
+
+	serviceQuery := "SELECT * FROM Service WHERE id = ?"
+
+	service := new(models.ServiceModel)
+	if err := s.db.GetContext(ctx, service, serviceQuery, transaction.ServiceId); err != nil {
+		fmt.Println("error get service: ", err.Error())
+		return nil, err
+	}
+	transaction.Service = *service
+
+	extrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            TransactionExtra te
+            JOIN Extra e ON e.id = te.extraId
+        WHERE
+            te.transactionId = ?
+    `
+
+	extras := make([]models.ExtraModel, 0)
+	if err := s.db.SelectContext(ctx, &extras, extrasQuery, transaction.Id); err != nil {
+		fmt.Println("error get extra: ", err.Error())
+		return nil, err
+	}
+	transaction.Extras = extras
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
@@ -221,10 +269,28 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	transactions := make([]*models.TransactionModel, 0)
+	transactionQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            t.isReviewed,
+            t.isReported,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
+            Transaction t
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            t.clientId = ?
+    `
 
-	query := "SELECT * FROM Transaction WHERE clientId = ?"
-	if err := s.db.SelectContext(ctx, &transactions, query, id); err != nil {
+	transactions := make([]*models.TransactionModel, 0)
+	if err := s.db.SelectContext(ctx, &transactions, transactionQuery, id); err != nil {
 		return nil, err
 	}
 
@@ -282,10 +348,28 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	transactions := make([]*models.TransactionModel, 0)
+	transactionQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            t.isReviewed,
+            t.isReported,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
+            Transaction t
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            t.vendorId = ?
+    `
 
-	query := "SELECT * FROM Transaction WHERE vendorId = ?"
-	if err := s.db.SelectContext(ctx, &transactions, query, id); err != nil {
+	transactions := make([]*models.TransactionModel, 0)
+	if err := s.db.SelectContext(ctx, &transactions, transactionQuery, id); err != nil {
 		return nil, err
 	}
 

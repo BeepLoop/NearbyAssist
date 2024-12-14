@@ -48,6 +48,60 @@ func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string,
 	return transactionId, nil
 }
 
+func (s *Service) GetTransaction(transactionId string) (*models.TransactionModel, error) {
+	transaction, err := s.store.FindById(transactionId)
+	if err != nil {
+		return nil, err
+	}
+
+	if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
+		return nil, err
+	} else {
+		transaction.Vendor = plain
+	}
+
+	if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
+		return nil, err
+	} else {
+		transaction.Client = plain
+	}
+
+	if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
+		return nil, err
+	} else {
+		transaction.Service.Title = plain
+	}
+
+	if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
+		return nil, err
+	} else {
+		transaction.Service.Description = plain
+	}
+
+	extras := make([]models.ExtraModel, 0)
+	for _, extra := range transaction.Extras {
+		title, err := s.encrypt.DecryptString(extra.Title)
+		if err != nil {
+			return nil, err
+		}
+
+		description, err := s.encrypt.DecryptString(extra.Description)
+		if err != nil {
+			return nil, err
+		}
+
+		extras = append(extras, models.ExtraModel{
+			Model:       extra.Model,
+			Title:       title,
+			Description: description,
+			Price:       extra.Price,
+		})
+	}
+	transaction.Extras = extras
+
+	return transaction, nil
+}
+
 func (s *Service) GetTransactionSummary(transactionId string) (*response.TransactionSummary, error) {
 	transactionData, err := s.store.GetSummary(transactionId)
 	if err != nil {
@@ -127,6 +181,18 @@ func (s *Service) GetTransactionUserSent(bearerToken string) ([]*models.Transact
 	}
 
 	for _, transaction := range transactions {
+		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
+			return nil, err
+		} else {
+			transaction.Vendor = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
+			return nil, err
+		} else {
+			transaction.Client = plain
+		}
+
 		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
 			return nil, err
 		} else {
@@ -176,6 +242,18 @@ func (s *Service) GetTransactionUserReceived(bearerToken string) ([]*models.Tran
 	}
 
 	for _, transaction := range transactions {
+		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
+			return nil, err
+		} else {
+			transaction.Vendor = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
+			return nil, err
+		} else {
+			transaction.Client = plain
+		}
+
 		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
 			return nil, err
 		} else {

@@ -152,6 +152,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		handler := transaction.NewHandler(transactionService, userService)
 
 		transactionRoute.POST("", handler.CreateTransaction)
+		transactionRoute.GET("/:transactionId", handler.GetTransaction)
 		transactionRoute.GET("/mine", handler.GetUserTransactionList)
 		transactionRoute.GET("/ongoing", handler.GetOngoingTransactions)
 		transactionRoute.GET("/history", handler.GetTransactionHistory)

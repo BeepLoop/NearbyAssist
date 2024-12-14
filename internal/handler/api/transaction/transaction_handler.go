@@ -58,6 +58,26 @@ func (h *transactionHandler) CreateTransaction(c echo.Context) error {
 	})
 }
 
+func (h *transactionHandler) GetTransaction(c echo.Context) error {
+	transactionId := c.Param("transactionId")
+	if transactionId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Transaction ID is required",
+			Error:   "Transaction ID is required",
+		})
+	}
+
+	transaction, err := h.transactionService.GetTransaction(transactionId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting transaction",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, transaction)
+}
+
 func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	filter := c.QueryParam("filter")
@@ -95,6 +115,7 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 	response := []struct {
 		Id       string              `json:"id"`
 		Cost     float64             `json:"cost"`
+		Vendor   string              `json:"vendor"`
 		VendorId string              `json:"vendorId"`
 		ClientId string              `json:"clientId"`
 		Status   string              `json:"status"`
@@ -111,6 +132,7 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 		response = append(response, struct {
 			Id       string              `json:"id"`
 			Cost     float64             `json:"cost"`
+			Vendor   string              `json:"vendor"`
 			VendorId string              `json:"vendorId"`
 			ClientId string              `json:"clientId"`
 			Status   string              `json:"status"`
@@ -119,6 +141,7 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 		}{
 			Id:       transaction.Id,
 			Cost:     cost,
+			Vendor:   transaction.Vendor,
 			VendorId: transaction.VendorId,
 			ClientId: transaction.ClientId,
 			Status:   string(transaction.Status),
