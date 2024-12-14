@@ -163,12 +163,25 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	getTransactions := "SELECT * FROM Transaction WHERE clientId = ? OR vendorId = ?"
 	transactions := make([]*models.TransactionModel, 0)
-
-	query := "SELECT * FROM Transaction WHERE clientId = ? OR vendorId = ?"
-	if err := s.db.SelectContext(ctx, &transactions, query, id, id); err != nil {
+	if err := s.db.SelectContext(ctx, &transactions, getTransactions, id, id); err != nil {
 		return nil, err
 	}
+
+	getService := `
+        SELECT
+            s.id,
+            s.vendorId,
+            s.title,
+            s.description,
+            s.rate
+        FROM
+            Service s
+            JOIN Transaction t ON s.id = t.serviceId
+        WHERE
+            t.id = ?
+    `
 
 	getExtras := `
         SELECT
@@ -189,6 +202,12 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
 			return nil, err
 		}
 		transaction.Extras = extras
+
+		service := new(models.ServiceModel)
+		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Service = *service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -209,6 +228,22 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
 		return nil, err
 	}
 
+	getService := `
+        SELECT
+            s.id,
+            s.vendorId,
+            s.title,
+            s.description,
+            s.rate,
+            s.latitude,
+            s.longitude
+        FROM
+            Service s
+            JOIN Transaction t ON s.id = t.serviceId
+        WHERE
+            t.id = ?
+    `
+
 	getExtras := `
         SELECT
             e.id,
@@ -228,6 +263,12 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
 			return nil, err
 		}
 		transaction.Extras = extras
+
+		service := new(models.ServiceModel)
+		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Service = *service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -248,6 +289,20 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
 		return nil, err
 	}
 
+	getService := `
+        SELECT
+            s.id,
+            s.vendorId,
+            s.title,
+            s.description,
+            s.rate
+        FROM
+            Service s
+            JOIN Transaction t ON s.id = t.serviceId
+        WHERE
+            t.id = ?
+    `
+
 	getExtras := `
         SELECT
             e.id,
@@ -267,6 +322,12 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
 			return nil, err
 		}
 		transaction.Extras = extras
+
+		service := new(models.ServiceModel)
+		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Service = *service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {

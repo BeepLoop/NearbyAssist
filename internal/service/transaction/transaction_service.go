@@ -126,8 +126,42 @@ func (s *Service) GetTransactionUserSent(bearerToken string) ([]*models.Transact
 		return nil, err
 	}
 
-	return transactions, nil
+	for _, transaction := range transactions {
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Title = plain
+		}
 
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Description = plain
+		}
+
+		extras := make([]models.ExtraModel, 0)
+		for _, extra := range transaction.Extras {
+			title, err := s.encrypt.DecryptString(extra.Title)
+			if err != nil {
+				return nil, err
+			}
+
+			description, err := s.encrypt.DecryptString(extra.Description)
+			if err != nil {
+				return nil, err
+			}
+
+			extras = append(extras, models.ExtraModel{
+				Model:       extra.Model,
+				Title:       title,
+				Description: description,
+				Price:       extra.Price,
+			})
+		}
+		transaction.Extras = extras
+	}
+
+	return transactions, nil
 }
 
 func (s *Service) GetTransactionUserReceived(bearerToken string) ([]*models.TransactionModel, error) {
@@ -141,8 +175,42 @@ func (s *Service) GetTransactionUserReceived(bearerToken string) ([]*models.Tran
 		return nil, err
 	}
 
-	return transactions, nil
+	for _, transaction := range transactions {
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Title = plain
+		}
 
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Description = plain
+		}
+
+		extras := make([]models.ExtraModel, 0)
+		for _, extra := range transaction.Extras {
+			title, err := s.encrypt.DecryptString(extra.Title)
+			if err != nil {
+				return nil, err
+			}
+
+			description, err := s.encrypt.DecryptString(extra.Description)
+			if err != nil {
+				return nil, err
+			}
+
+			extras = append(extras, models.ExtraModel{
+				Model:       extra.Model,
+				Title:       title,
+				Description: description,
+				Price:       extra.Price,
+			})
+		}
+		transaction.Extras = extras
+	}
+
+	return transactions, nil
 }
 
 func (s *Service) GetOngoingTransactions(bearerToken string) ([]*models.TransactionModel, error) {

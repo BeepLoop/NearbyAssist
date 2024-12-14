@@ -21,7 +21,8 @@ type TransactionModel struct {
 	IsReported bool                    `json:"isReported" db:"isReported"`
 
 	// Additional fields for joins
-	Vendor string       `json:"vendor,omitempty" db:"vendor"` // Vendor name
-	Client string       `json:"client,omitempty" db:"client"` // Client name
-	Extras []ExtraModel `json:"extras" db:"extras"`
+	Service ServiceModel `json:"service,omitempty"`
+	Vendor  string       `json:"vendor,omitempty" db:"vendor"` // Vendor name
+	Client  string       `json:"client,omitempty" db:"client"` // Client name
+	Extras  []ExtraModel `json:"extras" db:"extras"`
 }
