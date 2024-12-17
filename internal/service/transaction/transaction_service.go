@@ -1,6 +1,7 @@
 package transaction_service
 
 import (
+	"errors"
 	"nearbyassist/internal/models"
 	transaction_repo "nearbyassist/internal/repository/transaction"
 	"nearbyassist/internal/request"
@@ -100,6 +101,36 @@ func (s *Service) GetTransaction(transactionId string) (*models.TransactionModel
 	transaction.Extras = extras
 
 	return transaction, nil
+}
+
+func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	transaction, err := s.store.FindById(transactionId)
+	if err != nil {
+		return err
+	}
+
+	if transaction.Status != models.TRANSACTION_STATUS_PENDING {
+		return errors.New("Could not cancel non-pending transaction")
+	}
+
+	if transaction.Status == models.TRANSACTION_STATUS_DONE || transaction.Status == models.TRANSACTION_STATUS_CANCELLED {
+		return errors.New("Transaction already completed or cancelled")
+	}
+
+	if transaction.ClientId != userId {
+		return errors.New("Unauthorized cancel request")
+	}
+
+	if err := s.store.Cancel(transactionId); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) GetTransactionSummary(transactionId string) (*response.TransactionSummary, error) {
@@ -291,6 +322,67 @@ func (s *Service) GetTransactionUserReceived(bearerToken string) ([]*models.Tran
 	return transactions, nil
 }
 
+func (s *Service) GetRecentTransactions(bearerToken string) ([]*models.TransactionModel, error) {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return nil, err
+	}
+
+	transactions, err := s.store.GetRecent(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, transaction := range transactions {
+		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
+			return nil, err
+		} else {
+			transaction.Vendor = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
+			return nil, err
+		} else {
+			transaction.Client = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Title = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Description = plain
+		}
+
+		extras := make([]models.ExtraModel, 0)
+		for _, extra := range transaction.Extras {
+			title, err := s.encrypt.DecryptString(extra.Title)
+			if err != nil {
+				return nil, err
+			}
+
+			description, err := s.encrypt.DecryptString(extra.Description)
+			if err != nil {
+				return nil, err
+			}
+
+			extras = append(extras, models.ExtraModel{
+				Model:       extra.Model,
+				Title:       title,
+				Description: description,
+				Price:       extra.Price,
+			})
+		}
+		transaction.Extras = extras
+	}
+
+	return transactions, nil
+}
+
 func (s *Service) GetOngoingTransactions(bearerToken string) ([]*models.TransactionModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
@@ -300,6 +392,53 @@ func (s *Service) GetOngoingTransactions(bearerToken string) ([]*models.Transact
 	transactions, err := s.store.GetOngoing(userId)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, transaction := range transactions {
+		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
+			return nil, err
+		} else {
+			transaction.Vendor = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
+			return nil, err
+		} else {
+			transaction.Client = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Title = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Description = plain
+		}
+
+		extras := make([]models.ExtraModel, 0)
+		for _, extra := range transaction.Extras {
+			title, err := s.encrypt.DecryptString(extra.Title)
+			if err != nil {
+				return nil, err
+			}
+
+			description, err := s.encrypt.DecryptString(extra.Description)
+			if err != nil {
+				return nil, err
+			}
+
+			extras = append(extras, models.ExtraModel{
+				Model:       extra.Model,
+				Title:       title,
+				Description: description,
+				Price:       extra.Price,
+			})
+		}
+		transaction.Extras = extras
 	}
 
 	return transactions, nil
@@ -314,6 +453,53 @@ func (s *Service) GetTransactionHistory(bearerToken string) ([]*models.Transacti
 	transactions, err := s.store.GetHistory(userId)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, transaction := range transactions {
+		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
+			return nil, err
+		} else {
+			transaction.Vendor = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
+			return nil, err
+		} else {
+			transaction.Client = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Title = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
+			return nil, err
+		} else {
+			transaction.Service.Description = plain
+		}
+
+		extras := make([]models.ExtraModel, 0)
+		for _, extra := range transaction.Extras {
+			title, err := s.encrypt.DecryptString(extra.Title)
+			if err != nil {
+				return nil, err
+			}
+
+			description, err := s.encrypt.DecryptString(extra.Description)
+			if err != nil {
+				return nil, err
+			}
+
+			extras = append(extras, models.ExtraModel{
+				Model:       extra.Model,
+				Title:       title,
+				Description: description,
+				Price:       extra.Price,
+			})
+		}
+		transaction.Extras = extras
 	}
 
 	return transactions, nil

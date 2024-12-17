@@ -15,9 +15,11 @@ type TransactionRepository interface {
 	GetTransactionSent(id string) ([]*models.TransactionModel, error)
 	GetTransactionReceived(id string) ([]*models.TransactionModel, error)
 
+	GetRecent(id string) ([]*models.TransactionModel, error)
 	GetOngoing(id string) ([]*models.TransactionModel, error)
 
 	GetHistory(id string) ([]*models.TransactionModel, error)
 
+	Cancel(transactionId string) error
 	MarkComplete(transactionId string) error
 }

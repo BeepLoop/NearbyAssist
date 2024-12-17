@@ -229,6 +229,8 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
             JOIN Transaction t ON s.id = t.serviceId
         WHERE
             t.id = ?
+        ORDER BY
+            t.updatedAt DESC
     `
 
 	getExtras := `
@@ -286,7 +288,9 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            t.clientId = ?
+            t.clientId = ? AND t.status = 'pending'
+        ORDER BY
+            t.updatedAt DESC
     `
 
 	transactions := make([]*models.TransactionModel, 0)
@@ -365,7 +369,9 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            t.vendorId = ?
+            t.vendorId = ? AND t.status = 'pending'
+        ORDER BY
+            t.updatedAt DESC
     `
 
 	transactions := make([]*models.TransactionModel, 0)
@@ -379,7 +385,92 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
             s.vendorId,
             s.title,
             s.description,
-            s.rate
+            s.rate,
+            s.latitude,
+            s.longitude
+        FROM
+            Service s
+            JOIN Transaction t ON s.id = t.serviceId
+        WHERE
+            t.id = ?
+    `
+
+	getExtras := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN TransactionExtra te ON e.id = te.extraId
+        WHERE
+            te.transactionId = ?
+    `
+
+	for _, transaction := range transactions {
+		extras := make([]models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Extras = extras
+
+		service := new(models.ServiceModel)
+		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Service = *service
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return transactions, nil
+}
+
+func (s *MysqlTransactionRepository) GetRecent(userId string) ([]*models.TransactionModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	transactionQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            t.isReviewed,
+            t.isReported,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
+            Transaction t
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            t.vendorId = ? OR t.clientId = ?
+        ORDER BY
+            t.updatedAt DESC
+        LIMIT
+            10
+    `
+
+	transactions := make([]*models.TransactionModel, 0)
+	if err := s.db.SelectContext(ctx, &transactions, transactionQuery, userId, userId); err != nil {
+		return nil, err
+	}
+
+	getService := `
+        SELECT
+            s.id,
+            s.vendorId,
+            s.title,
+            s.description,
+            s.rate,
+            s.latitude,
+            s.longitude
         FROM
             Service s
             JOIN Transaction t ON s.id = t.serviceId
@@ -425,24 +516,75 @@ func (s *MysqlTransactionRepository) GetOngoing(id string) ([]*models.Transactio
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := `
+	transactionQuery := `
         SELECT
             t.id,
-            uVendor.name as vendor,
-            uClient.name as client,
-            t.status
-        FROM
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            t.isReviewed,
+            t.isReported,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
             Transaction t
-            LEFT JOIN User uVendor ON uVendor.id = t.vendorId
-            LEFT JOIN User uClient ON uClient.id = t.clientId
-            LEFT JOIN Service s ON s.id = t.serviceId
-        WHERE status = 'ongoing' AND (t.clientId = ? OR t.vendorId = ?)
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            (t.vendorId = ? OR t.clientId = ?) AND t.status = 'ongoing'
+        ORDER BY
+            t.updatedAt DESC
     `
 
 	transactions := make([]*models.TransactionModel, 0)
-	err := s.db.SelectContext(ctx, &transactions, query, id, id)
+	err := s.db.SelectContext(ctx, &transactions, transactionQuery, id, id)
 	if err != nil {
 		return nil, err
+	}
+
+	getService := `
+        SELECT
+            s.id,
+            s.vendorId,
+            s.title,
+            s.description,
+            s.rate,
+            s.latitude,
+            s.longitude
+        FROM
+            Service s
+            JOIN Transaction t ON s.id = t.serviceId
+        WHERE
+            t.id = ?
+    `
+
+	getExtras := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN TransactionExtra te ON e.id = te.extraId
+        WHERE
+            te.transactionId = ?
+    `
+
+	for _, transaction := range transactions {
+		extras := make([]models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Extras = extras
+
+		service := new(models.ServiceModel)
+		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Service = *service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -456,25 +598,75 @@ func (s *MysqlTransactionRepository) GetHistory(id string) ([]*models.Transactio
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := `
+	transactionQuery := `
         SELECT
             t.id,
-            uVendor.name as vendor,
-            uClient.name as client,
-            t.createdAt as createdAt,
-            t.status
-        FROM
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            t.isReviewed,
+            t.isReported,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
             Transaction t
-            LEFT JOIN User uVendor ON uVendor.id = t.vendorId
-            LEFT JOIN User uClient ON uClient.id = t.clientId
-            LEFT JOIN Service s ON s.id = t.serviceId
-        WHERE status = 'done' OR status = 'cancelled' AND (t.clientId = ? OR t.vendorId = ?)
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            (t.vendorId = ? OR t.clientId = ?) AND (t.status = 'done' OR t.status = 'cancelled')
+        ORDER BY
+            t.updatedAt DESC
     `
 
 	transactions := make([]*models.TransactionModel, 0)
-	err := s.db.SelectContext(ctx, &transactions, query, id, id)
+	err := s.db.SelectContext(ctx, &transactions, transactionQuery, id, id)
 	if err != nil {
 		return nil, err
+	}
+
+	getService := `
+        SELECT
+            s.id,
+            s.vendorId,
+            s.title,
+            s.description,
+            s.rate,
+            s.latitude,
+            s.longitude
+        FROM
+            Service s
+            JOIN Transaction t ON s.id = t.serviceId
+        WHERE
+            t.id = ?
+    `
+
+	getExtras := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN TransactionExtra te ON e.id = te.extraId
+        WHERE
+            te.transactionId = ?
+    `
+
+	for _, transaction := range transactions {
+		extras := make([]models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Extras = extras
+
+		service := new(models.ServiceModel)
+		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
+			return nil, err
+		}
+		transaction.Service = *service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -482,6 +674,22 @@ func (s *MysqlTransactionRepository) GetHistory(id string) ([]*models.Transactio
 	}
 
 	return transactions, nil
+}
+
+func (s *MysqlTransactionRepository) Cancel(transactionId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE Transaction SET status = 'cancelled' WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, transactionId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
 }
 
 func (s *MysqlTransactionRepository) MarkComplete(transactionId string) error {

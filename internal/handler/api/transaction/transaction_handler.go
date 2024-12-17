@@ -78,6 +78,27 @@ func (h *transactionHandler) GetTransaction(c echo.Context) error {
 	return c.JSON(http.StatusOK, transaction)
 }
 
+func (h *transactionHandler) Cancel(c echo.Context) error {
+	transactionId := c.Param("transactionId")
+	if transactionId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Transaction ID is required",
+			Error:   "Transaction ID is required",
+		})
+	}
+
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	if err := h.transactionService.CancelTransaction(bearerToken, transactionId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error cancellation request",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
 func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	filter := c.QueryParam("filter")
@@ -152,6 +173,22 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"transactions": response,
+	})
+}
+
+func (h *transactionHandler) GetRecentTransactions(c echo.Context) error {
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	transactions, err := h.transactionService.GetRecentTransactions(bearerToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error retrieving recents",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"transactions": transactions,
 	})
 }
 
