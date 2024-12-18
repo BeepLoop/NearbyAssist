@@ -156,7 +156,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		transactionRoute.PUT("/cancel/:transactionId", handler.Cancel)
 		transactionRoute.GET("/mine", handler.GetUserTransactionList)
 		transactionRoute.GET("/recent", handler.GetRecentTransactions)
-		transactionRoute.GET("/ongoing", handler.GetOngoingTransactions)
+		transactionRoute.GET("/confirmed", handler.GetConfirmedTransactions)
 		transactionRoute.GET("/history", handler.GetTransactionHistory)
 		transactionRoute.POST("/complete/:transactionId", handler.CompleteTransaction)
 	}

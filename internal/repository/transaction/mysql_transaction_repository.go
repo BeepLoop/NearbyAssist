@@ -38,13 +38,13 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
 	}
 
 	count := 0
-	checkDuplicate := "SELECT count(id) FROM Transaction WHERE (clientId = ? AND serviceId = ?) AND (status = 'ongoing' OR status = 'pending')"
+	checkDuplicate := "SELECT count(id) FROM Transaction WHERE (clientId = ? AND serviceId = ?) AND (status = 'confirmed' OR status = 'pending')"
 	if err := tx.GetContext(ctx, &count, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
 		return "", err
 	}
 
 	if count > 0 {
-		return "", errors.New("You already have an ongoing or pending transaction for this service")
+		return "", errors.New("You already have an confirmed or pending transaction for this service")
 	}
 
 	query := `
@@ -512,7 +512,7 @@ func (s *MysqlTransactionRepository) GetRecent(userId string) ([]*models.Transac
 	return transactions, nil
 }
 
-func (s *MysqlTransactionRepository) GetOngoing(id string) ([]*models.TransactionModel, error) {
+func (s *MysqlTransactionRepository) GetConfirmed(id string) ([]*models.TransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -533,7 +533,7 @@ func (s *MysqlTransactionRepository) GetOngoing(id string) ([]*models.Transactio
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            (t.vendorId = ? OR t.clientId = ?) AND t.status = 'ongoing'
+            (t.vendorId = ? OR t.clientId = ?) AND t.status = 'confirmed'
         ORDER BY
             t.updatedAt DESC
     `

@@ -4,7 +4,7 @@ type TransactionStatusFilter string
 
 const (
 	TRANSACTION_STATUS_PENDING   TransactionStatusFilter = "pending"
-	TRANSACTION_STATUS_ONGOING   TransactionStatusFilter = "ongoing"
+	TRANSACTION_STATUS_CONFIRMED TransactionStatusFilter = "confirmed"
 	TRANSACTION_STATUS_DONE      TransactionStatusFilter = "done"
 	TRANSACTION_STATUS_CANCELLED TransactionStatusFilter = "cancelled"
 )

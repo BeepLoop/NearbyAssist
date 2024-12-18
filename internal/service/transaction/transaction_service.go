@@ -383,13 +383,13 @@ func (s *Service) GetRecentTransactions(bearerToken string) ([]*models.Transacti
 	return transactions, nil
 }
 
-func (s *Service) GetOngoingTransactions(bearerToken string) ([]*models.TransactionModel, error) {
+func (s *Service) GetConfirmedTransactions(bearerToken string) ([]*models.TransactionModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return nil, err
 	}
 
-	transactions, err := s.store.GetOngoing(userId)
+	transactions, err := s.store.GetConfirmed(userId)
 	if err != nil {
 		return nil, err
 	}

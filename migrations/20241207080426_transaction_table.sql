@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS Transaction (
     vendorId VARCHAR(255) NOT NULL,
     clientId VARCHAR(255) NOT NULL,
     serviceId VARCHAR(255) NOT NULL,
-    status Enum('pending', 'ongoing', 'done', 'cancelled') NOT NULL DEFAULT 'pending',
+    status Enum('pending', 'confirmed', 'done', 'cancelled') NOT NULL DEFAULT 'pending',
     cost DOUBLE NOT NULL,
     isReviewed TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: not reviewed, 1: reviewed',
     isReported TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: not reported, 1: reported',

@@ -16,7 +16,7 @@ type TransactionRepository interface {
 	GetTransactionReceived(id string) ([]*models.TransactionModel, error)
 
 	GetRecent(id string) ([]*models.TransactionModel, error)
-	GetOngoing(id string) ([]*models.TransactionModel, error)
+	GetConfirmed(id string) ([]*models.TransactionModel, error)
 
 	GetHistory(id string) ([]*models.TransactionModel, error)
 

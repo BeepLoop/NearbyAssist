@@ -40,9 +40,9 @@ func (h *transactionHandler) CreateTransaction(c echo.Context) error {
 
 	transactionId, err := h.transactionService.CreateTransaction(req)
 	if err != nil {
-		if strings.Contains(err.Error(), "You already have an ongoing or pending transaction for this service") {
+		if strings.Contains(err.Error(), "You already have an confirmed or pending transaction for this service") {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-				Message: "You already have an ongoing or pending transaction for this service",
+				Message: "You already have an confirmed or pending transaction for this service",
 				Error:   err.Error(),
 			})
 		}
@@ -192,13 +192,13 @@ func (h *transactionHandler) GetRecentTransactions(c echo.Context) error {
 	})
 }
 
-func (h *transactionHandler) GetOngoingTransactions(c echo.Context) error {
+func (h *transactionHandler) GetConfirmedTransactions(c echo.Context) error {
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
-	transactions, err := h.transactionService.GetOngoingTransactions(bearerToken)
+	transactions, err := h.transactionService.GetConfirmedTransactions(bearerToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error getting ongoing transactions",
+			Message: "Error getting confirmed transactions",
 			Error:   err.Error(),
 		})
 	}
