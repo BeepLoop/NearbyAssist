@@ -211,9 +211,30 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	getTransactions := "SELECT * FROM Transaction WHERE clientId = ? OR vendorId = ?"
+	transactionQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            t.isReviewed,
+            t.isReported,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
+            Transaction t
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            t.clientId = ? OR t.vendorId = ?
+        ORDER BY
+            t.updatedAt DESC
+    `
+
 	transactions := make([]*models.TransactionModel, 0)
-	if err := s.db.SelectContext(ctx, &transactions, getTransactions, id, id); err != nil {
+	if err := s.db.SelectContext(ctx, &transactions, transactionQuery, id, id); err != nil {
 		return nil, err
 	}
 

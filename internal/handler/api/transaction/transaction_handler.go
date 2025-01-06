@@ -137,6 +137,7 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 		Id       string              `json:"id"`
 		Cost     float64             `json:"cost"`
 		Vendor   string              `json:"vendor"`
+		Client   string              `json:"client"`
 		VendorId string              `json:"vendorId"`
 		ClientId string              `json:"clientId"`
 		Status   string              `json:"status"`
@@ -154,6 +155,7 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 			Id       string              `json:"id"`
 			Cost     float64             `json:"cost"`
 			Vendor   string              `json:"vendor"`
+			Client   string              `json:"client"`
 			VendorId string              `json:"vendorId"`
 			ClientId string              `json:"clientId"`
 			Status   string              `json:"status"`
@@ -163,6 +165,7 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 			Id:       transaction.Id,
 			Cost:     cost,
 			Vendor:   transaction.Vendor,
+			Client:   transaction.Client,
 			VendorId: transaction.VendorId,
 			ClientId: transaction.ClientId,
 			Status:   string(transaction.Status),
