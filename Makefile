@@ -2,7 +2,7 @@ include .db.env
 # Simple Makefile for a Go project
 
 # Build the application
-all: build
+all: clean templates css build
 
 build:
 	@echo "Building..."
