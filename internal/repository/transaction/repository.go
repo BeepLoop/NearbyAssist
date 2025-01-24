@@ -21,5 +21,7 @@ type TransactionRepository interface {
 	GetHistory(id string) ([]*models.TransactionModel, error)
 
 	Cancel(transactionId string) error
+	Accept(transactionId string) error
+	Reject(transactionId string) error
 	MarkComplete(transactionId string) error
 }

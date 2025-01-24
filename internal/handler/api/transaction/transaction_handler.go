@@ -99,6 +99,48 @@ func (h *transactionHandler) Cancel(c echo.Context) error {
 	return c.JSON(http.StatusNoContent, nil)
 }
 
+func (h *transactionHandler) Accept(c echo.Context) error {
+	transactionId := c.Param("transactionId")
+	if transactionId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Transaction ID is required",
+			Error:   "Transaction ID is required",
+		})
+	}
+
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	if err := h.transactionService.AcceptTransactionRequest(bearerToken, transactionId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error accepting transaction request",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *transactionHandler) Reject(c echo.Context) error {
+	transactionId := c.Param("transactionId")
+	if transactionId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Transaction ID is required",
+			Error:   "Transaction ID is required",
+		})
+	}
+
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	if err := h.transactionService.RejectTransactionRequest(bearerToken, transactionId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error rejecting transaction request",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
 func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 	filter := c.QueryParam("filter")

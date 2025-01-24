@@ -133,6 +133,66 @@ func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
 	return nil
 }
 
+func (s *Service) AcceptTransactionRequest(bearerToken, transactionId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	transaction, err := s.store.FindById(transactionId)
+	if err != nil {
+		return err
+	}
+
+	if transaction.Status != models.TRANSACTION_STATUS_PENDING {
+		return errors.New("Could not accept non-pending transaction")
+	}
+
+	if transaction.Status == models.TRANSACTION_STATUS_DONE || transaction.Status == models.TRANSACTION_STATUS_CANCELLED {
+		return errors.New("Transaction already completed or cancelled")
+	}
+
+	if transaction.VendorId != userId {
+		return errors.New("Unauthorized accept request")
+	}
+
+	if err := s.store.Accept(transactionId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	transaction, err := s.store.FindById(transactionId)
+	if err != nil {
+		return err
+	}
+
+	if transaction.Status != models.TRANSACTION_STATUS_PENDING {
+		return errors.New("Could not reject non-pending transaction")
+	}
+
+	if transaction.Status == models.TRANSACTION_STATUS_DONE || transaction.Status == models.TRANSACTION_STATUS_CANCELLED {
+		return errors.New("Transaction already completed or cancelled")
+	}
+
+	if transaction.VendorId != userId {
+		return errors.New("Unauthorized accept request")
+	}
+
+	if err := s.store.Reject(transactionId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Service) GetTransactionSummary(transactionId string) (*response.TransactionSummary, error) {
 	transactionData, err := s.store.GetSummary(transactionId)
 	if err != nil {

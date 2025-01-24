@@ -713,6 +713,38 @@ func (s *MysqlTransactionRepository) Cancel(transactionId string) error {
 	return nil
 }
 
+func (s *MysqlTransactionRepository) Accept(transactionId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE Transaction SET status = 'confirmed' WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, transactionId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlTransactionRepository) Reject(transactionId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE Transaction SET status = 'rejected' WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, transactionId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlTransactionRepository) MarkComplete(transactionId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
