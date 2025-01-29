@@ -554,13 +554,13 @@ func (s *MysqlTransactionRepository) GetConfirmed(id string) ([]*models.Transact
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            (t.vendorId = ? OR t.clientId = ?) AND t.status = 'confirmed'
+            t.vendorId = ? AND t.status = 'confirmed'
         ORDER BY
             t.updatedAt DESC
     `
 
 	transactions := make([]*models.TransactionModel, 0)
-	err := s.db.SelectContext(ctx, &transactions, transactionQuery, id, id)
+	err := s.db.SelectContext(ctx, &transactions, transactionQuery, id)
 	if err != nil {
 		return nil, err
 	}
