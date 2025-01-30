@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/handler/api/e2ee"
 	"nearbyassist/internal/handler/api/health"
 	"nearbyassist/internal/handler/api/message"
+	"nearbyassist/internal/handler/api/qr"
 	"nearbyassist/internal/handler/api/review"
 	"nearbyassist/internal/handler/api/service"
 	"nearbyassist/internal/handler/api/tag"
@@ -31,6 +32,7 @@ import (
 	e2ee_service "nearbyassist/internal/service/e2ee"
 	health_service "nearbyassist/internal/service/health"
 	message_service "nearbyassist/internal/service/message"
+	qr_service "nearbyassist/internal/service/qr"
 	review_service "nearbyassist/internal/service/review"
 	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
@@ -253,5 +255,22 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		e2eeRoute.POST("", handler.SaveKeys)
 		e2eeRoute.GET("/keys", handler.GetKeys)
 		e2eeRoute.GET("/key/:userId", handler.GetPublicKey)
+	}
+
+	qrRoute := v1.Group("/qr")
+	{
+		qrRoute.Use(middleware.CheckAuth(s.JWT))
+
+		key, err := s.Encrypt.GetKey()
+		if err != nil {
+			// NOTE: This should not happen unless encryption key is not properly set
+			panic(err.Error())
+		}
+
+		qrService := qr_service.NewService(key)
+		handler := qr.NewHandler(qrService)
+
+		qrRoute.POST("/generateSignature", handler.SignTransaction)
+		qrRoute.POST("/verifySignature", handler.VerifySignature)
 	}
 }

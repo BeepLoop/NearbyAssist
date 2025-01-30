@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 )
 
@@ -18,6 +19,7 @@ type Encryption interface {
 	DecryptString(text string) (string, error)
 	EncryptFile(source []byte) ([]byte, error)
 	DecryptFile(source []byte) ([]byte, error)
+	GetKey() ([]byte, error)
 }
 
 type MockEncryptor struct{}
@@ -40,6 +42,10 @@ func (m *MockEncryptor) EncryptFile(source []byte) ([]byte, error) {
 
 func (m *MockEncryptor) DecryptFile(source []byte) ([]byte, error) {
 	return source, nil
+}
+
+func (m *MockEncryptor) GetKey() ([]byte, error) {
+	return nil, nil
 }
 
 type AES struct {
@@ -136,4 +142,11 @@ func (e *AES) DecryptFile(source []byte) ([]byte, error) {
 	}
 
 	return decrypted, nil
+}
+func (e *AES) GetKey() ([]byte, error) {
+	if e.key == nil {
+		return nil, errors.New("Missing key")
+	}
+
+	return e.key, nil
 }
