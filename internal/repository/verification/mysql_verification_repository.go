@@ -140,7 +140,8 @@ func (s *MysqlVerificationRepository) AcceptRequest(id string) error {
             u.verified = 1,
             u.address = iv.address,
             u.latitude = iv.latitude,
-            u.longitude = iv.longitude
+            u.longitude = iv.longitude,
+            u.name = iv.name
         WHERE
             iv.id = ?
     `
