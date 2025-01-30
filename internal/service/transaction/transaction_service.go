@@ -574,8 +574,8 @@ func (s *Service) CompleteTransaction(bearerToken, transactionId string) error {
 	if transaction, err := s.store.FindById(transactionId); err != nil {
 		return err
 	} else {
-		if transaction.ClientId != userId {
-			return err
+		if transaction.VendorId != userId {
+			return errors.New("unauthorized")
 		}
 	}
 

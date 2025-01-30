@@ -281,6 +281,13 @@ func (h *transactionHandler) CompleteTransaction(c echo.Context) error {
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
 	if err := h.transactionService.CompleteTransaction(bearerToken, transactionId); err != nil {
+		if strings.Contains(err.Error(), "unauthorized") {
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+				Message: "You are not authorized to complete this transaction",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error marking transaction as complete",
 			Error:   err.Error(),
