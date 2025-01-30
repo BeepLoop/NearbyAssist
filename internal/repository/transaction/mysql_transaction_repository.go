@@ -309,7 +309,7 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            t.clientId = ?
+            t.clientId = ? AND (t.status = 'pending' OR t.status = 'confirmed')
         ORDER BY
             t.updatedAt DESC
     `
