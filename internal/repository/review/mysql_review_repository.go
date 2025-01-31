@@ -35,7 +35,7 @@ func (s *MysqlReviewRepository) Create(data *models.ReviewModel) (string, error)
 		data.Id = id
 	}
 
-	insertReview := "INSERT INTO Review (id, serviceId, rating) VALUES (:id, :serviceId, :rating)"
+	insertReview := "INSERT INTO Review (id, serviceId, rating, text) VALUES (:id, :serviceId, :rating, :text)"
 	if _, err := tx.NamedExecContext(ctx, insertReview, data); err != nil {
 		return "", err
 	}
@@ -75,7 +75,7 @@ func (s *MysqlReviewRepository) IsServiceReviewable(serviceId string) error {
 
 	isReviewed := true
 	query := "SELECT isReviewed FROM Transaction WHERE serviceId = ?"
-	if err := s.db.GetContext(ctx, isReviewed, query, serviceId); err != nil {
+	if err := s.db.GetContext(ctx, &isReviewed, query, serviceId); err != nil {
 		return err
 	}
 

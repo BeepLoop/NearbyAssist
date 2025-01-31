@@ -253,6 +253,22 @@ func (h *transactionHandler) GetConfirmedTransactions(c echo.Context) error {
 	})
 }
 
+func (h *transactionHandler) GetReviewableTransactions(c echo.Context) error {
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	reviewables, err := h.transactionService.GetReviewableTransactions(bearerToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error getting confirmed transactions",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"reviewables": reviewables,
+	})
+}
+
 func (h *transactionHandler) GetTransactionHistory(c echo.Context) error {
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 

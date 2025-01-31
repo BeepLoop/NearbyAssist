@@ -161,6 +161,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		transactionRoute.GET("/mine", handler.GetUserTransactionList)
 		transactionRoute.GET("/recent", handler.GetRecentTransactions)
 		transactionRoute.GET("/confirmed", handler.GetConfirmedTransactions)
+		transactionRoute.GET("/toReview", handler.GetReviewableTransactions)
 		transactionRoute.GET("/history", handler.GetTransactionHistory)
 		transactionRoute.POST("/complete/:transactionId", handler.CompleteTransaction)
 	}

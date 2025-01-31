@@ -19,6 +19,7 @@ type TransactionRepository interface {
 	GetConfirmed(id string) ([]*models.TransactionModel, error)
 
 	GetHistory(id string) ([]*models.TransactionModel, error)
+	GetReviewableTransactions(userId string) ([]*models.TransactionModel, error)
 
 	Cancel(transactionId string) error
 	Accept(transactionId string) error

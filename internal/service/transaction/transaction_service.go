@@ -504,6 +504,67 @@ func (s *Service) GetConfirmedTransactions(bearerToken string) ([]*models.Transa
 	return transactions, nil
 }
 
+func (s *Service) GetReviewableTransactions(bearerToken string) ([]*models.TransactionModel, error) {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return nil, err
+	}
+
+	reviewables, err := s.store.GetReviewableTransactions(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, reviewable := range reviewables {
+		if plain, err := s.encrypt.DecryptString(reviewable.Vendor); err != nil {
+			return nil, err
+		} else {
+			reviewable.Vendor = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(reviewable.Client); err != nil {
+			return nil, err
+		} else {
+			reviewable.Client = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(reviewable.Service.Title); err != nil {
+			return nil, err
+		} else {
+			reviewable.Service.Title = plain
+		}
+
+		if plain, err := s.encrypt.DecryptString(reviewable.Service.Description); err != nil {
+			return nil, err
+		} else {
+			reviewable.Service.Description = plain
+		}
+
+		extras := make([]models.ExtraModel, 0)
+		for _, extra := range reviewable.Extras {
+			title, err := s.encrypt.DecryptString(extra.Title)
+			if err != nil {
+				return nil, err
+			}
+
+			description, err := s.encrypt.DecryptString(extra.Description)
+			if err != nil {
+				return nil, err
+			}
+
+			extras = append(extras, models.ExtraModel{
+				Model:       extra.Model,
+				Title:       title,
+				Description: description,
+				Price:       extra.Price,
+			})
+		}
+		reviewable.Extras = extras
+	}
+
+	return reviewables, nil
+}
+
 func (s *Service) GetTransactionHistory(bearerToken string) ([]*models.TransactionModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
