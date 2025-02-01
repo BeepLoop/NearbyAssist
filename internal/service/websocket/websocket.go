@@ -98,7 +98,7 @@ func (w *Websocket) forwardMessage(message *models.MessageModel) {
 	// NOTE: notify receiver
 	oneSignal := notification_service.OneSignalInstance
 	if oneSignal != nil {
-		if err := oneSignal.Notify(message.Receiver, notification_service.NOTIF_TYPE_NEW_MESSAGE); err != nil {
+		if err := oneSignal.NewMessageNotification(message.Receiver, notification_service.NOTIF_TYPE_NEW_MESSAGE); err != nil {
 			fmt.Println(err.Error())
 		}
 	} else {

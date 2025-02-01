@@ -13,26 +13,6 @@ var (
 	OneSignalInstance *OneSignalNotification
 )
 
-type Payload struct {
-	AppID          string                `json:"app_id"`
-	Headings       PayloadHeading        `json:"headings"`
-	Contents       PayloadContent        `json:"contents"`
-	IncludeAliases PayloadIncludeAliases `json:"include_aliases"`
-	TargetChannel  string                `json:"target_channel"`
-}
-
-type PayloadHeading struct {
-	EN string `json:"en"`
-}
-
-type PayloadContent struct {
-	EN string `json:"en"`
-}
-
-type PayloadIncludeAliases struct {
-	ExternalID []string `json:"external_id"`
-}
-
 type OneSignalNotification struct {
 	URL    string
 	AppID  string
@@ -53,12 +33,33 @@ func NewOneSignal(appId, apiKey string) *OneSignalNotification {
 	return OneSignalInstance
 }
 
-func (n *OneSignalNotification) Notify(userId string, notifyType NotificationType) error {
-	payload, err := n.payloadFactory(userId, notifyType)
+func (n *OneSignalNotification) NewMessageNotification(userId string, notifyType NotificationType) error {
+	body := MessagePayload{
+		AppID: n.AppID,
+		Headings: PayloadHeading{
+			EN: "New Message",
+		},
+		Contents: PayloadContent{
+			EN: "1 new unread message",
+		},
+		IncludeAliases: PayloadIncludeAliases{
+			ExternalID: []string{
+				userId,
+			},
+		},
+		TargetChannel:    "push",
+		AndroidChannelID: "133814f9-8cfb-4f14-9b03-7e0d4caa71ba",
+	}
+
+	payload, err := json.Marshal(body)
 	if err != nil {
 		return errors.New(string(NOTIF_PAYLOAD_INIT_ERR))
 	}
 
+	return n.shipNotification(bytes.NewReader(payload))
+}
+
+func (n *OneSignalNotification) shipNotification(payload io.Reader) error {
 	ctx := context.Background()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, n.URL, payload)
 	if err != nil {
@@ -93,7 +94,7 @@ func (n *OneSignalNotification) payloadFactory(userId string, notifType Notifica
 }
 
 func (n *OneSignalNotification) newMessagePayload(userId string) (io.Reader, error) {
-	body := Payload{
+	body := MessagePayload{
 		AppID: n.AppID,
 		Headings: PayloadHeading{
 			EN: "New Message",

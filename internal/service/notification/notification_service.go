@@ -12,7 +12,3 @@ const (
 	NOTIF_PAYLOAD_ERR      NotificationError = "Payload error"
 	NOTIF_HTTP_CLIENT_ERR  NotificationError = "Error sending notification"
 )
-
-type NotificationService interface {
-	Notify(userId string, notifType NotificationType) error
-}
