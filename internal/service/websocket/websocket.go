@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
 	message_repo "nearbyassist/internal/repository/message"
@@ -9,6 +10,14 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+)
+
+const (
+	NIL_INSTANCE_ERR = "Websocket instance is not initialized"
+)
+
+var (
+	Instance *Websocket
 )
 
 type Websocket struct {
@@ -27,6 +36,14 @@ func NewWebsocket(store message_repo.MessageRepository) *Websocket {
 		saverChan:   make(chan *models.MessageModel),
 		store:       store,
 	}
+}
+
+func GetInstance() (*Websocket, error) {
+	if Instance != nil {
+		return Instance, nil
+	}
+
+	return nil, errors.New(NIL_INSTANCE_ERR)
 }
 
 func (w *Websocket) Upgrade(c echo.Context) (*websocket.Conn, error) {
