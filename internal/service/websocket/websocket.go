@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	message_repo "nearbyassist/internal/repository/message"
+	notification_service "nearbyassist/internal/service/notification"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -95,8 +95,15 @@ func (w *Websocket) storeMessage(message *models.MessageModel) {
 }
 
 func (w *Websocket) forwardMessage(message *models.MessageModel) {
-	// TODO: Remove this sleep, this is just for testing purposes
-	time.Sleep(time.Second * 2)
+	// NOTE: notify receiver
+	oneSignal := notification_service.OneSignalInstance
+	if oneSignal != nil {
+		if err := oneSignal.Notify(message.Receiver, notification_service.NOTIF_TYPE_NEW_MESSAGE); err != nil {
+			fmt.Println(err.Error())
+		}
+	} else {
+		fmt.Println("dum dum you forgot to initialize one signal")
+	}
 
 	if socket, ok := w.clients[message.Receiver]; ok {
 		err := socket.WriteJSON(message)

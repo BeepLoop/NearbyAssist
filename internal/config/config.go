@@ -30,6 +30,9 @@ type Config struct {
 
 	ROUTE_ENGINE_URL string
 
+	ONE_SIGNAL_APP_ID  string
+	ONE_SIGNAL_API_KEY string
+
 	APPLICATION_PROOF_DIR string
 	POLICE_CLEARANCE_DIR  string
 	SERVICE_PHOTO_DIR     string
@@ -77,6 +80,9 @@ func LoadConfig() *Config {
 		FACE_IMG_DIR:          getEnv("VERIFICATION_FACE_DIR", "uploads/verification/face"),
 
 		ROUTE_ENGINE_URL: getEnv("ROUTE_ENGINE_URL", "http://127.0.0.1:5000"),
+
+		ONE_SIGNAL_APP_ID:  getEnv("ONE_SIGNAL_APP_ID", ""),
+		ONE_SIGNAL_API_KEY: getEnv("ONE_SIGNAL_API_KEY", ""),
 	}
 }
 

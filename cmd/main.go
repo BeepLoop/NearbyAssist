@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
@@ -57,6 +58,8 @@ func main() {
 
 	chatStore := message_repo.NewMysqlChatRepository(mysql)
 	ws := websocket.NewWebsocket(chatStore)
+
+	notification_service.NewOneSignal(config.ONE_SIGNAL_APP_ID, config.ONE_SIGNAL_API_KEY)
 
 	serverConfig := server.ServerConfig{
 		Config: config,
