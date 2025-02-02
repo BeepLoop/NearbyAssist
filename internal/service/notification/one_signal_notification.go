@@ -83,37 +83,3 @@ func (n *OneSignalNotification) shipNotification(payload io.Reader) error {
 
 	return nil
 }
-
-func (n *OneSignalNotification) payloadFactory(userId string, notifType NotificationType) (io.Reader, error) {
-	switch notifType {
-	case NOTIF_TYPE_NEW_MESSAGE:
-		return n.newMessagePayload(userId)
-	default:
-		return nil, errors.New(string(NOTIF_TYPE_INVALID))
-	}
-}
-
-func (n *OneSignalNotification) newMessagePayload(userId string) (io.Reader, error) {
-	body := MessagePayload{
-		AppID: n.AppID,
-		Headings: PayloadHeading{
-			EN: "New Message",
-		},
-		Contents: PayloadContent{
-			EN: "1 new unread message",
-		},
-		IncludeAliases: PayloadIncludeAliases{
-			ExternalID: []string{
-				userId,
-			},
-		},
-		TargetChannel: "push",
-	}
-
-	payload, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-
-	return bytes.NewReader(payload), nil
-}
