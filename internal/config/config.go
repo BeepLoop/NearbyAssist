@@ -1,11 +1,16 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
+)
+
+var (
+	Instance *Config
 )
 
 type Config struct {
@@ -42,7 +47,16 @@ type Config struct {
 	FACE_IMG_DIR          string
 }
 
-func LoadConfig() *Config {
+func GetConfig() *Config {
+	if Instance != nil {
+		return Instance
+	}
+
+	Instance = initialize()
+	return Instance
+}
+
+func initialize() *Config {
 	godotenv.Load()
 
 	jwtDuration := getEnv("JWT_DURATION", "60")
@@ -63,8 +77,8 @@ func LoadConfig() *Config {
 		DB_PORT: getEnv("DB_PORT", "3306"),
 		DB_NET:  getEnv("DB_NET", "tcp"),
 
-		EMAIL_FROM: getEnv("EMAIL_FROM", ""),
-		EMAIL_PASS: getEnv("EMAIL_PASS", ""),
+		EMAIL_FROM: mustGetEnv("EMAIL_FROM"),
+		EMAIL_PASS: mustGetEnv("EMAIL_PASS"),
 
 		JWT_SECRET:   getEnv("JWT_SECRET", "secret"),
 		JWT_DURATION: duration,
@@ -81,8 +95,8 @@ func LoadConfig() *Config {
 
 		ROUTE_ENGINE_URL: getEnv("ROUTE_ENGINE_URL", "http://127.0.0.1:5000"),
 
-		ONE_SIGNAL_APP_ID:  getEnv("ONE_SIGNAL_APP_ID", ""),
-		ONE_SIGNAL_API_KEY: getEnv("ONE_SIGNAL_API_KEY", ""),
+		ONE_SIGNAL_APP_ID:  mustGetEnv("ONE_SIGNAL_APP_ID"),
+		ONE_SIGNAL_API_KEY: mustGetEnv("ONE_SIGNAL_API_KEY"),
 	}
 }
 
@@ -90,6 +104,15 @@ func getEnv(key string, fallback string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {
 		return fallback
+	}
+
+	return value
+}
+
+func mustGetEnv(key string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		panic(fmt.Sprintf("Environment key '%s' does not exits in environment", key))
 	}
 
 	return value

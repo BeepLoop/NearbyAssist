@@ -18,7 +18,7 @@ import (
 
 func main() {
 	// Load configuration file
-	config := config.LoadConfig()
+	config := config.GetConfig()
 
 	// Load encryption algorithm
 	encrypt := auth.NewAES([]byte(config.ENCRYPTION_KEY))
