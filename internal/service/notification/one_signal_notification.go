@@ -48,7 +48,7 @@ func (n *OneSignalNotification) NewMessageNotification(userId string, notifyType
 			},
 		},
 		TargetChannel:    "push",
-		AndroidChannelID: "133814f9-8cfb-4f14-9b03-7e0d4caa71ba",
+		AndroidChannelID: NOTIF_CHANNEL_HIGH,
 	}
 
 	payload, err := json.Marshal(body)
