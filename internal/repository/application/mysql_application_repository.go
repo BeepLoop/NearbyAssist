@@ -51,8 +51,24 @@ func (s *MysqlApplicationRepository) FindApplication(id string) (*models.Applica
 	defer cancel()
 
 	application := new(models.ApplicationModel)
-	query := "SELECT id, applicantId FROM Application WHERE id = ?"
-	if err := s.db.GetContext(ctx, query, id); err != nil {
+	query := `
+        SELECT 
+            a.id,
+            a.applicantId,
+            a.expertiseId,
+            a.supportingDocumentUrl,
+            a.policeClearanceUrl,
+            a.status,
+            u.name AS applicantName,
+            e.title AS expertise
+        FROM 
+            Application a
+            JOIN User u ON u.id = a.applicantId
+            JOIN Expertise e ON e.id = a.expertiseId
+        WHERE
+            a.id = ?
+    `
+	if err := s.db.GetContext(ctx, application, query, id); err != nil {
 		return nil, err
 	}
 
@@ -115,4 +131,22 @@ func (s *MysqlApplicationRepository) NewPoliceClearance(data *models.PoliceClear
 	}
 
 	return data.Id, nil
+}
+
+func (s *MysqlApplicationRepository) GetAll(status string) ([]*models.ApplicationModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	applications := make([]*models.ApplicationModel, 0)
+
+	query := "SELECT * FROM Application WHERE status = ?"
+	if err := s.db.SelectContext(ctx, &applications, query, status); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return applications, nil
 }

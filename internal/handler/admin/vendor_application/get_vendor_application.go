@@ -3,7 +3,8 @@ package application
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/views/pages/vendor_application"
+	pages "nearbyassist/views/pages/vendor_application"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,6 +16,30 @@ func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	page := pages.Applications(applications)
+	data := make([]models.ApplicationModel, 0)
+	for _, application := range applications {
+		var date string
+
+		layout := "2006-01-02T15:04:05Z"
+		t, err := time.Parse(layout, application.CreatedAt)
+		if err != nil {
+			date = application.CreatedAt
+		} else {
+			date = t.Format(time.RFC1123)
+		}
+
+		data = append(data, models.ApplicationModel{
+			Model:                 models.Model{Id: application.Id, CreatedAt: date},
+			UpdateableModel:       application.UpdateableModel,
+			GeoSpatialModel:       application.GeoSpatialModel,
+			ApplicantId:           application.ApplicantId,
+			ExpertiseId:           application.ApplicantId,
+			SupportingDocumentUrl: application.SupportingDocumentUrl,
+			PoliceClearanceUrl:    application.PoliceClearanceUrl,
+			Status:                application.Status,
+		})
+	}
+
+	page := pages.Applications(data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

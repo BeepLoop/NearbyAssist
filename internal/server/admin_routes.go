@@ -76,6 +76,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		applicationHandler := application.NewHandler(applicationService)
 
 		applicationRoute.GET("", applicationHandler.GetVendorApplication, middleware.CheckSession)
+		applicationRoute.GET("/:applicationId", applicationHandler.GetVendorApplicationDetails, middleware.CheckSession)
+		applicationRoute.POST("/accept/:applicationId", applicationHandler.AcceptRequest, middleware.CheckSession)
+		applicationRoute.POST("/reject/:applicationId", applicationHandler.RejectRequest, middleware.CheckSession)
 	}
 
 	verificationRoute := r.Group("/verification-requests")

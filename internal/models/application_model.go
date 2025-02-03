@@ -18,4 +18,8 @@ type ApplicationModel struct {
 	SupportingDocumentUrl string                  `db:"supportingDocumentUrl"`
 	PoliceClearanceUrl    string                  `db:"policeClearanceUrl"`
 	Status                ApplicationStatusFilter `db:"status"`
+
+	// Join table fields
+	ApplicantName string `db:"applicantName"`
+	Expertise     string `db:"expertise"`
 }

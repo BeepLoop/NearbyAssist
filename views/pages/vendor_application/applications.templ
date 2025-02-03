@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
@@ -44,8 +45,11 @@ templ applicationsData(applications []models.ApplicationModel) {
 						<td class="px-6 py-4">{ application.CreatedAt }</td>
 						<td class="flex justify-center px-6 py-4">
 							<ul>
-								<a href="" class="text-blue hover:underline">
-									View Application
+								<a
+									href={ templ.SafeURL(fmt.Sprintf("/admin/vendor-applications/%s", application.Id)) }
+									class="text-blue hover:underline"
+								>
+									View Request
 								</a>
 							</ul>
 						</td>

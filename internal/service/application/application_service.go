@@ -1,12 +1,14 @@
 package application_service
 
 import (
+	"encoding/base64"
 	"mime/multipart"
 	"nearbyassist/internal/models"
 	application_repo "nearbyassist/internal/repository/application"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/utils"
+	"net/http"
 	"strings"
 )
 
@@ -85,6 +87,46 @@ func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*mu
 	return applicationId, nil
 }
 
-func (s *Service) GetApplications() ([]models.ApplicationModel, error) {
-	return nil, nil
+func (s *Service) GetApplications() ([]*models.ApplicationModel, error) {
+	applications, err := s.store.GetAll("pending")
+	if err != nil {
+		return nil, err
+	}
+
+	return applications, nil
+}
+
+func (s *Service) GetApplicationDetail(applicationId string) (*models.ApplicationModel, error) {
+	application, err := s.store.FindApplication(applicationId)
+	if err != nil {
+		return nil, err
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(application.ApplicantName); err != nil {
+		return nil, err
+	} else {
+		application.ApplicantName = decrypted
+	}
+
+	return application, nil
+}
+
+func (s *Service) GetFile(path string) (string, error) {
+	file, err := s.fs.GetFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	decrypted, err := s.encrypt.DecryptFile(file)
+	if err != nil {
+		return "", err
+	}
+
+	base64Img := base64.StdEncoding.EncodeToString(decrypted)
+
+	mime := http.DetectContentType(decrypted)
+
+	base64Img = "data:" + mime + ";base64," + base64Img
+
+	return base64Img, nil
 }

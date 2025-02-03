@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
@@ -108,7 +109,7 @@ func applicationsData(applications []models.ApplicationModel) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(application.Id)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/applications.templ`, Line: 42, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/applications.templ`, Line: 43, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -121,7 +122,7 @@ func applicationsData(applications []models.ApplicationModel) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(application.ApplicantId)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/applications.templ`, Line: 43, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/applications.templ`, Line: 44, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -134,13 +135,22 @@ func applicationsData(applications []models.ApplicationModel) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(application.CreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/applications.templ`, Line: 44, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/applications.templ`, Line: 45, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"flex justify-center px-6 py-4\"><ul><a href=\"\" class=\"text-blue hover:underline\">View Application</a></ul></td></tr>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"flex justify-center px-6 py-4\"><ul><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/vendor-applications/%s", application.Id))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"text-blue hover:underline\">View Request</a></ul></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

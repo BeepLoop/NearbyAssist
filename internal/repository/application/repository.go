@@ -7,4 +7,6 @@ type ApplicationRepository interface {
 	FindApplication(id string) (*models.ApplicationModel, error)
 	NewProof(data *models.ApplicationProofModel) (string, error)
 	NewPoliceClearance(data *models.PoliceClearanceModel) (string, error)
+
+	GetAll(status string) ([]*models.ApplicationModel, error)
 }
