@@ -1,17 +1,54 @@
 package notification_service
 
-type NotificationType string
-type NotificationError string
-
-const (
-	NOTIF_TYPE_NEW_MESSAGE NotificationType = "New Message"
-
-	NOTIF_TYPE_INVALID     NotificationError = "Invalid notification type"
-	NOTIF_REQ_INIT_ERR     NotificationError = "Error initializing http request"
-	NOTIF_PAYLOAD_INIT_ERR NotificationError = "Error initializing payload"
-	NOTIF_PAYLOAD_ERR      NotificationError = "Payload error"
-	NOTIF_HTTP_CLIENT_ERR  NotificationError = "Error sending notification"
-
-	NOTIF_CHANNEL_HIGH   = "3b202b57-6bb0-4481-826b-2c9ee405ebf5"
-	NOTIF_CHANNEL_URGENT = "133814f9-8cfb-4f14-9b03-7e0d4caa71ba"
+import (
+	"nearbyassist/internal/models"
+	notification_repo "nearbyassist/internal/repository/notification"
+	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/utils"
 )
+
+type Service struct {
+	store   notification_repo.NotificationRepository
+	encrypt auth.Encryption
+	jwt     auth.Authenticator
+}
+
+func NewService(store notification_repo.NotificationRepository, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
+	return &Service{
+		store:   store,
+		encrypt: encrypt,
+		jwt:     jwt,
+	}
+}
+
+func (s *Service) GetUnreadNotifications(bearerToken string) ([]*models.NotificationModel, error) {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return nil, err
+	}
+
+	notifications, err := s.store.GetAllUnreadByRecipient(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, notification := range notifications {
+		if plainText, err := s.encrypt.DecryptString(notification.Title); err != nil {
+			return nil, err
+		} else {
+			notification.Title = plainText
+		}
+
+		if plainText, err := s.encrypt.DecryptString(notification.Content); err != nil {
+			return nil, err
+		} else {
+			notification.Content = plainText
+		}
+	}
+
+	return notifications, nil
+}
+
+func (s *Service) ReadNotification(notificationId string) error {
+	return s.store.UpdateRead(notificationId)
+}

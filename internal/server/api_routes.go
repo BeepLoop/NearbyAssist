@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/handler/api/e2ee"
 	"nearbyassist/internal/handler/api/health"
 	"nearbyassist/internal/handler/api/message"
+	"nearbyassist/internal/handler/api/notification"
 	"nearbyassist/internal/handler/api/qr"
 	"nearbyassist/internal/handler/api/review"
 	"nearbyassist/internal/handler/api/service"
@@ -19,6 +20,7 @@ import (
 	complaint_repo "nearbyassist/internal/repository/complaint"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
 	message_repo "nearbyassist/internal/repository/message"
+	notification_repo "nearbyassist/internal/repository/notification"
 	review_repo "nearbyassist/internal/repository/review"
 	saved_service_repo "nearbyassist/internal/repository/saved_service"
 	service_repo "nearbyassist/internal/repository/service"
@@ -32,6 +34,7 @@ import (
 	e2ee_service "nearbyassist/internal/service/e2ee"
 	health_service "nearbyassist/internal/service/health"
 	message_service "nearbyassist/internal/service/message"
+	notification_service "nearbyassist/internal/service/notification"
 	qr_service "nearbyassist/internal/service/qr"
 	review_service "nearbyassist/internal/service/review"
 	"nearbyassist/internal/service/save_service"
@@ -273,5 +276,17 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		qrRoute.POST("/generateSignature", handler.SignTransaction)
 		qrRoute.POST("/verifySignature", handler.VerifySignature)
+	}
+
+	notificationRoute := v1.Group("/notifications")
+	{
+		notificationRoute.Use(middleware.CheckAuth(s.JWT))
+
+		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+		notificationService := notification_service.NewService(notificationStore, s.Encrypt, s.JWT)
+		handler := notification.NewHandler(notificationService)
+
+		notificationRoute.GET("", handler.GetUnreadNotifications)
+		notificationRoute.POST("/:notificationId", handler.ReadNotification)
 	}
 }
