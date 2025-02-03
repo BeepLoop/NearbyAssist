@@ -12,9 +12,11 @@ func (h *verificationHandler) RejectRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId+"?error=Invalid_request")
 	}
 
-	if err := h.verificationService.RejectRequest(requestId); err != nil {
+	reason := "default reason"
+
+	if err := h.verificationService.RejectRequest(requestId, reason); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId+"?error=Failed_to_accept_request")
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId)
+	return c.Redirect(http.StatusSeeOther, "/admin/verification-requests")
 }

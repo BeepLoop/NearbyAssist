@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"mime/multipart"
 	"nearbyassist/internal/models"
+	notification_repo "nearbyassist/internal/repository/notification"
 	verification_repo "nearbyassist/internal/repository/verification"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
@@ -12,14 +13,15 @@ import (
 )
 
 type Service struct {
-	store   verification_repo.VerificationRepository
-	fs      fs.FileStorage
-	encrypt auth.Encryption
-	jwt     auth.Authenticator
+	store      verification_repo.VerificationRepository
+	notifStore notification_repo.NotificationRepository
+	fs         fs.FileStorage
+	encrypt    auth.Encryption
+	jwt        auth.Authenticator
 }
 
-func NewService(store verification_repo.VerificationRepository, fs fs.FileStorage, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
-	return &Service{store: store, fs: fs, encrypt: encrypt, jwt: jwt}
+func NewService(store verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
+	return &Service{store: store, notifStore: notifStore, fs: fs, encrypt: encrypt, jwt: jwt}
 }
 
 func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bearerToken string, latitude, longitude float64, files []*multipart.FileHeader) (string, error) {
@@ -189,9 +191,73 @@ func (s *Service) GetFile(path string) (string, error) {
 }
 
 func (s *Service) AcceptRequest(id string) error {
-	return s.store.AcceptRequest(id)
+	request, err := s.store.FindById(id)
+	if err != nil {
+		return err
+	}
+
+	if err := s.store.AcceptRequest(id); err != nil {
+		return err
+	}
+
+	notification := &models.NotificationModel{
+		Recipient: request.UserId,
+		Type:      "identity_verification_accepted",
+		Title:     "Identity Verification Accepted",
+		Content:   "Congratulations! Your identity verification request has been accepted. Go to your settings and Sync Account to see the changes.",
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (s *Service) RejectRequest(id string) error {
-	return s.store.RejectRequest(id)
+func (s *Service) RejectRequest(id, reason string) error {
+	request, err := s.store.FindById(id)
+	if err != nil {
+		return err
+	}
+
+	if err := s.store.RejectRequest(id); err != nil {
+		return err
+	}
+
+	notification := &models.NotificationModel{
+		Recipient: request.UserId,
+		Type:      "identity_verification_rejected",
+		Title:     "Identity Verification Rejected",
+		Content:   "We are sorry to inform you that your identiy verification request has been denied. Reason of rejection: " + reason,
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -203,12 +203,15 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		verificationRoute.Use(middleware.CheckAuth(s.JWT))
 
+		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+
 		useStore := user_repo.NewMysqlUserRepository(s.DB)
 		userService := user_service.NewService(useStore, s.Encrypt, s.Hash, s.JWT)
 
 		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		verificationService := verification_service.NewService(
 			verificationStore,
+			notificationStore,
 			s.FS,
 			s.Encrypt,
 			s.JWT,

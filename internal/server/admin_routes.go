@@ -14,6 +14,7 @@ import (
 	complaint_repo "nearbyassist/internal/repository/complaint"
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
 	map_repo "nearbyassist/internal/repository/map"
+	notification_repo "nearbyassist/internal/repository/notification"
 	tag_repo "nearbyassist/internal/repository/tag"
 	verification_repo "nearbyassist/internal/repository/verification"
 	admin_service "nearbyassist/internal/service/admin"
@@ -82,7 +83,8 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		verificationRoute.Use(middleware.CheckSession)
 
 		requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
-		requestService := verification_service.NewService(requestStore, s.FS, s.Encrypt, s.JWT)
+		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+		requestService := verification_service.NewService(requestStore, notificationStore, s.FS, s.Encrypt, s.JWT)
 		requestHandler := verification.NewHandler(requestService)
 
 		verificationRoute.GET("", requestHandler.GetIdentityVerification)
