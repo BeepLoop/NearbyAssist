@@ -33,6 +33,18 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 		return s.Register(req, emailHash)
 	}
 
+	if decrypted, err := s.encrypt.DecryptString(existingUser.Name); err != nil {
+		return nil, err
+	} else {
+		existingUser.Name = decrypted
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(existingUser.Email); err != nil {
+		return nil, err
+	} else {
+		existingUser.Email = decrypted
+	}
+
 	if existingUser.Address.Valid {
 		if plain, err := s.encrypt.DecryptString(existingUser.Address.String); err != nil {
 			return nil, err
@@ -81,8 +93,8 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 
 	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
 		UserId: existingUser.Id,
-		Name:   req.Name,
-		Email:  req.Email,
+		Name:   existingUser.Name,
+		Email:  existingUser.Email,
 	})
 	if err != nil {
 		return nil, err
@@ -103,9 +115,9 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 		RefreshToken: refreshToken,
 		User: response.DetailedUser{
 			Id:         existingUser.Id,
-			Name:       req.Name,
-			Email:      req.Email,
-			ImageUrl:   req.Image,
+			Name:       existingUser.Name,
+			Email:      existingUser.Email,
+			ImageUrl:   existingUser.ImageUrl,
 			IsVerified: existingUser.Verified,
 			IsVendor:   isVendor,
 			Address:    existingUser.Address.String,
