@@ -16,5 +16,5 @@ func (h *verificationHandler) AcceptRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId+"?error=Failed_to_accept_request")
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId)
+	return c.Redirect(http.StatusSeeOther, "/admin/verification-requests")
 }
