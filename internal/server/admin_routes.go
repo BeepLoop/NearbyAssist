@@ -90,10 +90,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		requestService := verification_service.NewService(requestStore, notificationStore, s.FS, s.Encrypt, s.JWT)
 		requestHandler := verification.NewHandler(requestService)
 
-		verificationRoute.GET("", requestHandler.GetIdentityVerification)
-		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails)
-		verificationRoute.POST("/accept/:requestId", requestHandler.AcceptRequest)
-		verificationRoute.POST("/reject/:requestId", requestHandler.RejectRequest)
+		verificationRoute.GET("", requestHandler.GetIdentityVerification, middleware.CheckSession)
+		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails, middleware.CheckSession)
+		verificationRoute.POST("/accept/:requestId", requestHandler.AcceptRequest, middleware.CheckSession)
+		verificationRoute.POST("/reject/:requestId", requestHandler.RejectRequest, middleware.CheckSession)
 	}
 
 	managementRoute := r.Group("/account-management")
