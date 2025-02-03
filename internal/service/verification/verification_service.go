@@ -2,12 +2,14 @@ package verification_service
 
 import (
 	"encoding/base64"
+	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/models"
 	notification_repo "nearbyassist/internal/repository/notification"
 	verification_repo "nearbyassist/internal/repository/verification"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/utils"
 	"net/http"
 )
@@ -200,6 +202,9 @@ func (s *Service) AcceptRequest(id string) error {
 		return err
 	}
 
+	notificationHeading := "Identity Verification Accepted"
+	notificationContent := "Congratulations! Your identity verification request has been accepted. Go to your settings and Sync Account to see the changes."
+
 	notification := &models.NotificationModel{
 		Recipient: request.UserId,
 		Type:      "identity_verification_accepted",
@@ -223,6 +228,15 @@ func (s *Service) AcceptRequest(id string) error {
 		return err
 	}
 
+	oneSignal := notification_service.OneSignalInstance
+	if oneSignal != nil {
+		if err := oneSignal.NewUrgentNotification(request.UserId, notificationHeading, notificationContent); err != nil {
+			fmt.Println(err.Error())
+		}
+	} else {
+		fmt.Println("dum dum you forgot to initialize one signal")
+	}
+
 	return nil
 }
 
@@ -236,11 +250,14 @@ func (s *Service) RejectRequest(id, reason string) error {
 		return err
 	}
 
+	notificationHeading := "Identity Verification Rejected"
+	notificationContent := "Identity Verification Rejected" + reason
+
 	notification := &models.NotificationModel{
 		Recipient: request.UserId,
 		Type:      "identity_verification_rejected",
-		Title:     "Identity Verification Rejected",
-		Content:   "We are sorry to inform you that your identiy verification request has been denied. Reason of rejection: " + reason,
+		Title:     notificationHeading,
+		Content:   notificationContent,
 	}
 
 	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
@@ -257,6 +274,15 @@ func (s *Service) RejectRequest(id, reason string) error {
 
 	if err := s.notifStore.Create(notification); err != nil {
 		return err
+	}
+
+	oneSignal := notification_service.OneSignalInstance
+	if oneSignal != nil {
+		if err := oneSignal.NewUrgentNotification(request.UserId, notificationHeading, notificationContent); err != nil {
+			fmt.Println(err.Error())
+		}
+	} else {
+		fmt.Println("dum dum you forgot to initialize one signal")
 	}
 
 	return nil

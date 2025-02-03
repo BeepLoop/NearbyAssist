@@ -33,6 +33,32 @@ func NewOneSignal(appId, apiKey string) *OneSignalNotification {
 	return OneSignalInstance
 }
 
+func (n *OneSignalNotification) NewUrgentNotification(userId, heading, content string) error {
+	body := MessagePayload{
+		AppID: n.AppID,
+		Headings: PayloadHeading{
+			EN: heading,
+		},
+		Contents: PayloadContent{
+			EN: content,
+		},
+		IncludeAliases: PayloadIncludeAliases{
+			ExternalID: []string{
+				userId,
+			},
+		},
+		TargetChannel:    "push",
+		AndroidChannelID: NOTIF_CHANNEL_URGENT,
+	}
+
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return errors.New(string(NOTIF_PAYLOAD_INIT_ERR))
+	}
+
+	return n.shipNotification(bytes.NewReader(payload))
+}
+
 func (n *OneSignalNotification) NewMessageNotification(userId string, notifyType NotificationType) error {
 	body := MessagePayload{
 		AppID: n.AppID,
