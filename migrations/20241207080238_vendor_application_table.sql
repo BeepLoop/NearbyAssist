@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS Application (
     id VARCHAR(255) NOT NULL,
-    applicantId VARCHAR(255) NOT NULL UNIQUE,
+    applicantId VARCHAR(255) NOT NULL,
     expertiseId VARCHAR(255) NOT NULL,
     status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
     supportingDocumentUrl VARCHAR(255) NOT NULL,

@@ -71,8 +71,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	applicationRoute := r.Group("/vendor-applications")
 	{
+		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
-		applicationService := application_service.NewService(applicationStore, s.FS, s.Encrypt, s.JWT)
+		applicationService := application_service.NewService(applicationStore, notificationStore, s.FS, s.Encrypt, s.JWT)
 		applicationHandler := application.NewHandler(applicationService)
 
 		applicationRoute.GET("", applicationHandler.GetVendorApplication, middleware.CheckSession)

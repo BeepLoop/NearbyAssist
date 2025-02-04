@@ -4,6 +4,7 @@ import (
 	"context"
 	"nearbyassist/internal/models"
 	pages "nearbyassist/views/pages/vendor_application"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -48,14 +49,29 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 
 func (h *applicationHandler) AcceptRequest(c echo.Context) error {
 	applicationId := c.Param("applicationId")
-	_ = applicationId
+	if applicationId == "" {
+		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=Invalid_request")
+	}
 
-	return nil
+	if err := h.applicationService.AcceptRequest(applicationId); err != nil {
+		return c.Redirect(
+			http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=Failed_to_accept_request")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications")
 }
 
 func (h *applicationHandler) RejectRequest(c echo.Context) error {
 	applicationId := c.Param("applicationId")
-	_ = applicationId
+	if applicationId == "" {
+		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=Invalid_request")
+	}
 
-	return nil
+	reason := "default reason"
+
+	if err := h.applicationService.RejectRequest(applicationId, reason); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=Failed_to_accept_request")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications")
 }

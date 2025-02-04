@@ -48,6 +48,13 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 			})
 		}
 
+		if strings.Contains(err.Error(), "Already approved") {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "You already have that expertise",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating application",
 			Error:   err.Error(),

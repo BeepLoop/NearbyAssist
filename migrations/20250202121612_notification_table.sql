@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS Notification (
     id VARCHAR(255) NOT NULL,
     recipient VARCHAR(255) NOT NULL,
-    type Enum('identity_verification_accepted', 'identity_verification_rejected', 'generic') NOT NULL DEFAULT 'generic',
+    type Enum('identity_verification_accepted', 'identity_verification_rejected', 'add_expertise_accepted', 'add_expertise_rejected', 'generic') NOT NULL DEFAULT 'generic',
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
