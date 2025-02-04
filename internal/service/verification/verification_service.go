@@ -207,7 +207,7 @@ func (s *Service) AcceptRequest(id string) error {
 
 	notification := &models.NotificationModel{
 		Recipient: request.UserId,
-		Type:      "identity_verification_accepted",
+		Type:      "success",
 		Title:     "Identity Verification Accepted",
 		Content:   "Congratulations! Your identity verification request has been accepted. Go to your settings and Sync Account to see the changes.",
 	}
@@ -255,7 +255,7 @@ func (s *Service) RejectRequest(id, reason string) error {
 
 	notification := &models.NotificationModel{
 		Recipient: request.UserId,
-		Type:      "identity_verification_rejected",
+		Type:      "fail",
 		Title:     notificationHeading,
 		Content:   notificationContent,
 	}

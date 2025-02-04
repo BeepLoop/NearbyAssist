@@ -131,7 +131,7 @@ func (s *Service) AcceptRequest(applicationId string) error {
 
 	notification := &models.NotificationModel{
 		Recipient: application.ApplicantId,
-		Type:      "add_expertise_accepted",
+		Type:      "success",
 		Title:     "Sucessfully added an expertise",
 		Content:   notificationContent,
 	}
@@ -179,7 +179,7 @@ func (s *Service) RejectRequest(id, reason string) error {
 
 	notification := &models.NotificationModel{
 		Recipient: application.ApplicantId,
-		Type:      "add_expertise_rejected",
+		Type:      "fail",
 		Title:     notificationHeading,
 		Content:   notificationContent,
 	}
