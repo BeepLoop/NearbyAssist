@@ -29,7 +29,7 @@ func head() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>NearbyAssist</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/public/logo.svg\"><link rel=\"stylesheet\" href=\"/static/style/style.css\"></head>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>NearbyAssist</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/public/logo.ico\"><link rel=\"stylesheet\" href=\"/static/style/style.css\"></head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
