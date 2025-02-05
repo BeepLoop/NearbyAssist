@@ -15,8 +15,8 @@ templ Dashboard(data response.Analytics) {
 }
 
 templ dashboardData(data response.Analytics) {
-	<section class="grid grid-cols-1 gap-4 md:grid-cols-3">
-		<div class="rounded-md border p-4 shadow-md outline outline-1">
+	<section class="grid grid-cols-4 gap-4">
+		<div class="rounded-md p-4 shadow-md outline outline-1">
 			<h2 class="mb-2 text-lg font-semibold">
 				Number of Users:
 			</h2>
@@ -24,7 +24,7 @@ templ dashboardData(data response.Analytics) {
 				{ strconv.Itoa(data.User) }
 			</p>
 		</div>
-		<div class="rounded-md border p-4 shadow-md outline outline-1">
+		<div class="rounded-md p-4 shadow-md outline outline-1">
 			<h2 class="mb-2 text-lg font-semibold">
 				Verified Users
 			</h2>
@@ -32,7 +32,7 @@ templ dashboardData(data response.Analytics) {
 				{ strconv.Itoa(data.VerifiedUser) }
 			</p>
 		</div>
-		<div class="rounded-md border p-4 shadow-md outline outline-1">
+		<div class="rounded-md p-4 shadow-md outline outline-1">
 			<h2 class="mb-2 text-lg font-semibold">
 				Number of Complaints
 			</h2>
@@ -40,7 +40,7 @@ templ dashboardData(data response.Analytics) {
 				{ strconv.Itoa(data.Complaint) }
 			</p>
 		</div>
-		<div class="rounded-md border p-4 shadow-md outline outline-1">
+		<div class="rounded-md p-4 shadow-md outline outline-1">
 			<h2 class="mb-2 text-lg font-semibold">
 				Service Vendors
 			</h2>
@@ -48,7 +48,7 @@ templ dashboardData(data response.Analytics) {
 				{ strconv.Itoa(data.Vendor) }
 			</p>
 		</div>
-		<div class="rounded-md border p-4 shadow-md outline outline-1">
+		<div class="rounded-md p-4 shadow-md outline outline-1">
 			<h2 class="mb-2 text-lg font-semibold">
 				Pending Applications
 			</h2>

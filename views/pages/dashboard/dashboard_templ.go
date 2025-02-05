@@ -91,7 +91,7 @@ func dashboardData(data response.Analytics) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid grid-cols-1 gap-4 md:grid-cols-3\"><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Users:</h2><p class=\"text-3xl font-bold text-blue-400\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid grid-cols-4 gap-4\"><div class=\"rounded-md p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Users:</h2><p class=\"text-3xl font-bold text-blue-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -104,7 +104,7 @@ func dashboardData(data response.Analytics) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Verified Users</h2><p class=\"text-3xl font-bold text-yellow-400\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Verified Users</h2><p class=\"text-3xl font-bold text-yellow-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -117,7 +117,7 @@ func dashboardData(data response.Analytics) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Complaints</h2><p class=\"text-3xl font-bold text-red-400\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Number of Complaints</h2><p class=\"text-3xl font-bold text-red-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -130,7 +130,7 @@ func dashboardData(data response.Analytics) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Service Vendors</h2><p class=\"text-3xl font-bold text-green-400\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Service Vendors</h2><p class=\"text-3xl font-bold text-green-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -143,7 +143,7 @@ func dashboardData(data response.Analytics) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md border p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Pending Applications</h2><p class=\"text-3xl font-bold text-orange-400\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"rounded-md p-4 shadow-md outline outline-1\"><h2 class=\"mb-2 text-lg font-semibold\">Pending Applications</h2><p class=\"text-3xl font-bold text-orange-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
