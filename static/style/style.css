@@ -377,6 +377,9 @@
     --default-mono-font-variation-settings: var(
       --font-mono--font-variation-settings
     );
+    --color-primary: #4ECB71;
+    --color-primary-pale: #DCFFB7;
+    --color-primary-greener: #163020;
   }
 }
 @layer base {
@@ -826,6 +829,9 @@
   .bg-green-700 {
     background-color: var(--color-green-700);
   }
+  .bg-primary-greener {
+    background-color: var(--color-primary-greener);
+  }
   .bg-red-100 {
     background-color: var(--color-red-100);
   }
@@ -1027,6 +1033,12 @@
   .text-orange-400 {
     color: var(--color-orange-400);
   }
+  .text-primary {
+    color: var(--color-primary);
+  }
+  .text-primary-greener {
+    color: var(--color-primary-greener);
+  }
   .text-red-400 {
     color: var(--color-red-400);
   }
@@ -1070,6 +1082,9 @@
   }
   .outline-gray-300 {
     outline-color: var(--color-gray-300);
+  }
+  .outline-primary-greener {
+    outline-color: var(--color-primary-greener);
   }
   .blur {
     --tw-blur: blur(8px);
@@ -1119,6 +1134,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-green-800);
+      }
+    }
+  }
+  .hover\:bg-primary-pale {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-primary-pale);
       }
     }
   }

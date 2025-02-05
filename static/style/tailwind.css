@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme {
+    --color-primary: #4ECB71;
+    --color-primary-pale: #DCFFB7;
+    --color-primary-greener: #163020;
+}
+
 .active {
     background-color: green;
 }
