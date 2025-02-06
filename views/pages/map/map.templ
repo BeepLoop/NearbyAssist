@@ -18,20 +18,22 @@ type MapPageData struct {
 
 templ Map(data MapPageData) {
 	@layout.Layout() {
-		@partials.PageBanner("Map", "")
-		@searchBar(data.Tags, data.PreviousQuery)
-		@mapComponent(data.Markers)
+		<div class="pb-4">
+			@partials.PageBanner("Map", "")
+			@searchBar(data.Tags, data.PreviousQuery)
+			@mapComponent(data.Markers)
+		</div>
 	}
 }
 
 templ searchBar(tags []string, previousQuery string) {
-	<div class="flex justify-end gap-4 my-4">
-		<form action="/admin/map" method="POST">
+	<div class="flex justify-end my-3">
+		<form action="/admin/map" method="POST" class="flex gap-2">
 			<input
 				type="input"
 				name="query"
 				list="tags"
-				class="p-2 rounded-sm outline outline-1"
+				class="p-2 rounded-sm outline outline-1 text-sm"
 				placeholder="service"
 				autofocus
 				value={ previousQuery }
@@ -43,7 +45,7 @@ templ searchBar(tags []string, previousQuery string) {
 			</datalist>
 			<button
 				type="submit"
-				class="p-2 rounded-md bg-green-700 hover:bg-green-800"
+				class="p-2 rounded-md bg-green-700 hover:bg-green-800 text-sm"
 			>Search</button>
 		</form>
 	</div>
