@@ -20,8 +20,14 @@ templ Map(data MapPageData) {
 	@layout.Layout() {
 		<div class="pb-4">
 			@partials.PageBanner("Map", "")
-			@searchBar(data.Tags, data.PreviousQuery)
-			@mapComponent(data.Markers)
+			<div class="flex gap-4">
+				<div class="">
+					@searchBar(data.Tags, data.PreviousQuery)
+				</div>
+				<div class="flex-1">
+					@mapComponent(data.Markers)
+				</div>
+			</div>
 		</div>
 	}
 }
@@ -36,6 +42,7 @@ templ searchBar(tags []string, previousQuery string) {
 				class="p-2 rounded-sm outline outline-1 text-sm"
 				placeholder="service"
 				autofocus
+				onfocus="let temp = this.value; this.value = ''; this.value = temp; // place cursor at end of value"
 				value={ previousQuery }
 			/>
 			<datalist id="tags">
