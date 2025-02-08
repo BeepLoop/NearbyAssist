@@ -3,6 +3,7 @@ package pages
 import (
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
+	"strconv"
 )
 
 type Marker struct {
@@ -23,6 +24,9 @@ templ Map(data MapPageData) {
 			<div class="flex gap-4">
 				<div class="">
 					@searchBar(data.Tags, data.PreviousQuery)
+					<div>
+						Result: { strconv.Itoa(len(data.Markers)) }
+					</div>
 				</div>
 				<div class="flex-1">
 					@mapComponent(data.Markers)
