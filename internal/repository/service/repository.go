@@ -19,7 +19,7 @@ type ServiceRepository interface {
 
 	GetVendorInfo(vendorId string) (*models.VendorModel, error)
 
-	GetTags(serviceId string) ([]string, error)
+	GetTags(serviceId string) ([]*models.TagModel, error)
 
 	GetReviews(serviceId string) ([]*models.ReviewModel, error)
 

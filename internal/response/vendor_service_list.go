@@ -1,5 +1,7 @@
 package response
 
+import "nearbyassist/internal/models"
+
 type VendorServiceList struct {
 	Vendor struct {
 		Id           string   `json:"id"`
@@ -11,12 +13,12 @@ type VendorServiceList struct {
 		Expertise    []string `json:"expertise"`
 	} `json:"vendor"`
 	Services []struct {
-		Id          string   `json:"id"`
-		Title       string   `json:"title"`
-		Description string   `json:"description"`
-		Price       string   `json:"price"`
-		Latitude    float64  `json:"latitude"`
-		Longitude   float64  `json:"longitude"`
-		Tags        []string `json:"tags"`
+		Id          string             `json:"id"`
+		Title       string             `json:"title"`
+		Description string             `json:"description"`
+		Price       string             `json:"price"`
+		Latitude    float64            `json:"latitude"`
+		Longitude   float64            `json:"longitude"`
+		Tags        []*models.TagModel `json:"tags"`
 	} `json:"services"`
 }

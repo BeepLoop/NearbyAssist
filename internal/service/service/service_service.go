@@ -2,6 +2,7 @@ package service_service
 
 import (
 	"cmp"
+	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
 	service_repo "nearbyassist/internal/repository/service"
@@ -79,7 +80,7 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 	newService.Title = encryptedTitle
 	newService.Description = encryptedDesc
 	newService.Rate = req.Rate
-	newService.Tags = req.Tags
+	newService.TagsAsString = req.Tags
 	newService.Latitude = req.Latitude
 	newService.Longitude = req.Longitude
 	newService.Signature = signature
@@ -219,8 +220,8 @@ func (s *Service) UpdateService(bearerToken, serviceId string, req *request.Upda
 	if vendor, err := s.store.GetVendorInfo(userId); err != nil {
 		return err
 	} else {
-		if vendor.VendorId != userId {
-			return err
+		if vendor.VendorId != req.VendorId {
+			return errors.New("unauthorized")
 		}
 	}
 
@@ -228,7 +229,7 @@ func (s *Service) UpdateService(bearerToken, serviceId string, req *request.Upda
 	updatedService.Id = req.Id
 	updatedService.VendorId = req.VendorId
 	updatedService.Rate = req.Rate
-	updatedService.Tags = req.Tags
+	updatedService.TagsAsString = req.Tags
 	updatedService.Latitude = req.Latitude
 	updatedService.Longitude = req.Longitude
 

@@ -67,7 +67,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
                 (SELECT id FROM Tag WHERE title = ?)
             )
     `
-	for _, tag := range data.Tags {
+	for _, tag := range data.TagsAsString {
 		tagId, err := gonanoid.New()
 		if err != nil {
 			return "", errors.New("Failed to generate id for tag")
@@ -282,13 +282,14 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
 	return vendor, nil
 }
 
-func (s *MysqlServiceRepository) GetTags(serviceId string) ([]string, error) {
+func (s *MysqlServiceRepository) GetTags(serviceId string) ([]*models.TagModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         SELECT
-            t.title AS tag
+            t.id,
+            t.title
         FROM
             ServiceTag st
             JOIN Tag t ON t.id = st.tagId
@@ -296,7 +297,7 @@ func (s *MysqlServiceRepository) GetTags(serviceId string) ([]string, error) {
             st.serviceId = ?;
     `
 
-	tags := make([]string, 0)
+	tags := make([]*models.TagModel, 0)
 	if err := s.db.SelectContext(ctx, &tags, query, serviceId); err != nil {
 		return nil, err
 	}
@@ -411,7 +412,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
         FROM Tag t 
         WHERE t.title = ?
     `
-	for _, tag := range updatedService.Tags {
+	for _, tag := range updatedService.TagsAsString {
 		generatedId, err := gonanoid.New()
 		if err != nil {
 			return err
