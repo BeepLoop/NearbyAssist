@@ -29,7 +29,7 @@ func Header() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"relative flex justify-end gap-6 p-3 outline outline-1 outline-primary-greener\"><div class=\"\"><button class=\"flex items-center cursor-pointer\" id=\"profile-toggle-btn\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" strokeWidth=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" d=\"M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z\"></path></svg> <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" strokeWidth=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" d=\"M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9\"></path></svg></button>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"relative flex justify-end gap-6 p-3 outline outline-1 outline-primary-greener\"><div x-data=\"{ profileOpen: false }\"><button class=\"flex items-center cursor-pointer\" x-on:click=\"profileOpen = !profileOpen\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" strokeWidth=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" d=\"M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z\"></path></svg> <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" strokeWidth=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" d=\"M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9\"></path></svg></button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -37,7 +37,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script>\n                const profileToggleBtn = document.getElementById(\"profile-toggle-btn\");\n                const profileMenu = document.getElementById(\"profile-menu\");\n                \n                profileToggleBtn.addEventListener(\"click\", () => {\n                    profileMenu.classList.toggle(\"hidden\");\n                });\n            </script></div></header>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,7 +66,7 @@ func dropdown() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"profile-menu\" class=\"hidden absolute right-2 top-full mt-2 w-44 bg-white shadow-md outline outline-1 outline-primary-greener\"><form action=\"/admin/logout\" method=\"POST\"><button type=\"submit\" class=\"flex w-full items-center gap-2 p-2 text-sm hover:bg-red-200\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-4\" viewBox=\"0 0 24 24\"><path fill=\"red\" d=\"M3 21V3h9v2H5v14h7v2zm13-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z\"></path></svg> Logout</button></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-show=\"profileOpen\" x-transition class=\"rounded-md absolute right-2 top-full mt-2 w-44 bg-white shadow-md outline outline-1 outline-primary-greener\"><form action=\"/admin/logout\" method=\"POST\"><!-- Logout button --><button type=\"submit\" class=\"flex w-full items-center gap-2 p-2 text-sm hover:bg-red-200 cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-4\" viewBox=\"0 0 24 24\"><path fill=\"red\" d=\"M3 21V3h9v2H5v14h7v2zm13-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z\"></path></svg> Logout</button></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
