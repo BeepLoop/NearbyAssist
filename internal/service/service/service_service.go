@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"nearbyassist/internal/models"
 	service_repo "nearbyassist/internal/repository/service"
 	"nearbyassist/internal/request"
@@ -254,6 +255,193 @@ func (s *Service) UpdateService(bearerToken, serviceId string, req *request.Upda
 	}
 
 	if err := s.store.Update(updatedService); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) AddImage(bearerToken, serviceId string, files []*multipart.FileHeader) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	service, err := s.store.FindById(serviceId)
+	if err != nil {
+		return err
+	}
+
+	if service.VendorId != userId {
+		return errors.New("unauthorized")
+	}
+
+	for _, file := range files {
+		// NOTE: Not encrypted because its gonna be public anyway
+		// Read bytes
+		bytes, err := utils.FileToBytes(file)
+		if err != nil {
+			return err
+		}
+
+		fileData := fs.File{
+			Data:     bytes,
+			Category: fs.SERVICE_PHOTO_DIR,
+		}
+		url, err := s.fs.SaveFile(fileData)
+		if err != nil {
+			return err
+		}
+
+		photoData := &models.ServicePhotoModel{
+			ServiceId: serviceId,
+			VendorId:  userId,
+			Url:       url,
+		}
+
+		if err := s.store.AddImage(photoData); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) DeleteImage(bearerToken, imageId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	photo, err := s.store.FindPhotoById(imageId)
+	if err != nil {
+		return err
+	}
+
+	if photo.VendorId != userId {
+		return errors.New("unauthorized")
+	}
+
+	// TODO: delete file in storage
+
+	if err := s.store.DeleteImage(imageId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	service, err := s.store.FindById(input.ServiceId)
+	if err != nil {
+		return err
+	}
+
+	if service.VendorId != userId {
+		return errors.New("unauthorized")
+	}
+
+	data := &models.ExtraModel{
+		Title:       input.Title,
+		Description: input.Description,
+		Price:       input.Price,
+		ServiceId:   input.ServiceId,
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(data.Title); err != nil {
+		return err
+	} else {
+		data.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(data.Description); err != nil {
+		return err
+	} else {
+		data.Description = encrypted
+	}
+
+	if err := s.store.AddExtra(data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) EditExtra(bearerToken string, data *request.EditExtraPayload) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	extra, err := s.store.FindExtraById(data.Id)
+	if err != nil {
+		return err
+	}
+
+	service, err := s.store.FindById(extra.ServiceId)
+	if err != nil {
+		return err
+	}
+
+	if service.VendorId != userId {
+		return errors.New("unauthorized")
+	}
+
+	updatedExtra := &models.ExtraModel{
+		Model:       models.Model{Id: data.Id},
+		Title:       data.Title,
+		Description: data.Description,
+		Price:       data.Price,
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(updatedExtra.Title); err != nil {
+		return err
+	} else {
+		updatedExtra.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(updatedExtra.Description); err != nil {
+		return err
+	} else {
+		updatedExtra.Description = encrypted
+	}
+
+	if err := s.store.EditExtra(updatedExtra); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) DeleteExtra(bearerToken, extraId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	extra, err := s.store.FindExtraById(extraId)
+	if err != nil {
+		fmt.Println("find extra by id: ", err.Error())
+		return err
+	}
+
+	service, err := s.store.FindById(extra.ServiceId)
+	if err != nil {
+		fmt.Println("find service by id: ", err.Error())
+		return err
+	}
+
+	if service.VendorId != userId {
+		return errors.New("unauthorized")
+	}
+
+	if err := s.store.DeleteExtra(extraId); err != nil {
+		fmt.Println("delete extra: ", err.Error())
 		return err
 	}
 
