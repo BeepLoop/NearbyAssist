@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/handler/api/message"
 	"nearbyassist/internal/handler/api/notification"
 	"nearbyassist/internal/handler/api/qr"
+	"nearbyassist/internal/handler/api/resource"
 	"nearbyassist/internal/handler/api/review"
 	"nearbyassist/internal/handler/api/service"
 	"nearbyassist/internal/handler/api/tag"
@@ -298,5 +299,13 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		notificationRoute.GET("", handler.GetUnreadNotifications)
 		notificationRoute.POST("/:notificationId", handler.ReadNotification)
+	}
+
+	resourceRoute := v1.Group("/resource")
+	{
+		// NOTE: This is public
+		handler := resource.NewHandler(s.FS)
+
+		resourceRoute.GET("/:path", handler.GetFile)
 	}
 }
