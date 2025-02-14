@@ -193,7 +193,8 @@ func (h *serviceHandler) AddExtra(c echo.Context) error {
 
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
-	if err := h.service_service.AddExtra(bearerToken, req); err != nil {
+	extraId, err := h.service_service.AddExtra(bearerToken, req)
+	if err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not authorized to do this action",
@@ -207,7 +208,9 @@ func (h *serviceHandler) AddExtra(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, nil)
+	return c.JSON(http.StatusCreated, utils.Mapper{
+		"extraId": extraId,
+	})
 }
 
 func (h *serviceHandler) EditExtra(c echo.Context) error {

@@ -507,17 +507,17 @@ func (s *MysqlServiceRepository) DeleteImage(imageId string) error {
 	return nil
 }
 
-func (s *MysqlServiceRepository) AddExtra(data *models.ExtraModel) error {
+func (s *MysqlServiceRepository) AddExtra(data *models.ExtraModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if generatedId, err := gonanoid.New(); err != nil {
-		return err
+		return "", err
 	} else {
 		data.Id = generatedId
 	}
@@ -531,10 +531,10 @@ func (s *MysqlServiceRepository) AddExtra(data *models.ExtraModel) error {
 
 	if _, err := tx.NamedExecContext(ctx, insertExtraQuery, data); err != nil {
 		if err := tx.Rollback(); err != nil {
-			return err
+			return "", err
 		}
 
-		return err
+		return "", err
 	}
 
 	insertServiceExtraQuery := `
@@ -546,25 +546,25 @@ func (s *MysqlServiceRepository) AddExtra(data *models.ExtraModel) error {
 
 	if _, err := tx.ExecContext(ctx, insertServiceExtraQuery, data.ServiceId, data.Id); err != nil {
 		if err := tx.Rollback(); err != nil {
-			return err
+			return "", err
 		}
 
-		return err
+		return "", err
 	}
 
 	if err := tx.Commit(); err != nil {
 		if err := tx.Rollback(); err != nil {
-			return err
+			return "", err
 		}
 
-		return err
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return nil
+	return data.Id, nil
 }
 
 func (s *MysqlServiceRepository) EditExtra(data *models.ExtraModel) error {

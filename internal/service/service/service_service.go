@@ -331,19 +331,19 @@ func (s *Service) DeleteImage(bearerToken, imageId string) error {
 	return nil
 }
 
-func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) error {
+func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) (string, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	service, err := s.store.FindById(input.ServiceId)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if service.VendorId != userId {
-		return errors.New("unauthorized")
+		return "", errors.New("unauthorized")
 	}
 
 	data := &models.ExtraModel{
@@ -354,22 +354,23 @@ func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) e
 	}
 
 	if encrypted, err := s.encrypt.EncryptString(data.Title); err != nil {
-		return err
+		return "", err
 	} else {
 		data.Title = encrypted
 	}
 
 	if encrypted, err := s.encrypt.EncryptString(data.Description); err != nil {
-		return err
+		return "", err
 	} else {
 		data.Description = encrypted
 	}
 
-	if err := s.store.AddExtra(data); err != nil {
-		return err
+	extraId, err := s.store.AddExtra(data)
+	if err != nil {
+		return "", err
 	}
 
-	return nil
+	return extraId, nil
 }
 
 func (s *Service) EditExtra(bearerToken string, data *request.EditExtraPayload) error {
