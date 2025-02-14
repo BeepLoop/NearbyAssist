@@ -130,7 +130,8 @@ func (h *serviceHandler) AddImage(c echo.Context) error {
 
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
-	if err := h.service_service.AddImage(bearerToken, serviceId, files); err != nil {
+	imageData, err := h.service_service.AddImage(bearerToken, serviceId, files)
+	if err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not allowed to do this action",
@@ -144,7 +145,10 @@ func (h *serviceHandler) AddImage(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, nil)
+	return c.JSON(http.StatusCreated, utils.Mapper{
+		"imageId": imageData.Id,
+		"url":     imageData.Url,
+	})
 }
 
 func (h *serviceHandler) DeleteImage(c echo.Context) error {

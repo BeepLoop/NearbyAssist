@@ -461,12 +461,12 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 	return nil
 }
 
-func (s *MysqlServiceRepository) AddImage(data *models.ServicePhotoModel) error {
+func (s *MysqlServiceRepository) AddImage(data *models.ServicePhotoModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if generatedId, err := gonanoid.New(); err != nil {
-		return err
+		return "", err
 	} else {
 		data.Id = generatedId
 	}
@@ -477,15 +477,15 @@ func (s *MysqlServiceRepository) AddImage(data *models.ServicePhotoModel) error 
         VALUES
             (:id, :serviceId, :vendorId, :url)
     `
-	if _, err := s.db.ExecContext(ctx, query, data); err != nil {
-		return err
+	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return nil
+	return data.Id, nil
 }
 
 func (s *MysqlServiceRepository) DeleteImage(imageId string) error {

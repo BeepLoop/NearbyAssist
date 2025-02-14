@@ -25,7 +25,7 @@ type ServiceRepository interface {
 
 	FindPhotoById(imageId string) (*models.ServicePhotoModel, error)
 	GetPhotos(serviceId string) ([]*models.ServicePhotoModel, error)
-	AddImage(data *models.ServicePhotoModel) error
+	AddImage(data *models.ServicePhotoModel) (string, error)
 	DeleteImage(imageId string) error
 
 	GetAllByVendorId(vendorId string) ([]*models.ServiceModel, error)

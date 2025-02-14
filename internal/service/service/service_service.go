@@ -261,50 +261,51 @@ func (s *Service) UpdateService(bearerToken, serviceId string, req *request.Upda
 	return nil
 }
 
-func (s *Service) AddImage(bearerToken, serviceId string, files []*multipart.FileHeader) error {
+func (s *Service) AddImage(bearerToken, serviceId string, files []*multipart.FileHeader) (*models.ServicePhotoModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	service, err := s.store.FindById(serviceId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if service.VendorId != userId {
-		return errors.New("unauthorized")
+		return nil, errors.New("unauthorized")
 	}
 
-	for _, file := range files {
-		// NOTE: Not encrypted because its gonna be public anyway
-		// Read bytes
-		bytes, err := utils.FileToBytes(file)
-		if err != nil {
-			return err
-		}
-
-		fileData := fs.File{
-			Data:     bytes,
-			Category: fs.SERVICE_PHOTO_DIR,
-		}
-		url, err := s.fs.SaveFile(fileData)
-		if err != nil {
-			return err
-		}
-
-		photoData := &models.ServicePhotoModel{
-			ServiceId: serviceId,
-			VendorId:  userId,
-			Url:       url,
-		}
-
-		if err := s.store.AddImage(photoData); err != nil {
-			return err
-		}
+	// NOTE: Not encrypted because its gonna be public anyway
+	file := files[0]
+	bytes, err := utils.FileToBytes(file)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	fileData := fs.File{
+		Data:     bytes,
+		Category: fs.SERVICE_PHOTO_DIR,
+	}
+	url, err := s.fs.SaveFile(fileData)
+	if err != nil {
+		return nil, err
+	}
+
+	photoData := &models.ServicePhotoModel{
+		ServiceId: serviceId,
+		VendorId:  userId,
+		Url:       url,
+	}
+
+	imageId, err := s.store.AddImage(photoData)
+	if err != nil {
+		return nil, err
+	}
+
+	photoData.Id = imageId
+
+	return photoData, nil
 }
 
 func (s *Service) DeleteImage(bearerToken, imageId string) error {
