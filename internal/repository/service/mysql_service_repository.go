@@ -369,15 +369,33 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 		return err
 	}
 
+	checkIfHasActiveTransactionsQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.cost
+        FROM
+            Transaction t
+        WHERE
+            t.id = ? AND (t.status = 'pending' OR t.status = 'confirmed')
+    `
+	activeTransactions := make([]*models.TransactionModel, 0)
+	if err := tx.SelectContext(ctx, &activeTransactions, checkIfHasActiveTransactionsQuery, updatedService.Id); err != nil {
+		return err
+	}
+
+	if len(activeTransactions) != 0 {
+		return errors.New("This service is actively in use")
+	}
+
 	updateService := `
         UPDATE
             Service
         SET
             title = :title,
             description = :description,
-            rate = :rate,
-            latitude = :latitude,
-            longitude = :longitude
+            rate = :rate
         WHERE
             id = :id
     `
