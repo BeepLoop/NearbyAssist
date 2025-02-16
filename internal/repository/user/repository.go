@@ -8,6 +8,8 @@ type UserRepository interface {
 	FindByEmailHash(emailHash string) (*models.UserModel, error)
 	Login(data *models.SessionModel) error
 
+	GetUserAccountPageData(userId string) (*models.UserAccountPageData, error)
+
 	GetAllUserAccounts(limit, offset int) ([]*models.UserModel, error)
 
 	// Sets the refreshToken in session to offline and adds the refreshToken to blacklist

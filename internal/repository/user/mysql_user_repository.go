@@ -137,7 +137,7 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	defer cancel()
 
 	user := new(models.UserModel)
-	query := "SELECT id, name, email, imageUrl, verified, address, latitude, longitude FROM User WHERE id = ?"
+	query := "SELECT id, name, email, imageUrl, verified, address, latitude, longitude, createdAt FROM User WHERE id = ?"
 	err := s.db.GetContext(ctx, user, query, id)
 	if err != nil {
 		return nil, err
@@ -148,6 +148,56 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	}
 
 	return user, nil
+}
+
+func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.UserAccountPageData, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	accountData := new(models.UserAccountPageData)
+
+	getUserQuery := "SELECT id, name, email, imageUrl, address, createdAt FROM User where id = ?"
+	user := new(models.UserModel)
+	if err := s.db.GetContext(ctx, user, getUserQuery, userId); err != nil {
+		return nil, err
+	}
+	accountData.Id = user.Id
+	accountData.ProfileURL = user.ImageUrl
+	accountData.Name = user.Name
+	accountData.Email = user.Email
+	accountData.Address = user.Address
+	accountData.CreatedAt = user.CreatedAt
+
+	getExpertiseQuery := `
+        SELECT
+            e.title
+        FROM
+            VendorExpertise ve
+            JOIN Expertise e ON e.id = ve.expertiseId
+        WHERE
+            ve.vendorId = ?
+    `
+	expertise := make([]*models.ExpertiseModel, 0)
+	if err := s.db.SelectContext(ctx, &expertise, getExpertiseQuery, userId); err != nil {
+		return nil, err
+	}
+
+	for _, expertise := range expertise {
+		accountData.Expertise = append(accountData.Expertise, expertise.Title)
+	}
+
+	getServicesQuery := "SELECT * FROM Service WHERE vendorId = ?"
+	services := make([]*models.ServiceModel, 0)
+	if err := s.db.SelectContext(ctx, &services, getServicesQuery, userId); err != nil {
+		return nil, err
+	}
+	accountData.Services = services
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return accountData, nil
 }
 
 func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserModel, error) {

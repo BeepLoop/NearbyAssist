@@ -31,3 +31,48 @@ func (s *Service) GetUsers(limit, offset int) ([]*models.UserModel, error) {
 
 	return accounts, nil
 }
+
+func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, error) {
+	accountData, err := s.store.GetUserAccountPageData(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(accountData.Name); err != nil {
+		return nil, err
+	} else {
+		accountData.Name = decrypted
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(accountData.Email); err != nil {
+		return nil, err
+	} else {
+		accountData.Email = decrypted
+	}
+
+	if accountData.Address.Valid {
+		if decrypted, err := s.encrypt.DecryptString(accountData.Address.String); err != nil {
+			return nil, err
+		} else {
+			accountData.Address.String = decrypted
+		}
+	} else {
+		accountData.Address.String = ""
+	}
+
+	for _, service := range accountData.Services {
+		if decrypted, err := s.encrypt.DecryptString(service.Title); err != nil {
+			return nil, err
+		} else {
+			service.Title = decrypted
+		}
+
+		if decrypted, err := s.encrypt.DecryptString(service.Description); err != nil {
+			return nil, err
+		} else {
+			service.Description = decrypted
+		}
+	}
+
+	return accountData, nil
+}

@@ -106,5 +106,6 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		managementHandler := management.NewHandler(managementService)
 
 		managementRoute.GET("", managementHandler.GetAccountManagement, middleware.CheckSession)
+		managementRoute.GET("/:userId", managementHandler.ViewUserAccount, middleware.CheckSession)
 	}
 }
