@@ -3,8 +3,8 @@ package application
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/vendor_application"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,15 +18,7 @@ func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
 
 	data := make([]models.ApplicationModel, 0)
 	for _, application := range applications {
-		var date string
-
-		layout := "2006-01-02T15:04:05Z"
-		t, err := time.Parse(layout, application.CreatedAt)
-		if err != nil {
-			date = application.CreatedAt
-		} else {
-			date = t.Format(time.RFC1123)
-		}
+		date := utils.FormatDate(application.CreatedAt)
 
 		data = append(data, models.ApplicationModel{
 			Model:                 models.Model{Id: application.Id, CreatedAt: date},
