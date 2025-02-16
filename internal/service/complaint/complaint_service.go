@@ -67,6 +67,25 @@ func (s *Service) CreateSystemComplaint(req *request.SystemComplaintPayload, fil
 	return complaintId, nil
 }
 
-func (s *Service) GetComplaints() ([]models.ComplaintModel, error) {
-	return nil, nil
+func (s *Service) GetComplaints(limit, offset int) ([]*models.ComplaintModel, error) {
+	complaints, err := s.store.GetAll(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, complaint := range complaints {
+		if cipher, err := s.encrypt.DecryptString(complaint.Title); err != nil {
+			return nil, err
+		} else {
+			complaint.Title = cipher
+		}
+
+		if cipher, err := s.encrypt.DecryptString(complaint.Detail); err != nil {
+			return nil, err
+		} else {
+			complaint.Detail = cipher
+		}
+	}
+
+	return complaints, nil
 }

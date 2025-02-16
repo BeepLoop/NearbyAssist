@@ -71,3 +71,26 @@ func (s *MysqlComplaintRepository) CreateSystemComplaint(data *models.SystemComp
 
 	return data.Id, nil
 }
+
+func (s *MysqlComplaintRepository) GetAll(limit, offset int) ([]*models.ComplaintModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM SystemComplaint ORDER BY createdAt DESC LIMIT ? OFFSET ?"
+
+	complaints := make([]*models.ComplaintModel, 0)
+	if err := s.db.SelectContext(ctx, &complaints, query, limit, offset); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return complaints, nil
+}
+
+func (s *MysqlComplaintRepository) FindById(id string) (*models.ComplaintModel, error) {
+	// TODO: Implement this method
+	return nil, nil
+}
