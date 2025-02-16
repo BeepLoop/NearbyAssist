@@ -166,7 +166,22 @@ func (s *MysqlApplicationRepository) GetAll(status string) ([]*models.Applicatio
 
 	applications := make([]*models.ApplicationModel, 0)
 
-	query := "SELECT * FROM Application WHERE status = ?"
+	query := `
+        SELECT
+            a.id,
+            a.applicantId,
+            a.expertiseId,
+            a.createdAt,
+            a.supportingDocumentUrl,
+            a.policeClearanceUrl,
+            a.status,
+            u.name AS applicantName
+        FROM
+            Application a
+            JOIN User u ON u.id = a.applicantId
+        WHERE
+            a.status = ?
+    `
 	if err := s.db.SelectContext(ctx, &applications, query, status); err != nil {
 		return nil, err
 	}

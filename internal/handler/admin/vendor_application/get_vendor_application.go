@@ -34,6 +34,7 @@ func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
 			GeoSpatialModel:       application.GeoSpatialModel,
 			ApplicantId:           application.ApplicantId,
 			ExpertiseId:           application.ApplicantId,
+			ApplicantName:         application.ApplicantName,
 			SupportingDocumentUrl: application.SupportingDocumentUrl,
 			PoliceClearanceUrl:    application.PoliceClearanceUrl,
 			Status:                application.Status,

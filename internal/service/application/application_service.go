@@ -92,6 +92,14 @@ func (s *Service) GetApplications() ([]*models.ApplicationModel, error) {
 		return nil, err
 	}
 
+	for _, application := range applications {
+		if decrypted, err := s.encrypt.DecryptString(application.ApplicantName); err != nil {
+			return nil, err
+		} else {
+			application.ApplicantName = decrypted
+		}
+	}
+
 	return applications, nil
 }
 

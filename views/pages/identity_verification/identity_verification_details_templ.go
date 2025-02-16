@@ -76,7 +76,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"max-w-6xl mx-auto grid grid-cols-[26rem_1fr] gap-4 mt-4\"><div><table class=\"w-full text-left text-sm\"><tbody><tr><th class=\"py-2 font-medium text-gray-700\">Name:</th><td class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"max-w-6xl mx-auto grid grid-cols-[26rem_1fr] gap-4\"><div><table class=\"w-full text-left text-sm\"><tbody><tr><th class=\"py-2 font-medium text-gray-700\">Name:</th><td class=\"py-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
