@@ -91,7 +91,7 @@ func applicationsData(applications []models.ApplicationModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"w-full rounded-lg border table-auto\"><thead><tr class=\"bg-primary-greener\"><th class=\"px-6 py-3 text-left font-medium text-white\">ID</th><th class=\"px-6 py-3 text-left font-medium text-white\">Applicant ID</th><th class=\"px-6 py-3 text-left font-medium text-white\">Date Applied</th><th class=\"flex justify-center px-6 py-3 font-medium text-white\">Action</th></tr></thead> <tbody>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"w-full rounded-lg border table-auto\"><thead><tr class=\"bg-primary-greener\"><th class=\"px-6 py-3 text-left font-medium text-white\">ID</th><th class=\"px-6 py-3 text-left font-medium text-white\">Applicant</th><th class=\"px-6 py-3 text-left font-medium text-white\">Date Applied</th><th class=\"flex justify-center px-6 py-3 font-medium text-white\">Action</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -120,9 +120,9 @@ func applicationsData(applications []models.ApplicationModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(application.ApplicantId)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(application.ApplicantName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/applications.templ`, Line: 44, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/applications.templ`, Line: 44, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -150,7 +150,7 @@ func applicationsData(applications []models.ApplicationModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"text-blue hover:underline\">View Request</a></ul></td></tr>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"bg-yellow-400 p-2 rounded-sm hover:bg-yellow-600\">View Request</a></ul></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

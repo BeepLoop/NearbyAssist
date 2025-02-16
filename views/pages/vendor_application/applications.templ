@@ -22,7 +22,7 @@ templ applicationsData(applications []models.ApplicationModel) {
 					ID
 				</th>
 				<th class="px-6 py-3 text-left font-medium text-white">
-					Applicant ID
+					Applicant
 				</th>
 				<th class="px-6 py-3 text-left font-medium text-white">
 					Date Applied
@@ -41,13 +41,13 @@ templ applicationsData(applications []models.ApplicationModel) {
 				for _, application := range applications {
 					<tr class="border">
 						<td class="px-6 py-4">{ application.Id }</td>
-						<td class="px-6 py-4">{ application.ApplicantId }</td>
+						<td class="px-6 py-4">{ application.ApplicantName }</td>
 						<td class="px-6 py-4">{ application.CreatedAt }</td>
 						<td class="flex justify-center px-6 py-4">
 							<ul>
 								<a
 									href={ templ.SafeURL(fmt.Sprintf("/admin/vendor-applications/%s", application.Id)) }
-									class="text-blue hover:underline"
+									class="bg-yellow-400 p-2 rounded-sm hover:bg-yellow-600"
 								>
 									View Request
 								</a>

@@ -4,6 +4,8 @@ include .db.env
 # Build the application
 all: templates css build
 
+dev: all run
+
 build:
 	@echo "Building..."
 	@go build -o bin/main cmd/main.go

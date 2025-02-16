@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS Service (
     id VARCHAR(255) NOT NULL,
     vendorId VARCHAR(255) NOT NULL,
     title VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
     rate Double NOT NULL,
     latitude Decimal(12, 10) NOT NULL,
     longitude Decimal(13, 10) NOT NULL,

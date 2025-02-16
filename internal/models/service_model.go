@@ -16,6 +16,7 @@ type ServiceModel struct {
 	Signature   string `db:"signature" json:"-"`
 
 	// Additional fields for joins
-	Tags   []string     `json:"tags" db:"tags" validate:"required"`
-	Extras []ExtraModel `json:"extras" db:"extras"`
+	Tags         []*TagModel `json:"tags" db:"tags" validate:"required"`
+	TagsAsString []string
+	Extras       []ExtraModel `json:"extras" db:"extras"`
 }

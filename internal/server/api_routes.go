@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/handler/api/message"
 	"nearbyassist/internal/handler/api/notification"
 	"nearbyassist/internal/handler/api/qr"
+	"nearbyassist/internal/handler/api/resource"
 	"nearbyassist/internal/handler/api/review"
 	"nearbyassist/internal/handler/api/service"
 	"nearbyassist/internal/handler/api/tag"
@@ -134,6 +135,11 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		serviceRoute.GET("/search", handler.SearchService)
 		serviceRoute.GET("/:serviceId", handler.GetService)
 		serviceRoute.PUT("/:serviceId", handler.UpdateService)
+		serviceRoute.DELETE("/deleteImage/:imageId", handler.DeleteImage)
+		serviceRoute.POST("/addImage/:serviceId", handler.AddImage)
+		serviceRoute.POST("/addExtra", handler.AddExtra)
+		serviceRoute.PUT("/editExtra", handler.EditExtra)
+		serviceRoute.DELETE("/deleteExtra/:extraId", handler.DeleteExtra)
 		serviceRoute.GET("/get-saved", handler.GetSavedServices)
 		serviceRoute.POST("/save", handler.SaveService)
 		serviceRoute.POST("/unsave", handler.UnsaveService)
@@ -293,5 +299,13 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		notificationRoute.GET("", handler.GetUnreadNotifications)
 		notificationRoute.POST("/:notificationId", handler.ReadNotification)
+	}
+
+	resourceRoute := v1.Group("/resource")
+	{
+		// NOTE: This is public
+		handler := resource.NewHandler(s.FS)
+
+		resourceRoute.GET("/:path", handler.GetFile)
 	}
 }

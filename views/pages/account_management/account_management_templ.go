@@ -9,11 +9,19 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"fmt"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-func AccountManagement() templ.Component {
+type UserAccounts struct {
+	Id         string
+	ProfileURL string
+	Name       string
+	CreatedAt  string
+}
+
+func AccountManagement(accounts []UserAccounts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -54,7 +62,7 @@ func AccountManagement() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = accountsData().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = accountsData(accounts).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -68,7 +76,7 @@ func AccountManagement() templ.Component {
 	})
 }
 
-func accountsData() templ.Component {
+func accountsData(accounts []UserAccounts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -89,7 +97,72 @@ func accountsData() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"w-full rounded-lg border border-gray\"><thead><tr class=\"border bg-primary-greener\"><th class=\"px-6 py-3 text-left font-medium text-white\">Name</th><th class=\"px-4 py-3 text-left font-medium text-white\">View Profile</th><th class=\"px-4 py-3 text-left font-medium text-white\">Status</th></tr></thead> <tbody><tr class=\"border\"><td class=\"px-4 py-2\">John Doe</td><td class=\"px-4 py-2\"><ul><button class=\"text-blue hover:underline\">View Profile</button></ul></td><td class=\"rounded-md px-4 py-2 font-semibold text-primary\">Active</td></tr><tr class=\"border\"><td class=\"px-4 py-2\">Jane Smith</td><td class=\"px-4 py-2\"><ul><button class=\"text-blue hover:underline\">View Profile</button></ul></td><td class=\"rounded-md px-4 py-2 font-semibold text-gray\">Not Active</td></tr></tbody></table>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"w-full rounded-lg border table-auto\"><thead><tr class=\"border bg-primary-greener\"><th class=\"px-4 py-3 text-left font-medium text-white\">Name</th><th class=\"px-4 py-3 text-left font-medium text-white\">Created At</th><th class=\"px-4 py-3 text-left font-medium text-white\">Action</th></tr></thead> <tbody>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if len(accounts) < 1 {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"border\"><td class=\"px-6 py-4\" align=\"center\" colspan=\"4\">No Users</td></tr>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			for _, account := range accounts {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"border\"><td class=\"px-6 py-4\"><div class=\"flex gap-2 items-center\"><img class=\"w-6 h-6 rounded-full aspect-square outline outline-1 bg-green-400 object-cover\" src=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(account.ProfileURL)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 50, Col: 33}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(account.Name)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 52, Col: 27}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></td><td class=\"px-6 py-4\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(account.CreatedAt)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 55, Col: 47}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"flex justify-center px-6 py-4\"><ul><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/account-management/%s", account.Id))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"bg-yellow-400 p-2 rounded-sm hover:bg-yellow-600\">View Profile</a></ul></td></tr>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

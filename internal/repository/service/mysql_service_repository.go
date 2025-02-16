@@ -67,7 +67,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
                 (SELECT id FROM Tag WHERE title = ?)
             )
     `
-	for _, tag := range data.Tags {
+	for _, tag := range data.TagsAsString {
 		tagId, err := gonanoid.New()
 		if err != nil {
 			return "", errors.New("Failed to generate id for tag")
@@ -181,7 +181,7 @@ func (s *MysqlServiceRepository) FindById(id string) (*models.ServiceModel, erro
             Extra e
             JOIN ServiceExtra se ON se.extraId = e.id
         WHERE
-            se.serviceId = ?
+            se.serviceId = ? AND e.deleted = 0
     `
 
 	extras := make([]models.ExtraModel, 0)
@@ -282,13 +282,14 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
 	return vendor, nil
 }
 
-func (s *MysqlServiceRepository) GetTags(serviceId string) ([]string, error) {
+func (s *MysqlServiceRepository) GetTags(serviceId string) ([]*models.TagModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         SELECT
-            t.title AS tag
+            t.id,
+            t.title
         FROM
             ServiceTag st
             JOIN Tag t ON t.id = st.tagId
@@ -296,7 +297,7 @@ func (s *MysqlServiceRepository) GetTags(serviceId string) ([]string, error) {
             st.serviceId = ?;
     `
 
-	tags := make([]string, 0)
+	tags := make([]*models.TagModel, 0)
 	if err := s.db.SelectContext(ctx, &tags, query, serviceId); err != nil {
 		return nil, err
 	}
@@ -320,6 +321,24 @@ func (s *MysqlServiceRepository) GetReviews(serviceId string) ([]*models.ReviewM
 	}
 
 	return reviews, nil
+}
+
+func (s *MysqlServiceRepository) FindPhotoById(imageId string) (*models.ServicePhotoModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM ServicePhoto where id = ?"
+
+	photo := new(models.ServicePhotoModel)
+	if err := s.db.GetContext(ctx, photo, query, imageId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return photo, nil
 }
 
 func (s *MysqlServiceRepository) GetPhotos(serviceId string) ([]*models.ServicePhotoModel, error) {
@@ -350,15 +369,33 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 		return err
 	}
 
+	checkIfHasActiveTransactionsQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.cost
+        FROM
+            Transaction t
+        WHERE
+            t.id = ? AND (t.status = 'pending' OR t.status = 'confirmed')
+    `
+	activeTransactions := make([]*models.TransactionModel, 0)
+	if err := tx.SelectContext(ctx, &activeTransactions, checkIfHasActiveTransactionsQuery, updatedService.Id); err != nil {
+		return err
+	}
+
+	if len(activeTransactions) != 0 {
+		return errors.New("This service is actively in use")
+	}
+
 	updateService := `
         UPDATE
             Service
         SET
             title = :title,
             description = :description,
-            rate = :rate,
-            latitude = :latitude,
-            longitude = :longitude
+            rate = :rate
         WHERE
             id = :id
     `
@@ -411,7 +448,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
         FROM Tag t 
         WHERE t.title = ?
     `
-	for _, tag := range updatedService.Tags {
+	for _, tag := range updatedService.TagsAsString {
 		generatedId, err := gonanoid.New()
 		if err != nil {
 			return err
@@ -440,6 +477,258 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 	}
 
 	return nil
+}
+
+func (s *MysqlServiceRepository) AddImage(data *models.ServicePhotoModel) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if generatedId, err := gonanoid.New(); err != nil {
+		return "", err
+	} else {
+		data.Id = generatedId
+	}
+
+	query := `
+        INSERT INTO
+            ServicePhoto (id, serviceId, vendorId, url)
+        VALUES
+            (:id, :serviceId, :vendorId, :url)
+    `
+	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
+		return "", err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return "", context.DeadlineExceeded
+	}
+
+	return data.Id, nil
+}
+
+func (s *MysqlServiceRepository) DeleteImage(imageId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	deleteImageQuery := `
+        DELETE FROM ServicePhoto
+        WHERE id = ?
+    `
+	if _, err := s.db.ExecContext(ctx, deleteImageQuery, imageId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlServiceRepository) AddExtra(data *models.ExtraModel) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return "", err
+	}
+
+	if generatedId, err := gonanoid.New(); err != nil {
+		return "", err
+	} else {
+		data.Id = generatedId
+	}
+
+	insertExtraQuery := `
+        INSERT INTO
+            Extra (id, title, description, price, serviceId)
+        VALUES 
+            (:id, :title, :description, :price, :serviceId)
+    `
+
+	if _, err := tx.NamedExecContext(ctx, insertExtraQuery, data); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return "", err
+		}
+
+		return "", err
+	}
+
+	insertServiceExtraQuery := `
+        INSERT INTO
+            ServiceExtra (serviceId, extraId)
+        VALUES
+            (?, ?)
+    `
+
+	if _, err := tx.ExecContext(ctx, insertServiceExtraQuery, data.ServiceId, data.Id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return "", err
+		}
+
+		return "", err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return "", err
+		}
+
+		return "", err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return "", context.DeadlineExceeded
+	}
+
+	return data.Id, nil
+}
+
+func (s *MysqlServiceRepository) EditExtra(data *models.ExtraModel) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	transactionsWithThisExtraQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.cost
+        FROM
+            TransactionExtra te
+            JOIN Transaction t ON t.id = te.transactionId
+        WHERE
+            te.extraId = ? AND (t.status = 'pending' OR t.status = 'confirmed')
+    `
+
+	transactionsWithThisExtra := make([]*models.TransactionModel, 0)
+	if err := tx.SelectContext(ctx, &transactionsWithThisExtra, transactionsWithThisExtraQuery, data.Id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if len(transactionsWithThisExtra) != 0 {
+		return errors.New("This service extra is actively in use")
+	}
+
+	updateExtraQuery := `
+        UPDATE 
+            Extra
+        SET 
+            title = :title,
+            description = :description,
+            price = :price
+        WHERE
+            id = :id
+    `
+
+	if _, err := tx.NamedExecContext(ctx, updateExtraQuery, data); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlServiceRepository) DeleteExtra(extraId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	transactionsWithThisExtraQuery := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.cost
+        FROM
+            TransactionExtra te
+            JOIN Transaction t ON t.id = te.transactionId
+        WHERE
+            te.extraId = ? AND (t.status = 'pending' OR t.status = 'confirmed')
+    `
+
+	transactionsWithThisExtra := make([]*models.TransactionModel, 0)
+	if err := tx.SelectContext(ctx, &transactionsWithThisExtra, transactionsWithThisExtraQuery, extraId); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if len(transactionsWithThisExtra) != 0 {
+		return errors.New("This service extra is actively in use")
+	}
+
+	markExtraAsDeletedQuery := "UPDATE Extra set deleted = 1 WHERE id = ?"
+	if _, err := tx.ExecContext(ctx, markExtraAsDeletedQuery, extraId); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlServiceRepository) FindExtraById(extraId string) (*models.ExtraModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM Extra WHERE id = ?"
+
+	extra := new(models.ExtraModel)
+	if err := s.db.GetContext(ctx, extra, query, extraId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return extra, nil
 }
 
 func (s *MysqlServiceRepository) Delete(serviceId string) error {

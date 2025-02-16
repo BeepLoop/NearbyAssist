@@ -3,8 +3,8 @@ package verification
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/identity_verification"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,15 +18,7 @@ func (h *verificationHandler) GetIdentityVerification(c echo.Context) error {
 
 	data := make([]models.IdentityVerificationModel, 0)
 	for _, request := range requests {
-		var date string
-
-		layout := "2006-01-02T15:04:05Z"
-		t, err := time.Parse(layout, request.CreatedAt)
-		if err != nil {
-			date = request.CreatedAt
-		} else {
-			date = t.Format(time.RFC1123)
-		}
+		date := utils.FormatDate(request.CreatedAt)
 
 		data = append(data, models.IdentityVerificationModel{
 			Model:           models.Model{Id: request.Id, CreatedAt: date},

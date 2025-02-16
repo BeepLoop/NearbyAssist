@@ -14,18 +14,26 @@ type ServiceRepository interface {
 
 	Delete(serviceId string) error
 
-	// return nil if vendorId is found in vendor, else error
+	// Return nil if vendorId is found in vendor, else error
 	IsVendor(vendorId string) error
 
 	GetVendorInfo(vendorId string) (*models.VendorModel, error)
 
-	GetTags(serviceId string) ([]string, error)
+	GetTags(serviceId string) ([]*models.TagModel, error)
 
 	GetReviews(serviceId string) ([]*models.ReviewModel, error)
 
+	FindPhotoById(imageId string) (*models.ServicePhotoModel, error)
 	GetPhotos(serviceId string) ([]*models.ServicePhotoModel, error)
+	AddImage(data *models.ServicePhotoModel) (string, error)
+	DeleteImage(imageId string) error
 
 	GetAllByVendorId(vendorId string) ([]*models.ServiceModel, error)
 
 	GeoSpatialSearch(params map[string]string) ([]*models.GeoSpatialSearchResult, error)
+
+	FindExtraById(extraId string) (*models.ExtraModel, error)
+	AddExtra(data *models.ExtraModel) (string, error)
+	EditExtra(data *models.ExtraModel) error
+	DeleteExtra(extraId string) error
 }

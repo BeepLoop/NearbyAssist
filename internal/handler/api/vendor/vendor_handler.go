@@ -108,13 +108,13 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 
 	for _, service := range services {
 		response.Services = append(response.Services, struct {
-			Id          string   `json:"id"`
-			Title       string   `json:"title"`
-			Description string   `json:"description"`
-			Price       string   `json:"price"`
-			Latitude    float64  `json:"latitude"`
-			Longitude   float64  `json:"longitude"`
-			Tags        []string `json:"tags"`
+			Id          string             `json:"id"`
+			Title       string             `json:"title"`
+			Description string             `json:"description"`
+			Price       string             `json:"price"`
+			Latitude    float64            `json:"latitude"`
+			Longitude   float64            `json:"longitude"`
+			Tags        []*models.TagModel `json:"tags"`
 		}{
 			Id:          service.Id,
 			Title:       service.Title,
