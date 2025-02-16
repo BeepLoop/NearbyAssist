@@ -16,6 +16,7 @@ import (
 	map_repo "nearbyassist/internal/repository/map"
 	notification_repo "nearbyassist/internal/repository/notification"
 	tag_repo "nearbyassist/internal/repository/tag"
+	user_repo "nearbyassist/internal/repository/user"
 	verification_repo "nearbyassist/internal/repository/verification"
 	admin_service "nearbyassist/internal/service/admin"
 	application_service "nearbyassist/internal/service/application"
@@ -99,7 +100,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	managementRoute := r.Group("/account-management")
 	{
-		managementService := management_service.NewService()
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
+
+		managementService := management_service.NewService(userStore, s.Encrypt)
 		managementHandler := management.NewHandler(managementService)
 
 		managementRoute.GET("", managementHandler.GetAccountManagement, middleware.CheckSession)

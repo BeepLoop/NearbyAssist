@@ -1,59 +1,71 @@
 package pages
 
 import (
+	"fmt"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ AccountManagement() {
+type UserAccounts struct {
+	Id         string
+	ProfileURL string
+	Name       string
+	CreatedAt  string
+}
+
+templ AccountManagement(accounts []UserAccounts) {
 	@layout.Layout() {
 		@partials.PageBanner("Account Management", "View and manage accounts")
-		@accountsData()
+		@accountsData(accounts)
 	}
 }
 
-templ accountsData() {
-	<table class="w-full rounded-lg border border-gray">
+templ accountsData(accounts []UserAccounts) {
+	<table class="w-full rounded-lg border table-auto">
 		<thead>
 			<tr class="border bg-primary-greener">
-				<th class="px-6 py-3 text-left font-medium text-white">
+				<th class="px-4 py-3 text-left font-medium text-white">
 					Name
 				</th>
 				<th class="px-4 py-3 text-left font-medium text-white">
-					View Profile
+					Created At
 				</th>
 				<th class="px-4 py-3 text-left font-medium text-white">
-					Status
+					Action
 				</th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr class="border">
-				<td class="px-4 py-2">John Doe</td>
-				<td class="px-4 py-2">
-					<ul>
-						<button class="text-blue hover:underline">
-							View Profile
-						</button>
-					</ul>
-				</td>
-				<td class="rounded-md px-4 py-2 font-semibold text-primary">
-					Active
-				</td>
-			</tr>
-			<tr class="border">
-				<td class="px-4 py-2">Jane Smith</td>
-				<td class="px-4 py-2">
-					<ul>
-						<button class="text-blue hover:underline">
-							View Profile
-						</button>
-					</ul>
-				</td>
-				<td class="rounded-md px-4 py-2 font-semibold text-gray">
-					Not Active
-				</td>
-			</tr>
+			if (len(accounts) < 1) {
+				<tr class="border">
+					<td class="px-6 py-4" align="center" colspan="4">No Users</td>
+				</tr>
+			} else {
+				for _, account := range accounts {
+					<tr class="border">
+						<td class="px-6 py-4">
+							<div class="flex gap-2 items-center">
+								<img
+									class="w-6 h-6 rounded-full aspect-square outline outline-1 bg-green-400 object-cover"
+									src={ account.ProfileURL }
+								/>
+								<div>{ account.Name } </div>
+							</div>
+						</td>
+						<td class="px-6 py-4">{ account.CreatedAt }</td>
+						<td class="flex justify-center px-6 py-4">
+							<ul>
+								<a
+									href={ templ.SafeURL(fmt.Sprintf("/admin/account-management/%s", account.Id)) }
+									class="bg-yellow-400 p-2 rounded-sm hover:bg-yellow-600"
+								>
+									View Profile
+								</a>
+							</ul>
+						</td>
+					</tr>
+				}
+			}
 		</tbody>
 	</table>
 }

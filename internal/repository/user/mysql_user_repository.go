@@ -97,6 +97,41 @@ func (s *MysqlUserRepository) Logout(refreshToken string) error {
 	return nil
 }
 
+func (s *MysqlUserRepository) GetAllUserAccounts(limit, offset int) ([]*models.UserModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := make([]*models.UserModel, 0)
+
+	getAccountsQuery := `
+        SELECT
+            id, name, imageUrl, createdAt
+        FROM
+            User
+        ORDER BY createdAt DESC
+        LIMIT ?
+        OFFSET ?
+    `
+	if err := tx.SelectContext(ctx, &accounts, getAccountsQuery, limit, offset); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return nil, err
+		}
+
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return accounts, nil
+}
+
 func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
