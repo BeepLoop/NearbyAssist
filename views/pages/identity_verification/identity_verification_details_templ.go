@@ -76,7 +76,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"max-w-6xl mx-auto grid grid-cols-[26rem_1fr] gap-4\"><div><table class=\"w-full text-left\"><tbody><tr><th class=\"py-2 font-medium text-gray-700\">Name:</th><td class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"max-w-6xl mx-auto grid grid-cols-[26rem_1fr] gap-4 mt-4\"><div><table class=\"w-full text-left text-sm\"><tbody><tr><th class=\"py-2 font-medium text-gray-700\">Name:</th><td class=\"py-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -187,7 +187,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr></tbody></table><!-- Image Selection Buttons --><div class=\"mt-6 space-y-4\" id=\"image-controls\"><button class=\"w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300\" data-button=\"front\" data-image=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr></tbody></table><!-- Image Selection Buttons --><div class=\"mt-6 space-y-4\" id=\"image-controls\"><button class=\"w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300 cursor-pointer\" data-button=\"front\" data-image=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -200,7 +200,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">View Front of ID</button> <button class=\"w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300\" data-button=\"back\" data-image=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">View Front of ID</button> <button class=\"w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300 cursor-pointer\" data-button=\"back\" data-image=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -213,7 +213,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">View Back of ID</button> <button class=\"w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300\" data-button=\"selfie\" data-image=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">View Back of ID</button> <button class=\"w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300 cursor-pointer\" data-button=\"selfie\" data-image=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -244,7 +244,7 @@ func IdentityVerificationDetails(request models.IdentityVerificationModel) templ
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"POST\"><button type=\"submit\" class=\"flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg shadow hover:bg-red-700\">Reject</button></form></div></div><!-- Right Side: Image Viewer --><div class=\"w-full h-full outline outline-1\"><img id=\"image-viewer\" src=\"https://via.placeholder.com/400x300\" alt=\"Selected Image\" class=\"w-full h-full object-contain bg-gray-200\"></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"POST\"><button type=\"submit\" class=\"flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg shadow hover:bg-red-700\">Reject</button></form></div></div><!-- Right Side: Image Viewer --><div class=\"w-full h-96 outline outline-1\"><img id=\"image-viewer\" src=\"https://via.placeholder.com/400x300\" alt=\"Selected Image\" class=\"w-full h-96 object-contain bg-gray-200\"></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

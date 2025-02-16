@@ -17,7 +17,7 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel) {
 		@partials.PageBanner("Request Details", "Here are the details of the identity verification")
 		<div class="max-w-6xl mx-auto grid grid-cols-[26rem_1fr] gap-4">
 			<div>
-				<table class="w-full text-left">
+				<table class="w-full text-left text-sm">
 					<tbody>
 						<tr>
 							<th class="py-2 font-medium text-gray-700">Name:</th>
@@ -58,21 +58,21 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel) {
 				<!-- Image Selection Buttons -->
 				<div class="mt-6 space-y-4" id="image-controls">
 					<button
-						class="w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300"
+						class="w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300 cursor-pointer"
 						data-button="front"
 						data-image={ request.FrontIdImageUrl }
 					>
 						View Front of ID
 					</button>
 					<button
-						class="w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300"
+						class="w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300 cursor-pointer"
 						data-button="back"
 						data-image={ request.BackIdImageUrl }
 					>
 						View Back of ID
 					</button>
 					<button
-						class="w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300"
+						class="w-full px-4 py-2 bg-green-200 text-green-700 font-medium rounded-lg hover:bg-green-300 cursor-pointer"
 						data-button="selfie"
 						data-image={ request.FaceImageUrl }
 					>
@@ -106,12 +106,12 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel) {
 				</div>
 			</div>
 			<!-- Right Side: Image Viewer -->
-			<div class="w-full h-full outline outline-1">
+			<div class="w-full h-96 outline outline-1">
 				<img
 					id="image-viewer"
 					src="https://via.placeholder.com/400x300"
 					alt="Selected Image"
-					class="w-full h-full object-contain bg-gray-200"
+					class="w-full h-96 object-contain bg-gray-200"
 				/>
 			</div>
 		</div>
