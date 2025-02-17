@@ -10,6 +10,7 @@ type UserAccounts struct {
 	Id         string
 	ProfileURL string
 	Name       string
+	Verified   bool
 	CreatedAt  string
 }
 
@@ -25,20 +26,31 @@ templ accountsData(accounts []UserAccounts) {
 		<thead>
 			<tr class="border bg-primary-greener">
 				<th class="px-4 py-3 text-left font-medium text-white">
-					Name
+					<p>
+						Name
+					</p>
 				</th>
 				<th class="px-4 py-3 text-left font-medium text-white">
-					Created At
+					<p>
+						Status
+					</p>
 				</th>
 				<th class="px-4 py-3 text-left font-medium text-white">
-					Action
+					<p class="">
+						Created At
+					</p>
+				</th>
+				<th class="px-4 py-3 text-left font-medium text-white">
+					<p class="text-center">
+						Action
+					</p>
 				</th>
 			</tr>
 		</thead>
 		<tbody>
 			if (len(accounts) < 1) {
 				<tr class="border">
-					<td class="px-6 py-4" align="center" colspan="4">No Users</td>
+					<td class="px-6 py-4" align="center" colspan="5">No Users</td>
 				</tr>
 			} else {
 				for _, account := range accounts {
@@ -51,6 +63,13 @@ templ accountsData(accounts []UserAccounts) {
 								/>
 								<div>{ account.Name } </div>
 							</div>
+						</td>
+						<td class="px-6 py-4">
+							if account.Verified == false {
+								<p class="font-medium text-red-700">unverified</p>
+							} else {
+								<p class="font-medium text-green-700">verified</p>
+							}
 						</td>
 						<td class="px-6 py-4">{ account.CreatedAt }</td>
 						<td class="flex justify-center px-6 py-4">

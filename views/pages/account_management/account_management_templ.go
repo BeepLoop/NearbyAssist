@@ -18,6 +18,7 @@ type UserAccounts struct {
 	Id         string
 	ProfileURL string
 	Name       string
+	Verified   bool
 	CreatedAt  string
 }
 
@@ -97,12 +98,12 @@ func accountsData(accounts []UserAccounts) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"w-full rounded-lg border table-auto\"><thead><tr class=\"border bg-primary-greener\"><th class=\"px-4 py-3 text-left font-medium text-white\">Name</th><th class=\"px-4 py-3 text-left font-medium text-white\">Created At</th><th class=\"px-4 py-3 text-left font-medium text-white\">Action</th></tr></thead> <tbody>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"w-full rounded-lg border table-auto\"><thead><tr class=\"border bg-primary-greener\"><th class=\"px-4 py-3 text-left font-medium text-white\"><p>Name</p></th><th class=\"px-4 py-3 text-left font-medium text-white\"><p>Status</p></th><th class=\"px-4 py-3 text-left font-medium text-white\"><p class=\"\">Created At</p></th><th class=\"px-4 py-3 text-left font-medium text-white\"><p class=\"text-center\">Action</p></th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(accounts) < 1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"border\"><td class=\"px-6 py-4\" align=\"center\" colspan=\"4\">No Users</td></tr>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"border\"><td class=\"px-6 py-4\" align=\"center\" colspan=\"5\">No Users</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -115,7 +116,7 @@ func accountsData(accounts []UserAccounts) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(account.ProfileURL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 50, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 62, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -128,7 +129,7 @@ func accountsData(accounts []UserAccounts) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(account.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 52, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 64, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -138,10 +139,25 @@ func accountsData(accounts []UserAccounts) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
+				if account.Verified == false {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"font-medium text-red-700\">unverified</p>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"font-medium text-green-700\">verified</p>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"px-6 py-4\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(account.CreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 55, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/account_management.templ`, Line: 74, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

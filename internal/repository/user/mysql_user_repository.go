@@ -110,7 +110,7 @@ func (s *MysqlUserRepository) GetAllUserAccounts(limit, offset int) ([]*models.U
 
 	getAccountsQuery := `
         SELECT
-            id, name, imageUrl, createdAt
+            id, name, imageUrl, verified, createdAt
         FROM
             User
         ORDER BY createdAt DESC
