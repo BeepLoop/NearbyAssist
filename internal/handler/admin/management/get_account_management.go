@@ -37,6 +37,7 @@ func (h *managementHandler) GetAccountManagement(c echo.Context) error {
 			Id:         account.Id,
 			Name:       account.Name,
 			ProfileURL: account.ImageUrl,
+			Verified:   account.Verified,
 			CreatedAt:  utils.FormatDate(account.CreatedAt),
 		})
 	}
