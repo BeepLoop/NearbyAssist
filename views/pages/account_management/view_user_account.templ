@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
 )
 
 templ ViewUserAccount(data models.UserAccountPageData) {
@@ -18,7 +19,8 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 			</button>
 		</div>
 		<!-- main content -->
-		<div class="max-w-3xl mx-auto">
+		<div class="max-w-4xl mx-auto">
+			<!-- user profile -->
 			<div class="flex gap-4">
 				<div class="outline-1">
 					<img
@@ -40,6 +42,15 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 							}
 						</div>
 					</div>
+				</div>
+			</div>
+			<!-- stats -->
+			<div class="mt-8 grid grid-cols-4 gap-4">
+				<div class="outline-1 outline-gray-300 rounded-sm p-2">
+					@partials.Increasing("Sent Requests", 10.33)
+				</div>
+				<div class="outline-1 outline-gray-300 rounded-sm p-2">
+					@partials.Decreasing("Received Requests", 12.5)
 				</div>
 			</div>
 			<!-- services -->
