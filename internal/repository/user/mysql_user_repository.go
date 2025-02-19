@@ -193,6 +193,24 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 	}
 	accountData.Services = services
 
+	getServiceTagsQuery := `
+        SELECT
+            t.title
+        FROM
+            ServiceTag st
+            JOIN Tag t ON st.tagId = t.id
+        WHERE
+            st.serviceId = ?
+    `
+	for _, service := range accountData.Services {
+		tags := make([]string, 0)
+		if err := s.db.SelectContext(ctx, &tags, getServiceTagsQuery, service.Id); err != nil {
+			return nil, err
+		}
+
+		service.TagsAsString = tags
+	}
+
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
