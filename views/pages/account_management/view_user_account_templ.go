@@ -48,7 +48,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- back button --> <div class=\"mb-4\"><button class=\"p-2 rounded-sm bg-blue-400 text-sm hover:bg-blue-500 cursor-pointer\" onClick=\"history.back()\">back</button></div><!-- main content --> <div class=\"max-w-4xl mx-auto\"><!-- user profile --><div class=\"flex gap-4\"><div class=\"outline-1\"><img src=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- back button --> <div class=\"mb-4\"><button class=\"p-2 rounded-sm bg-blue-400 text-sm hover:bg-blue-500 cursor-pointer\" onClick=\"history.back()\">back</button></div><!-- main content --> <div class=\"max-w-4xl mx-auto\"><!-- user profile --><div class=\"flex gap-4\"><div class=\"outline-1 outline-gray-300\"><img src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

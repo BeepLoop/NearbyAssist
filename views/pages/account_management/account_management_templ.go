@@ -109,7 +109,7 @@ func accountsData(accounts []UserAccounts) templ.Component {
 			}
 		} else {
 			for _, account := range accounts {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"border\"><td class=\"px-6 py-4\"><div class=\"flex gap-2 items-center\"><img class=\"w-6 h-6 rounded-full aspect-square outline outline-1 bg-green-400 object-cover\" src=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"border\"><td class=\"px-6 py-4\"><div class=\"flex gap-2 items-center\"><img class=\"w-6 h-6 rounded-full aspect-square outline outline-1 outline-gray-300 bg-green-400 object-cover\" src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
