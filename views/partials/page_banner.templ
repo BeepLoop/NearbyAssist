@@ -2,7 +2,10 @@ package partials
 
 templ PageBanner(title, description string) {
 	<div class="mb-4">
-		<h1 class="text-2xl font-semibold">{ title }</h1>
+		<h1 class="text-2xl font-semibold flex gap-2 items-center">
+			<div class="w-1.5 h-6 bg-green-700 rounded-sm"></div>
+			{ title }
+		</h1>
 		<div class="mt-2">
 			<p>{ description }</p>
 		</div>
