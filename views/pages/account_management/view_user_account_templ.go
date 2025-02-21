@@ -127,7 +127,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = partials.Increasing("Sent Requests", 10.33).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.Increasing("Sent Requests", 10, 25).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -135,7 +135,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = partials.Decreasing("Received Requests", 12.5).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.Decreasing("Received Requests", 4, 20).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

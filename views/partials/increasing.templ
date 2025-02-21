@@ -2,16 +2,17 @@ package partials
 
 import "strconv"
 
-templ Increasing(text string, amount float64) {
+templ Increasing(text string, amount int, percent float64) {
 	<div>
 		<p class="font-medium">{ text } </p>
+		<p class="font-medium text-xl my-2">{ strconv.Itoa(amount) }</p>
 		<p class="my-2 text-xs text-gray-500">Compared to last month </p>
 		<div class="rounded-sm p-1 bg-green-100 w-min">
 			<p class="flex gap-1 text-green-600 font-bold">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 fill-red-400">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18"></path>
 				</svg>
-				{ strconv.FormatFloat(amount, 'f', -1, 64) }%
+				{ strconv.FormatFloat(percent, 'f', -1, 64) }%
 			</p>
 		</div>
 	</div>

@@ -47,10 +47,10 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 			<!-- stats -->
 			<div class="mt-8 grid grid-cols-4 gap-4">
 				<div class="outline-1 outline-gray-300 rounded-sm p-2">
-					@partials.Increasing("Sent Requests", 10.33)
+					@partials.Increasing("Sent Requests", 10, 25)
 				</div>
 				<div class="outline-1 outline-gray-300 rounded-sm p-2">
-					@partials.Decreasing("Received Requests", 12.5)
+					@partials.Decreasing("Received Requests", 4, 20)
 				</div>
 			</div>
 			<!-- services -->

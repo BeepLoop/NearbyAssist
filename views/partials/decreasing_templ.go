@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "strconv"
 
-func Decreasing(text string, amount float64) templ.Component {
+func Decreasing(text string, amount int, percent float64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -44,16 +44,29 @@ func Decreasing(text string, amount float64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"my-2 text-xs text-gray-500\">Compared to last month </p><div class=\"rounded-sm p-1 bg-red-200 w-min\"><p class=\"flex gap-1 text-red-600 font-bold\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" class=\"size-4 fill-green-400\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3\"></path></svg> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-medium text-xl my-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatFloat(amount, 'f', -1, 64))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(amount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/decreasing.templ`, Line: 14, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/decreasing.templ`, Line: 8, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"my-2 text-xs text-gray-500\">Compared to last month </p><div class=\"rounded-sm p-1 bg-red-200 w-min\"><p class=\"flex gap-1 text-red-600 font-bold\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" class=\"size-4 fill-green-400\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3\"></path></svg> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatFloat(percent, 'f', -1, 64))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/decreasing.templ`, Line: 15, Col: 47}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
