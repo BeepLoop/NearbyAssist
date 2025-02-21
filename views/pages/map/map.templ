@@ -68,7 +68,7 @@ templ mapComponent(markers []Marker) {
 	@openLayers.Once() {
 		<script src="/static/script/OpenLayers.js"></script>
 	}
-	<div id="map" class="h-[75vh] outline outline-1"></div>
+	<div id="map" class="h-[75vh] outline-1 outline-gray-300"></div>
 	@templ.JSONScript("markers", markers)
 	<script>
         map = new OpenLayers.Map("map");
