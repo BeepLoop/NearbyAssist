@@ -26,13 +26,18 @@ func NewService(store verification_repo.VerificationRepository, notifStore notif
 	return &Service{store: store, notifStore: notifStore, fs: fs, encrypt: encrypt, jwt: jwt}
 }
 
-func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bearerToken string, latitude, longitude float64, files []*multipart.FileHeader) (string, error) {
+func (s *Service) CreateVerificationRequest(name, phone, address, idType, idNumber, bearerToken string, latitude, longitude float64, files []*multipart.FileHeader) (string, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return "", err
 	}
 
 	encryptedName, err := s.encrypt.EncryptString(name)
+	if err != nil {
+		return "", err
+	}
+
+	encryptedPhone, err := s.encrypt.EncryptString(phone)
 	if err != nil {
 		return "", err
 	}
@@ -51,6 +56,7 @@ func (s *Service) CreateVerificationRequest(name, address, idType, idNumber, bea
 	req.UserId = userId
 	req.Name = encryptedName
 	req.Address = encryptedAddress
+	req.Phone = encryptedPhone
 	req.IdType = idType
 	req.IdNumber = encryptedIdNumber
 	req.Latitude = latitude

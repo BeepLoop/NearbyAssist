@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS IdentityVerification (
     userId VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
+    phone VARCHAR(255) NOT NULL,
     latitude Decimal(12, 10) NOT NULL,
     longitude Decimal(13, 10) NOT NULL,
     idType VARCHAR(255) NOT NULL,

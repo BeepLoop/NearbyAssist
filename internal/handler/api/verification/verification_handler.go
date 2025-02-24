@@ -23,12 +23,13 @@ func NewHandler(verificationService *verification_service.Service, userService *
 
 func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 	name := c.FormValue("name")
+	phone := c.FormValue("phone")
 	address := c.FormValue("address")
 	latitude := c.FormValue("latitude")
 	longitude := c.FormValue("longitude")
 	idType := c.FormValue("idType")
 	idNumber := c.FormValue("idNumber")
-	if name == "" || address == "" || latitude == "" || longitude == "" || idType == "" || idNumber == "" {
+	if name == "" || phone == "" || address == "" || latitude == "" || longitude == "" || idType == "" || idNumber == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Missing required fields",
 			Error:   "Missing required fields",
@@ -63,6 +64,7 @@ func (h *verificationHandler) CreateIdentityVerification(c echo.Context) error {
 
 	verificationId, err := h.verificationService.CreateVerificationRequest(
 		name,
+		phone,
 		address,
 		idType,
 		idNumber,

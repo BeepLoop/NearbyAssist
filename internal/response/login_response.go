@@ -8,6 +8,7 @@ type DetailedUser struct {
 	IsVerified bool        `json:"isVerified"`
 	IsVendor   bool        `json:"isVendor"`
 	Address    string      `json:"address"`
+	Phone      string      `json:"phone"`
 	Latitude   float64     `json:"latitude"`
 	Longitude  float64     `json:"longitude"`
 	Expertises []Expertise `json:"expertises"`

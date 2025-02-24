@@ -31,9 +31,9 @@ func (s *MysqlVerificationRepository) Create(data *models.IdentityVerificationMo
 
 	query := `
         INSERT INTO IdentityVerification 
-            (id, userId, name, address, latitude, longitude, idType, idNumber, frontIdImageUrl, backIdImageUrl, faceImageUrl)
+            (id, userId, name, address, phone, latitude, longitude, idType, idNumber, frontIdImageUrl, backIdImageUrl, faceImageUrl)
         VALUES 
-            ( :id, :userId, :name, :address, :latitude, :longitude, :idType, :idNumber, :frontIdImageUrl, :backIdImageUrl, :faceImageUrl)
+            ( :id, :userId, :name, :address, :phone, :latitude, :longitude, :idType, :idNumber, :frontIdImageUrl, :backIdImageUrl, :faceImageUrl)
     `
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
 		return "", err
@@ -139,6 +139,7 @@ func (s *MysqlVerificationRepository) AcceptRequest(id string) error {
         SET
             u.verified = 1,
             u.address = iv.address,
+            u.phone = iv.phone,
             u.latitude = iv.latitude,
             u.longitude = iv.longitude,
             u.name = iv.name

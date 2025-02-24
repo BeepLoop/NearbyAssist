@@ -53,6 +53,14 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 		}
 	}
 
+	if existingUser.Phone.Valid {
+		if plain, err := s.encrypt.DecryptString(existingUser.Phone.String); err != nil {
+			return nil, err
+		} else {
+			existingUser.Phone = sql.NullString{String: plain, Valid: true}
+		}
+	}
+
 	if existingUser.Latitude.Valid == false {
 		existingUser.Latitude = sql.NullFloat64{Float64: 0.0, Valid: true}
 	}
@@ -121,6 +129,7 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 			IsVerified: existingUser.Verified,
 			IsVendor:   isVendor,
 			Address:    existingUser.Address.String,
+			Phone:      existingUser.Phone.String,
 			Latitude:   existingUser.Latitude.Float64,
 			Longitude:  existingUser.Longitude.Float64,
 			Expertises: vendorExpertises,
