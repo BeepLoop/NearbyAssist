@@ -247,6 +247,7 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
             v.restricted,
             u.name AS vendor,
             u.email AS email,
+            u.phone AS phone,
             u.imageUrl AS imageUrl
         FROM 
             Vendor  v

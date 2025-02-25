@@ -28,6 +28,7 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
             v.restricted,
             u.name AS vendor,
             u.email AS email,
+            u.phone AS phone,
             u.imageUrl AS imageUrl
         FROM 
             Vendor  v

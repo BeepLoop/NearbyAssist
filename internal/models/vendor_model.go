@@ -18,6 +18,7 @@ type VendorModel struct {
 	// Additional fields for joins
 	Vendor    string   `json:"vendor" db:"vendor"`
 	Email     string   `json:"email" db:"email"`
+	Phone     string   `db:"phone"`
 	ImageUrl  string   `json:"imageUrl" db:"imageUrl"`
 	Expertise []string `json:"expertise" db:"expertise"`
 }

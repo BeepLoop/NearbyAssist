@@ -33,6 +33,12 @@ func (s *Service) GetVendor(vendorId string) (*models.VendorModel, error) {
 		vendor.Email = plainText
 	}
 
+	if plainText, err := s.encrypt.DecryptString(vendor.Phone); err != nil {
+		return nil, err
+	} else {
+		vendor.Phone = plainText
+	}
+
 	return vendor, nil
 }
 

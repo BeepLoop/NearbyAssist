@@ -7,6 +7,7 @@ type VendorServiceList struct {
 		Id           string   `json:"id"`
 		Name         string   `json:"name"`
 		Email        string   `json:"email"`
+		Phone        string   `json:"phone"`
 		ImageUrl     string   `json:"imageUrl"`
 		Rating       string   `json:"rating"`
 		IsRestricted int      `json:"isRestricted"`

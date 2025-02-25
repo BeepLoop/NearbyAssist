@@ -46,6 +46,7 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		Id           string `json:"id"`
 		Name         string `json:"name"`
 		Email        string `json:"email"`
+		Phone        string `json:"phone"`
 		ImageUrl     string `json:"imageUrl"`
 		Rating       string `json:"rating"`
 		IsRestricted int    `json:"isRestricted"`
@@ -53,6 +54,7 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		Id:           vendor.Id,
 		Name:         vendor.Vendor,
 		Email:        vendor.Email,
+		Phone:        vendor.Phone,
 		ImageUrl:     vendor.ImageUrl,
 		Rating:       vendor.Rating,
 		IsRestricted: vendor.Restricted,
@@ -91,6 +93,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 			Id           string   `json:"id"`
 			Name         string   `json:"name"`
 			Email        string   `json:"email"`
+			Phone        string   `json:"phone"`
 			ImageUrl     string   `json:"imageUrl"`
 			Rating       string   `json:"rating"`
 			IsRestricted int      `json:"isRestricted"`
@@ -99,6 +102,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 			Id:           vendor.Id,
 			Name:         vendor.Vendor,
 			Email:        vendor.Email,
+			Phone:        vendor.Phone,
 			ImageUrl:     vendor.ImageUrl,
 			Rating:       vendor.Rating,
 			IsRestricted: vendor.Restricted,
