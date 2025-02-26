@@ -22,4 +22,7 @@ type UserModel struct {
 	Latitude  sql.NullFloat64 `json:"latitude" db:"latitude"`
 	Longitude sql.NullFloat64 `json:"longitude" db:"longitude"`
 	Verified  bool            `json:"verified" db:"verified"`
+
+	// Socials
+	Socials []string
 }

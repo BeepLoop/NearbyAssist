@@ -83,6 +83,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 			protected.GET("/me", handler.GetUser)
 			protected.GET("/verified", handler.GetUserVerification)
+			protected.POST("/socials", handler.AddSocial)
 		}
 	}
 

@@ -270,6 +270,17 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		return nil, err
 	}
 
+	decryptedSocials := make([]string, 0)
+	for _, social := range user.Socials {
+		decrypted, err := s.encrypt.DecryptString(social)
+		if err != nil {
+			return nil, err
+		}
+
+		decryptedSocials = append(decryptedSocials, decrypted)
+	}
+	user.Socials = decryptedSocials
+
 	vendorExpertises := make([]response.Expertise, 0)
 	if isVendor {
 		expertises, err := s.store.GetExpertise(user.Id)
@@ -315,6 +326,14 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		}
 	}
 
+	if user.Phone.Valid {
+		if plain, err := s.encrypt.DecryptString(user.Phone.String); err != nil {
+			return nil, err
+		} else {
+			user.Phone = sql.NullString{String: plain, Valid: true}
+		}
+	}
+
 	if user.Latitude.Valid == false {
 		user.Latitude = sql.NullFloat64{Float64: 0.0, Valid: true}
 	}
@@ -331,9 +350,11 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		IsVerified: user.Verified,
 		IsVendor:   isVendor,
 		Address:    user.Address.String,
+		Phone:      user.Phone.String,
 		Latitude:   user.Latitude.Float64,
 		Longitude:  user.Longitude.Float64,
 		Expertises: vendorExpertises,
+		Socials:    user.Socials,
 	}
 
 	return response, nil
@@ -351,4 +372,26 @@ func (s *Service) IsVerified(bearerToken string) (bool, error) {
 	}
 
 	return user.Verified, nil
+}
+
+func (s *Service) AddSocial(bearerToken, url string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	encrypted, err := s.encrypt.EncryptString(url)
+	if err != nil {
+		return err
+	}
+
+	social := new(models.SocialModel)
+	social.UserId = userId
+	social.Url = encrypted
+
+	if err := s.store.AddSocial(social); err != nil {
+		return err
+	}
+
+	return nil
 }

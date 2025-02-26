@@ -1,6 +1,7 @@
 package vendor_service
 
 import (
+	"database/sql"
 	"nearbyassist/internal/models"
 	repository "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/service/auth"
@@ -33,11 +34,24 @@ func (s *Service) GetVendor(vendorId string) (*models.VendorModel, error) {
 		vendor.Email = plainText
 	}
 
-	if plainText, err := s.encrypt.DecryptString(vendor.Phone); err != nil {
-		return nil, err
-	} else {
-		vendor.Phone = plainText
+	if vendor.Phone.Valid {
+		if plainText, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
+			return nil, err
+		} else {
+			vendor.Phone = sql.NullString{String: plainText, Valid: true}
+		}
 	}
+
+	decryptedSocials := make([]string, 0)
+	for _, social := range vendor.Socials {
+		decrypted, err := s.encrypt.DecryptString(social)
+		if err != nil {
+			return nil, err
+		}
+
+		decryptedSocials = append(decryptedSocials, decrypted)
+	}
+	vendor.Socials = decryptedSocials
 
 	return vendor, nil
 }

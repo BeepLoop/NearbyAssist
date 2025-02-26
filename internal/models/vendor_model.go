@@ -1,5 +1,7 @@
 package models
 
+import "database/sql"
+
 type VendorStatusFilter string
 
 const (
@@ -16,9 +18,10 @@ type VendorModel struct {
 	Restricted int    `json:"restricted" db:"restricted"`
 
 	// Additional fields for joins
-	Vendor    string   `json:"vendor" db:"vendor"`
-	Email     string   `json:"email" db:"email"`
-	Phone     string   `db:"phone"`
-	ImageUrl  string   `json:"imageUrl" db:"imageUrl"`
-	Expertise []string `json:"expertise" db:"expertise"`
+	Vendor    string         `json:"vendor" db:"vendor"`
+	Email     string         `json:"email" db:"email"`
+	Phone     sql.NullString `db:"phone"`
+	ImageUrl  string         `json:"imageUrl" db:"imageUrl"`
+	Expertise []string       `json:"expertise" db:"expertise"`
+	Socials   []string
 }

@@ -12,6 +12,7 @@ type VendorServiceList struct {
 		Rating       string   `json:"rating"`
 		IsRestricted int      `json:"isRestricted"`
 		Expertise    []string `json:"expertise"`
+		Socials      []string `json:"socials"`
 	} `json:"vendor"`
 	Services []struct {
 		Id          string             `json:"id"`

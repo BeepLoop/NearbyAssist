@@ -24,4 +24,6 @@ type UserRepository interface {
 	IsVendor(userId string) (bool, error)
 
 	GetExpertise(userId string) ([]*models.ExpertiseModel, error)
+
+	AddSocial(data *models.SocialModel) error
 }

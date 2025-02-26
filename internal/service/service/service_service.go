@@ -2,6 +2,7 @@ package service_service
 
 import (
 	"cmp"
+	"database/sql"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -184,10 +185,12 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		vendor.Email = decrypted
 	}
 
-	if decrypted, err := s.encrypt.DecryptString(vendor.Phone); err != nil {
-		return nil, err
-	} else {
-		vendor.Phone = decrypted
+	if vendor.Phone.Valid {
+		if decrypted, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
+			return nil, err
+		} else {
+			vendor.Phone = sql.NullString{String: decrypted, Valid: true}
+		}
 	}
 
 	vendorData := struct {
@@ -203,7 +206,7 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		Id:           vendor.VendorId,
 		Name:         vendor.Vendor,
 		Email:        vendor.Email,
-		Phone:        vendor.Phone,
+		Phone:        vendor.Phone.String,
 		ImageUrl:     vendor.ImageUrl,
 		Rating:       vendor.Rating,
 		IsRestricted: vendor.Restricted,

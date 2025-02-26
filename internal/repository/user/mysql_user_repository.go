@@ -136,12 +136,37 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
+	getUserQuery := `
+        SELECT 
+            id,
+            name,
+            email,
+            imageUrl,
+            verified,
+            address,
+            phone,
+            latitude,
+            longitude,
+            createdAt 
+        FROM 
+            User 
+        WHERE 
+            id = ?
+    `
+
 	user := new(models.UserModel)
-	query := "SELECT id, name, email, imageUrl, verified, address, latitude, longitude, createdAt FROM User WHERE id = ?"
-	err := s.db.GetContext(ctx, user, query, id)
+	err := s.db.GetContext(ctx, user, getUserQuery, id)
 	if err != nil {
 		return nil, err
 	}
+
+	getUserSocialsQuery := `SELECT url FROM Social WHERE userId = ?`
+
+	socials := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &socials, getUserSocialsQuery, id); err != nil {
+		return nil, err
+	}
+	user.Socials = socials
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
@@ -342,4 +367,32 @@ func (s *MysqlUserRepository) GetExpertise(userId string) ([]*models.ExpertiseMo
 	}
 
 	return expertises, nil
+}
+
+func (s *MysqlUserRepository) AddSocial(data *models.SocialModel) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	addSocialQuery := `
+        INSERT INTO
+            Social (id, userId, url)
+        VALUES
+            (:id, :userId, :url)
+    `
+
+	if generatedId, err := gonanoid.New(); err != nil {
+		return err
+	} else {
+		data.Id = generatedId
+	}
+
+	if _, err := s.db.NamedExecContext(ctx, addSocialQuery, data); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
 }

@@ -54,8 +54,22 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, id); err != nil {
 		return nil, err
 	}
-
 	vendor.Expertise = expertise
+
+	getSocialsQuery := `
+        SELECT
+            url
+        FROM
+            Social
+        WHERE
+            userId = ?
+    `
+
+	socials := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &socials, getSocialsQuery, id); err != nil {
+		return nil, err
+	}
+	vendor.Socials = socials
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded

@@ -133,3 +133,31 @@ func (h *userHandler) GetUserVerification(c echo.Context) error {
 		"verified": isVerified,
 	})
 }
+
+func (h *userHandler) AddSocial(c echo.Context) error {
+	req := new(request.AddSocialPayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	if err := h.userService.AddSocial(bearerToken, req.Url); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error adding social",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, nil)
+}
