@@ -2,6 +2,7 @@ package user_service
 
 import (
 	"database/sql"
+	"errors"
 	"nearbyassist/internal/models"
 	repository "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/request"
@@ -390,6 +391,40 @@ func (s *Service) AddSocial(bearerToken, url string) error {
 	social.Url = encrypted
 
 	if err := s.store.AddSocial(social); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) DeleteSocial(bearerToken, url string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	socials, err := s.store.GetSocials(userId)
+	if err != nil {
+		return err
+	}
+
+	var socialId string
+	for _, social := range socials {
+		decrypted, err := s.encrypt.DecryptString(social.Url)
+		if err != nil {
+			return err
+		}
+
+		if decrypted == url {
+			socialId = social.Id
+		}
+	}
+
+	if socialId == "" {
+		return errors.New("social not found")
+	}
+
+	if err := s.store.DeleteSocial(userId, socialId); err != nil {
 		return err
 	}
 

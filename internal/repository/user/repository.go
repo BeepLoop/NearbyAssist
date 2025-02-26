@@ -26,4 +26,6 @@ type UserRepository interface {
 	GetExpertise(userId string) ([]*models.ExpertiseModel, error)
 
 	AddSocial(data *models.SocialModel) error
+	DeleteSocial(userId, id string) error
+	GetSocials(userId string) ([]*models.SocialModel, error)
 }

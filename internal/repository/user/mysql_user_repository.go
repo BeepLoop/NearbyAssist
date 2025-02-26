@@ -396,3 +396,37 @@ func (s *MysqlUserRepository) AddSocial(data *models.SocialModel) error {
 
 	return nil
 }
+
+func (s *MysqlUserRepository) GetSocials(userId string) ([]*models.SocialModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	getSocialsQuery := "SELECT * FROM Social WHERE userId = ?"
+
+	socials := make([]*models.SocialModel, 0)
+	if err := s.db.SelectContext(ctx, &socials, getSocialsQuery, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return socials, nil
+}
+
+func (s *MysqlUserRepository) DeleteSocial(userId, id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	deleteSocialQuery := "DELETE FROM Social WHERE userId = ? AND id = ?"
+	if _, err := s.db.ExecContext(ctx, deleteSocialQuery, userId, id); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}

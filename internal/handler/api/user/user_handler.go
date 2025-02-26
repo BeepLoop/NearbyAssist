@@ -6,6 +6,7 @@ import (
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -160,4 +161,39 @@ func (h *userHandler) AddSocial(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, nil)
+}
+
+func (h *userHandler) DeleteSocial(c echo.Context) error {
+	req := new(request.DeleteSocialPayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	if err := h.userService.DeleteSocial(bearerToken, req.Url); err != nil {
+		if strings.Contains(err.Error(), "social not found") {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "social does not exists",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error deleting social",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
 }
