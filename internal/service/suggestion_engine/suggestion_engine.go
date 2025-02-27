@@ -6,5 +6,5 @@ import (
 )
 
 type Engine interface {
-	GenerateSuggestions(services []*models.GeoSpatialSearchResult) ([]*response.SearchResult, error)
+	GenerateSuggestions(services []*models.GeoSpatialSearchResult) ([]*response.ServiceSearchResult, error)
 }

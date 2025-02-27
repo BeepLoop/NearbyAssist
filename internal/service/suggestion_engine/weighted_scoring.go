@@ -36,8 +36,8 @@ func NewWeightedScoring() *weightedScoring {
 	}
 }
 
-func (w *weightedScoring) GenerateSuggestions(services []*models.GeoSpatialSearchResult) ([]*response.SearchResult, error) {
-	scores := make([]*response.SearchResult, 0)
+func (w *weightedScoring) GenerateSuggestions(services []*models.GeoSpatialSearchResult) ([]*response.ServiceSearchResult, error) {
+	scores := make([]*response.ServiceSearchResult, 0)
 
 	w.getTopScores(services)
 
@@ -47,13 +47,16 @@ func (w *weightedScoring) GenerateSuggestions(services []*models.GeoSpatialSearc
 			return nil, err
 		}
 
-		scores = append(scores, &response.SearchResult{
-			Id:        service.Id,
-			Score:     score,
-			Rank:      0,
-			Vendor:    service.VendorName,
-			Latitude:  service.Latitude,
-			Longitude: service.Longitude,
+		scores = append(scores, &response.ServiceSearchResult{
+			Id:                    service.Id,
+			VendorName:            service.VendorName,
+			SuggestionScore:       score,
+			Rate:                  service.Rate,
+			Rating:                service.Rating,
+			Latitude:              service.Latitude,
+			Longitude:             service.Longitude,
+			CompletedTransactions: service.CompletedTransactions,
+			Distance:              service.Distance,
 		})
 	}
 

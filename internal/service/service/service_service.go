@@ -1,7 +1,6 @@
 package service_service
 
 import (
-	"cmp"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -15,7 +14,6 @@ import (
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/utils"
-	"slices"
 )
 
 type Service struct {
@@ -461,7 +459,7 @@ func (s *Service) DeleteExtra(bearerToken, extraId string) error {
 	return nil
 }
 
-func (s *Service) SearchService(params map[string]string) ([]*response.SearchResult, error) {
+func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSearchResult, error) {
 	services, err := s.store.GeoSpatialSearch(params)
 	if err != nil {
 		return nil, err
@@ -487,18 +485,20 @@ func (s *Service) SearchService(params map[string]string) ([]*response.SearchRes
 		}
 	}
 
-	// Compute service suggestibility score
+	// Decrypt vendor name
+	for _, service := range services {
+		decrypted, err := s.encrypt.DecryptString(service.VendorName)
+		if err != nil {
+			return nil, err
+		}
+
+		service.VendorName = decrypted
+	}
+
+	// Compute service suggestion score
 	scoredServices, err := s.suggest.GenerateSuggestions(services)
 	if err != nil {
 		return nil, err
-	}
-
-	// Rank services
-	slices.SortFunc(scoredServices, func(a, b *response.SearchResult) int {
-		return cmp.Compare(b.Score, a.Score)
-	})
-	for i, service := range scoredServices {
-		service.Rank = i + 1
 	}
 
 	return scoredServices, nil
