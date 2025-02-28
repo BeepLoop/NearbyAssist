@@ -27,6 +27,12 @@ func (s *Service) GetUsers(limit, offset int) ([]*models.UserModel, error) {
 		} else {
 			account.Name = decrypted
 		}
+
+		if decrypted, err := s.encrypt.DecryptString(account.Email); err != nil {
+			return nil, err
+		} else {
+			account.Email = decrypted
+		}
 	}
 
 	return accounts, nil

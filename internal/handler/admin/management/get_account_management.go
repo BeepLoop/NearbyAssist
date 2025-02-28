@@ -36,6 +36,7 @@ func (h *managementHandler) GetAccountManagement(c echo.Context) error {
 		data = append(data, pages.UserAccounts{
 			Id:         account.Id,
 			Name:       account.Name,
+			Email:      account.Email,
 			ProfileURL: account.ImageUrl,
 			Verified:   account.Verified,
 			CreatedAt:  utils.FormatDate(account.CreatedAt),
