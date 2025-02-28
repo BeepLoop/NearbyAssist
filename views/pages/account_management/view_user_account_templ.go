@@ -138,7 +138,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"POST\"><button type=\"submit\" class=\"rounded-sm px-3 py-1 bg-red-500 text-sm text-white cursor-pointer hover:bg-red-700\">unban</button></form>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"POST\"><button type=\"submit\" class=\"rounded-sm px-2 py-1 bg-red-500 text-sm text-white cursor-pointer hover:bg-red-700\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>Unban user</p></span></button></form>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -152,7 +152,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"POST\"><button type=\"submit\" class=\"rounded-sm px-3 py-1 bg-red-500 text-sm text-white cursor-pointer hover:bg-red-700\">ban</button></form>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"POST\"><button type=\"submit\" class=\"rounded-sm px-2 py-1 bg-red-500 text-sm text-white cursor-pointer hover:bg-red-700\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>Ban user</p></span></button></form>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -199,7 +199,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(service.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 107, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 125, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -212,7 +212,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatDate(service.CreatedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 108, Col: 76}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 126, Col: 76}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -230,7 +230,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(tag)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 111, Col: 21}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 129, Col: 21}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -288,7 +288,7 @@ func expertiseChip(text string) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 131, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 149, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
