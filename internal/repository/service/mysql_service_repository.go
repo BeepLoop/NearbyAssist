@@ -814,9 +814,9 @@ func (s *MysqlServiceRepository) GeoSpatialSearch(params map[string]string) ([]*
 		for i, tag := range tags {
 			cleaned := strings.ReplaceAll(tag, "_", " ")
 			if i == 0 {
-				condition += fmt.Sprintf(" t.title = '%s'", cleaned)
+				condition += fmt.Sprintf(" t.title LIKE '%%%s%%'", cleaned)
 			} else {
-				condition += fmt.Sprintf(" OR t.title = '%s'", cleaned)
+				condition += fmt.Sprintf(" OR t.title LIKE '%%%s%%'", cleaned)
 			}
 		}
 
