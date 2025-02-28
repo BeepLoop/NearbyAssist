@@ -31,6 +31,7 @@ func (h *managementHandler) ViewUserAccount(c echo.Context) error {
 		CreatedAt:  utils.FormatDate(accountData.CreatedAt),
 		Expertise:  accountData.Expertise,
 		Services:   accountData.Services,
+		Banned:     accountData.Banned,
 	}
 
 	page := pages.ViewUserAccount(data)

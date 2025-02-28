@@ -28,4 +28,7 @@ type UserRepository interface {
 	AddSocial(data *models.SocialModel) error
 	DeleteSocial(userId, id string) error
 	GetSocials(userId string) ([]*models.SocialModel, error)
+
+	BanUser(userId string) error
+	UnbanUser(userId string) error
 }

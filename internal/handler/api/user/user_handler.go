@@ -37,6 +37,13 @@ func (h *userHandler) Login(c echo.Context) error {
 
 	loginResp, err := h.userService.Login(req)
 	if err != nil {
+		if strings.Contains(err.Error(), user_service.ERR_BANNED_USER) {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "User is banned",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error logging in",
 			Error:   err.Error(),
@@ -66,6 +73,13 @@ func (h *userHandler) Refresh(c echo.Context) error {
 
 	accessToken, err := h.userService.Refresh(bearerToken, req.RefreshToken)
 	if err != nil {
+		if strings.Contains(err.Error(), user_service.ERR_BANNED_USER) {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "User is banned",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error refresh token",
 			Error:   err.Error(),

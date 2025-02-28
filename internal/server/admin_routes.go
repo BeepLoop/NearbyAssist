@@ -107,5 +107,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		managementRoute.GET("", managementHandler.GetAccountManagement, middleware.CheckSession)
 		managementRoute.GET("/:userId", managementHandler.ViewUserAccount, middleware.CheckSession)
+		managementRoute.POST("/ban/:userId", managementHandler.BanUser, middleware.CheckSession)
+		managementRoute.POST("/unban/:userId", managementHandler.UnbanUser, middleware.CheckSession)
 	}
 }

@@ -143,6 +143,7 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
             email,
             imageUrl,
             verified,
+            banned,
             address,
             phone,
             latitude,
@@ -181,7 +182,7 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 
 	accountData := new(models.UserAccountPageData)
 
-	getUserQuery := "SELECT id, name, email, imageUrl, address, createdAt FROM User where id = ?"
+	getUserQuery := "SELECT id, name, email, imageUrl, address, banned, createdAt FROM User where id = ?"
 	user := new(models.UserModel)
 	if err := s.db.GetContext(ctx, user, getUserQuery, userId); err != nil {
 		return nil, err
@@ -191,6 +192,7 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 	accountData.Name = user.Name
 	accountData.Email = user.Email
 	accountData.Address = user.Address
+	accountData.Banned = user.Banned
 	accountData.CreatedAt = user.CreatedAt
 
 	getExpertiseQuery := `
@@ -249,7 +251,7 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
 
 	user := new(models.UserModel)
 
-	query := "SELECT id, name, email, imageUrl, verified, address, phone, latitude, longitude FROM User WHERE emailHash = ?"
+	query := "SELECT id, name, email, imageUrl, verified, banned, address, phone, latitude, longitude FROM User WHERE emailHash = ?"
 	if err := s.db.GetContext(ctx, user, query, emailHash); err != nil {
 		return nil, err
 	}
@@ -421,6 +423,38 @@ func (s *MysqlUserRepository) DeleteSocial(userId, id string) error {
 
 	deleteSocialQuery := "DELETE FROM Social WHERE userId = ? AND id = ?"
 	if _, err := s.db.ExecContext(ctx, deleteSocialQuery, userId, id); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlUserRepository) BanUser(userId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE User SET banned = 1 WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlUserRepository) UnbanUser(userId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE User SET banned = 0 WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
 		return err
 	}
 

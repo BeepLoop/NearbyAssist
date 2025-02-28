@@ -76,3 +76,19 @@ func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, err
 
 	return accountData, nil
 }
+
+func (s *Service) BanUser(userId string) error {
+	if err := s.store.BanUser(userId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) UnbanUser(userId string) error {
+	if err := s.store.UnbanUser(userId); err != nil {
+		return err
+	}
+
+	return nil
+}

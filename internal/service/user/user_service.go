@@ -11,6 +11,10 @@ import (
 	"nearbyassist/internal/utils"
 )
 
+const (
+	ERR_BANNED_USER = "banned user"
+)
+
 type Service struct {
 	store   repository.UserRepository
 	encrypt auth.Encryption
@@ -32,6 +36,10 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 	if err != nil {
 		// If user is not found, continue to registration
 		return s.Register(req, emailHash)
+	}
+
+	if existingUser.Banned {
+		return nil, errors.New(ERR_BANNED_USER)
 	}
 
 	if decrypted, err := s.encrypt.DecryptString(existingUser.Name); err != nil {
@@ -217,6 +225,10 @@ func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
 	user, err := s.store.FindById(userId)
 	if err != nil {
 		return "", err
+	}
+
+	if user.Banned {
+		return "", errors.New(ERR_BANNED_USER)
 	}
 
 	if plain, err := s.encrypt.DecryptString(user.Name); err != nil {

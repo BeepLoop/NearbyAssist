@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS User (
     latitude Decimal(12, 10),
     longitude Decimal(13, 10),
     verified TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: not verified, 1: verified',
+    banned TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: not banned, 1: banned',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
