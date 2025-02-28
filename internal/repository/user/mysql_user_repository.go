@@ -245,6 +245,78 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 	return accountData, nil
 }
 
+func (s *MysqlUserRepository) GetSentTransactionCount(userId string) (*models.SentStat, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stat := new(models.SentStat)
+
+	query := `
+        SELECT 
+            SUM(CASE 
+                    WHEN YEAR(createdAt) = YEAR(CURDATE()) 
+                    AND MONTH(createdAt) = MONTH(CURDATE()) 
+                    THEN 1 
+                    ELSE 0 
+                END) AS currentMonth,
+            SUM(CASE 
+                    WHEN YEAR(createdAt) = YEAR(CURDATE() - INTERVAL 1 MONTH) 
+                    AND MONTH(createdAt) = MONTH(CURDATE() - INTERVAL 1 MONTH) 
+                    THEN 1 
+                    ELSE 0 
+                END) AS lastMonth
+        FROM 
+            Transaction
+        WHERE 
+            clientId = ?
+    `
+	if err := s.db.GetContext(ctx, stat, query, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return stat, nil
+}
+
+func (s *MysqlUserRepository) GetReceivedTransactionCount(userId string) (*models.ReceivedStat, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stat := new(models.ReceivedStat)
+
+	query := `
+        SELECT 
+            SUM(CASE 
+                    WHEN YEAR(createdAt) = YEAR(CURDATE()) 
+                    AND MONTH(createdAt) = MONTH(CURDATE()) 
+                    THEN 1 
+                    ELSE 0 
+                END) AS currentMonth,
+            SUM(CASE 
+                    WHEN YEAR(createdAt) = YEAR(CURDATE() - INTERVAL 1 MONTH) 
+                    AND MONTH(createdAt) = MONTH(CURDATE() - INTERVAL 1 MONTH) 
+                    THEN 1 
+                    ELSE 0 
+                END) AS lastMonth
+        FROM 
+            Transaction
+        WHERE 
+            vendorId = ?
+    `
+	if err := s.db.GetContext(ctx, stat, query, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return stat, nil
+}
+
 func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

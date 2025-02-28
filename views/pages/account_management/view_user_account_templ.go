@@ -157,21 +157,35 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- stats --><div class=\"mt-8 grid grid-cols-4 gap-4\"><div class=\"outline-1 outline-gray-300 rounded-sm p-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- stats --><div class=\"mt-8 grid grid-cols-4 gap-4\"><div class=\"outline-1 outline-gray-300 rounded-sm p-2\"><!-- Sent Requests -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = partials.Increasing("Sent Requests", 10, 25).Render(ctx, templ_7745c5c3_Buffer)
+			if data.Stat.Sent.CurrentMonth >= data.Stat.Sent.LastMonth {
+				templ_7745c5c3_Err = partials.Increasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageIncrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth)).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = partials.Decreasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageDecrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth)).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"outline-1 outline-gray-300 rounded-sm p-2\"><!-- Received Requests -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"outline-1 outline-gray-300 rounded-sm p-2\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = partials.Decreasing("Received Requests", 4, 20).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			if data.Stat.Received.CurrentMonth >= data.Stat.Received.LastMonth {
+				templ_7745c5c3_Err = partials.Increasing("Received Requests", data.Stat.Received.CurrentMonth, utils.PercentageIncrease(data.Stat.Received.CurrentMonth, data.Stat.Received.LastMonth)).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = partials.Decreasing("Received Requests", data.Stat.Received.CurrentMonth, utils.PercentageDecrease(data.Stat.Received.CurrentMonth, data.Stat.Received.LastMonth)).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- services --><div class=\"mt-8\"><h2 class=\"mb-2 font-medium\">Services</h2><table class=\"w-full outline-1 outline-gray-300 rounded-lg table-auto\"><thead><tr class=\"bg-primary-greener outline-1 outline-gray-300\"><th class=\"px-4 py-3 text-left font-medium text-white\">Title</th><th class=\"px-4 py-3 text-left font-medium text-white\">Added on</th><th class=\"px-4 py-3 text-left font-medium text-white\">Tags</th><th class=\"px-4 py-3 text-left font-medium text-white\">Action</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
@@ -185,7 +199,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(service.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 97, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 107, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -198,7 +212,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatDate(service.CreatedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 98, Col: 76}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 108, Col: 76}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -216,7 +230,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(tag)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 101, Col: 21}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 111, Col: 21}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -274,7 +288,7 @@ func expertiseChip(text string) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 121, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 131, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {

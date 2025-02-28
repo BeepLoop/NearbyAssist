@@ -73,10 +73,20 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 			<!-- stats -->
 			<div class="mt-8 grid grid-cols-4 gap-4">
 				<div class="outline-1 outline-gray-300 rounded-sm p-2">
-					@partials.Increasing("Sent Requests", 10, 25)
+					<!-- Sent Requests -->
+					if data.Stat.Sent.CurrentMonth >= data.Stat.Sent.LastMonth {
+						@partials.Increasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageIncrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
+					} else {
+						@partials.Decreasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageDecrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
+					}
 				</div>
 				<div class="outline-1 outline-gray-300 rounded-sm p-2">
-					@partials.Decreasing("Received Requests", 4, 20)
+					<!-- Received Requests -->
+					if data.Stat.Received.CurrentMonth >= data.Stat.Received.LastMonth {
+						@partials.Increasing("Received Requests", data.Stat.Received.CurrentMonth, utils.PercentageIncrease(data.Stat.Received.CurrentMonth, data.Stat.Received.LastMonth))
+					} else {
+						@partials.Decreasing("Received Requests", data.Stat.Received.CurrentMonth, utils.PercentageDecrease(data.Stat.Received.CurrentMonth, data.Stat.Received.LastMonth))
+					}
 				</div>
 			</div>
 			<!-- services -->

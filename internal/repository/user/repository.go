@@ -12,6 +12,9 @@ type UserRepository interface {
 
 	GetAllUserAccounts(limit, offset int) ([]*models.UserModel, error)
 
+	GetSentTransactionCount(userId string) (*models.SentStat, error)
+	GetReceivedTransactionCount(userId string) (*models.ReceivedStat, error)
+
 	// Sets the refreshToken in session to offline and adds the refreshToken to blacklist
 	Logout(refreshToken string) error
 

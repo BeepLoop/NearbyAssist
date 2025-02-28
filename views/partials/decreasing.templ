@@ -1,6 +1,9 @@
 package partials
 
-import "strconv"
+import (
+	"nearbyassist/internal/utils"
+	"strconv"
+)
 
 templ Decreasing(text string, amount int, percent float64) {
 	<div>
@@ -12,7 +15,7 @@ templ Decreasing(text string, amount int, percent float64) {
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-4 fill-green-400">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3"></path>
 				</svg>
-				{ strconv.FormatFloat(percent, 'f', -1, 64) }%
+				{ utils.ToPercentageString(percent) }
 			</p>
 		</div>
 	</div>

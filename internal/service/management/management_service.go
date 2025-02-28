@@ -38,6 +38,18 @@ func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, err
 		return nil, err
 	}
 
+	if stat, err := s.store.GetSentTransactionCount(userId); err != nil {
+		accountData.Stat.Sent = models.SentStat{}
+	} else {
+		accountData.Stat.Sent = *stat
+	}
+
+	if stat, err := s.store.GetReceivedTransactionCount(userId); err != nil {
+		accountData.Stat.Received = models.ReceivedStat{}
+	} else {
+		accountData.Stat.Received = *stat
+	}
+
 	if decrypted, err := s.encrypt.DecryptString(accountData.Name); err != nil {
 		return nil, err
 	} else {
