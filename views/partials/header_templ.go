@@ -29,15 +29,15 @@ func Header() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"relative flex justify-end gap-6 p-3 outline-1 outline-gray-300\"><div x-data=\"{ profileOpen: false }\"><button class=\"flex items-center cursor-pointer\" x-on:click=\"profileOpen = !profileOpen\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" strokeWidth=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" d=\"M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z\"></path></svg> <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" strokeWidth=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" d=\"M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9\"></path></svg></button>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"flex justify-end items-center outline-1 outline-pale-gray px-4 py-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = dropdown().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = dropdownMenu().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></header>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -45,7 +45,7 @@ func Header() templ.Component {
 	})
 }
 
-func dropdown() templ.Component {
+func dropdownMenu() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -66,7 +66,7 @@ func dropdown() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-show=\"profileOpen\" x-transition class=\"rounded-md absolute right-2 top-full mt-2 w-44 bg-white shadow-md outline outline-1 outline-primary-greener\"><form action=\"/admin/logout\" method=\"POST\"><!-- Logout button --><button type=\"submit\" class=\"flex w-full items-center gap-2 p-2 text-sm hover:bg-red-200 cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-4\" viewBox=\"0 0 24 24\"><path fill=\"red\" d=\"M3 21V3h9v2H5v14h7v2zm13-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z\"></path></svg> Logout</button></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{ isOpen: false, openedWithKeyboard: false }\" class=\"relative\" x-on:keydown.esc.window=\"isOpen = false, openedWithKeyboard = false\"><!-- Toggle Button --><button type=\"button\" x-on:click=\"isOpen = ! isOpen\" class=\"inline-flex items-center gap-2 whitespace-nowrap text-sm tracking-wide transition hover:opacity-75\" aria-haspopup=\"true\" x-on:keydown.space.prevent=\"openedWithKeyboard = true\" x-on:keydown.enter.prevent=\"openedWithKeyboard = true\" x-on:keydown.down.prevent=\"openedWithKeyboard = true\" x-bind:class=\"isOpen || openedWithKeyboard ? &#39;text-on-surface-strong dark:text-on-surface-dark-strong&#39; : &#39;text-on-surface dark:text-on-surface-dark&#39;\" x-bind:aria-expanded=\"isOpen || openedWithKeyboard\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" strokeWidth=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path strokeLinecap=\"round\" strokeLinejoin=\"round\" d=\"M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z\"></path></svg> <svg aria-hidden=\"true\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" class=\"size-4 totate-0\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19.5 8.25l-7.5 7.5-7.5-7.5\"></path></svg></button><!-- Dropdown Menu --><div x-cloak x-show=\"isOpen || openedWithKeyboard\" x-transition x-trap=\"openedWithKeyboard\" x-on:click.outside=\"isOpen = false, openedWithKeyboard = false\" x-on:keydown.down.prevent=\"$focus.wrap().next()\" x-on:keydown.up.prevent=\"$focus.wrap().previous()\" class=\"absolute top-11 right-0 flex w-fit min-w-48 flex-col overflow-hidden rounded-sm outline-1 outline-pale-gray bg-white\" role=\"menu\"><form action=\"/admin/logout\" method=\"POST\"><button type=\"submit\" class=\"w-full flex items-center gap-2 px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-gray hover:text-white\" role=\"menuitem\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"red\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9\"></path></svg> Sign-out</button></form></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
