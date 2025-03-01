@@ -41,7 +41,7 @@ templ userTable(accounts []UserAccounts) {
 			<tbody class="divide-y divide-gray-300">
 				if len(accounts) < 1 {
 					<tr class="">
-						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="5" id="emptyTable"></td>
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="5" id="emptyTable">Empty</td>
 					</tr>
 				} else {
 					for _, account := range accounts {

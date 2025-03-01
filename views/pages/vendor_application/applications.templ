@@ -29,7 +29,7 @@ templ applicationsData(applications []models.ApplicationModel) {
 			<tbody class="divide-y divide-gray-300">
 				if len(applications) < 1 {
 					<tr class="">
-						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable"></td>
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable">Empty</td>
 					</tr>
 				} else {
 					for _, application := range applications {
