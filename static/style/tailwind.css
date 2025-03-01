@@ -2,9 +2,17 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary: #4ECB71;
-    --color-primary-pale: #DCFFB7;
-    --color-primary-greener: #163020;
+    --color-primary: var(--color-green-800);
+    --color-primary-pale: var(--color-green-500);
+    --color-primary-greener: var(--color-green-900);
+
+    --color-pale-gray: var(--color-gray-300);
+    --color-neutral-dark: var(--color-neutral-900);
+    --color-neutral-gray: var(--color-neutral-600);
+
+    --color-success: var(--color-green-700);
+    --color-warning: var(--color-amber-600);
+    --color-danger: var(--color-red-500);
 
     --font-roboto: "Roboto", sans-serif;
 }

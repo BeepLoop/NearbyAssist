@@ -378,9 +378,15 @@
     --default-mono-font-variation-settings: var(
       --font-mono--font-variation-settings
     );
-    --color-primary: #4ECB71;
-    --color-primary-pale: #DCFFB7;
-    --color-primary-greener: #163020;
+    --color-primary: var(--color-green-800);
+    --color-primary-pale: var(--color-green-500);
+    --color-primary-greener: var(--color-green-900);
+    --color-pale-gray: var(--color-gray-300);
+    --color-neutral-dark: var(--color-neutral-900);
+    --color-neutral-gray: var(--color-neutral-600);
+    --color-success: var(--color-green-700);
+    --color-warning: var(--color-amber-600);
+    --color-danger: var(--color-red-500);
     --font-roboto: "Roboto", sans-serif;
   }
 }
@@ -895,6 +901,9 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
+  .border-danger {
+    border-color: var(--color-danger);
+  }
   .border-gray-300 {
     border-color: var(--color-gray-300);
   }
@@ -907,6 +916,9 @@
   .border-red-700 {
     border-color: var(--color-red-700);
   }
+  .border-warning {
+    border-color: var(--color-warning);
+  }
   .border-yellow-700 {
     border-color: var(--color-yellow-700);
   }
@@ -918,6 +930,9 @@
   }
   .bg-blue-600 {
     background-color: var(--color-blue-600);
+  }
+  .bg-danger\/10 {
+    background-color: color-mix(in oklab, var(--color-danger) 10%, transparent);
   }
   .bg-gray-200 {
     background-color: var(--color-gray-200);
@@ -966,6 +981,9 @@
   }
   .bg-red-700 {
     background-color: var(--color-red-700);
+  }
+  .bg-warning\/10 {
+    background-color: color-mix(in oklab, var(--color-warning) 10%, transparent);
   }
   .bg-white {
     background-color: var(--color-white);
@@ -1172,6 +1190,9 @@
   .text-blue-600 {
     color: var(--color-blue-600);
   }
+  .text-danger {
+    color: var(--color-danger);
+  }
   .text-gray-100 {
     color: var(--color-gray-100);
   }
@@ -1205,6 +1226,9 @@
   .text-neutral-900 {
     color: var(--color-neutral-900);
   }
+  .text-neutral-gray {
+    color: var(--color-neutral-gray);
+  }
   .text-primary-greener {
     color: var(--color-primary-greener);
   }
@@ -1216,6 +1240,9 @@
   }
   .text-red-700 {
     color: var(--color-red-700);
+  }
+  .text-warning {
+    color: var(--color-warning);
   }
   .text-white {
     color: var(--color-white);
@@ -1261,6 +1288,9 @@
   }
   .outline-gray-300 {
     outline-color: var(--color-gray-300);
+  }
+  .outline-neutral-gray {
+    outline-color: var(--color-neutral-gray);
   }
   .outline-primary-greener {
     outline-color: var(--color-primary-greener);
