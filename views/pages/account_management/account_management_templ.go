@@ -283,12 +283,12 @@ func newUserTable(accounts []UserAccounts) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if account.Verified {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"inline-flex overflow-hidden rounded-full border border-green-800 px-1 py-0.5 text-xs font-medium text-green-800 bg-green-800/10\">Verified</span>")
+				templ_7745c5c3_Err = partials.SoftBadgeSuccess("Verified").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"inline-flex overflow-hidden rounded-full border border-green-800 px-1 py-0.5 text-xs font-medium text-green-800 bg-green-800/10\">Unverified</span>")
+				templ_7745c5c3_Err = partials.SoftBadgeDanger("Unverified").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

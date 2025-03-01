@@ -1,0 +1,41 @@
+package partials
+
+templ DefaultBadge(text string) {
+	<span class="rounded-sm w-fit border border-gray-300 bg-neutral-50 px-2 py-1 text-xs font-medium text-neutral-600">{ text }</span>
+}
+
+templ DefaultBadgeSuccess(text string) {
+	<!-- success Badge -->
+	<span class="rounded-sm w-fit border border-green-700 bg-green-700 px-2 py-1 text-xs font-medium text-white">{ text }</span>
+}
+
+templ DefaultBadgeWarning(text string) {
+	<!-- warning Badge -->
+	<span class="rounded-sm w-fit border border-yellow-700 bg-yellow-700 px-2 py-1 text-xs font-medium text-white">{ text }</span>
+}
+
+templ DefaultBadgeDanger(text string) {
+	<!-- danger Badge -->
+	<span class="rounded-sm w-fit border border-red-700 bg-red-700 px-2 py-1 text-xs font-medium text-white">{ text }</span>
+}
+
+templ SoftBadgeSuccess(text string) {
+	<!-- success Badge -->
+	<span class="w-fit inline-flex overflow-hidden rounded-sm border border-green-700 bg-surface text-xs font-medium text-green-700">
+		<span class="px-2 py-1 bg-green-700/10">{ text }</span>
+	</span>
+}
+
+templ SoftBadgeWarning(text string) {
+	<!-- warning Badge -->
+	<span class="w-fit inline-flex overflow-hidden rounded-sm border border-warning bg-surface text-xs font-medium text-warning">
+		<span class="px-2 py-1 bg-warning/10">{ text }</span>
+	</span>
+}
+
+templ SoftBadgeDanger(text string) {
+	<!-- danger Badge -->
+	<span class="w-fit inline-flex overflow-hidden rounded-sm border border-danger bg-surface text-xs font-medium text-danger">
+		<span class="px-2 py-1 bg-danger/10">{ text }</span>
+	</span>
+}

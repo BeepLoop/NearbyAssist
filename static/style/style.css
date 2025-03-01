@@ -722,6 +722,9 @@
   .w-44 {
     width: calc(var(--spacing) * 44);
   }
+  .w-fit {
+    width: fit-content;
+  }
   .w-full {
     width: 100%;
   }
@@ -892,11 +895,20 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
+  .border-gray-300 {
+    border-color: var(--color-gray-300);
+  }
   .border-gray-400 {
     border-color: var(--color-gray-400);
   }
-  .border-green-800 {
-    border-color: var(--color-green-800);
+  .border-green-700 {
+    border-color: var(--color-green-700);
+  }
+  .border-red-700 {
+    border-color: var(--color-red-700);
+  }
+  .border-yellow-700 {
+    border-color: var(--color-yellow-700);
   }
   .bg-blue-400 {
     background-color: var(--color-blue-400);
@@ -925,11 +937,14 @@
   .bg-green-700 {
     background-color: var(--color-green-700);
   }
+  .bg-green-700\/10 {
+    background-color: color-mix(in oklab, var(--color-green-700) 10%, transparent);
+  }
   .bg-green-800 {
     background-color: var(--color-green-800);
   }
-  .bg-green-800\/10 {
-    background-color: color-mix(in oklab, var(--color-green-800) 10%, transparent);
+  .bg-neutral-50 {
+    background-color: var(--color-neutral-50);
   }
   .bg-primary-greener {
     background-color: var(--color-primary-greener);
@@ -949,6 +964,9 @@
   .bg-red-600 {
     background-color: var(--color-red-600);
   }
+  .bg-red-700 {
+    background-color: var(--color-red-700);
+  }
   .bg-white {
     background-color: var(--color-white);
   }
@@ -957,6 +975,9 @@
   }
   .bg-yellow-400 {
     background-color: var(--color-yellow-400);
+  }
+  .bg-yellow-700 {
+    background-color: var(--color-yellow-700);
   }
   .bg-cover {
     background-size: cover;
@@ -1009,8 +1030,8 @@
   .p-8 {
     padding: calc(var(--spacing) * 8);
   }
-  .px-1 {
-    padding-inline: calc(var(--spacing) * 1);
+  .px-2 {
+    padding-inline: calc(var(--spacing) * 2);
   }
   .px-3 {
     padding-inline: calc(var(--spacing) * 3);
@@ -1020,9 +1041,6 @@
   }
   .px-6 {
     padding-inline: calc(var(--spacing) * 6);
-  }
-  .py-0\.5 {
-    padding-block: calc(var(--spacing) * 0.5);
   }
   .py-1 {
     padding-block: calc(var(--spacing) * 1);
