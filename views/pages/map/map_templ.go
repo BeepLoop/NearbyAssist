@@ -74,7 +74,7 @@ func Map(data MapPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>Result: ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"text-sm text-neutral-dark font-medium\">Result: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -87,7 +87,7 @@ func Map(data MapPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"flex-1\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div><div class=\"flex-1\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -130,7 +130,7 @@ func searchBar(tags []string, previousQuery string) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex justify-end my-3\"><form action=\"/admin/map\" method=\"POST\" class=\"flex gap-2\"><input type=\"input\" name=\"query\" list=\"tags\" class=\"p-2 rounded-sm outline outline-1 text-sm\" placeholder=\"service\" autofocus onfocus=\"let temp = this.value; this.value = &#39;&#39;; this.value = temp; // place cursor at end of value\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex justify-end my-3\"><form action=\"/admin/map\" method=\"POST\" class=\"flex gap-2\"><input type=\"input\" name=\"query\" list=\"tags\" class=\"p-2 rounded-sm text-sm outline-1 outline-pale-gray\" placeholder=\"service\" autofocus onfocus=\"let temp = this.value; this.value = &#39;&#39;; this.value = temp; // place cursor at end of value\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -179,7 +179,7 @@ func searchBar(tags []string, previousQuery string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</datalist> <button type=\"submit\" class=\"p-2 rounded-md bg-green-700 hover:bg-green-800 text-sm\">Search</button></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</datalist> <button type=\"submit\" class=\"p-2 rounded-md bg-primary-greener hover:opacity-75 text-sm text-white\">Search</button></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -11,6 +11,7 @@ templ IdentityVerification(requests []models.IdentityVerificationModel) {
 	@layout.Layout() {
 		@partials.PageBanner("Verification requests", "View and manage identity verification requests")
 		@requestsData(requests)
+		@partials.Pagination()
 	}
 }
 
@@ -28,7 +29,7 @@ templ requestsData(requests []models.IdentityVerificationModel) {
 			<tbody class="divide-y divide-gray-300">
 				if len(requests) < 1 {
 					<tr class="">
-						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4">No Requests</td>
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable"></td>
 					</tr>
 				} else {
 					for _, request := range requests {

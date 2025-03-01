@@ -19,6 +19,7 @@ templ AccountManagement(accounts []UserAccounts) {
 	@layout.Layout() {
 		@partials.PageBanner("Account Management", "View and manage accounts")
 		@newUserTable(accounts)
+		@partials.Pagination()
 	}
 }
 
@@ -35,41 +36,47 @@ templ newUserTable(accounts []UserAccounts) {
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-300">
-				for _, account := range accounts {
-					<tr class="text-xs">
-						<td class="p-4">
-							<div class="flex w-max items-center gap-2">
-								<img
-									class="size-8 rounded-full object-cover"
-									src={ account.ProfileURL }
-									alt="user avatar"
-								/>
-								<div class="flex flex-col">
-									<span class="font-medium text-neutral-900">{ account.Name }</span>
-									<span class="text-neutral-600 opacity-85">{ account.Email }</span>
-								</div>
-							</div>
-						</td>
-						<td class="p-4">{ account.Id }</td>
-						<td class="p-4">{ account.CreatedAt }</td>
-						<td class="p-4">
-							if account.Verified {
-								@partials.SoftBadgeSuccess("Verified")
-							} else {
-								@partials.SoftBadgeDanger("Unverified")
-							}
-						</td>
-						<td class="p-4">
-							<ul>
-								<a
-									href={ templ.SafeURL(fmt.Sprintf("/admin/account-management/%s", account.Id)) }
-									class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
-								>
-									view profile
-								</a>
-							</ul>
-						</td>
+				if len(accounts) < 1 {
+					<tr class="">
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="5" id="emptyTable"></td>
 					</tr>
+				} else {
+					for _, account := range accounts {
+						<tr class="text-xs">
+							<td class="p-4">
+								<div class="flex w-max items-center gap-2">
+									<img
+										class="size-8 rounded-full object-cover"
+										src={ account.ProfileURL }
+										alt="user avatar"
+									/>
+									<div class="flex flex-col">
+										<span class="font-medium text-neutral-900">{ account.Name }</span>
+										<span class="text-neutral-600 opacity-85">{ account.Email }</span>
+									</div>
+								</div>
+							</td>
+							<td class="p-4">{ account.Id }</td>
+							<td class="p-4">{ account.CreatedAt }</td>
+							<td class="p-4">
+								if account.Verified {
+									@partials.SoftBadgeSuccess("Verified")
+								} else {
+									@partials.SoftBadgeDanger("Unverified")
+								}
+							</td>
+							<td class="p-4">
+								<ul>
+									<a
+										href={ templ.SafeURL(fmt.Sprintf("/admin/account-management/%s", account.Id)) }
+										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
+									>
+										view profile
+									</a>
+								</ul>
+							</td>
+						</tr>
+					}
 				}
 			</tbody>
 		</table>

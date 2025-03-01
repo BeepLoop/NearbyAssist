@@ -24,9 +24,9 @@ templ Map(data MapPageData) {
 			<div class="flex gap-4">
 				<div class="">
 					@searchBar(data.Tags, data.PreviousQuery)
-					<div>
+					<span class="text-sm text-neutral-dark font-medium">
 						Result: { strconv.Itoa(len(data.Markers)) }
-					</div>
+					</span>
 				</div>
 				<div class="flex-1">
 					@mapComponent(data.Markers)
@@ -43,7 +43,7 @@ templ searchBar(tags []string, previousQuery string) {
 				type="input"
 				name="query"
 				list="tags"
-				class="p-2 rounded-sm outline outline-1 text-sm"
+				class="p-2 rounded-sm text-sm outline-1 outline-pale-gray"
 				placeholder="service"
 				autofocus
 				onfocus="let temp = this.value; this.value = ''; this.value = temp; // place cursor at end of value"
@@ -56,7 +56,7 @@ templ searchBar(tags []string, previousQuery string) {
 			</datalist>
 			<button
 				type="submit"
-				class="p-2 rounded-md bg-green-700 hover:bg-green-800 text-sm"
+				class="p-2 rounded-md bg-primary-greener hover:opacity-75 text-sm text-white"
 			>Search</button>
 		</form>
 	</div>
