@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
+	"strings"
 )
 
 templ ViewUserAccount(data models.UserAccountPageData) {
@@ -78,26 +79,36 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 				</div>
 			</div>
 			<!-- services -->
-			<div class="mt-8">
-				<h2 class="mb-2 font-medium">Services</h2>
-				<table class="w-full outline-1 outline-pale-gray rounded-lg table-auto">
-					<thead>
-						<tr class="bg-primary-greener outline-1 outline-pale-gray">
-							<th class="px-4 py-3 text-left font-medium text-white">Title</th>
-							<th class="px-4 py-3 text-left font-medium text-white">Added on</th>
-							<th class="px-4 py-3 text-left font-medium text-white">Tags</th>
-							<th class="px-4 py-3 text-left font-medium text-white">Action</th>
+			@userServices(data.Services)
+		</div>
+	}
+}
+
+templ userServices(services []*models.ServiceModel) {
+	<div class="mt-8">
+		<h2 class="mb-2 font-medium">Services</h2>
+		<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
+			<table class="w-full text-left text-sm">
+				<thead class="text-white text-sm font-semibold bg-primary-greener">
+					<tr>
+						<th scope="col" class="p-4">Title</th>
+						<th scope="col" class="p-4">Added on</th>
+						<th scope="col" class="p-4">Tags</th>
+						<th scope="col" class="p-4">Action</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-gray-300">
+					if len(services) < 1 {
+						<tr class="">
+							<td class="px-6 py-4 text-neutral-dark" align="center" colspan="5" id="emptyTable">Empty</td>
 						</tr>
-					</thead>
-					<tbody>
-						for _, service := range data.Services {
-							<tr class="outline-1 outline-pale-gray">
+					} else {
+						for _, service := range services {
+							<tr class="relative outline-1 outline-pale-gray text-neutral-dark">
 								<td class="px-6 py-4">{ service.Title }</td>
 								<td class="px-6 py-4">added on { utils.FormatDate(service.CreatedAt) }</td>
 								<td class="px-6 py-4">
-									for _, tag := range service.TagsAsString {
-										<span>{ tag }</span>
-									}
+									{ strings.Join(service.TagsAsString, ", ") }
 								</td>
 								<td class="px-6 py-4">
 									<button class="hover:bg-pale-gray cursor-pointer rounded-sm">
@@ -108,9 +119,9 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 								</td>
 							</tr>
 						}
-					</tbody>
-				</table>
-			</div>
+					}
+				</tbody>
+			</table>
 		</div>
-	}
+	</div>
 }
