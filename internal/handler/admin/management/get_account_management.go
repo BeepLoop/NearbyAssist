@@ -2,6 +2,7 @@ package management
 
 import (
 	"context"
+	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/account_management"
 	"strconv"
@@ -15,24 +16,42 @@ const (
 )
 
 func (h *managementHandler) GetAccountManagement(c echo.Context) error {
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
-	if err != nil {
-		limit = DEFAULT_LIMIT
-	}
+	params := c.QueryParams()
 
-	offset, err := strconv.Atoi(c.QueryParam("offset"))
-	if err != nil {
-		offset = DEFAULT_OFFSET
-	}
+	results := make([]*models.UserModel, 0)
 
-	accounts, err := h.managementService.GetUsers(limit, offset)
-	if err != nil {
-		page := pages.AccountManagement(make([]pages.UserAccounts, 0))
-		return page.Render(context.Background(), c.Response().Writer)
+	// If query exists, search is performed
+	if params.Has("query") {
+		query := params.Get("query")
+
+		user, err := h.managementService.FindUserByEmail(query)
+		if err != nil {
+			page := pages.AccountManagement(make([]pages.UserAccounts, 0))
+			return page.Render(context.Background(), c.Response().Writer)
+		}
+
+		results = append(results, user)
+	} else {
+		limit, _ := strconv.Atoi(params.Get("limit"))
+		if limit == 0 {
+			limit = DEFAULT_LIMIT
+		}
+
+		offset, _ := strconv.Atoi(params.Get("offset"))
+		if offset == 0 {
+			offset = DEFAULT_OFFSET
+		}
+
+		accounts, err := h.managementService.GetUsers(limit, offset)
+		if err != nil {
+			page := pages.AccountManagement(make([]pages.UserAccounts, 0))
+			return page.Render(context.Background(), c.Response().Writer)
+		}
+		results = accounts
 	}
 
 	data := make([]pages.UserAccounts, 0)
-	for _, account := range accounts {
+	for _, account := range results {
 		data = append(data, pages.UserAccounts{
 			Id:         account.Id,
 			Name:       account.Name,

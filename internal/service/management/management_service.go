@@ -9,10 +9,11 @@ import (
 type Service struct {
 	store   user_repo.UserRepository
 	encrypt auth.Encryption
+	hash    auth.Hash
 }
 
-func NewService(store user_repo.UserRepository, encrypt auth.Encryption) *Service {
-	return &Service{store: store, encrypt: encrypt}
+func NewService(store user_repo.UserRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
+	return &Service{store: store, encrypt: encrypt, hash: hash}
 }
 
 func (s *Service) GetUsers(limit, offset int) ([]*models.UserModel, error) {
@@ -36,6 +37,32 @@ func (s *Service) GetUsers(limit, offset int) ([]*models.UserModel, error) {
 	}
 
 	return accounts, nil
+}
+
+func (s *Service) FindUserByEmail(email string) (*models.UserModel, error) {
+	emailHash, err := s.hash.Generate([]byte(email))
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.store.FindByEmailHash(emailHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(user.Name); err != nil {
+		return nil, err
+	} else {
+		user.Name = decrypted
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(user.Email); err != nil {
+		return nil, err
+	} else {
+		user.Email = decrypted
+	}
+
+	return user, nil
 }
 
 func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, error) {

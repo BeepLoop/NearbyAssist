@@ -323,7 +323,24 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
 
 	user := new(models.UserModel)
 
-	query := "SELECT id, name, email, imageUrl, verified, banned, address, phone, latitude, longitude FROM User WHERE emailHash = ?"
+	query := `
+        SELECT 
+            id,
+            name,
+            email,
+            imageUrl,
+            verified,
+            banned,
+            address,
+            phone,
+            latitude,
+            longitude,
+            createdAt
+        FROM 
+            User 
+        WHERE 
+            emailHash = ?
+    `
 	if err := s.db.GetContext(ctx, user, query, emailHash); err != nil {
 		return nil, err
 	}

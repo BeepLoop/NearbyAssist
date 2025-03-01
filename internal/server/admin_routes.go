@@ -102,7 +102,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 	{
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 
-		managementService := management_service.NewService(userStore, s.Encrypt)
+		managementService := management_service.NewService(userStore, s.Encrypt, s.Hash)
 		managementHandler := management.NewHandler(managementService)
 
 		managementRoute.GET("", managementHandler.GetAccountManagement, middleware.CheckSession)

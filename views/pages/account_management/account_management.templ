@@ -18,12 +18,15 @@ type UserAccounts struct {
 templ AccountManagement(accounts []UserAccounts) {
 	@layout.Layout() {
 		@partials.PageBanner("Account Management", "View and manage accounts")
-		@newUserTable(accounts)
+		<div class="flex justify-end py-2">
+			@userSearchbar()
+		</div>
+		@userTable(accounts)
 		@partials.Pagination()
 	}
 }
 
-templ newUserTable(accounts []UserAccounts) {
+templ userTable(accounts []UserAccounts) {
 	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="text-white text-sm font-semibold bg-primary-greener">
@@ -80,5 +83,35 @@ templ newUserTable(accounts []UserAccounts) {
 				}
 			</tbody>
 		</table>
+	</div>
+}
+
+templ userSearchbar() {
+	<div
+		class="relative flex w-full max-w-xs flex-col gap-1 text-neutral-gray"
+	>
+		<form
+			action="/admin/account-management"
+			method="GET"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="absolute left-2.5 top-1/2 size-5 -translate-y-1/2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path>
+			</svg>
+			<input
+				type="search"
+				class="w-full rounded-sm outline-1 outline-pale-gray py-2 pl-10 pr-2 text-sm disabled:cursor-not-allowed disabled:opacity-75"
+				name="query"
+				placeholder="Search email"
+				aria-label="search"
+				id="searchInput"
+			/>
+			<script>
+                const searchInput = document.getElementById("searchInput");
+                const params = new URLSearchParams(location.search);
+                if (params.has("query")) {
+                    searchInput.value = params.get("query");
+                }
+            </script>
+		</form>
 	</div>
 }
