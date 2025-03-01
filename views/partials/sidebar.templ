@@ -55,7 +55,7 @@ templ navlist() {
 }
 
 templ navItem(path, title string) {
-	<a href={ templ.URL(path) } data-path={ path } class="flex gap-3 rounded-l-3xl px-3 py-2 items-center hover:bg-primary-pale">
+	<a href={ templ.URL(path) } data-path={ path } class="flex gap-3 rounded-l-3xl px-3 py-2 items-center hover:bg-primary hover:opacity-75">
 		{ children... }
 		<span>{ title }</span>
 		<script>

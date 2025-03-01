@@ -15,47 +15,43 @@ templ Applications(applications []models.ApplicationModel) {
 }
 
 templ applicationsData(applications []models.ApplicationModel) {
-	<table class="w-full rounded-lg border table-auto">
-		<thead>
-			<tr class="bg-primary-greener">
-				<th class="px-6 py-3 text-left font-medium text-white">
-					ID
-				</th>
-				<th class="px-6 py-3 text-left font-medium text-white">
-					Applicant
-				</th>
-				<th class="px-6 py-3 text-left font-medium text-white">
-					Date Applied
-				</th>
-				<th class="flex justify-center px-6 py-3 font-medium text-white">
-					Action
-				</th>
-			</tr>
-		</thead>
-		<tbody>
-			if len(applications) < 1 {
-				<tr class="border">
-					<td class="px-6 py-4" align="center" colspan="4">No applications</td>
+	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
+		<table class="w-full text-left text-sm">
+			<thead class="text-white text-sm font-semibold bg-primary-greener">
+				<tr>
+					<th scope="col" class="p-4">ID</th>
+					<th scope="col" class="p-4">User</th>
+					<th scope="col" class="p-4">Applied On</th>
+					<th scope="col" class="p-4">Action</th>
 				</tr>
-			} else {
-				for _, application := range applications {
-					<tr class="border">
-						<td class="px-6 py-4">{ application.Id }</td>
-						<td class="px-6 py-4">{ application.ApplicantName }</td>
-						<td class="px-6 py-4">{ application.CreatedAt }</td>
-						<td class="flex justify-center px-6 py-4">
-							<ul>
-								<a
-									href={ templ.SafeURL(fmt.Sprintf("/admin/vendor-applications/%s", application.Id)) }
-									class="bg-yellow-400 p-2 rounded-sm hover:bg-yellow-600"
-								>
-									View Request
-								</a>
-							</ul>
-						</td>
+			</thead>
+			<tbody class="divide-y divide-gray-300">
+				if len(applications) < 1 {
+					<tr class="">
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4">No Applications</td>
 					</tr>
+				} else {
+					for _, application := range applications {
+						<tr class="text-xs">
+							<td class="p-4">
+								{ application.Id }
+							</td>
+							<td class="p-4">{ application.ApplicantName }</td>
+							<td class="p-4">{ application.CreatedAt }</td>
+							<td class="p-4">
+								<ul>
+									<a
+										href={ templ.SafeURL(fmt.Sprintf("/admin/vendor-applications/%s", application.Id)) }
+										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
+									>
+										view request
+									</a>
+								</ul>
+							</td>
+						</tr>
+					}
 				}
-			}
-		</tbody>
-	</table>
+			</tbody>
+		</table>
+	</div>
 }

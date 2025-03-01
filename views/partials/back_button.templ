@@ -1,0 +1,14 @@
+package partials
+
+templ BackButton() {
+	<button
+		type="button"
+		class="py-1 pr-2 inline-flex justify-center items-center gap-1 whitespace-nowrap rounded-sm cursor-pointer hover:bg-neutral-gray/50 hover:text-white"
+		onClick="history.back()"
+	>
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+		</svg>
+		Back
+	</button>
+}

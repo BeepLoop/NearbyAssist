@@ -286,7 +286,7 @@ func navItem(path, title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"flex gap-3 rounded-l-3xl px-3 py-2 items-center hover:bg-primary-pale\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"flex gap-3 rounded-l-3xl px-3 py-2 items-center hover:bg-primary hover:opacity-75\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

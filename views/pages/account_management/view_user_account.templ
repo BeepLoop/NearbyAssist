@@ -11,33 +11,37 @@ import (
 templ ViewUserAccount(data models.UserAccountPageData) {
 	@layout.Layout() {
 		<!-- back button -->
-		<div class="mb-4">
-			<button
-				class="p-2 rounded-sm bg-blue-400 text-sm hover:bg-blue-500 cursor-pointer"
-				onClick="history.back()"
-			>
-				back
-			</button>
-		</div>
+		@partials.BackButton()
 		<!-- main content -->
 		<div class="max-w-4xl mx-auto">
 			<!-- user profile -->
 			<div class="flex justify-between">
 				<div class="flex gap-4">
-					<div class="outline-1 outline-gray-300">
-						<img
-							src={ data.ProfileURL }
-							alt="profile"
-							class="w-40 h-40 aspect-square"
-						/>
-					</div>
-					<div>
-						<h1 class="text-xl font-bold">{ data.Name }</h1>
-						<h2>{ data.Email }</h2>
-						<p><strong>User ID:</strong> { data.Id }</p>
-						<p><strong>User Since:</strong> { data.CreatedAt }</p>
+					<img
+						src={ data.ProfileURL }
+						alt="profile"
+						class="w-44 h-44 aspect-square outline-1 outline-pale-gray"
+					/>
+					<div class="grid gap-2">
+						<!-- name & email -->
+						<div>
+							<h1 class="text-xl font-medium text-neutral-dark">{ data.Name }</h1>
+							<h2 class="text-neutral-gray">{ data.Email }</h2>
+						</div>
+						<!-- id & created at -->
+						<div>
+							<span class="flex gap-2">
+								<p class="font-medium text-neutral-dark">User ID: </p>
+								<p class="text-neutral-gray">{ data.Id }</p>
+							</span>
+							<span class="flex gap-2">
+								<p class="font-medium text-neutral-dark">User Since: </p>
+								<p class="text-neutral-gray">{ data.CreatedAt }</p>
+							</span>
+						</div>
+						<!-- expertise -->
 						<div class="mt-3">
-							<h3>Expertise</h3>
+							<p class="font-medium text-xs">Expertise</p>
 							<div class="mt-2 flex gap-2">
 								for _, expertise := range data.Expertise {
 									@partials.DefaultBadgeSuccess(expertise)
@@ -56,7 +60,7 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 			</div>
 			<!-- stats -->
 			<div class="mt-8 grid grid-cols-4 gap-4">
-				<div class="outline-1 outline-gray-300 rounded-sm p-2">
+				<div class="outline-1 outline-pale-gray rounded-sm p-2">
 					<!-- Sent Requests -->
 					if data.Stat.Sent.CurrentMonth >= data.Stat.Sent.LastMonth {
 						@partials.Increasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageIncrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
@@ -64,7 +68,7 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 						@partials.Decreasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageDecrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
 					}
 				</div>
-				<div class="outline-1 outline-gray-300 rounded-sm p-2">
+				<div class="outline-1 outline-pale-gray rounded-sm p-2">
 					<!-- Received Requests -->
 					if data.Stat.Received.CurrentMonth >= data.Stat.Received.LastMonth {
 						@partials.Increasing("Received Requests", data.Stat.Received.CurrentMonth, utils.PercentageIncrease(data.Stat.Received.CurrentMonth, data.Stat.Received.LastMonth))
@@ -76,9 +80,9 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 			<!-- services -->
 			<div class="mt-8">
 				<h2 class="mb-2 font-medium">Services</h2>
-				<table class="w-full outline-1 outline-gray-300 rounded-lg table-auto">
+				<table class="w-full outline-1 outline-pale-gray rounded-lg table-auto">
 					<thead>
-						<tr class="bg-primary-greener outline-1 outline-gray-300">
+						<tr class="bg-primary-greener outline-1 outline-pale-gray">
 							<th class="px-4 py-3 text-left font-medium text-white">Title</th>
 							<th class="px-4 py-3 text-left font-medium text-white">Added on</th>
 							<th class="px-4 py-3 text-left font-medium text-white">Tags</th>
@@ -87,7 +91,7 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 					</thead>
 					<tbody>
 						for _, service := range data.Services {
-							<tr class="outline-1 outline-gray-300">
+							<tr class="outline-1 outline-pale-gray">
 								<td class="px-6 py-4">{ service.Title }</td>
 								<td class="px-6 py-4">added on { utils.FormatDate(service.CreatedAt) }</td>
 								<td class="px-6 py-4">
@@ -96,7 +100,7 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 									}
 								</td>
 								<td class="px-6 py-4">
-									<button class="hover:bg-gray-300 cursor-pointer rounded-sm">
+									<button class="hover:bg-pale-gray cursor-pointer rounded-sm">
 										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
 											<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"></path>
 										</svg>
