@@ -4,7 +4,7 @@ import (
 	"context"
 	"nearbyassist/internal/response"
 	dashboard_service "nearbyassist/internal/service/dashboard"
-	"nearbyassist/views/pages/dashboard"
+	pages "nearbyassist/views/pages/dashboard"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,6 +24,18 @@ func (h *dashboardHandler) GetDashboard(c echo.Context) error {
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	page := pages.Dashboard(*analytics)
+	data := response.Analytics{
+		User:               analytics.User,
+		Vendor:             analytics.Vendor,
+		VerifiedUser:       analytics.VerifiedUser,
+		PendingApplication: analytics.PendingApplication,
+		Complaint:          analytics.Complaint,
+		BugReportData: response.BugReportData{
+			Total: 0,
+			Daily: make([]int, 0),
+		},
+	}
+
+	page := pages.Dashboard(data)
 	return page.Render(context.Background(), c.Response().Writer)
 }
