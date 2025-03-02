@@ -40,13 +40,13 @@ templ dashboardData(data response.Analytics) {
 }
 
 templ dashboardAnalyticComponent(title string, amount int) {
-	<div class="outline-1 outline-gray-300 p-2 rounded-sm hover:shadow-xl">
+	<div class="outline-1 outline-pale-gray p-2 rounded-sm hover:shadow-xl">
 		<div>
 			{ children... }
 		</div>
 		<div class="mt-4">
-			<p class="mb-2">{ title }</p>
-			<p class="font-semibold text-3xl">{ strconv.Itoa(amount) } </p>
+			<p class="mb-2 font-medium text-sm text-neutral-gray">{ title }</p>
+			<p class="font-semibold text-3xl text-neutral-dark">{ strconv.Itoa(amount) } </p>
 		</div>
 	</div>
 }

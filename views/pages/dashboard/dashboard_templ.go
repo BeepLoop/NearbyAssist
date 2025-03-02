@@ -91,7 +91,7 @@ func dashboardData(data response.Analytics) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid grid-cols-4 gap-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"grid gap-4\"><section class=\"grid grid-cols-4 gap-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -183,7 +183,7 @@ func dashboardData(data response.Analytics) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</section>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</section></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -212,7 +212,7 @@ func dashboardAnalyticComponent(title string, amount int) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"outline-1 outline-gray-300 p-2 rounded-sm hover:shadow-xl\"><div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"outline-1 outline-pale-gray p-2 rounded-sm hover:shadow-xl\"><div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -220,27 +220,27 @@ func dashboardAnalyticComponent(title string, amount int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"mt-4\"><p class=\"mb-2\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"mt-4\"><p class=\"mb-2 font-medium text-sm text-neutral-gray\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 48, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 50, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-3xl\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-3xl text-neutral-dark\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(amount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 49, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 51, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
