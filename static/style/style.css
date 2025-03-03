@@ -725,8 +725,8 @@
   .h-96 {
     height: calc(var(--spacing) * 96);
   }
-  .h-\[75vh\] {
-    height: 75vh;
+  .h-\[80vh\] {
+    height: 80vh;
   }
   .h-screen {
     height: 100vh;

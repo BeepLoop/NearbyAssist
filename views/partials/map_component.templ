@@ -1,0 +1,14 @@
+package partials
+
+import "nearbyassist/internal/models"
+
+var mapScriptLoader = templ.NewOnceHandle()
+
+templ MapComponent(data models.MapPageDataModel) {
+	<div id="map" class="h-[80vh] outline-1 outline-gray-300"></div>
+	@templ.JSONScript("markers", data.Markers)
+	@mapScriptLoader.Once() {
+		<script src="/static/script/OpenLayers.js"></script>
+		<script src="/static/script/mapComponent.js"></script>
+	}
+}

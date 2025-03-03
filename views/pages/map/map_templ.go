@@ -9,22 +9,13 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 	"strconv"
 )
 
-type Marker struct {
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
-}
-
-type MapPageData struct {
-	Markers []Marker
-	Tags    []string
-}
-
-func Map(data MapPageData) templ.Component {
+func Map(data models.MapPageDataModel) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -80,7 +71,7 @@ func Map(data MapPageData) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(data.Markers)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/map/map.templ`, Line: 27, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/map/map.templ`, Line: 18, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -90,7 +81,7 @@ func Map(data MapPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = mapComponent(data.Markers).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.MapComponent(data).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -138,67 +129,6 @@ func searchBar(tags []string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form action=\"/admin/map\" class=\"flex gap-2\"><input type=\"input\" id=\"searchInput\" name=\"query\" autocomplete=\"off\" class=\"p-2 rounded-sm text-sm outline-1 outline-pale-gray\" placeholder=\"service\" autofocus> <button type=\"submit\" class=\"p-2 rounded-md bg-primary hover:opacity-75 text-sm text-white\">Search</button><script>\n                    (function() {\n                        const searchInput = document.getElementById(\"searchInput\");\n                        const params = new URLSearchParams(location.search);\n                        if (params.has(\"query\")) {\n                            searchInput.value = params.get(\"query\");\n                        }\n                     })();\n                </script></form><div id=\"resultBox\" class=\"absolute top-full left-0 right-0 bg-white shadow-xl\"></div></div><script>\n            const tags = JSON.parse(document.getElementById(\"tags\").textContent);\n            const inputBox = document.getElementById(\"searchInput\");\n            const resultBox = document.getElementById(\"resultBox\");\n\n            inputBox.onkeyup = () => {\n                let suggestions = [];\n                const input = inputBox.value;\n\n                if (input.length) {\n                    suggestions = tags.filter((tag) => {\n                        return tag.toLowerCase().includes(input.toLowerCase());\n                    });\n                }\n\n                displaySuggestions(suggestions);\n            }\n\n            function displaySuggestions(suggestions) {\n                resultBox.innerHTML = \"\";\n\n                const contents = suggestions.map((suggestion) => {\n                    const classes = [\n                        \"bg-white\",\n                        \"p-2\",\n                        \"text-neutral-dark\",\n                        \"text-sm\",\n                        \"cursor-pointer\",\n                        \"hover:bg-neutral-200\",\n                    ];\n\n                    const div = document.createElement(\"div\");\n                    div.innerText = suggestion;\n                    div.setAttribute(\"onclick\", `selectSuggestion('${suggestion}')`);\n\n                    classes.forEach((classname) => {\n                        div.classList.add(classname);\n                    });\n\n                    return div;\n                });\n\n                const wrapper = document.createElement(\"div\");\n                wrapper.classList.add(\"outline-1\");\n                wrapper.classList.add(\"outline-pale-gray\");\n                wrapper.classList.add(\"rounded-sm\");\n                for (const content of contents) {\n                    wrapper.appendChild(content);\n                }\n                resultBox.appendChild(wrapper);\n            }\n\n            function selectSuggestion(suggestion) {\n                inputBox.value = suggestion;\n                resultBox.innerHTML = \"\";\n            }\n        </script></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return templ_7745c5c3_Err
-	})
-}
-
-var openLayers = templ.NewOnceHandle()
-
-func mapComponent(markers []Marker) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var6 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-			if !templ_7745c5c3_IsBuffer {
-				defer func() {
-					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err == nil {
-						templ_7745c5c3_Err = templ_7745c5c3_BufErr
-					}
-				}()
-			}
-			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"/static/script/OpenLayers.js\"></script>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			return templ_7745c5c3_Err
-		})
-		templ_7745c5c3_Err = openLayers.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"map\" class=\"h-[75vh] outline-1 outline-gray-300\"></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.JSONScript("markers", markers).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script>\n        map = new OpenLayers.Map(\"map\");\n        let mapnik = new OpenLayers.Layer.OSM();\n        let fromProjection = new OpenLayers.Projection(\"EPSG:4326\");   // Transform from WGS 1984\n        let toProjection = new OpenLayers.Projection(\"EPSG:900913\"); // to Spherical Mercator Projection\n        let position = new OpenLayers.LonLat(125.80942522476553, 7.447220876004841).transform(fromProjection, toProjection);\n        let zoom = 13;\n\n        let markers = new OpenLayers.Layer.Markers(\"Markers\");\n\n        try{\n            const markersJson = document.getElementById(\"markers\").textContent;\n            const coordinates = JSON.parse(markersJson);\n\n            for (const coordinate of coordinates) {\n                const marker = new OpenLayers.LonLat(coordinate.lon, coordinate.lat).transform(fromProjection, toProjection);\n                markers.addMarker(new OpenLayers.Marker(marker));\n            }\n        } catch (e) {\n            console.error(\"Error parsing markers\", e);\n        }\n\n        map.addLayer(mapnik);\n        map.addLayer(markers);\n        map.setCenter(position, zoom);\n\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

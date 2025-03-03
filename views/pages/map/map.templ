@@ -1,22 +1,13 @@
 package pages
 
 import (
+	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 	"strconv"
 )
 
-type Marker struct {
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
-}
-
-type MapPageData struct {
-	Markers []Marker
-	Tags    []string
-}
-
-templ Map(data MapPageData) {
+templ Map(data models.MapPageDataModel) {
 	@layout.Layout() {
 		<div class="pb-4">
 			@partials.PageBanner("Map", "")
@@ -28,7 +19,7 @@ templ Map(data MapPageData) {
 					</span>
 				</div>
 				<div class="flex-1">
-					@mapComponent(data.Markers)
+					@partials.MapComponent(data)
 				</div>
 			</div>
 		</div>
@@ -126,41 +117,4 @@ templ searchBar(tags []string) {
             }
         </script>
 	</div>
-}
-
-var openLayers = templ.NewOnceHandle()
-
-templ mapComponent(markers []Marker) {
-	@openLayers.Once() {
-		<script src="/static/script/OpenLayers.js"></script>
-	}
-	<div id="map" class="h-[75vh] outline-1 outline-gray-300"></div>
-	@templ.JSONScript("markers", markers)
-	<script>
-        map = new OpenLayers.Map("map");
-        let mapnik = new OpenLayers.Layer.OSM();
-        let fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
-        let toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
-        let position = new OpenLayers.LonLat(125.80942522476553, 7.447220876004841).transform(fromProjection, toProjection);
-        let zoom = 13;
-
-        let markers = new OpenLayers.Layer.Markers("Markers");
-
-        try{
-            const markersJson = document.getElementById("markers").textContent;
-            const coordinates = JSON.parse(markersJson);
-
-            for (const coordinate of coordinates) {
-                const marker = new OpenLayers.LonLat(coordinate.lon, coordinate.lat).transform(fromProjection, toProjection);
-                markers.addMarker(new OpenLayers.Marker(marker));
-            }
-        } catch (e) {
-            console.error("Error parsing markers", e);
-        }
-
-        map.addLayer(mapnik);
-        map.addLayer(markers);
-        map.setCenter(position, zoom);
-
-    </script>
 }

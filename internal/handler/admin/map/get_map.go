@@ -2,16 +2,17 @@ package map_handler
 
 import (
 	"context"
+	"nearbyassist/internal/models"
 	"nearbyassist/views/pages/map"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *mapHandler) GetMap(c echo.Context) error {
-	markers := make([]pages.Marker, 0)
+	markers := make([]models.GeoSpatialModel, 0)
 	tags := make([]string, 0)
 
-	pageData := pages.MapPageData{
+	pageData := models.MapPageDataModel{
 		Markers: markers,
 		Tags:    tags,
 	}
@@ -25,9 +26,9 @@ func (h *mapHandler) GetMap(c echo.Context) error {
 		}
 
 		for _, service := range services {
-			pageData.Markers = append(pageData.Markers, pages.Marker{
-				Lat: service.Latitude,
-				Lon: service.Longitude,
+			pageData.Markers = append(pageData.Markers, models.GeoSpatialModel{
+				Latitude:  service.Latitude,
+				Longitude: service.Longitude,
 			})
 		}
 	}
