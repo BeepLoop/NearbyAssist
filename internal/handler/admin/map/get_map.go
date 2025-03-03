@@ -16,6 +16,22 @@ func (h *mapHandler) GetMap(c echo.Context) error {
 		Tags:    tags,
 	}
 
+	params := c.QueryParams()
+	if params.Has("query") {
+		services, err := h.mapService.GetServices(params.Get("query"))
+		if err != nil {
+			page := pages.Map(pageData)
+			return page.Render(context.Background(), c.Response().Writer)
+		}
+
+		for _, service := range services {
+			pageData.Markers = append(pageData.Markers, pages.Marker{
+				Lat: service.Latitude,
+				Lon: service.Longitude,
+			})
+		}
+	}
+
 	result, err := h.tagService.GetTags()
 	if err != nil {
 		page := pages.Map(pageData)

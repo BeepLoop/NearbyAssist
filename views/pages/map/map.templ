@@ -12,9 +12,8 @@ type Marker struct {
 }
 
 type MapPageData struct {
-	Markers       []Marker
-	Tags          []string
-	PreviousQuery string
+	Markers []Marker
+	Tags    []string
 }
 
 templ Map(data MapPageData) {
@@ -23,7 +22,7 @@ templ Map(data MapPageData) {
 			@partials.PageBanner("Map", "")
 			<div class="flex gap-4">
 				<div class="">
-					@searchBar(data.Tags, data.PreviousQuery)
+					@searchBar(data.Tags)
 					<span class="text-sm text-neutral-dark font-medium">
 						Result: { strconv.Itoa(len(data.Markers)) }
 					</span>
@@ -36,29 +35,96 @@ templ Map(data MapPageData) {
 	}
 }
 
-templ searchBar(tags []string, previousQuery string) {
-	<div class="flex justify-end my-3">
-		<form action="/admin/map" method="POST" class="flex gap-2">
-			<input
-				type="input"
-				name="query"
-				list="tags"
-				class="p-2 rounded-sm text-sm outline-1 outline-pale-gray"
-				placeholder="service"
-				autofocus
-				onfocus="let temp = this.value; this.value = ''; this.value = temp; // place cursor at end of value"
-				value={ previousQuery }
-			/>
-			<datalist id="tags">
-				for _, tag := range tags {
-					<option value={ tag }>{ tag }</option>
-				}
-			</datalist>
-			<button
-				type="submit"
-				class="p-2 rounded-md bg-primary-greener hover:opacity-75 text-sm text-white"
-			>Search</button>
-		</form>
+templ searchBar(tags []string) {
+	<div>
+		<div class="relative flex justify-end my-3">
+			@templ.JSONScript("tags", tags)
+			<form
+				action="/admin/map"
+				class="flex gap-2"
+			>
+				<input
+					type="input"
+					id="searchInput"
+					name="query"
+					autocomplete="off"
+					class="p-2 rounded-sm text-sm outline-1 outline-pale-gray"
+					placeholder="service"
+					autofocus
+				/>
+				<button
+					type="submit"
+					class="p-2 rounded-md bg-primary hover:opacity-75 text-sm text-white"
+				>Search</button>
+				<script>
+                    (function() {
+                        const searchInput = document.getElementById("searchInput");
+                        const params = new URLSearchParams(location.search);
+                        if (params.has("query")) {
+                            searchInput.value = params.get("query");
+                        }
+                     })();
+                </script>
+			</form>
+			<div id="resultBox" class="absolute top-full left-0 right-0 bg-white shadow-xl"></div>
+		</div>
+		<script>
+            const tags = JSON.parse(document.getElementById("tags").textContent);
+            const inputBox = document.getElementById("searchInput");
+            const resultBox = document.getElementById("resultBox");
+
+            inputBox.onkeyup = () => {
+                let suggestions = [];
+                const input = inputBox.value;
+
+                if (input.length) {
+                    suggestions = tags.filter((tag) => {
+                        return tag.toLowerCase().includes(input.toLowerCase());
+                    });
+                }
+
+                displaySuggestions(suggestions);
+            }
+
+            function displaySuggestions(suggestions) {
+                resultBox.innerHTML = "";
+
+                const contents = suggestions.map((suggestion) => {
+                    const classes = [
+                        "bg-white",
+                        "p-2",
+                        "text-neutral-dark",
+                        "text-sm",
+                        "cursor-pointer",
+                        "hover:bg-neutral-200",
+                    ];
+
+                    const div = document.createElement("div");
+                    div.innerText = suggestion;
+                    div.setAttribute("onclick", `selectSuggestion('${suggestion}')`);
+
+                    classes.forEach((classname) => {
+                        div.classList.add(classname);
+                    });
+
+                    return div;
+                });
+
+                const wrapper = document.createElement("div");
+                wrapper.classList.add("outline-1");
+                wrapper.classList.add("outline-pale-gray");
+                wrapper.classList.add("rounded-sm");
+                for (const content of contents) {
+                    wrapper.appendChild(content);
+                }
+                resultBox.appendChild(wrapper);
+            }
+
+            function selectSuggestion(suggestion) {
+                inputBox.value = suggestion;
+                resultBox.innerHTML = "";
+            }
+        </script>
 	</div>
 }
 

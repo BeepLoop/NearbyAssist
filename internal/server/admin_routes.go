@@ -58,7 +58,6 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		mapHandler := map_handler.NewHandler(mapService, tagService)
 
 		mapRoute.GET("", mapHandler.GetMap, middleware.CheckSession)
-		mapRoute.POST("", mapHandler.PostMap, middleware.CheckSession)
 	}
 
 	complaintRoute := r.Group("/complaints")
