@@ -10,9 +10,12 @@
     --color-neutral-dark: var(--color-neutral-900);
     --color-neutral-gray: var(--color-neutral-600);
 
+    --color-good: var(--color-blue-500);
     --color-success: var(--color-green-700);
     --color-warning: var(--color-amber-600);
+    --color-warning-light: var(--color-yellow-500);
     --color-danger: var(--color-red-500);
+    --color-danger-light: var(--color-red-400);
 
     --font-roboto: "Roboto", sans-serif;
 }

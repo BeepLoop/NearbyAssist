@@ -1,5 +1,7 @@
 package dashboard_repo
 
+import "nearbyassist/internal/models"
+
 type UserStatusFilter string
 type VendorStatusFilter string
 type ApplicationStatusFilter string
@@ -19,8 +21,7 @@ const (
 )
 
 type DashboardRepository interface {
-	UserCount(filter UserStatusFilter) (int, error)
-	VendorCount(filter VendorStatusFilter) (int, error)
-	ApplicationCount(filter ApplicationStatusFilter) (int, error)
-	ComplaintCount() (int, error)
+	GetUserData() (*models.UserData, error)
+	GetBugReportData() (*models.WeeklyBugReportData, error)
+	GetTransactionData() (*models.WeeklyTransactionData, error)
 }

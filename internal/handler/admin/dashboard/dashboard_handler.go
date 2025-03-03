@@ -2,7 +2,7 @@ package dashboard
 
 import (
 	"context"
-	"nearbyassist/internal/response"
+	"nearbyassist/internal/models"
 	dashboard_service "nearbyassist/internal/service/dashboard"
 	pages "nearbyassist/views/pages/dashboard"
 
@@ -20,22 +20,10 @@ func NewHandler(dashboardService *dashboard_service.Service) *dashboardHandler {
 func (h *dashboardHandler) GetDashboard(c echo.Context) error {
 	analytics, err := h.dashboardService.GetAnalytics()
 	if err != nil {
-		page := pages.Dashboard(response.Analytics{})
+		page := pages.Dashboard(models.DashboardModel{})
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	data := response.Analytics{
-		User:               analytics.User,
-		Vendor:             analytics.Vendor,
-		VerifiedUser:       analytics.VerifiedUser,
-		PendingApplication: analytics.PendingApplication,
-		Complaint:          analytics.Complaint,
-		BugReportData: response.BugReportData{
-			Total: 0,
-			Daily: make([]int, 0),
-		},
-	}
-
-	page := pages.Dashboard(data)
+	page := pages.Dashboard(*analytics)
 	return page.Render(context.Background(), c.Response().Writer)
 }

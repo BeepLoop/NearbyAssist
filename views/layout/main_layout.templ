@@ -7,13 +7,12 @@ templ Layout() {
 	<html lang="en">
 		@head()
 		<body class="font-roboto">
-			<div class="grid h-screen grid-cols-[14rem_1fr] text-sm">
-				@partials.Sidebar()
-				<main class="overflow-scroll">
-					@partials.Header()
-					<div class="flex-1 p-4">
-						{ children... }
-					</div>
+			<div class="grid h-screen grid-cols-12 text-sm">
+				<div class="col-span-2">
+					@partials.Sidebar()
+				</div>
+				<main class="overflow-scroll col-span-10 px-4 pt-2">
+					{ children... }
 				</main>
 			</div>
 		</body>

@@ -1,0 +1,22 @@
+package dashboardcomponent
+
+import "nearbyassist/internal/models"
+
+var loadUserDataChart = templ.NewOnceHandle()
+
+templ UserData(data models.UserData) {
+	<card class="relative w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
+		@templ.JSONScript("userData", data)
+		<div class="grid grid-cols-2 gap-2 p-2">
+			@BasicCountIndicator("Total users", data.Total, CLR_BLUE)
+			@BasicCountIndicator("Experts", data.Expert, CLR_GREEN)
+		</div>
+		<!-- Chart -->
+		<div class="aspect-square p-2">
+			<canvas id="userDataChart"></canvas>
+			@loadUserDataChart.Once() {
+				<script src="/static/script/userDataChart.js"></script>
+			}
+		</div>
+	</card>
+}

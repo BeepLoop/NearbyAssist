@@ -1,8 +1,8 @@
 package dashboard_service
 
 import (
+	"nearbyassist/internal/models"
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
-	"nearbyassist/internal/response"
 )
 
 type Service struct {
@@ -13,38 +13,27 @@ func NewService(store dashboard_repo.DashboardRepository) *Service {
 	return &Service{store: store}
 }
 
-func (s *Service) GetAnalytics() (*response.Analytics, error) {
-	analytics := new(response.Analytics)
-
-	if count, err := s.store.UserCount(dashboard_repo.USER_STATUS_ALL); err != nil {
+func (s *Service) GetAnalytics() (*models.DashboardModel, error) {
+	userData, err := s.store.GetUserData()
+	if err != nil {
 		return nil, err
-	} else {
-		analytics.User = count
 	}
 
-	if count, err := s.store.UserCount(dashboard_repo.USER_STATUS_VERIFIED); err != nil {
+	bugReportData, err := s.store.GetBugReportData()
+	if err != nil {
 		return nil, err
-	} else {
-		analytics.VerifiedUser = count
 	}
 
-	if count, err := s.store.VendorCount(dashboard_repo.VENDOR_STATUS_ALL); err != nil {
+	transactionData, err := s.store.GetTransactionData()
+	if err != nil {
 		return nil, err
-	} else {
-		analytics.Vendor = count
 	}
 
-	if count, err := s.store.ApplicationCount(dashboard_repo.APPLICATION_STATUS_PENDING); err != nil {
-		return nil, err
-	} else {
-		analytics.PendingApplication = count
+	dashboardData := &models.DashboardModel{
+		UserData:        *userData,
+		BugReportData:   *bugReportData,
+		TransactionData: *transactionData,
 	}
 
-	if count, err := s.store.ComplaintCount(); err != nil {
-		return nil, err
-	} else {
-		analytics.Complaint = count
-	}
-
-	return analytics, nil
+	return dashboardData, nil
 }

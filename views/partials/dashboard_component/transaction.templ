@@ -1,0 +1,39 @@
+package dashboardcomponent
+
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/views/partials"
+	"strconv"
+)
+
+var loadTransactionChart = templ.NewOnceHandle()
+
+templ Transaction(data models.WeeklyTransactionData) {
+	<card class="w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
+		@templ.JSONScript("transactionData", data)
+		<div class="p-2">
+			<!-- Title -->
+			<span class="flex justify-between mb-2">
+				<p class="text-xs text-neutral-gray font-medium">Transactions</p>
+				<p class="text-xs text-neutral-gray font-medium">(last 7 days)</p>
+			</span>
+			<!-- Count -->
+			<div class="flex items-baseline gap-2">
+				if data.Difference > 0 {
+					@partials.TrendUp()
+				} else {
+					@partials.TrendDown()
+				}
+				<p class="font-semibold text-4xl text-neutral-dark">{ strconv.Itoa(data.Total) }</p>
+				<p class="font-semibold text-xs text-neutral-gray">total</p>
+			</div>
+		</div>
+		<div class="p-2">
+			<!-- Chart -->
+			<canvas id="transactionChart"></canvas>
+			@loadTransactionChart.Once() {
+				<script src="/static/script/transactionChart.js"></script>
+			}
+		</div>
+	</card>
+}

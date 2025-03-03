@@ -384,9 +384,12 @@
     --color-pale-gray: var(--color-gray-300);
     --color-neutral-dark: var(--color-neutral-900);
     --color-neutral-gray: var(--color-neutral-600);
+    --color-good: var(--color-blue-500);
     --color-success: var(--color-green-700);
     --color-warning: var(--color-amber-600);
+    --color-warning-light: var(--color-yellow-500);
     --color-danger: var(--color-red-500);
+    --color-danger-light: var(--color-red-400);
     --font-roboto: "Roboto", sans-serif;
   }
 }
@@ -559,11 +562,32 @@
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
+  .bottom-2 {
+    bottom: calc(var(--spacing) * 2);
+  }
   .left-2\.5 {
     left: calc(var(--spacing) * 2.5);
   }
+  .left-full {
+    left: 100%;
+  }
   .z-30 {
     z-index: 30;
+  }
+  .z-50 {
+    z-index: 50;
+  }
+  .col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+  .col-span-4 {
+    grid-column: span 4 / span 4;
+  }
+  .col-span-8 {
+    grid-column: span 8 / span 8;
+  }
+  .col-span-10 {
+    grid-column: span 10 / span 10;
   }
   .container {
     width: 100%;
@@ -606,9 +630,6 @@
   }
   .mt-3 {
     margin-top: calc(var(--spacing) * 3);
-  }
-  .mt-4 {
-    margin-top: calc(var(--spacing) * 4);
   }
   .mt-6 {
     margin-top: calc(var(--spacing) * 6);
@@ -786,8 +807,8 @@
   .grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-  .grid-cols-\[14rem_1fr\] {
-    grid-template-columns: 14rem 1fr;
+  .grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
   .grid-cols-\[26rem_1fr\] {
     grid-template-columns: 26rem 1fr;
@@ -941,6 +962,9 @@
   .bg-danger\/25 {
     background-color: color-mix(in oklab, var(--color-danger) 25%, transparent);
   }
+  .bg-good\/50 {
+    background-color: color-mix(in oklab, var(--color-good) 50%, transparent);
+  }
   .bg-gray-200 {
     background-color: var(--color-gray-200);
   }
@@ -977,8 +1001,14 @@
   .bg-success\/25 {
     background-color: color-mix(in oklab, var(--color-success) 25%, transparent);
   }
+  .bg-success\/50 {
+    background-color: color-mix(in oklab, var(--color-success) 50%, transparent);
+  }
   .bg-warning {
     background-color: var(--color-warning);
+  }
+  .bg-warning-light\/75 {
+    background-color: color-mix(in oklab, var(--color-warning-light) 75%, transparent);
   }
   .bg-warning\/10 {
     background-color: color-mix(in oklab, var(--color-warning) 10%, transparent);
@@ -995,26 +1025,14 @@
   .bg-right {
     background-position: right;
   }
-  .fill-blue-600 {
-    fill: var(--color-blue-600);
-  }
   .fill-current {
     fill: currentColor;
   }
   .fill-danger {
     fill: var(--color-danger);
   }
-  .fill-green-600 {
-    fill: var(--color-green-600);
-  }
-  .fill-red-600 {
-    fill: var(--color-red-600);
-  }
   .fill-success {
     fill: var(--color-success);
-  }
-  .fill-yellow-600 {
-    fill: var(--color-yellow-600);
   }
   .object-contain {
     object-fit: contain;
@@ -1069,6 +1087,9 @@
   }
   .py-10 {
     padding-block: calc(var(--spacing) * 10);
+  }
+  .pt-2 {
+    padding-top: calc(var(--spacing) * 2);
   }
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
@@ -1276,6 +1297,10 @@
     --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
+  .shadow-xl {
+    --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 8px 10px -6px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
   .outline {
     outline-style: var(--tw-outline-style);
     outline-width: 1px;
@@ -1336,6 +1361,20 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-blue-700);
+      }
+    }
+  }
+  .hover\:bg-danger\/50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, var(--color-danger) 50%, transparent);
+      }
+    }
+  }
+  .hover\:bg-gray-200 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-gray-200);
       }
     }
   }

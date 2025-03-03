@@ -1,0 +1,30 @@
+package dashboardcomponent
+
+import "strconv"
+
+type color uint
+
+const (
+	CLR_BLUE color = iota
+	CLR_YELLOW
+	CLR_GREEN
+)
+
+templ BasicCountIndicator(title string, amount int, color color) {
+	if color == CLR_BLUE {
+		<div class="bg-good/50 w-full outline-1 outline-pale-gray px-4 py-2 rounded-sm hover:shadow-xl">
+			<p class="mb-2 font-medium text-xs text-neutral-gray">{ title }</p>
+			<p class="font-semibold text-3xl text-neutral-dark">{ strconv.Itoa(amount) } </p>
+		</div>
+	} else if color == CLR_YELLOW {
+		<div class="bg-warning-light/75 w-full outline-1 outline-pale-gray px-4 py-2 rounded-sm hover:shadow-xl">
+			<p class="mb-2 font-medium text-xs text-neutral-gray">{ title }</p>
+			<p class="font-semibold text-3xl text-neutral-dark">{ strconv.Itoa(amount) } </p>
+		</div>
+	} else {
+		<div class="bg-success/50 w-full outline-1 outline-pale-gray px-4 py-2 rounded-sm hover:shadow-xl">
+			<p class="mb-2 font-medium text-xs text-neutral-gray">{ title }</p>
+			<p class="font-semibold text-3xl text-neutral-dark">{ strconv.Itoa(amount) } </p>
+		</div>
+	}
+}

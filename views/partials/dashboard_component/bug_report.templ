@@ -1,34 +1,28 @@
 package dashboardcomponent
 
 import (
-	"nearbyassist/internal/response"
+	"nearbyassist/internal/models"
+	"nearbyassist/views/partials"
 	"strconv"
 )
 
-var barchartLoader = templ.NewOnceHandle()
-
-templ BugReport(data response.BugReportData) {
-	<card class="w-full outline-1 outline-pale-gray p-4 rounded-sm hover:shadow-xl">
+templ BugReport(data models.WeeklyBugReportData) {
+	<card class="w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
 		@templ.JSONScript("bugReportData", data)
 		<!-- Title -->
-		<span class="flex justify-between mb-2">
-			<div class="flex items-center gap-1">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="size-4 fill-yellow-600">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"></path>
-				</svg>
-				<p class="text-sm text-neutral-gray font-medium">Bug Reports</p>
-			</div>
-			<p class="text-sm text-neutral-gray font-medium">(last 7 days)</p>
+		<span class="flex justify-between p-2">
+			<p class="text-xs text-neutral-gray font-medium">Bug Reports</p>
+			<p class="text-xs text-neutral-gray font-medium">(last 7 days)</p>
 		</span>
 		<!-- Count -->
-		<div class="flex items-baseline gap-2">
-			<p class="font-semibold text-xs text-neutral-gray">total</p>
+		<div class="flex items-baseline gap-2 p-2">
+			if data.Difference > 0 {
+				@partials.TrendUpInverse()
+			} else {
+				@partials.TrendDownInverse()
+			}
 			<p class="font-semibold text-4xl text-neutral-dark">{ strconv.Itoa(data.Total) }</p>
+			<p class="font-semibold text-xs text-neutral-gray">total</p>
 		</div>
-		<!-- Chart -->
-		<canvas id="bugReportChart"></canvas>
-		@barchartLoader.Once() {
-			<script src="/static/script/bugReportChart.js"></script>
-		}
 	</card>
 }
