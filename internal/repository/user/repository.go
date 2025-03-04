@@ -35,4 +35,8 @@ type UserRepository interface {
 	IsBanned(userId string) (bool, error)
 	BanUser(userId string) error
 	UnbanUser(userId string) error
+
+	IsRestricted(userId string) (bool, error)
+	RestrictUser(userId string) error
+	UnrestrictUser(userId string) error
 }

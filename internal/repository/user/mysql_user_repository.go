@@ -213,6 +213,12 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 		accountData.Banned = banned
 	}
 
+	if restricted, err := s.IsRestricted(user.Id); err != nil {
+		return nil, err
+	} else {
+		accountData.Restricted = restricted
+	}
+
 	getExpertiseQuery := `
         SELECT
             e.title
@@ -596,6 +602,67 @@ func (s *MysqlUserRepository) UnbanUser(userId string) error {
 
 	unbanQuery := "DELETE FROM Ban WHERE userId = ?"
 	if _, err := s.db.ExecContext(ctx, unbanQuery, userId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlUserRepository) IsRestricted(userId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            CASE
+                WHEN EXISTS (SELECT 1 FROM Restricted WHERE userId = ?)
+                THEN 1
+                ELSE 0
+            END AS user_exists;
+    `
+
+	isRestricted := false
+	if err := s.db.GetContext(ctx, &isRestricted, query, userId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return isRestricted, nil
+}
+
+func (s *MysqlUserRepository) RestrictUser(userId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "INSERT INTO Restricted(userId) VALUES(?)"
+	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			return nil
+		}
+
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlUserRepository) UnrestrictUser(userId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "DELETE FROM Restricted WHERE userId = ?"
+	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
 		return err
 	}
 

@@ -137,3 +137,19 @@ func (s *Service) UnbanUser(userId string) error {
 
 	return nil
 }
+
+func (s *Service) RestrictUser(userId string) error {
+	if err := s.store.RestrictUser(userId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) UnrestrictUser(userId string) error {
+	if err := s.store.UnrestrictUser(userId); err != nil {
+		return err
+	}
+
+	return nil
+}

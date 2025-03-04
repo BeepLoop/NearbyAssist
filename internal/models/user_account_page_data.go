@@ -9,6 +9,7 @@ type UserAccountPageData struct {
 	Email      string
 	Address    sql.NullString
 	Banned     bool
+	Restricted bool
 	CreatedAt  string
 
 	Expertise []string
