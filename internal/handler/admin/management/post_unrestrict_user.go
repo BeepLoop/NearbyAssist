@@ -9,12 +9,12 @@ import (
 func (h *managementHandler) UnrestrictUser(c echo.Context) error {
 	userId := c.Param("userId")
 	if userId == "" {
-		return c.Redirect(http.StatusSeeOther, "/admin/account-manangement/"+userId+"?error=Invalid_request")
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId+"?error=Invalid_request")
 	}
 
 	if err := h.managementService.UnrestrictUser(userId); err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/account-manangement/"+userId+"?error=error_unrestricting")
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId+"?error=error_unrestricting")
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/admin/account-manangement"+userId)
+	return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 }

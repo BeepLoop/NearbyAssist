@@ -7,14 +7,13 @@ import (
 )
 
 func (h *managementHandler) RestrictUser(c echo.Context) error {
+	reason := c.FormValue("reason")
+	duration := c.FormValue("duration")
 	userId := c.Param("userId")
-	if userId == "" {
-		return c.Redirect(http.StatusSeeOther, "/admin/account-manangement/"+userId+"?error=Invalid_request")
+
+	if err := h.managementService.RestrictUser(userId, reason, duration); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId+"?error=error_restricting")
 	}
 
-	if err := h.managementService.RestrictUser(userId, "", "2d"); err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/account-manangement/"+userId+"?error=error_restricting")
-	}
-
-	return c.Redirect(http.StatusSeeOther, "/admin/account-manangement"+userId)
+	return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 }
