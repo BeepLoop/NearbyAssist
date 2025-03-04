@@ -13,16 +13,17 @@ const (
 type UserModel struct {
 	Model
 	UpdateableModel
-	Name      string          `json:"name" db:"name"`
-	Email     string          `json:"email" db:"email"`
-	EmailHash string          `json:"emailHash" db:"emailHash"`
-	ImageUrl  string          `json:"imageUrl" db:"imageUrl"`
-	Address   sql.NullString  `json:"address" db:"address"`
-	Phone     sql.NullString  `json:"phone" db:"phone"`
-	Latitude  sql.NullFloat64 `json:"latitude" db:"latitude"`
-	Longitude sql.NullFloat64 `json:"longitude" db:"longitude"`
-	Verified  bool            `json:"verified" db:"verified"`
-	Banned    bool            `db:"banned"`
+	Name       string          `json:"name" db:"name"`
+	Email      string          `json:"email" db:"email"`
+	EmailHash  string          `json:"emailHash" db:"emailHash"`
+	ImageUrl   string          `json:"imageUrl" db:"imageUrl"`
+	Address    sql.NullString  `json:"address" db:"address"`
+	Phone      sql.NullString  `json:"phone" db:"phone"`
+	Latitude   sql.NullFloat64 `json:"latitude" db:"latitude"`
+	Longitude  sql.NullFloat64 `json:"longitude" db:"longitude"`
+	Verified   bool            `json:"verified" db:"verified"`
+	Banned     bool            `db:"banned"`
+	Restricted bool            `db:"restricted"`
 
 	// Socials
 	Socials []string

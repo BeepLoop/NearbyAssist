@@ -167,6 +167,12 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 		user.Banned = banned
 	}
 
+	if restricted, err := s.IsRestricted(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Restricted = restricted
+	}
+
 	getUserSocialsQuery := `SELECT url FROM Social WHERE userId = ?`
 
 	socials := make([]string, 0)
@@ -377,6 +383,12 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
 		return nil, err
 	} else {
 		user.Banned = banned
+	}
+
+	if restricted, err := s.IsRestricted(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Restricted = restricted
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
