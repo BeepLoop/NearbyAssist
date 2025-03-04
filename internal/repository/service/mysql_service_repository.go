@@ -852,3 +852,29 @@ func (s *MysqlServiceRepository) GeoSpatialSearch(params map[string]string) ([]*
 
 	return services, nil
 }
+
+func (s *MysqlServiceRepository) IsVendorRestricted(serviceId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	isVendorRestrictedQuery := `
+        SELECT EXISTS (
+            SELECT 1 
+            FROM Service s
+            INNER JOIN Restricted r 
+            ON s.vendorId = r.userId
+            WHERE s.id = ?
+        ) AS isRestricted;
+    `
+
+	isRestricted := false
+	if err := s.db.GetContext(ctx, &isRestricted, isVendorRestrictedQuery, serviceId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return isRestricted, nil
+}

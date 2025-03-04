@@ -465,8 +465,21 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		return nil, err
 	}
 
-	// Compute service distance
+	// Filter out services with restricted vendor
+	validServices := make([]*models.GeoSpatialSearchResult, 0)
 	for _, service := range services {
+		restricted, err := s.store.IsVendorRestricted(service.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		if !restricted {
+			validServices = append(validServices, service)
+		}
+	}
+
+	// Compute service distance
+	for _, service := range validServices {
 		origin := new(models.GeoSpatialModel)
 		if location, ok := params["l"]; ok {
 			if err := origin.FromString(location); err != nil {

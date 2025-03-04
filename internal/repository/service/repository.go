@@ -32,6 +32,8 @@ type ServiceRepository interface {
 
 	GeoSpatialSearch(params map[string]string) ([]*models.GeoSpatialSearchResult, error)
 
+	IsVendorRestricted(serviceId string) (bool, error)
+
 	FindExtraById(extraId string) (*models.ExtraModel, error)
 	AddExtra(data *models.ExtraModel) (string, error)
 	EditExtra(data *models.ExtraModel) error
