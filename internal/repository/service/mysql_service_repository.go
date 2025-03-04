@@ -878,3 +878,29 @@ func (s *MysqlServiceRepository) IsVendorRestricted(serviceId string) (bool, err
 
 	return isRestricted, nil
 }
+
+func (s *MysqlServiceRepository) IsVendorBanned(serviceId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT EXISTS (
+            SELECT 1 
+            FROM Service s
+            INNER JOIN Ban b 
+            ON s.vendorId = b.userId
+            WHERE s.id = ?
+        ) AS isRestricted;
+    `
+
+	isBanned := false
+	if err := s.db.GetContext(ctx, &isBanned, query, serviceId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return isBanned, nil
+}

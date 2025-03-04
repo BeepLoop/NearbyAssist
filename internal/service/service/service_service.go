@@ -465,7 +465,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		return nil, err
 	}
 
-	// Filter out services with restricted vendor
+	// Filter out services with restricted OR banned vendor
 	validServices := make([]*models.GeoSpatialSearchResult, 0)
 	for _, service := range services {
 		restricted, err := s.store.IsVendorRestricted(service.Id)
@@ -473,7 +473,12 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 			return nil, err
 		}
 
-		if !restricted {
+		banned, err := s.store.IsVendorBanned(service.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		if !restricted && !banned {
 			validServices = append(validServices, service)
 		}
 	}
