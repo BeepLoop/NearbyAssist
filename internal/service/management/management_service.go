@@ -4,6 +4,8 @@ import (
 	"nearbyassist/internal/models"
 	user_repo "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/utils"
+	"time"
 )
 
 type Service struct {
@@ -138,8 +140,21 @@ func (s *Service) UnbanUser(userId string) error {
 	return nil
 }
 
-func (s *Service) RestrictUser(userId string) error {
-	if err := s.store.RestrictUser(userId); err != nil {
+func (s *Service) RestrictUser(userId, reason, duration string) error {
+	d, err := utils.ParseStringDuration(duration)
+	if err != nil {
+		return err
+	}
+
+	endDate := time.Now().Add(d)
+
+	data := &models.RestrictionModel{
+		UserId:  userId,
+		Reason:  reason,
+		EndTime: utils.FormatDateTime(endDate),
+	}
+
+	if err := s.store.RestrictUser(data); err != nil {
 		return err
 	}
 
@@ -147,7 +162,7 @@ func (s *Service) RestrictUser(userId string) error {
 }
 
 func (s *Service) UnrestrictUser(userId string) error {
-	if err := s.store.UnrestrictUser(userId); err != nil {
+	if err := s.store.ForceLiftRestriction(userId); err != nil {
 		return err
 	}
 

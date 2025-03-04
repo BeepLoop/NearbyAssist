@@ -12,7 +12,7 @@ func (h *managementHandler) RestrictUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-manangement/"+userId+"?error=Invalid_request")
 	}
 
-	if err := h.managementService.RestrictUser(userId); err != nil {
+	if err := h.managementService.RestrictUser(userId, "", "2d"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-manangement/"+userId+"?error=error_restricting")
 	}
 

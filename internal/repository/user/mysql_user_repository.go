@@ -617,12 +617,12 @@ func (s *MysqlUserRepository) IsRestricted(userId string) (bool, error) {
 	defer cancel()
 
 	query := `
-        SELECT
-            CASE
-                WHEN EXISTS (SELECT 1 FROM Restricted WHERE userId = ?)
-                THEN 1
-                ELSE 0
-            END AS user_exists;
+        SELECT EXISTS (
+            SELECT 1 
+            FROM Restricted 
+            WHERE userId = ? 
+              AND endTime > NOW()
+        ) AS isRestricted;
     `
 
 	isRestricted := false
@@ -637,12 +637,17 @@ func (s *MysqlUserRepository) IsRestricted(userId string) (bool, error) {
 	return isRestricted, nil
 }
 
-func (s *MysqlUserRepository) RestrictUser(userId string) error {
+func (s *MysqlUserRepository) RestrictUser(data *models.RestrictionModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO Restricted(userId) VALUES(?)"
-	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
+	query := `
+        INSERT INTO
+            Restricted (userId, reason, endTime)
+        VALUES
+            (:userId, :reason, :endTime)
+    `
+	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			return nil
 		}
@@ -657,7 +662,23 @@ func (s *MysqlUserRepository) RestrictUser(userId string) error {
 	return nil
 }
 
-func (s *MysqlUserRepository) UnrestrictUser(userId string) error {
+func (s *MysqlUserRepository) LiftRestrictionIfExpired(userId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "DELETE FROM Restricted WHERE userId = ? AND endTime <= NOW()"
+	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlUserRepository) ForceLiftRestriction(userId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

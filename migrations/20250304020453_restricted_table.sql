@@ -1,7 +1,9 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS Restricted (
     userId VARCHAR(255) NOT NULL UNIQUE,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reason TEXT,
+    startTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    endTime TIMESTAMP NOT NULL,
     FOREIGN KEY(userId) REFERENCES User(id),
     INDEX(userId)
 );
