@@ -58,6 +58,7 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/account-management/ban/%s", data.Id), data.Banned)
 					}
 					@partials.UnrestrictUser(fmt.Sprintf("/admin/account-management/unrestrict/%s", data.Id))
+					@partials.RestrictUser(fmt.Sprintf("/admin/account-management/restrict/%s", data.Id))
 				</div>
 			</div>
 			<!-- stats -->
