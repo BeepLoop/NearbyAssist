@@ -14,7 +14,7 @@ type SavedServiceData struct {
 		Email        string `json:"email"`
 		ImageUrl     string `json:"imageUrl"`
 		Rating       string `json:"rating"`
-		IsRestricted int    `json:"isRestricted"`
+		IsRestricted bool   `json:"isRestricted"`
 	} `json:"vendorInfo"`
 	Photos         []*models.ServicePhotoModel `json:"serviceImages"`
 	CountPerRating CountPerRating              `json:"countPerRating"`

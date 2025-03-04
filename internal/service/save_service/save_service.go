@@ -134,7 +134,7 @@ func (s *Service) GetSavedServices(bearerToken string) (*response.SavedServicesR
 			Email        string `json:"email"`
 			ImageUrl     string `json:"imageUrl"`
 			Rating       string `json:"rating"`
-			IsRestricted int    `json:"isRestricted"`
+			IsRestricted bool   `json:"isRestricted"`
 		}{
 			Id:           vendor.VendorId,
 			Name:         vendor.Vendor,

@@ -15,7 +15,7 @@ type VendorModel struct {
 	UpdateableModel
 	VendorId   string `json:"vendorId" db:"vendorId"`
 	Rating     string `json:"rating" db:"rating"`
-	Restricted int    `json:"restricted" db:"restricted"`
+	Restricted bool   `json:"restricted" db:"restricted"`
 
 	// Additional fields for joins
 	Vendor    string         `json:"vendor" db:"vendor"`

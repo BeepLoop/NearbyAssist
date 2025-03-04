@@ -198,7 +198,7 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		Phone        string   `json:"phone"`
 		ImageUrl     string   `json:"imageUrl"`
 		Rating       string   `json:"rating"`
-		IsRestricted int      `json:"isRestricted"`
+		IsRestricted bool     `json:"isRestricted"`
 		Expertise    []string `json:"expertise"`
 	}{
 		Id:           vendor.VendorId,

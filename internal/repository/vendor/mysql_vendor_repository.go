@@ -25,7 +25,6 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
         SELECT  
             v.vendorId AS id,
             v.rating,
-            v.restricted,
             u.name AS vendor,
             u.email AS email,
             u.phone AS phone,
@@ -38,6 +37,12 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
     `
 	if err := s.db.GetContext(ctx, vendor, query, id); err != nil {
 		return nil, err
+	}
+
+	if restricted, err := s.IsRestricted(vendor.Id); err != nil {
+		return nil, err
+	} else {
+		vendor.Restricted = restricted
 	}
 
 	expertiseQuery := `
@@ -134,4 +139,29 @@ func (s *MysqlVendorRepository) GetTags(serviceId string) ([]*models.TagModel, e
 	}
 
 	return tags, nil
+}
+
+func (s *MysqlVendorRepository) IsRestricted(userId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            CASE
+                WHEN EXISTS (SELECT 1 FROM Restricted WHERE userId = ?)
+                THEN 1
+                ELSE 0
+            END AS user_exists;
+    `
+
+	isRestricted := false
+	if err := s.db.GetContext(ctx, &isRestricted, query, userId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return isRestricted, nil
 }
