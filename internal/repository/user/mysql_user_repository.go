@@ -144,7 +144,6 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
             email,
             imageUrl,
             verified,
-            banned,
             address,
             phone,
             latitude,
@@ -160,6 +159,12 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	err := s.db.GetContext(ctx, user, getUserQuery, id)
 	if err != nil {
 		return nil, err
+	}
+
+	if banned, err := s.IsBanned(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Banned = banned
 	}
 
 	getUserSocialsQuery := `SELECT url FROM Social WHERE userId = ?`
