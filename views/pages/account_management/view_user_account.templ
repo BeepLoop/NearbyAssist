@@ -51,12 +51,13 @@ templ ViewUserAccount(data models.UserAccountPageData) {
 						</div>
 					</div>
 				</div>
-				<div>
+				<div class="flex gap-2">
 					if data.Banned {
 						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/account-management/unban/%s", data.Id), data.Banned)
 					} else {
 						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/account-management/ban/%s", data.Id), data.Banned)
 					}
+					@partials.UnrestrictUser(fmt.Sprintf("/admin/account-management/unrestrict/%s", data.Id))
 				</div>
 			</div>
 			<!-- stats -->

@@ -20,6 +20,10 @@
     --font-roboto: "Roboto", sans-serif;
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
 .active {
     background-color: var(--color-primary);
     color: var(--color-white);
