@@ -38,6 +38,7 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 		return s.Register(req, emailHash)
 	}
 
+	// Check if the user is banned
 	if existingUser.Banned {
 		return nil, errors.New(ERR_BANNED_USER)
 	}

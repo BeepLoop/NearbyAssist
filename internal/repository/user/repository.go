@@ -32,6 +32,7 @@ type UserRepository interface {
 	DeleteSocial(userId, id string) error
 	GetSocials(userId string) ([]*models.SocialModel, error)
 
+	IsBanned(userId string) (bool, error)
 	BanUser(userId string) error
 	UnbanUser(userId string) error
 }

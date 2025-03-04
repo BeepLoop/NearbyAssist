@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -182,7 +183,19 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 
 	accountData := new(models.UserAccountPageData)
 
-	getUserQuery := "SELECT id, name, email, imageUrl, address, banned, createdAt FROM User where id = ?"
+	getUserQuery := `
+        SELECT
+            id,
+            name,
+            email,
+            imageUrl,
+            address,
+            createdAt
+        FROM 
+            User 
+        WHERE 
+            id = ?
+    `
 	user := new(models.UserModel)
 	if err := s.db.GetContext(ctx, user, getUserQuery, userId); err != nil {
 		return nil, err
@@ -192,8 +205,13 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 	accountData.Name = user.Name
 	accountData.Email = user.Email
 	accountData.Address = user.Address
-	accountData.Banned = user.Banned
 	accountData.CreatedAt = user.CreatedAt
+
+	if banned, err := s.IsBanned(user.Id); err != nil {
+		return nil, err
+	} else {
+		accountData.Banned = banned
+	}
 
 	getExpertiseQuery := `
         SELECT
@@ -330,7 +348,6 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
             email,
             imageUrl,
             verified,
-            banned,
             address,
             phone,
             latitude,
@@ -343,6 +360,12 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
     `
 	if err := s.db.GetContext(ctx, user, query, emailHash); err != nil {
 		return nil, err
+	}
+
+	if banned, err := s.IsBanned(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Banned = banned
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -522,12 +545,41 @@ func (s *MysqlUserRepository) DeleteSocial(userId, id string) error {
 	return nil
 }
 
+func (s *MysqlUserRepository) IsBanned(userId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            CASE
+                WHEN EXISTS (SELECT 1 FROM Ban WHERE userId = ?)
+                THEN 1
+                ELSE 0
+            END AS user_exists;
+    `
+
+	isBanned := false
+	if err := s.db.GetContext(ctx, &isBanned, query, userId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return isBanned, nil
+}
+
 func (s *MysqlUserRepository) BanUser(userId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "UPDATE User SET banned = 1 WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
+	banQuery := "INSERT INTO Ban (userId) VALUES(?)"
+	if _, err := s.db.ExecContext(ctx, banQuery, userId); err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			return nil
+		}
+
 		return err
 	}
 
@@ -542,8 +594,8 @@ func (s *MysqlUserRepository) UnbanUser(userId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "UPDATE User SET banned = 0 WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
+	unbanQuery := "DELETE FROM Ban WHERE userId = ?"
+	if _, err := s.db.ExecContext(ctx, unbanQuery, userId); err != nil {
 		return err
 	}
 
