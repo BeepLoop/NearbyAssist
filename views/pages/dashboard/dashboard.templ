@@ -18,11 +18,24 @@ templ Dashboard(data models.DashboardModel) {
 templ dashboardData(data models.DashboardModel) {
 	<section class="grid gap-4">
 		<div class="grid gap-4 grid-cols-12">
-			<div class="col-span-4 grid">
+			<div class="col-span-3 grid">
 				<card class="w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
 					<!-- Title -->
 					<span class="flex justify-between p-2">
-						<p class="text-xs text-neutral-gray font-medium">Pending applications</p>
+						<p class="text-xs text-neutral-gray font-medium">Verification requests</p>
+					</span>
+					<!-- Count -->
+					<div class="flex items-baseline gap-2 p-2">
+						<p class="font-semibold text-4xl text-neutral-dark">{ strconv.Itoa(data.RequestData.IdentityVerification.Total) }</p>
+						<p class="font-semibold text-xs text-neutral-gray">total</p>
+					</div>
+				</card>
+			</div>
+			<div class="col-span-3 grid">
+				<card class="w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
+					<!-- Title -->
+					<span class="flex justify-between p-2">
+						<p class="text-xs text-neutral-gray font-medium">Vendor applications</p>
 					</span>
 					<!-- Count -->
 					<div class="flex items-baseline gap-2 p-2">
@@ -31,10 +44,10 @@ templ dashboardData(data models.DashboardModel) {
 					</div>
 				</card>
 			</div>
-			<div class="col-span-4 grid">
+			<div class="col-span-3 grid">
 				@dashboardcomponent.BugReport(data.ReportData.WeeklyBugReport)
 			</div>
-			<div class="col-span-4 grid">
+			<div class="col-span-3 grid">
 				@dashboardcomponent.VendorReport(data.ReportData.WeeklyVendorReport)
 			</div>
 		</div>

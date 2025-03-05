@@ -1,5 +1,5 @@
 (function transactionChart() {
-  const bugReportData = JSON.parse(
+  const transactionData = JSON.parse(
     document.getElementById("transactionData").textContent,
   );
 
@@ -18,12 +18,12 @@
     "December",
   ];
 
-  const labels = bugReportData.daily.map((day) => {
+  const labels = transactionData.daily.map((day) => {
     const date = new Date(day.date);
     return `${months[date.getMonth()]} ${date.getDate()}`;
   });
 
-  const values = bugReportData.daily.map((day) => day.count);
+  const values = transactionData.daily.map((day) => day.count);
 
   const DEFAULT_MAX_RANGE = 10;
   const max = Math.max(...values);
@@ -47,6 +47,7 @@
 
   const layout = {
     showlegend: false,
+    marin: { t: 0, l: 0, b: 10, r: 0 },
     xaxis: {
       tickangle: -45,
       tickwidth: 4,
