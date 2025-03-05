@@ -17,21 +17,21 @@ templ Dashboard(data models.DashboardModel) {
 templ dashboardData(data models.DashboardModel) {
 	<section class="grid gap-4">
 		<div class="grid gap-4 grid-cols-12">
-			<div class="col-span-4 grid gap-4">
-				@dashboardcomponent.BugReport(data.BugReportData)
-			</div>
 			<div class="outline-1 outline-pale-gray rounded-sm p-2 col-span-4 hover:shadow-xl">
 				<p class="text-xs text-neutral-gray font-medium">Pending applications</p>
 			</div>
-			<div class="outline-1 outline-pale-gray rounded-sm p-2 col-span-4 hover:shadow-xl">
-				<p class="text-xs text-neutral-gray font-medium">Complaints</p>
+			<div class="col-span-4 grid">
+				@dashboardcomponent.BugReport(data.ReportData.WeeklyBugReport)
+			</div>
+			<div class="col-span-4 grid">
+				@dashboardcomponent.VendorReport(data.ReportData.WeeklyVendorReport)
 			</div>
 		</div>
 		<div class="grid grid-cols-12 gap-4">
-			<div class="col-span-4 outline-1 outline-pale-gray rounded-sm">
+			<div class="col-span-4 grid">
 				@dashboardcomponent.UserData(data.UserData)
 			</div>
-			<div class="col-span-8 outline-1 outline-pale-gray rounded-sm">
+			<div class="col-span-8 grid">
 				@dashboardcomponent.Transaction(data.TransactionData)
 			</div>
 		</div>

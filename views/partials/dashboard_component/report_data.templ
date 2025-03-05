@@ -8,10 +8,29 @@ import (
 
 templ BugReport(data models.WeeklyBugReportData) {
 	<card class="w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
-		@templ.JSONScript("bugReportData", data)
 		<!-- Title -->
 		<span class="flex justify-between p-2">
 			<p class="text-xs text-neutral-gray font-medium">Bug Reports</p>
+			<p class="text-xs text-neutral-gray font-medium">(last 7 days)</p>
+		</span>
+		<!-- Count -->
+		<div class="flex items-baseline gap-2 p-2">
+			if data.Difference > 0 {
+				@partials.TrendUpInverse()
+			} else {
+				@partials.TrendDownInverse()
+			}
+			<p class="font-semibold text-4xl text-neutral-dark">{ strconv.Itoa(data.Total) }</p>
+			<p class="font-semibold text-xs text-neutral-gray">total</p>
+		</div>
+	</card>
+}
+
+templ VendorReport(data models.WeeklyVendorReportData) {
+	<card class="w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
+		<!-- Title -->
+		<span class="flex justify-between p-2">
+			<p class="text-xs text-neutral-gray font-medium">Vendor Complaints</p>
 			<p class="text-xs text-neutral-gray font-medium">(last 7 days)</p>
 		</span>
 		<!-- Count -->

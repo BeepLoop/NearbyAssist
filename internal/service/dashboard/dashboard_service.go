@@ -24,14 +24,22 @@ func (s *Service) GetAnalytics() (*models.DashboardModel, error) {
 		return nil, err
 	}
 
+	vendorReportData, err := s.store.GetVendorReportData()
+	if err != nil {
+		return nil, err
+	}
+
 	transactionData, err := s.store.GetTransactionData()
 	if err != nil {
 		return nil, err
 	}
 
 	dashboardData := &models.DashboardModel{
-		UserData:        *userData,
-		BugReportData:   *bugReportData,
+		UserData: *userData,
+		ReportData: models.ReportData{
+			WeeklyBugReport:    *bugReportData,
+			WeeklyVendorReport: *vendorReportData,
+		},
 		TransactionData: *transactionData,
 	}
 

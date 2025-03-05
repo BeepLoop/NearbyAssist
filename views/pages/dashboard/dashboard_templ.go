@@ -91,15 +91,23 @@ func dashboardData(data models.DashboardModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid gap-4\"><div class=\"grid gap-4 grid-cols-12\"><div class=\"col-span-4 grid gap-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid gap-4\"><div class=\"grid gap-4 grid-cols-12\"><div class=\"outline-1 outline-pale-gray rounded-sm p-2 col-span-4 hover:shadow-xl\"><p class=\"text-xs text-neutral-gray font-medium\">Pending applications</p></div><div class=\"col-span-4 grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = dashboardcomponent.BugReport(data.BugReportData).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = dashboardcomponent.BugReport(data.ReportData.WeeklyBugReport).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"outline-1 outline-pale-gray rounded-sm p-2 col-span-4 hover:shadow-xl\"><p class=\"text-xs text-neutral-gray font-medium\">Pending applications</p></div><div class=\"outline-1 outline-pale-gray rounded-sm p-2 col-span-4 hover:shadow-xl\"><p class=\"text-xs text-neutral-gray font-medium\">Complaints</p></div></div><div class=\"grid grid-cols-12 gap-4\"><div class=\"col-span-4 outline-1 outline-pale-gray rounded-sm\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"col-span-4 grid\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = dashboardcomponent.VendorReport(data.ReportData.WeeklyVendorReport).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"grid grid-cols-12 gap-4\"><div class=\"col-span-4 grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -107,7 +115,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"col-span-8 outline-1 outline-pale-gray rounded-sm\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"col-span-8 grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

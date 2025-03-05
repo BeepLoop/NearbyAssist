@@ -23,5 +23,6 @@ const (
 type DashboardRepository interface {
 	GetUserData() (*models.UserData, error)
 	GetBugReportData() (*models.WeeklyBugReportData, error)
+	GetVendorReportData() (*models.WeeklyVendorReportData, error)
 	GetTransactionData() (*models.WeeklyTransactionData, error)
 }

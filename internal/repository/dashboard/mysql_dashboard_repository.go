@@ -154,6 +154,102 @@ func (s *MysqlDashboardRepository) GetBugReportData() (*models.WeeklyBugReportDa
 	return data, nil
 }
 
+func (s *MysqlDashboardRepository) GetVendorReportData() (*models.WeeklyVendorReportData, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	reportCountThisWeekQuery := `
+        WITH date_series AS (
+            SELECT CURDATE() - INTERVAL n DAY AS reportDate
+            FROM (
+                SELECT 0 AS n UNION ALL
+                SELECT 1 UNION ALL
+                SELECT 2 UNION ALL
+                SELECT 3 UNION ALL
+                SELECT 4 UNION ALL
+                SELECT 5 UNION ALL
+                SELECT 6
+            ) numbers
+        )
+        SELECT 
+            d.reportDate AS date,
+            COUNT(v.id) AS count
+        FROM 
+            date_series d
+        LEFT JOIN 
+            VendorComplaint v
+        ON 
+            DATE(v.createdAt) = d.reportDate
+        GROUP BY 
+            d.reportDate
+        ORDER BY 
+            d.reportDate;
+    `
+	reportCountThisWeek := make([]models.DailyVendorReportData, 0)
+	if err := s.db.SelectContext(ctx, &reportCountThisWeek, reportCountThisWeekQuery); err != nil {
+		return nil, err
+	}
+
+	reportCountLastWeekQuery := `
+        WITH date_series AS (
+            SELECT CURDATE() - INTERVAL (7 + n) DAY AS reportDate
+            FROM (
+                SELECT 0 AS n UNION ALL
+                SELECT 1 UNION ALL
+                SELECT 2 UNION ALL
+                SELECT 3 UNION ALL
+                SELECT 4 UNION ALL
+                SELECT 5 UNION ALL
+                SELECT 6
+            ) numbers
+        )
+        SELECT 
+            d.reportDate AS date,
+            COUNT(v.id) AS count
+        FROM 
+            date_series d
+        LEFT JOIN 
+            VendorComplaint v
+        ON 
+            DATE(v.createdAt) = d.reportDate
+        GROUP BY 
+            d.reportDate
+        ORDER BY 
+            d.reportDate;
+    `
+	reportCountLastWeek := make([]models.DailyVendorReportData, 0)
+	if err := s.db.SelectContext(ctx, &reportCountLastWeek, reportCountLastWeekQuery); err != nil {
+		return nil, err
+	}
+
+	totalReportsThisWeek := 0
+	for _, report := range reportCountThisWeek {
+		totalReportsThisWeek += report.Count
+	}
+
+	totalReportsLastWeek := 0
+	for _, report := range reportCountLastWeek {
+		totalReportsLastWeek += report.Count
+	}
+
+	// NOTE:
+	// Positive difference = bad
+	// Negative difference = good
+	difference := totalReportsThisWeek - totalReportsLastWeek
+
+	data := &models.WeeklyVendorReportData{
+		Total:      totalReportsThisWeek,
+		Daily:      reportCountThisWeek,
+		Difference: difference,
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return data, nil
+}
+
 func (s *MysqlDashboardRepository) GetTransactionData() (*models.WeeklyTransactionData, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
