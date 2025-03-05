@@ -2,7 +2,6 @@
   const bugReportData = JSON.parse(
     document.getElementById("transactionData").textContent,
   );
-  const ctx = document.getElementById("transactionChart");
 
   const months = [
     "January",
@@ -24,40 +23,49 @@
     return `${months[date.getMonth()]} ${date.getDate()}`;
   });
 
-  const data = bugReportData.daily.map((day) => day.count);
+  const values = bugReportData.daily.map((day) => day.count);
 
-  new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          data: data,
-          tension: 0.3,
-          fill: true,
-          backgroundColor: "oklch(0.527 0.154 150.069/0.4)",
-          borderColor: "oklch(0.527 0.154 150.069)",
+  const DEFAULT_MAX_RANGE = 10;
+  const max = Math.max(...values);
+  const range = [0, max > DEFAULT_MAX_RANGE ? max : DEFAULT_MAX_RANGE];
+
+  const data = [
+    {
+      type: "bar",
+      x: labels,
+      y: values,
+      marker: {
+        line: {
+          color: "rgb(10, 10, 255)",
         },
-      ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
+        opacity: 0.5,
       },
-      plugins: {
-        tooltip: {
-          intersect: false,
-        },
-        legend: {
-          display: false,
-          labels: {
-            boxWidth: 0,
-          },
-        },
-      },
+      width: 0.5,
+      automargin: true,
     },
-    plugins: [],
-  });
+  ];
+
+  const layout = {
+    showlegend: false,
+    xaxis: {
+      tickangle: -45,
+      tickwidth: 4,
+      zeroline: true,
+      showgrid: true,
+      showline: true,
+    },
+    yaxis: {
+      gridwidth: 2,
+      tickwidth: 4,
+      range: range,
+    },
+    bargap: 0.05,
+  };
+
+  const options = {
+    displayModeBar: false,
+    responsive: true,
+  };
+
+  Plotly.newPlot("transactionChart", data, layout, options);
 })();

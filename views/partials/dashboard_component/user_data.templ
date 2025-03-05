@@ -13,7 +13,7 @@ templ UserData(data models.UserData) {
 		</div>
 		<!-- Chart -->
 		<div class="aspect-square p-2">
-			<canvas id="userDataChart"></canvas>
+			<div id="userDataChart"></div>
 			@loadUserDataChart.Once() {
 				<script src="/static/script/userDataChart.js"></script>
 			}

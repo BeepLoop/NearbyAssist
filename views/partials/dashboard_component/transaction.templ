@@ -30,7 +30,7 @@ templ Transaction(data models.WeeklyTransactionData) {
 		</div>
 		<div class="p-2">
 			<!-- Chart -->
-			<canvas id="transactionChart"></canvas>
+			<div id="transactionChart"></div>
 			@loadTransactionChart.Once() {
 				<script src="/static/script/transactionChart.js"></script>
 			}

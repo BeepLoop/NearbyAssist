@@ -73,7 +73,7 @@ func Transaction(data models.WeeklyTransactionData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></div><div class=\"p-2\"><!-- Chart --><canvas id=\"transactionChart\"></canvas>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></div><div class=\"p-2\"><!-- Chart --><div id=\"transactionChart\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

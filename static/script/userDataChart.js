@@ -1,37 +1,28 @@
 (function userDataChart() {
   const userData = JSON.parse(document.getElementById("userData").textContent);
-  const ctx = document.getElementById("userDataChart");
 
   const labels = ["unverified", "experts"];
-  const data = [userData.total - userData.verified, userData.expert];
+  const values = [userData.total - userData.verified, userData.expert];
 
-  new Chart(ctx, {
-    type: "doughnut",
-    data: {
+  const data = [
+    {
+      type: "pie",
+      hole: 0.5,
       labels: labels,
-      datasets: [
-        {
-          data: data,
-          backgroundColor: [
-            "oklch(0.637 0.237 25.331/0.5)",
-            "oklch(0.527 0.154 150.069/0.5)",
-          ],
-          hoverOffset: 4,
-        },
-      ],
+      values: values,
+      automargin: true,
     },
-    options: {
-      cutout: "75%",
-      radius: "90%",
-      plugins: {
-        legend: {
-          display: false,
-          labels: {
-            boxWidth: 0,
-          },
-        },
-      },
-    },
-    plugins: [],
-  });
+  ];
+
+  const layout = {
+    showlegend: false,
+    margin: { t: 0, b: 0, l: 0, r: 0 },
+  };
+
+  const options = {
+    displayModeBar: false,
+    responsive: true,
+  };
+
+  Plotly.newPlot("userDataChart", data, layout, options);
 })();
