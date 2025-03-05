@@ -2,8 +2,9 @@ package models
 
 type DashboardModel struct {
 	UserData        UserData
-	ReportData      ReportData
 	TransactionData WeeklyTransactionData
+	ReportData      ReportData
+	RequestData     RequestData
 }
 
 // User data
@@ -12,6 +13,20 @@ type UserData struct {
 	Verified   int `json:"verified"`
 	Expert     int `json:"expert"`
 	Restricted int `json:"restricted"`
+}
+
+// Request Data
+type RequestData struct {
+	IdentityVerification IdentityVerificationRequestData
+	VendorApplication    VendorApplicationRequestData
+}
+
+type IdentityVerificationRequestData struct {
+	Total int `json:"total"`
+}
+
+type VendorApplicationRequestData struct {
+	Total int `json:"total"`
 }
 
 // Report Data

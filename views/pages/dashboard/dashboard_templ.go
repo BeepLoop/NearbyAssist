@@ -13,6 +13,7 @@ import (
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 	dashboardcomponent "nearbyassist/views/partials/dashboard_component"
+	"strconv"
 )
 
 func Dashboard(data models.DashboardModel) templ.Component {
@@ -91,7 +92,20 @@ func dashboardData(data models.DashboardModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid gap-4\"><div class=\"grid gap-4 grid-cols-12\"><div class=\"outline-1 outline-pale-gray rounded-sm p-2 col-span-4 hover:shadow-xl\"><p class=\"text-xs text-neutral-gray font-medium\">Pending applications</p></div><div class=\"col-span-4 grid\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid gap-4\"><div class=\"grid gap-4 grid-cols-12\"><div class=\"col-span-4 grid\"><card class=\"w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs text-neutral-gray font-medium\">Pending applications</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"font-semibold text-4xl text-neutral-dark\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.RequestData.VendorApplication.Total))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 29, Col: 114}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></card></div><div class=\"col-span-4 grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

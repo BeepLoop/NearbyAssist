@@ -250,6 +250,62 @@ func (s *MysqlDashboardRepository) GetVendorReportData() (*models.WeeklyVendorRe
 	return data, nil
 }
 
+func (s *MysqlDashboardRepository) GetIdentityVerificationRequestsData() (*models.IdentityVerificationRequestData, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	countPendingQuery := `
+        SELECT
+            COUNT(id)
+        FROM
+            IdentityVerification
+        WHERE
+            status = 'pending'
+    `
+	pendingCount := 0
+	if err := s.db.GetContext(ctx, &pendingCount, countPendingQuery); err != nil {
+		return nil, err
+	}
+
+	data := &models.IdentityVerificationRequestData{
+		Total: pendingCount,
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return data, nil
+}
+
+func (s *MysqlDashboardRepository) GetVendorApplicationRequestsData() (*models.VendorApplicationRequestData, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	countPendingQuery := `
+        SELECT
+            Count(id)
+        FROM
+            Application
+        WHERE
+            status = 'pending'
+    `
+	pendingCount := 0
+	if err := s.db.GetContext(ctx, &pendingCount, countPendingQuery); err != nil {
+		return nil, err
+	}
+
+	data := &models.VendorApplicationRequestData{
+		Total: pendingCount,
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return data, nil
+}
+
 func (s *MysqlDashboardRepository) GetTransactionData() (*models.WeeklyTransactionData, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

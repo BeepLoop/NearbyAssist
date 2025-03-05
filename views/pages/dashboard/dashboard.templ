@@ -5,6 +5,7 @@ import (
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 	dashboardcomponent "nearbyassist/views/partials/dashboard_component"
+	"strconv"
 )
 
 templ Dashboard(data models.DashboardModel) {
@@ -17,8 +18,18 @@ templ Dashboard(data models.DashboardModel) {
 templ dashboardData(data models.DashboardModel) {
 	<section class="grid gap-4">
 		<div class="grid gap-4 grid-cols-12">
-			<div class="outline-1 outline-pale-gray rounded-sm p-2 col-span-4 hover:shadow-xl">
-				<p class="text-xs text-neutral-gray font-medium">Pending applications</p>
+			<div class="col-span-4 grid">
+				<card class="w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
+					<!-- Title -->
+					<span class="flex justify-between p-2">
+						<p class="text-xs text-neutral-gray font-medium">Pending applications</p>
+					</span>
+					<!-- Count -->
+					<div class="flex items-baseline gap-2 p-2">
+						<p class="font-semibold text-4xl text-neutral-dark">{ strconv.Itoa(data.RequestData.VendorApplication.Total) }</p>
+						<p class="font-semibold text-xs text-neutral-gray">total</p>
+					</div>
+				</card>
 			</div>
 			<div class="col-span-4 grid">
 				@dashboardcomponent.BugReport(data.ReportData.WeeklyBugReport)

@@ -29,18 +29,32 @@ func (s *Service) GetAnalytics() (*models.DashboardModel, error) {
 		return nil, err
 	}
 
+	verificationRequests, err := s.store.GetIdentityVerificationRequestsData()
+	if err != nil {
+		return nil, err
+	}
+
+	vendorRequests, err := s.store.GetVendorApplicationRequestsData()
+	if err != nil {
+		return nil, err
+	}
+
 	transactionData, err := s.store.GetTransactionData()
 	if err != nil {
 		return nil, err
 	}
 
 	dashboardData := &models.DashboardModel{
-		UserData: *userData,
+		UserData:        *userData,
+		TransactionData: *transactionData,
 		ReportData: models.ReportData{
 			WeeklyBugReport:    *bugReportData,
 			WeeklyVendorReport: *vendorReportData,
 		},
-		TransactionData: *transactionData,
+		RequestData: models.RequestData{
+			IdentityVerification: *verificationRequests,
+			VendorApplication:    *vendorRequests,
+		},
 	}
 
 	return dashboardData, nil
