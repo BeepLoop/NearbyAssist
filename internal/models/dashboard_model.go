@@ -7,9 +7,10 @@ type DashboardModel struct {
 }
 
 type UserData struct {
-	Total    int `json:"total"`
-	Verified int `json:"verified"`
-	Expert   int `json:"expert"`
+	Total      int `json:"total"`
+	Verified   int `json:"verified"`
+	Expert     int `json:"expert"`
+	Restricted int `json:"restricted"`
 }
 
 type WeeklyBugReportData struct {

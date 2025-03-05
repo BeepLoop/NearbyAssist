@@ -38,10 +38,17 @@ func (s *MysqlDashboardRepository) GetUserData() (*models.UserData, error) {
 		return nil, err
 	}
 
+	countRestrictedQuery := "SELECT COUNT(userId) FROM Restricted"
+	restrictedCount := 0
+	if err := s.db.GetContext(ctx, &restrictedCount, countRestrictedQuery); err != nil {
+		return nil, err
+	}
+
 	data := &models.UserData{
-		Total:    userCount,
-		Verified: verifiedCount,
-		Expert:   vendorCount,
+		Total:      userCount,
+		Verified:   verifiedCount,
+		Expert:     vendorCount,
+		Restricted: restrictedCount,
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
