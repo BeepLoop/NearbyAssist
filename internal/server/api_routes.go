@@ -252,7 +252,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	complaintRoute := v1.Group("/complaints")
 	{
 
-		bugReportStore := bug_report_repo.NewMysqlComplaintRepository(s.DB)
+		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		complaintService := complaint_service.NewService(bugReportStore, s.FS, s.Encrypt)
 		handler := complaint.NewHandler(complaintService)
 

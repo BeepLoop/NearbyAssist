@@ -11,13 +11,17 @@ import (
 )
 
 type Service struct {
-	store   bug_report_repo.BugReportRepository
-	fs      fs.FileStorage
-	encrypt auth.Encryption
+	bugReportStore bug_report_repo.BugReportRepository
+	fs             fs.FileStorage
+	encrypt        auth.Encryption
 }
 
-func NewService(store bug_report_repo.BugReportRepository, fs fs.FileStorage, encrypt auth.Encryption) *Service {
-	return &Service{store: store, fs: fs, encrypt: encrypt}
+func NewService(bugReportStore bug_report_repo.BugReportRepository, fs fs.FileStorage, encrypt auth.Encryption) *Service {
+	return &Service{
+		bugReportStore: bugReportStore,
+		fs:             fs,
+		encrypt:        encrypt,
+	}
 }
 
 func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multipart.FileHeader) (string, error) {
@@ -59,7 +63,7 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 		newComplaint.Detail = cipher
 	}
 
-	complaintId, err := s.store.Create(newComplaint)
+	complaintId, err := s.bugReportStore.Create(newComplaint)
 	if err != nil {
 		return "", err
 	}
@@ -68,7 +72,7 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 }
 
 func (s *Service) GetBugReports(limit, offset int) ([]*models.BugReportModel, error) {
-	complaints, err := s.store.GetAll(limit, offset)
+	complaints, err := s.bugReportStore.GetAll(limit, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -62,7 +62,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	complaintRoute := r.Group("/complaints")
 	{
-		bugReportStore := bug_report_repo.NewMysqlComplaintRepository(s.DB)
+		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		complaintService := complaint_service.NewService(bugReportStore, s.FS, s.Encrypt)
 		complaintHandler := complaint.NewHandler(complaintService)
 
