@@ -11,7 +11,7 @@ import (
 	"nearbyassist/internal/middleware"
 	admin_repo "nearbyassist/internal/repository/admin"
 	application_repo "nearbyassist/internal/repository/application"
-	complaint_repo "nearbyassist/internal/repository/complaint"
+	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
 	map_repo "nearbyassist/internal/repository/map"
 	notification_repo "nearbyassist/internal/repository/notification"
@@ -62,11 +62,11 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	complaintRoute := r.Group("/complaints")
 	{
-		complaintStore := complaint_repo.NewMysqlComplaintRepository(s.DB)
-		complaintService := complaint_service.NewService(complaintStore, s.FS, s.Encrypt)
+		bugReportStore := bug_report_repo.NewMysqlComplaintRepository(s.DB)
+		complaintService := complaint_service.NewService(bugReportStore, s.FS, s.Encrypt)
 		complaintHandler := complaint.NewHandler(complaintService)
 
-		complaintRoute.GET("", complaintHandler.GetComplaints, middleware.CheckSession)
+		complaintRoute.GET("", complaintHandler.GetBugReports, middleware.CheckSession)
 	}
 
 	applicationRoute := r.Group("/vendor-applications")

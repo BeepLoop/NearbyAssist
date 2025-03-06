@@ -1,4 +1,4 @@
-package complaint_repo
+package bug_report_repo
 
 import (
 	"context"
@@ -19,7 +19,7 @@ func NewMysqlComplaintRepository(db *sqlx.DB) *MysqlComplaintRepository {
 	}
 }
 
-func (s *MysqlComplaintRepository) CreateBugReport(data *models.BugReportModel) (string, error) {
+func (s *MysqlComplaintRepository) Create(data *models.BugReportModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -72,13 +72,13 @@ func (s *MysqlComplaintRepository) CreateBugReport(data *models.BugReportModel) 
 	return data.Id, nil
 }
 
-func (s *MysqlComplaintRepository) GetAll(limit, offset int) ([]*models.ComplaintModel, error) {
+func (s *MysqlComplaintRepository) GetAll(limit, offset int) ([]*models.BugReportModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := "SELECT * FROM BugReport ORDER BY createdAt DESC LIMIT ? OFFSET ?"
 
-	complaints := make([]*models.ComplaintModel, 0)
+	complaints := make([]*models.BugReportModel, 0)
 	if err := s.db.SelectContext(ctx, &complaints, query, limit, offset); err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (s *MysqlComplaintRepository) GetAll(limit, offset int) ([]*models.Complain
 	return complaints, nil
 }
 
-func (s *MysqlComplaintRepository) FindById(id string) (*models.ComplaintModel, error) {
+func (s *MysqlComplaintRepository) FindById(id string) (*models.BugReportModel, error) {
 	// TODO: Implement this method
 	return nil, nil
 }

@@ -1,6 +1,6 @@
 package models
 
-type SystemComplaintModel struct {
+type BugReportModel struct {
 	Model
 	UpdateableModel
 	Title  string `json:"title" db:"title"`

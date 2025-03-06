@@ -1,6 +1,6 @@
 package request
 
-type SystemComplaintPayload struct {
+type BugReportPayload struct {
 	Title  string `json:"title" validate:"required"`
 	Detail string `json:"detail" validate:"required"`
 }

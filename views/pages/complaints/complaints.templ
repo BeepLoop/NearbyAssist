@@ -7,7 +7,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ Complaints(complaints []models.ComplaintModel) {
+templ Complaints(complaints []models.BugReportModel) {
 	@layout.Layout() {
 		@partials.PageBanner("Complaints", "Manage user complaints and feedback")
 		@complaintData(complaints)
@@ -15,7 +15,7 @@ templ Complaints(complaints []models.ComplaintModel) {
 	}
 }
 
-templ complaintData(complaints []models.ComplaintModel) {
+templ complaintData(complaints []models.BugReportModel) {
 	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="text-white text-sm font-semibold bg-primary-greener">

@@ -15,7 +15,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-func Complaints(complaints []models.ComplaintModel) templ.Component {
+func Complaints(complaints []models.BugReportModel) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -78,7 +78,7 @@ func Complaints(complaints []models.ComplaintModel) templ.Component {
 	})
 }
 
-func complaintData(complaints []models.ComplaintModel) templ.Component {
+func complaintData(complaints []models.BugReportModel) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

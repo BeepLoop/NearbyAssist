@@ -15,7 +15,7 @@ const (
 	DEFAULT_OFFSET = 0
 )
 
-func (h *complaintHandler) GetComplaints(c echo.Context) error {
+func (h *complaintHandler) GetBugReports(c echo.Context) error {
 	limit, err := strconv.Atoi(c.QueryParam("limit"))
 	if err != nil {
 		limit = DEFAULT_LIMIT
@@ -26,17 +26,17 @@ func (h *complaintHandler) GetComplaints(c echo.Context) error {
 		offset = DEFAULT_OFFSET
 	}
 
-	complaints, err := h.complaintService.GetComplaints(limit, offset)
+	complaints, err := h.complaintService.GetBugReports(limit, offset)
 	if err != nil {
-		page := pages.Complaints(make([]models.ComplaintModel, 0))
+		page := pages.Complaints(make([]models.BugReportModel, 0))
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	data := make([]models.ComplaintModel, 0)
+	data := make([]models.BugReportModel, 0)
 	for _, complaint := range complaints {
 		date := utils.FormatDate(complaint.CreatedAt)
 
-		data = append(data, models.ComplaintModel{
+		data = append(data, models.BugReportModel{
 			Model:           models.Model{Id: complaint.Id, CreatedAt: date},
 			UpdateableModel: complaint.UpdateableModel,
 			Title:           complaint.Title,

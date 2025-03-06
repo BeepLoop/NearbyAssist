@@ -3,7 +3,7 @@ package complaint_service
 import (
 	"mime/multipart"
 	"nearbyassist/internal/models"
-	complaint_repo "nearbyassist/internal/repository/complaint"
+	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
@@ -11,17 +11,17 @@ import (
 )
 
 type Service struct {
-	store   complaint_repo.ComplaintRepository
+	store   bug_report_repo.BugReportRepository
 	fs      fs.FileStorage
 	encrypt auth.Encryption
 }
 
-func NewService(store complaint_repo.ComplaintRepository, fs fs.FileStorage, encrypt auth.Encryption) *Service {
+func NewService(store bug_report_repo.BugReportRepository, fs fs.FileStorage, encrypt auth.Encryption) *Service {
 	return &Service{store: store, fs: fs, encrypt: encrypt}
 }
 
-func (s *Service) CreateSystemComplaint(req *request.SystemComplaintPayload, files []*multipart.FileHeader) (string, error) {
-	newComplaint := new(models.SystemComplaintModel)
+func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multipart.FileHeader) (string, error) {
+	newComplaint := new(models.BugReportModel)
 	newComplaint.Title = req.Title
 	newComplaint.Detail = req.Detail
 
@@ -59,7 +59,7 @@ func (s *Service) CreateSystemComplaint(req *request.SystemComplaintPayload, fil
 		newComplaint.Detail = cipher
 	}
 
-	complaintId, err := s.store.CreateSystemComplaint(newComplaint)
+	complaintId, err := s.store.Create(newComplaint)
 	if err != nil {
 		return "", err
 	}
@@ -67,7 +67,7 @@ func (s *Service) CreateSystemComplaint(req *request.SystemComplaintPayload, fil
 	return complaintId, nil
 }
 
-func (s *Service) GetComplaints(limit, offset int) ([]*models.ComplaintModel, error) {
+func (s *Service) GetBugReports(limit, offset int) ([]*models.BugReportModel, error) {
 	complaints, err := s.store.GetAll(limit, offset)
 	if err != nil {
 		return nil, err

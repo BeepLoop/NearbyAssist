@@ -16,6 +16,4 @@ type AdminRepository interface {
 
 	// Check if refreshToken is blacklisted, if blacklisted return nil else return error
 	IsRefreshTokenBlacklisted(refreshToken string) error
-
-	CreateSystemComplaint(data *models.SystemComplaintModel) (string, error)
 }

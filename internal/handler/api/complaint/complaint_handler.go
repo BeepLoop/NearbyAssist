@@ -18,11 +18,11 @@ func NewHandler(complaintService *complaint_service.Service) *complaintHandler {
 	return &complaintHandler{complaintService: complaintService}
 }
 
-func (h *complaintHandler) CreateSystemComplaint(c echo.Context) error {
+func (h *complaintHandler) CreateBugReport(c echo.Context) error {
 	title := c.FormValue("title")
 	detail := c.FormValue("detail")
 
-	req := new(request.SystemComplaintPayload)
+	req := new(request.BugReportPayload)
 	req.Title = title
 	req.Detail = detail
 
@@ -41,7 +41,7 @@ func (h *complaintHandler) CreateSystemComplaint(c echo.Context) error {
 		})
 	}
 
-	complaintId, err := h.complaintService.CreateSystemComplaint(req, files)
+	complaintId, err := h.complaintService.CreateBugReport(req, files)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating system complaint",

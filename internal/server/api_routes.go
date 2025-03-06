@@ -18,7 +18,7 @@ import (
 	"nearbyassist/internal/handler/api/verification"
 	"nearbyassist/internal/middleware"
 	application_repo "nearbyassist/internal/repository/application"
-	complaint_repo "nearbyassist/internal/repository/complaint"
+	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
 	message_repo "nearbyassist/internal/repository/message"
 	notification_repo "nearbyassist/internal/repository/notification"
@@ -252,11 +252,11 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	complaintRoute := v1.Group("/complaints")
 	{
 
-		complaintStore := complaint_repo.NewMysqlComplaintRepository(s.DB)
-		complaintService := complaint_service.NewService(complaintStore, s.FS, s.Encrypt)
+		bugReportStore := bug_report_repo.NewMysqlComplaintRepository(s.DB)
+		complaintService := complaint_service.NewService(bugReportStore, s.FS, s.Encrypt)
 		handler := complaint.NewHandler(complaintService)
 
-		complaintRoute.POST("/system", handler.CreateSystemComplaint)
+		complaintRoute.POST("/system", handler.CreateBugReport)
 		complaintRoute.POST("/vendor", handler.ReportVendor)
 	}
 

@@ -81,7 +81,7 @@ func (s *MysqlDashboardRepository) GetBugReportData() (*models.WeeklyBugReportDa
         FROM 
             date_series d
         LEFT JOIN 
-            SystemComplaint s
+            BugReport s
         ON 
             DATE(s.createdAt) = d.reportDate
         GROUP BY 
@@ -113,7 +113,7 @@ func (s *MysqlDashboardRepository) GetBugReportData() (*models.WeeklyBugReportDa
         FROM 
             date_series d
         LEFT JOIN 
-            SystemComplaint s
+            BugReport s
         ON 
             DATE(s.createdAt) = d.reportDate
         GROUP BY 
