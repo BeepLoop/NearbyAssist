@@ -38,10 +38,11 @@ type Config struct {
 	APPLICATION_PROOF_DIR string
 	POLICE_CLEARANCE_DIR  string
 	SERVICE_PHOTO_DIR     string
-	SYS_COMPLAINT_DIR     string
 	ID_FRONT_DIR          string
 	ID_BACK_DIR           string
 	FACE_IMG_DIR          string
+	BUG_REPORT_DIR        string
+	REPORT_USER_DIR       string
 }
 
 func GetConfig() *Config {
@@ -82,10 +83,11 @@ func initialize() *Config {
 		APPLICATION_PROOF_DIR: getEnv("APPLICATION_PROOF_DIR", "uploads/application_proof"),
 		POLICE_CLEARANCE_DIR:  getEnv("POLICE_CLEARANCE_DIR", "uploads/police_clearance"),
 		SERVICE_PHOTO_DIR:     getEnv("SERVICE_PHOTO_DIR", "uploads/service_photo"),
-		SYS_COMPLAINT_DIR:     getEnv("SYSTEM_COMPLAINT_DIR", "uploads/system_complaint"),
 		ID_FRONT_DIR:          getEnv("VERIFICATION_FRONT_ID_DIR", "uploads/verification/front_id"),
 		ID_BACK_DIR:           getEnv("VERIFICATION_BACK_ID_DIR", "uploads/verification/back_id"),
 		FACE_IMG_DIR:          getEnv("VERIFICATION_FACE_DIR", "uploads/verification/face"),
+		BUG_REPORT_DIR:        getEnv("BUG_REPORT_DIR", "uploads/bug_report"),
+		REPORT_USER_DIR:       getEnv("REPORT_USER_DIR", "uploads/report_user"),
 
 		ROUTE_ENGINE_URL: getEnv("ROUTE_ENGINE_URL", "http://127.0.0.1:5000"),
 

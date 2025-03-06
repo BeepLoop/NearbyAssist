@@ -4,6 +4,7 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/models"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
+	report_user_repo "nearbyassist/internal/repository/report_user"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
@@ -11,23 +12,27 @@ import (
 )
 
 type Service struct {
-	bugReportStore bug_report_repo.BugReportRepository
-	fs             fs.FileStorage
-	encrypt        auth.Encryption
+	reportUserStore report_user_repo.ReportUserRepository
+	bugReportStore  bug_report_repo.BugReportRepository
+	fs              fs.FileStorage
+	encrypt         auth.Encryption
 }
 
-func NewService(bugReportStore bug_report_repo.BugReportRepository, fs fs.FileStorage, encrypt auth.Encryption) *Service {
+func NewService(reportUserStore report_user_repo.ReportUserRepository, bugReportStore bug_report_repo.BugReportRepository, fs fs.FileStorage, encrypt auth.Encryption) *Service {
 	return &Service{
-		bugReportStore: bugReportStore,
-		fs:             fs,
-		encrypt:        encrypt,
+		reportUserStore: reportUserStore,
+		bugReportStore:  bugReportStore,
+		fs:              fs,
+		encrypt:         encrypt,
 	}
 }
 
 func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multipart.FileHeader) (string, error) {
-	newComplaint := new(models.BugReportModel)
-	newComplaint.Title = req.Title
-	newComplaint.Detail = req.Detail
+	reportData := &models.BugReportModel{
+		Title:  req.Title,
+		Detail: req.Detail,
+		Images: make([]string, 0),
+	}
 
 	for _, file := range files {
 		bytes, err := utils.FileToBytes(file)
@@ -41,34 +46,72 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 
 		fileData := fs.File{
 			Data:     cipher,
-			Category: fs.SYS_COMPLAINT_DIR,
+			Category: fs.BUG_REPORT_DIR,
 		}
 		url, err := s.fs.SaveFile(fileData)
 		if err != nil {
 			return "", err
 		}
 
-		newComplaint.Images = append(newComplaint.Images, url)
+		reportData.Images = append(reportData.Images, url)
 	}
 
 	if cipher, err := s.encrypt.EncryptString(req.Title); err != nil {
 		return "", err
 	} else {
-		newComplaint.Title = cipher
+		reportData.Title = cipher
 	}
 
 	if cipher, err := s.encrypt.EncryptString(req.Detail); err != nil {
 		return "", err
 	} else {
-		newComplaint.Detail = cipher
+		reportData.Detail = cipher
 	}
 
-	complaintId, err := s.bugReportStore.Create(newComplaint)
+	complaintId, err := s.bugReportStore.Create(reportData)
 	if err != nil {
 		return "", err
 	}
 
 	return complaintId, nil
+}
+
+func (s *Service) ReportUser(req *request.ReportUserPayload, files []*multipart.FileHeader) (string, error) {
+	reportData := &models.ReportedUserModel{
+		UserId: req.UserId,
+		Title:  req.Title,
+		Reason: req.Reason,
+		Images: make([]string, 0),
+	}
+
+	for _, file := range files {
+		bytes, err := utils.FileToBytes(file)
+		if err != nil {
+		}
+
+		cipher, err := s.encrypt.EncryptFile(bytes)
+		if err != nil {
+			return "", err
+		}
+
+		fileData := fs.File{
+			Data:     cipher,
+			Category: fs.REPORT_USER_DIR,
+		}
+		url, err := s.fs.SaveFile(fileData)
+		if err != nil {
+			return "", err
+		}
+
+		reportData.Images = append(reportData.Images, url)
+	}
+
+	reportId, err := s.reportUserStore.Create(reportData)
+	if err != nil {
+		return "", err
+	}
+
+	return reportId, nil
 }
 
 func (s *Service) GetBugReports(limit, offset int) ([]*models.BugReportModel, error) {

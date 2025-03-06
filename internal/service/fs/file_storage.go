@@ -23,8 +23,9 @@ const (
 	FACE                  Category = "face"
 	APPLICATION_PROOF_DIR Category = "application_proof"
 	SERVICE_PHOTO_DIR     Category = "service_photo"
-	SYS_COMPLAINT_DIR     Category = "system_complaint"
 	POLICE_CLEARANCE_DIR  Category = "police_clearance"
+	BUG_REPORT_DIR        Category = "bug_report"
+	REPORT_USER_DIR       Category = "report_user"
 )
 
 type File struct {

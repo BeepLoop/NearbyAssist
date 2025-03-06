@@ -22,6 +22,7 @@ import (
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
 	message_repo "nearbyassist/internal/repository/message"
 	notification_repo "nearbyassist/internal/repository/notification"
+	report_user_repo "nearbyassist/internal/repository/report_user"
 	review_repo "nearbyassist/internal/repository/review"
 	saved_service_repo "nearbyassist/internal/repository/saved_service"
 	service_repo "nearbyassist/internal/repository/service"
@@ -252,8 +253,9 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	complaintRoute := v1.Group("/complaints")
 	{
 
+		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
-		complaintService := complaint_service.NewService(bugReportStore, s.FS, s.Encrypt)
+		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, s.FS, s.Encrypt)
 		handler := complaint.NewHandler(complaintService)
 
 		complaintRoute.POST("/system", handler.CreateBugReport)

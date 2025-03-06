@@ -173,13 +173,13 @@ func (s *MysqlDashboardRepository) GetVendorReportData() (*models.WeeklyVendorRe
         )
         SELECT 
             d.reportDate AS date,
-            COUNT(v.id) AS count
+            COUNT(ru.id) AS count
         FROM 
             date_series d
         LEFT JOIN 
-            VendorComplaint v
+            ReportedUser ru
         ON 
-            DATE(v.createdAt) = d.reportDate
+            DATE(ru.createdAt) = d.reportDate
         GROUP BY 
             d.reportDate
         ORDER BY 
@@ -205,13 +205,13 @@ func (s *MysqlDashboardRepository) GetVendorReportData() (*models.WeeklyVendorRe
         )
         SELECT 
             d.reportDate AS date,
-            COUNT(v.id) AS count
+            COUNT(ru.id) AS count
         FROM 
             date_series d
         LEFT JOIN 
-            VendorComplaint v
+            ReportedUser ru
         ON 
-            DATE(v.createdAt) = d.reportDate
+            DATE(ru.createdAt) = d.reportDate
         GROUP BY 
             d.reportDate
         ORDER BY 

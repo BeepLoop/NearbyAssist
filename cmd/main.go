@@ -36,8 +36,9 @@ func main() {
 		fs.FACE:                  config.FACE_IMG_DIR,
 		fs.APPLICATION_PROOF_DIR: config.APPLICATION_PROOF_DIR,
 		fs.SERVICE_PHOTO_DIR:     config.SERVICE_PHOTO_DIR,
-		fs.SYS_COMPLAINT_DIR:     config.SYS_COMPLAINT_DIR,
 		fs.POLICE_CLEARANCE_DIR:  config.POLICE_CLEARANCE_DIR,
+		fs.BUG_REPORT_DIR:        config.BUG_REPORT_DIR,
+		fs.REPORT_USER_DIR:       config.REPORT_USER_DIR,
 	}
 	storage := fs.NewDiskStorage(directories, hash)
 

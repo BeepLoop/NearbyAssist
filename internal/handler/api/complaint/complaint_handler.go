@@ -55,6 +55,40 @@ func (h *complaintHandler) CreateBugReport(c echo.Context) error {
 }
 
 func (h *complaintHandler) ReportVendor(c echo.Context) error {
-	// TODO: Implement filing vendor complaint/report
-	return c.JSON(http.StatusNoContent, nil)
+	userId := c.FormValue("userId")
+	title := c.FormValue("title")
+	detail := c.FormValue("reason")
+
+	req := &request.ReportUserPayload{
+		UserId: userId,
+		Title:  title,
+		Reason: detail,
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Invalid request payload",
+			Error:   err.Error(),
+		})
+	}
+
+	files, err := utils.FormParser(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error parsing form",
+			Error:   err.Error(),
+		})
+	}
+
+	reportId, err := h.complaintService.ReportUser(req, files)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error reporting user",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, utils.Mapper{
+		"reportId": reportId,
+	})
 }
