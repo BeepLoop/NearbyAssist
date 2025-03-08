@@ -22,14 +22,14 @@ templ logo() {
 templ user() {
 	<div
 		x-data="{ isOpen: false, openedWithKeyboard: false }"
-		class="relative outline-1 outline-pale-gray p-2 hover:bg-gray-200 hover:opacity-75"
+		class="relative outline-1 outline-pale-gray"
 		x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
 	>
 		<!-- Toggle Button -->
 		<button
 			type="button"
 			x-on:click="isOpen = ! isOpen"
-			class="inline-flex w-full justify-between items-center gap-2 whitespace-nowrap text-sm tracking-wide transition"
+			class="p-2 inline-flex w-full justify-between items-center gap-2 whitespace-nowrap text-sm tracking-wide transition cursor-pointer hover:bg-primary/50 hover:opacity-75"
 			aria-haspopup="true"
 			x-on:keydown.space.prevent="openedWithKeyboard = true"
 			x-on:keydown.enter.prevent="openedWithKeyboard = true"
