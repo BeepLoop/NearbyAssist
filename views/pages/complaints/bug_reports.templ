@@ -1,0 +1,56 @@
+package pages
+
+import (
+	"fmt"
+	"nearbyassist/internal/models"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ BugReports(bugs []models.BugReportModel) {
+	@layout.Layout() {
+		@partials.PageBanner("Bug Reports", "View reported bugs")
+		@bugReportTable(bugs)
+		@partials.Pagination()
+	}
+}
+
+templ bugReportTable(bugs []models.BugReportModel) {
+	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
+		<table class="w-full text-left text-sm">
+			<thead class="text-white text-sm font-semibold bg-primary-greener">
+				<tr>
+					<th scope="col" class="p-4">Complaint ID</th>
+					<th scope="col" class="p-4">Submitted On</th>
+					<th scope="col" class="p-4">Action</th>
+				</tr>
+			</thead>
+			<tbody class="divide-y divide-gray-300">
+				if len(bugs) < 1 {
+					<tr class="">
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable">Empty</td>
+					</tr>
+				} else {
+					for _, complaint := range bugs {
+						<tr class="text-xs">
+							<td class="p-4">
+								{ complaint.Id }
+							</td>
+							<td class="p-4">{ complaint.CreatedAt }</td>
+							<td class="p-4">
+								<ul>
+									<a
+										href={ templ.SafeURL(fmt.Sprintf("/admin/complaints/%s", complaint.Id)) }
+										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
+									>
+										view complaint
+									</a>
+								</ul>
+							</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+}

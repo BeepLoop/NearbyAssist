@@ -68,7 +68,8 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, s.FS, s.Encrypt)
 		complaintHandler := complaint.NewHandler(complaintService)
 
-		complaintRoute.GET("", complaintHandler.GetBugReports, middleware.CheckSession)
+		complaintRoute.GET("/bugs", complaintHandler.GetBugReports, middleware.CheckSession)
+		complaintRoute.GET("/users", complaintHandler.GetReportedUsers, middleware.CheckSession)
 	}
 
 	applicationRoute := r.Group("/vendor-applications")

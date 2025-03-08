@@ -104,7 +104,7 @@ templ user() {
 }
 
 templ navlist() {
-	<div class="pl-3">
+	<div class="pl-3 text-xs">
 		<ul class="">
 			@navItem("/admin/dashboard", "Dashboard")
 			@navItem("/admin/map", "Map")
@@ -115,7 +115,10 @@ templ navlist() {
 			@navWithSubItem("User Management") {
 				@subNavItem("/admin/account-management", "Users")
 			}
-			@navItem("/admin/complaints", "Complaints")
+			@navWithSubItem("Reports") {
+				@subNavItem("/admin/complaints/users", "Reported Users")
+				@subNavItem("/admin/complaints/bugs", "Bug reports")
+			}
 		</ul>
 	</div>
 }
@@ -146,7 +149,7 @@ templ navWithSubItem(title string) {
 		href="#"
 		class="flex items-center gap-2 px-3 py-2 text-sm rounded-md text-neutral-dark underline-offset-2"
 	>
-		<span>{ title }</span>
+		<span class="text-xs">{ title }</span>
 	</a>
 	<ul class="pl-4">
 		{ children... }

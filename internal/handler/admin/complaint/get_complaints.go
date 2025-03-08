@@ -10,11 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const (
-	DEFAULT_LIMIT  = 10
-	DEFAULT_OFFSET = 0
-)
-
 func (h *complaintHandler) GetBugReports(c echo.Context) error {
 	limit, err := strconv.Atoi(c.QueryParam("limit"))
 	if err != nil {
@@ -28,7 +23,7 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 
 	complaints, err := h.complaintService.GetBugReports(limit, offset)
 	if err != nil {
-		page := pages.Complaints(make([]models.BugReportModel, 0))
+		page := pages.BugReports(make([]models.BugReportModel, 0))
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -44,6 +39,6 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 		})
 	}
 
-	page := pages.Complaints(data)
+	page := pages.BugReports(data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

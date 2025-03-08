@@ -7,15 +7,15 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ Complaints(complaints []models.BugReportModel) {
+templ ReportedUsers(users []models.ReportedUserModel) {
 	@layout.Layout() {
-		@partials.PageBanner("Complaints", "Manage user complaints and feedback")
-		@complaintData(complaints)
+		@partials.PageBanner("Reported Users", "View reported users")
+		@reportedUsersTable(users)
 		@partials.Pagination()
 	}
 }
 
-templ complaintData(complaints []models.BugReportModel) {
+templ reportedUsersTable(users []models.ReportedUserModel) {
 	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="text-white text-sm font-semibold bg-primary-greener">
@@ -26,24 +26,24 @@ templ complaintData(complaints []models.BugReportModel) {
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-300">
-				if len(complaints) < 1 {
+				if len(users) < 1 {
 					<tr class="">
 						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable">Empty</td>
 					</tr>
 				} else {
-					for _, complaint := range complaints {
+					for _, user := range users {
 						<tr class="text-xs">
 							<td class="p-4">
-								{ complaint.Id }
+								{ user.Id }
 							</td>
-							<td class="p-4">{ complaint.CreatedAt }</td>
+							<td class="p-4">{ user.CreatedAt }</td>
 							<td class="p-4">
 								<ul>
 									<a
-										href={ templ.SafeURL(fmt.Sprintf("/admin/complaints/%s", complaint.Id)) }
+										href={ templ.SafeURL(fmt.Sprintf("/admin/complaints/%s", user.Id)) }
 										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
 									>
-										view complaint
+										view report
 									</a>
 								</ul>
 							</td>

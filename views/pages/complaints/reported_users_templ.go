@@ -15,7 +15,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-func Complaints(complaints []models.BugReportModel) templ.Component {
+func ReportedUsers(users []models.ReportedUserModel) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -48,7 +48,7 @@ func Complaints(complaints []models.BugReportModel) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = partials.PageBanner("Complaints", "Manage user complaints and feedback").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.PageBanner("Reported Users", "View reported users").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -56,7 +56,7 @@ func Complaints(complaints []models.BugReportModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = complaintData(complaints).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = reportedUsersTable(users).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -78,7 +78,7 @@ func Complaints(complaints []models.BugReportModel) templ.Component {
 	})
 }
 
-func complaintData(complaints []models.BugReportModel) templ.Component {
+func reportedUsersTable(users []models.ReportedUserModel) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -103,21 +103,21 @@ func complaintData(complaints []models.BugReportModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(complaints) < 1 {
+		if len(users) < 1 {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"\"><td class=\"px-6 py-4 text-neutral-dark\" align=\"center\" colspan=\"4\" id=\"emptyTable\">Empty</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			for _, complaint := range complaints {
+			for _, user := range users {
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"text-xs\"><td class=\"p-4\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(complaint.Id)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Id)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/complaints.templ`, Line: 37, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_users.templ`, Line: 37, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -128,9 +128,9 @@ func complaintData(complaints []models.BugReportModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(complaint.CreatedAt)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.CreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/complaints.templ`, Line: 39, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_users.templ`, Line: 39, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -140,12 +140,12 @@ func complaintData(complaints []models.BugReportModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var6 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/complaints/%s", complaint.Id))
+				var templ_7745c5c3_Var6 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/complaints/%s", user.Id))
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0\">view complaint</a></ul></td></tr>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0\">view report</a></ul></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

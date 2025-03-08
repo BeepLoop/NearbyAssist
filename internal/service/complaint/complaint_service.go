@@ -76,11 +76,44 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 	return complaintId, nil
 }
 
+func (s *Service) GetBugReports(limit, offset int) ([]*models.BugReportModel, error) {
+	complaints, err := s.bugReportStore.GetAll(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, complaint := range complaints {
+		if cipher, err := s.encrypt.DecryptString(complaint.Title); err != nil {
+			return nil, err
+		} else {
+			complaint.Title = cipher
+		}
+
+		if cipher, err := s.encrypt.DecryptString(complaint.Detail); err != nil {
+			return nil, err
+		} else {
+			complaint.Detail = cipher
+		}
+	}
+
+	return complaints, nil
+}
+
 func (s *Service) ReportUser(req *request.ReportUserPayload, files []*multipart.FileHeader) (string, error) {
+	reason, err := s.encrypt.EncryptString(req.Reason)
+	if err != nil {
+		return "", err
+	}
+
+	detail, err := s.encrypt.EncryptString(req.Detail)
+	if err != nil {
+		return "", err
+	}
+
 	reportData := &models.ReportedUserModel{
 		UserId: req.UserId,
-		Reason: req.Reason,
-		Detail: req.Detail,
+		Reason: reason,
+		Detail: detail,
 		Images: make([]string, 0),
 	}
 
@@ -114,25 +147,25 @@ func (s *Service) ReportUser(req *request.ReportUserPayload, files []*multipart.
 	return reportId, nil
 }
 
-func (s *Service) GetBugReports(limit, offset int) ([]*models.BugReportModel, error) {
-	complaints, err := s.bugReportStore.GetAll(limit, offset)
+func (s *Service) GetReportedUsers(limit, offset int) ([]*models.ReportedUserModel, error) {
+	users, err := s.reportUserStore.GetAll(limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, complaint := range complaints {
-		if cipher, err := s.encrypt.DecryptString(complaint.Title); err != nil {
+	for _, user := range users {
+		if decrypted, err := s.encrypt.DecryptString(user.Reason); err != nil {
 			return nil, err
 		} else {
-			complaint.Title = cipher
+			user.Reason = decrypted
 		}
 
-		if cipher, err := s.encrypt.DecryptString(complaint.Detail); err != nil {
+		if decrypted, err := s.encrypt.DecryptString(user.Detail); err != nil {
 			return nil, err
 		} else {
-			complaint.Detail = cipher
+			user.Detail = decrypted
 		}
 	}
 
-	return complaints, nil
+	return users, nil
 }
