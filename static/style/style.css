@@ -384,6 +384,7 @@
     --color-pale-gray: var(--color-gray-300);
     --color-neutral-dark: var(--color-neutral-900);
     --color-neutral-gray: var(--color-neutral-600);
+    --color-neutral-gray-lighter: var(--color-neutral-400);
     --color-good: var(--color-blue-500);
     --color-success: var(--color-green-700);
     --color-warning: var(--color-amber-600);
@@ -948,8 +949,8 @@
   .border-danger {
     border-color: var(--color-danger);
   }
-  .border-gray-400 {
-    border-color: var(--color-gray-400);
+  .border-neutral-gray-lighter {
+    border-color: var(--color-neutral-gray-lighter);
   }
   .border-pale-gray {
     border-color: var(--color-pale-gray);
@@ -992,9 +993,6 @@
   }
   .bg-neutral-50 {
     background-color: var(--color-neutral-50);
-  }
-  .bg-neutral-gray {
-    background-color: var(--color-neutral-gray);
   }
   .bg-neutral-gray\/50 {
     background-color: color-mix(in oklab, var(--color-neutral-gray) 50%, transparent);
@@ -1332,6 +1330,9 @@
   }
   .outline-neutral-gray {
     outline-color: var(--color-neutral-gray);
+  }
+  .outline-neutral-gray-lighter {
+    outline-color: var(--color-neutral-gray-lighter);
   }
   .outline-pale-gray {
     outline-color: var(--color-pale-gray);

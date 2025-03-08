@@ -4,8 +4,8 @@ import "nearbyassist/views/layout"
 
 templ Login() {
 	@layout.BasicLayout() {
-		<div class="fixed left-0 right-0 z-0 bg-neutral-gray h-screen grid place-items-center">
-			<div class="w-full max-w-sm rounded-md bg-white p-8 shadow-2xl has-outline outline-gray-300">
+		<div class="fixed left-0 right-0 z-0 h-screen grid place-items-center">
+			<div class="w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter">
 				<h2 class="mb-4 text-2xl font-semibold text-center">
 					Welcome back
 				</h2>
@@ -20,7 +20,7 @@ templ Login() {
 							id="username"
 							name="username"
 							placeholder="Username"
-							class="mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue"
+							class="mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue"
 							autoComplete="off"
 							autofocus
 							required
@@ -32,7 +32,7 @@ templ Login() {
 							id="password"
 							name="password"
 							placeholder="Password"
-							class="mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue"
+							class="mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue"
 							autoComplete="off"
 							required
 						/>
