@@ -37,9 +37,9 @@ func (s *MysqlReportUserRepository) Create(data *models.ReportedUserModel) (stri
 
 	insertQuery := `
         INSERT INTO 
-            ReportedUser (id, userId, title, reason)
+            ReportedUser (id, userId, reason, detail)
         VALUES
-            (:id, :userId, :title, :reason)
+            (:id, :userId, :reason, :detail)
     `
 	if _, err := tx.NamedExecContext(ctx, insertQuery, data); err != nil {
 		return "", err

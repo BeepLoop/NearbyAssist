@@ -79,8 +79,8 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 func (s *Service) ReportUser(req *request.ReportUserPayload, files []*multipart.FileHeader) (string, error) {
 	reportData := &models.ReportedUserModel{
 		UserId: req.UserId,
-		Title:  req.Title,
 		Reason: req.Reason,
+		Detail: req.Detail,
 		Images: make([]string, 0),
 	}
 

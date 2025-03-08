@@ -54,15 +54,15 @@ func (h *complaintHandler) CreateBugReport(c echo.Context) error {
 	})
 }
 
-func (h *complaintHandler) ReportVendor(c echo.Context) error {
+func (h *complaintHandler) ReportUser(c echo.Context) error {
 	userId := c.FormValue("userId")
-	title := c.FormValue("title")
-	detail := c.FormValue("reason")
+	reason := c.FormValue("reason")
+	detail := c.FormValue("detail")
 
 	req := &request.ReportUserPayload{
 		UserId: userId,
-		Title:  title,
-		Reason: detail,
+		Reason: reason,
+		Detail: detail,
 	}
 
 	if err := c.Validate(req); err != nil {

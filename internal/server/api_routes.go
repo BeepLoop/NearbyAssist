@@ -259,7 +259,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		handler := complaint.NewHandler(complaintService)
 
 		complaintRoute.POST("/system", handler.CreateBugReport)
-		complaintRoute.POST("/vendor", handler.ReportVendor)
+		complaintRoute.POST("/user", handler.ReportUser)
 	}
 
 	// ===== E2E Encryption =======
