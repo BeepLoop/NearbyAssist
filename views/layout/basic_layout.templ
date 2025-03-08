@@ -1,0 +1,41 @@
+package layout
+
+templ BasicLayout() {
+	<!DOCTYPE html>
+	<html lang="en">
+		@head()
+		<body class="font-roboto">
+			<header class="flex items-center px-4 py-2 justify-between z-50">
+				<!-- Logo -->
+				<a href="/" class="cursor-pointer">
+					<div class="">
+						<div class="text-xl font-bold">
+							<span class="">Nearby</span>
+							<span class="text-green-700">Assist</span>
+						</div>
+					</div>
+				</a>
+				<!-- Links -->
+				<div>
+					<ul class="flex items-center gap-4 text-sm">
+						<li>
+							<a
+								href="/privacy_policy"
+								class="hover:underline"
+							>Privacy Policy</a>
+						</li>
+						<li>
+							<a
+								href="/terms_and_conditions"
+								class="hover:underline"
+							>Terms and Conditions</a>
+						</li>
+					</ul>
+				</div>
+			</header>
+			<div>
+				{ children... }
+			</div>
+		</body>
+	</html>
+}

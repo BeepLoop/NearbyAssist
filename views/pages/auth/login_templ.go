@@ -43,13 +43,13 @@ func Login() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-gray-200 flex min-h-screen items-center justify-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl has-outline outline-gray-300\"><h2 class=\"mb-4 text-2xl font-semibold text-center\">Welcome back</h2><form action=\"/admin/login\" method=\"POST\" class=\"flex flex-col items-center\"><div class=\"mb-4 w-full\"><input type=\"text\" id=\"username\" name=\"username\" placeholder=\"Username\" class=\"mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" autofocus required></div><div class=\"mb-6 w-full\"><input type=\"password\" id=\"password\" name=\"password\" placeholder=\"Password\" class=\"mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" required></div><button type=\"submit\" class=\"w-full rounded-md bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-lightblue focus:outline-none focus:ring-2 focus:ring-blue-lightblue focus:ring-offset-2 hover:bg-blue-600\">Login</button> <a href=\"/\" class=\"pt-4 text-xs text-blue hover:underline\">Home</a></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"fixed left-0 right-0 z-0 bg-neutral-gray h-screen grid place-items-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl has-outline outline-gray-300\"><h2 class=\"mb-4 text-2xl font-semibold text-center\">Welcome back</h2><form action=\"/admin/login\" method=\"POST\" class=\"flex flex-col items-center\"><div class=\"mb-4 w-full text-xs\"><input type=\"text\" id=\"username\" name=\"username\" placeholder=\"Username\" class=\"mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" autofocus required></div><div class=\"mb-6 w-full text-xs\"><input type=\"password\" id=\"password\" name=\"password\" placeholder=\"Password\" class=\"mt-1 w-full rounded-md border border-gray-400 px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" required></div><button type=\"submit\" class=\"w-full rounded-md bg-good px-4 py-2 font-semibold text-xs text-white cursor-pointer hover:opacity-75\">Login</button></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = layout.NoLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layout.BasicLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
