@@ -244,7 +244,6 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
         SELECT  
             v.vendorId,
             v.rating,
-            v.restricted,
             u.name AS vendor,
             u.email AS email,
             u.phone AS phone,
@@ -257,6 +256,16 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
     `
 	if err := s.db.GetContext(ctx, vendor, query, vendorId); err != nil {
 		return nil, err
+	}
+
+	if vendor.VendorId == "" {
+		return nil, errors.New("not found")
+	}
+
+	if restricted, err := s.IsVendorRestricted(vendor.VendorId); err != nil {
+		return nil, err
+	} else {
+		vendor.Restricted = restricted
 	}
 
 	expertiseQuery := `
