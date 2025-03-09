@@ -1,0 +1,22 @@
+package pages
+
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ Expertise(data []models.ExpertiseModel) {
+	@layout.Layout() {
+		@partials.PageBanner("Expertise", "")
+		<div>
+			@templ.JSONScript("expertise", data)
+			<script>
+                (function() {
+                    const data = JSON.parse(document.getElementById("expertise").textContent);
+                    console.log(data);
+                 })();
+            </script>
+		</div>
+	}
+}

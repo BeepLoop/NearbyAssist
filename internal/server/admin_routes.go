@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/handler/admin/auth"
 	"nearbyassist/internal/handler/admin/complaint"
 	"nearbyassist/internal/handler/admin/dashboard"
+	"nearbyassist/internal/handler/admin/expertise"
 	"nearbyassist/internal/handler/admin/management"
 	map_handler "nearbyassist/internal/handler/admin/map"
 	application "nearbyassist/internal/handler/admin/vendor_application"
@@ -13,6 +14,7 @@ import (
 	application_repo "nearbyassist/internal/repository/application"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
+	expertise_repo "nearbyassist/internal/repository/expertise"
 	map_repo "nearbyassist/internal/repository/map"
 	notification_repo "nearbyassist/internal/repository/notification"
 	report_user_repo "nearbyassist/internal/repository/report_user"
@@ -23,6 +25,7 @@ import (
 	application_service "nearbyassist/internal/service/application"
 	complaint_service "nearbyassist/internal/service/complaint"
 	dashboard_service "nearbyassist/internal/service/dashboard"
+	expertise_service "nearbyassist/internal/service/expertise"
 	management_service "nearbyassist/internal/service/management"
 	map_service "nearbyassist/internal/service/map"
 	tag_service "nearbyassist/internal/service/tag"
@@ -113,5 +116,16 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		managementRoute.POST("/unban/:userId", managementHandler.UnbanUser, middleware.CheckSession)
 		managementRoute.POST("/restrict/:userId", managementHandler.RestrictUser, middleware.CheckSession)
 		managementRoute.POST("/unrestrict/:userId", managementHandler.UnrestrictUser, middleware.CheckSession)
+	}
+
+	expertiseRoute := r.Group("/expertise")
+	{
+		expertiseRoute.Use(middleware.CheckSession)
+
+		expertiseStore := expertise_repo.NewMysqlExpertiseRepository(s.DB)
+		expertiseService := expertise_service.NewService(expertiseStore, s.Encrypt, s.Hash)
+		handler := expertise.NewHandler(expertiseService)
+
+		expertiseRoute.GET("", handler.GetIndex)
 	}
 }
