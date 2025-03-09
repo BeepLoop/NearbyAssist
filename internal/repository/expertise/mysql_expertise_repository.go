@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlExpertiseRepository struct {
@@ -17,6 +18,76 @@ func NewMysqlExpertiseRepository(db *sqlx.DB) *MysqlExpertiseRepository {
 	return &MysqlExpertiseRepository{
 		db: db,
 	}
+}
+
+func (s *MysqlExpertiseRepository) Create(data *models.ExpertiseModel) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if generatedId, err := gonanoid.New(); err != nil {
+		return "", err
+	} else {
+		data.Id = generatedId
+	}
+
+	createQuery := "INSERT INTO Expertise (id, title) VALUES (:id, :title)"
+	if _, err := s.db.NamedExecContext(ctx, createQuery, data); err != nil {
+		return "", err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return "", context.DeadlineExceeded
+	}
+
+	return data.Id, nil
+}
+
+func (s *MysqlExpertiseRepository) CreateTag(expertiseId string, data *models.TagModel) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if generatedId, err := gonanoid.New(); err != nil {
+		return "", err
+	} else {
+		data.Id = generatedId
+	}
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return "", err
+	}
+
+	createTagQuery := "INSERT INTO Tag (id, title) VALUES (:id, :title)"
+	if _, err := tx.NamedExecContext(ctx, createTagQuery, data); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return "", err
+		}
+
+		return "", err
+	}
+
+	createRelationshipQuery := "INSERT INTO ExpertiseTag (expertiseId, tagId) VALUES (?, ?)"
+	if _, err := tx.ExecContext(ctx, createRelationshipQuery, expertiseId, data.Id); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return "", err
+		}
+
+		return "", err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return "", err
+		}
+
+		return "", err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return "", context.DeadlineExceeded
+	}
+
+	return data.Id, nil
 }
 
 func (s *MysqlExpertiseRepository) GetAll() ([]*models.ExpertiseModel, error) {

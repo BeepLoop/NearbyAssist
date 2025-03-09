@@ -20,11 +20,14 @@ func NewService(store expertise_repo.ExpertiseRepository, encrypt auth.Encryptio
 	}
 }
 
-func (s *Service) GetAllExpertise() ([]*models.ExpertiseModel, error) {
-	expertise, err := s.store.GetAll()
-	if err != nil {
-		return nil, err
-	}
+func (s *Service) CreateExpertise(data *models.ExpertiseModel) (string, error) {
+	return s.store.Create(data)
+}
 
-	return expertise, nil
+func (s *Service) GetAllExpertise() ([]*models.ExpertiseModel, error) {
+	return s.store.GetAll()
+}
+
+func (s *Service) AddTagToExpertise(expertiseId string, data *models.TagModel) (string, error) {
+	return s.store.CreateTag(expertiseId, data)
 }

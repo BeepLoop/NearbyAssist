@@ -126,6 +126,8 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		expertiseService := expertise_service.NewService(expertiseStore, s.Encrypt, s.Hash)
 		handler := expertise.NewHandler(expertiseService)
 
-		expertiseRoute.GET("", handler.GetIndex)
+		expertiseRoute.GET("", handler.GetAllExpertise)
+		expertiseRoute.POST("", handler.CreateExpertise)
+		expertiseRoute.POST("newTag/:expertiseId", handler.AddTagToExpertise)
 	}
 }
