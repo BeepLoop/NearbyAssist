@@ -40,10 +40,10 @@ templ bugReportTable(bugs []models.BugReportModel) {
 							<td class="p-4">
 								<ul>
 									<a
-										href={ templ.SafeURL(fmt.Sprintf("/admin/complaints/%s", complaint.Id)) }
+										href={ templ.SafeURL(fmt.Sprintf("/admin/complaints/bugs/%s", complaint.Id)) }
 										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
 									>
-										view complaint
+										view bug
 									</a>
 								</ul>
 							</td>
