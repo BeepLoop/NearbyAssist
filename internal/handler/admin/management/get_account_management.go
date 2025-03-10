@@ -21,7 +21,7 @@ func (h *managementHandler) GetAccountManagement(c echo.Context) error {
 	results := make([]*models.UserModel, 0)
 
 	// If query exists, search is performed
-	if params.Has("query") {
+	if params.Has("query") && params.Get("query") != "" {
 		query := params.Get("query")
 
 		user, err := h.managementService.FindUserByEmail(query)
