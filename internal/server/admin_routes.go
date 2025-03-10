@@ -45,15 +45,19 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	dashboardRoute := r.Group("/dashboard")
 	{
+		dashboardRoute.Use(middleware.CheckSession)
+
 		dashboardStore := dashboard_repo.NewMysqlDashboardRepository(s.DB)
 		dashboardService := dashboard_service.NewService(dashboardStore)
 		dashboardHandler := dashboard.NewHandler(dashboardService)
 
-		dashboardRoute.GET("", dashboardHandler.GetDashboard, middleware.CheckSession)
+		dashboardRoute.GET("", dashboardHandler.GetDashboard)
 	}
 
 	mapRoute := r.Group("/map")
 	{
+		mapRoute.Use(middleware.CheckSession)
+
 		tagStore := tag_repo.NewMysqlTagRepository(s.DB)
 		tagService := tag_service.NewService(tagStore)
 
@@ -61,31 +65,35 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		mapService := map_service.NewService(mapStore)
 		mapHandler := map_handler.NewHandler(mapService, tagService)
 
-		mapRoute.GET("", mapHandler.GetMap, middleware.CheckSession)
+		mapRoute.GET("", mapHandler.GetMap)
 	}
 
 	complaintRoute := r.Group("/complaints")
 	{
+		complaintRoute.Use(middleware.CheckSession)
+
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, s.FS, s.Encrypt)
 		complaintHandler := complaint.NewHandler(complaintService)
 
-		complaintRoute.GET("/bugs", complaintHandler.GetBugReports, middleware.CheckSession)
-		complaintRoute.GET("/users", complaintHandler.GetReportedUsers, middleware.CheckSession)
+		complaintRoute.GET("/bugs", complaintHandler.GetBugReports)
+		complaintRoute.GET("/users", complaintHandler.GetReportedUsers)
 	}
 
 	applicationRoute := r.Group("/vendor-applications")
 	{
+		applicationRoute.Use(middleware.CheckSession)
+
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
 		applicationService := application_service.NewService(applicationStore, notificationStore, s.FS, s.Encrypt, s.JWT)
 		applicationHandler := application.NewHandler(applicationService)
 
-		applicationRoute.GET("", applicationHandler.GetVendorApplication, middleware.CheckSession)
-		applicationRoute.GET("/:applicationId", applicationHandler.GetVendorApplicationDetails, middleware.CheckSession)
-		applicationRoute.POST("/accept/:applicationId", applicationHandler.AcceptRequest, middleware.CheckSession)
-		applicationRoute.POST("/reject/:applicationId", applicationHandler.RejectRequest, middleware.CheckSession)
+		applicationRoute.GET("", applicationHandler.GetVendorApplication)
+		applicationRoute.GET("/:applicationId", applicationHandler.GetVendorApplicationDetails)
+		applicationRoute.POST("/accept/:applicationId", applicationHandler.AcceptRequest)
+		applicationRoute.POST("/reject/:applicationId", applicationHandler.RejectRequest)
 	}
 
 	verificationRoute := r.Group("/verification-requests")
@@ -97,25 +105,27 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		requestService := verification_service.NewService(requestStore, notificationStore, s.FS, s.Encrypt, s.JWT)
 		requestHandler := verification.NewHandler(requestService)
 
-		verificationRoute.GET("", requestHandler.GetIdentityVerification, middleware.CheckSession)
-		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails, middleware.CheckSession)
-		verificationRoute.POST("/accept/:requestId", requestHandler.AcceptRequest, middleware.CheckSession)
-		verificationRoute.POST("/reject/:requestId", requestHandler.RejectRequest, middleware.CheckSession)
+		verificationRoute.GET("", requestHandler.GetIdentityVerification)
+		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails)
+		verificationRoute.POST("/accept/:requestId", requestHandler.AcceptRequest)
+		verificationRoute.POST("/reject/:requestId", requestHandler.RejectRequest)
 	}
 
 	managementRoute := r.Group("/account-management")
 	{
+		managementRoute.Use(middleware.CheckSession)
+
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 
 		managementService := management_service.NewService(userStore, s.Encrypt, s.Hash)
 		managementHandler := management.NewHandler(managementService)
 
-		managementRoute.GET("", managementHandler.GetAccountManagement, middleware.CheckSession)
-		managementRoute.GET("/:userId", managementHandler.ViewUserAccount, middleware.CheckSession)
-		managementRoute.POST("/ban/:userId", managementHandler.BanUser, middleware.CheckSession)
-		managementRoute.POST("/unban/:userId", managementHandler.UnbanUser, middleware.CheckSession)
-		managementRoute.POST("/restrict/:userId", managementHandler.RestrictUser, middleware.CheckSession)
-		managementRoute.POST("/unrestrict/:userId", managementHandler.UnrestrictUser, middleware.CheckSession)
+		managementRoute.GET("", managementHandler.GetAccountManagement)
+		managementRoute.GET("/:userId", managementHandler.ViewUserAccount)
+		managementRoute.POST("/ban/:userId", managementHandler.BanUser)
+		managementRoute.POST("/unban/:userId", managementHandler.UnbanUser)
+		managementRoute.POST("/restrict/:userId", managementHandler.RestrictUser)
+		managementRoute.POST("/unrestrict/:userId", managementHandler.UnrestrictUser)
 	}
 
 	expertiseRoute := r.Group("/expertise")
