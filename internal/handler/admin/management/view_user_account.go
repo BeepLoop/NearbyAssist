@@ -32,6 +32,7 @@ func (h *managementHandler) ViewUserAccount(c echo.Context) error {
 		Expertise:  accountData.Expertise,
 		Services:   accountData.Services,
 		Banned:     accountData.Banned,
+		Restricted: accountData.Restricted,
 		Stat:       accountData.Stat,
 	}
 

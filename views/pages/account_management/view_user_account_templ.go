@@ -136,22 +136,7 @@ func ViewUserAccount(data models.UserAccountPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if data.Banned {
-				templ_7745c5c3_Err = partials.BanUserModal("Unban user", fmt.Sprintf("/admin/account-management/unban/%s", data.Id), data.Banned).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = partials.BanUserModal("Ban user", fmt.Sprintf("/admin/account-management/ban/%s", data.Id), data.Banned).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = partials.UnrestrictUser(fmt.Sprintf("/admin/account-management/unrestrict/%s", data.Id)).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = partials.RestrictUser(fmt.Sprintf("/admin/account-management/restrict/%s", data.Id)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = actions(data).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -246,7 +231,7 @@ func userServices(services []*models.ServiceModel) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(service.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 108, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 102, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -259,7 +244,7 @@ func userServices(services []*models.ServiceModel) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatDate(service.CreatedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 109, Col: 76}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/view_user_account.templ`, Line: 103, Col: 76}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -336,6 +321,61 @@ func viewServiceTags(tags []string) templ.Component {
 			}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func actions(data models.UserAccountPageData) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- Dropdown Container --><div x-data=\"{ userActionsOpen: false }\" x-on:keydown.esc.prevent.stop=\"userActionsOpen = false\" class=\"relative\"><!-- Dropdown Toggle Button --><button type=\"button\" class=\"inline-flex gap-2 items-center outline-1 outline-danger rounded-sm px-2 py-1.5 text-sm text-danger fond-medium bg-danger/25 cursor-pointer hover:opacity-75\" id=\"pm-dropdown\" aria-haspopup=\"true\" x-bind:aria-expanded=\"userActionsOpen\" x-on:click=\"userActionsOpen = true\"><span>Actions</span> <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\" data-slot=\"icon\" class=\"hi-micro hi-chevron-down inline-block size-5 opacity-50\" x-bind:class=\"{ &#39;rotate-180&#39;: userActionsOpen }\"><path fill-rule=\"evenodd\" d=\"M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\"></path></svg></button><!-- END Dropdown Toggle Button --><!-- Dropdown --><div x-cloak x-show=\"userActionsOpen\" x-transition:enter=\"transition ease-out duration-100\" x-transition:enter-start=\"opacity-0 -translate-y-3\" x-transition:enter-end=\"opacity-100 translate-y-0\" x-transition:leave=\"transition ease-in duration-75\" x-transition:leave-start=\"opacity-100 translate-y-0\" x-transition:leave-end=\"opacity-0 -translate-y-3\" x-on:click.outside=\"userActionsOpen = false\" role=\"menu\" aria-labelledby=\"pm-dropdown\" class=\"absolute end-0 z-10 mt-2 w-44\"><div class=\"outline-1 outline-pale-gray rounded-sm shadow-xl\"><div class=\"p-1.5 grid gap-1.5\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.Banned {
+			templ_7745c5c3_Err = partials.BanUserModal("Unban user", fmt.Sprintf("/admin/account-management/unban/%s", data.Id), data.Banned).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = partials.BanUserModal("Ban user", fmt.Sprintf("/admin/account-management/ban/%s", data.Id), data.Banned).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if data.Restricted {
+			templ_7745c5c3_Err = partials.UnrestrictUser(fmt.Sprintf("/admin/account-management/unrestrict/%s", data.Id)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = partials.RestrictUser(fmt.Sprintf("/admin/account-management/restrict/%s", data.Id)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div><!-- END Dropdown --></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

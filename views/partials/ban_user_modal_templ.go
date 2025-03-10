@@ -29,7 +29,7 @@ func BanUserModal(text, actionUrl string, isBanned bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{banModalOpen: false}\"><button x-on:click=\"banModalOpen = true\" type=\"button\" class=\"bg-danger rounded-sm p-2 text-white text-center text-sm font-medium cursor-pointer tracking-wide transition hover:opacity-75\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{banModalOpen: false}\"><button x-on:click=\"banModalOpen = true\" type=\"button\" class=\"bg-danger/25 w-full rounded-sm p-2 text-danger text-center text-sm font-medium cursor-pointer transition hover:opacity-75\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
