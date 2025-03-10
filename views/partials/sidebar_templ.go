@@ -327,7 +327,7 @@ func navWithSubItem(title string) templ.Component {
 			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"#\" class=\"flex items-center gap-2 px-3 py-2 text-sm rounded-md text-neutral-dark underline-offset-2\"><span class=\"text-xs\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"#\" class=\"flex items-center gap-2 px-3 py-2 text-sm rounded-md underline-offset-2\"><span class=\"text-xs\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

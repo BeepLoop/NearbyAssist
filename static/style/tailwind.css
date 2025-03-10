@@ -27,6 +27,7 @@
 
 .active {
     background-color: var(--color-primary);
+    opacity: 0.75;
     color: var(--color-white);
 }
 
