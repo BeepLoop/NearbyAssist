@@ -55,7 +55,7 @@ func (h *expertiseHandler) CreateExpertise(c echo.Context) error {
 }
 
 func (h *expertiseHandler) AddTagToExpertise(c echo.Context) error {
-	expertiseId := c.Param("expertiseId")
+	expertiseId := c.FormValue("expertiseId")
 	title := c.FormValue("title")
 
 	data := &models.TagModel{

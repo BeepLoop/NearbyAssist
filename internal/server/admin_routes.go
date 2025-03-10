@@ -128,6 +128,6 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		expertiseRoute.GET("", handler.GetAllExpertise)
 		expertiseRoute.POST("", handler.CreateExpertise)
-		expertiseRoute.POST("newTag/:expertiseId", handler.AddTagToExpertise)
+		expertiseRoute.POST("/tags", handler.AddTagToExpertise)
 	}
 }
