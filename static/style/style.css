@@ -1232,9 +1232,6 @@
   .text-danger {
     color: var(--color-danger);
   }
-  .text-good {
-    color: var(--color-good);
-  }
   .text-gray-100 {
     color: var(--color-gray-100);
   }

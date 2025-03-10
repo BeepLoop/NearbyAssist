@@ -8,4 +8,5 @@ type ExpertiseRepository interface {
 
 	GetAll() ([]*models.ExpertiseModel, error)
 	FindById(id string) (*models.ExpertiseModel, error)
+	FindByTitle(title string) (*models.ExpertiseModel, error)
 }

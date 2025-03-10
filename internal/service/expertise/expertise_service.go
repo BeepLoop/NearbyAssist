@@ -28,6 +28,10 @@ func (s *Service) GetAllExpertise() ([]*models.ExpertiseModel, error) {
 	return s.store.GetAll()
 }
 
+func (s *Service) FindExpertise(query string) (*models.ExpertiseModel, error) {
+	return s.store.FindByTitle(query)
+}
+
 func (s *Service) AddTagToExpertise(expertiseId string, data *models.TagModel) (string, error) {
 	return s.store.CreateTag(expertiseId, data)
 }

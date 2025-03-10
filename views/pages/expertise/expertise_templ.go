@@ -54,23 +54,11 @@ func Expertise(data []models.ExpertiseModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"flex justify-end py-2\"><div class=\"relative flex w-full max-w-xs flex-col gap-1 text-neutral-gray\"><form action=\"/admin/account-management\" method=\"GET\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" aria-hidden=\"true\" class=\"absolute left-2.5 top-1/2 size-5 -translate-y-1/2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg> <input type=\"search\" class=\"w-full rounded-sm outline-1 outline-pale-gray py-2 pl-10 pr-2 text-sm disabled:cursor-not-allowed disabled:opacity-75\" name=\"query\" placeholder=\"search\" aria-label=\"search\" id=\"searchInput\"><script>\n                const searchInput = document.getElementById(\"searchInput\");\n                const params = new URLSearchParams(location.search);\n                if (params.has(\"query\")) {\n                    searchInput.value = params.get(\"query\");\n                }\n            </script></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- searchbar --> <div class=\"flex justify-end py-2\"><div class=\"relative flex w-full max-w-xs flex-col gap-1 text-neutral-gray\"><form action=\"/admin/expertise\" method=\"GET\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" aria-hidden=\"true\" class=\"absolute left-2.5 top-1/2 size-5 -translate-y-1/2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg> <input type=\"search\" class=\"w-full rounded-sm outline-1 outline-pale-gray py-2 pl-10 pr-2 text-sm disabled:cursor-not-allowed disabled:opacity-75\" name=\"query\" placeholder=\"search\" autocomplete=\"off\" autofocus aria-label=\"search\" id=\"searchInput\"><script>\n                const searchInput = document.getElementById(\"searchInput\");\n                const params = new URLSearchParams(location.search);\n                if (params.has(\"query\")) {\n                    searchInput.value = params.get(\"query\");\n                }\n            </script></form></div></div><!-- expertise table --> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = expertiseTable(data).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templ.JSONScript("expertise", data).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script>\n                (function() {\n                    const data = JSON.parse(document.getElementById(\"expertise\").textContent);\n                    console.log(data);\n                 })();\n            </script></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -123,7 +111,7 @@ func expertiseTable(data []models.ExpertiseModel) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(expertise.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 77, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 72, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -136,7 +124,7 @@ func expertiseTable(data []models.ExpertiseModel) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatDate(expertise.CreatedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 79, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 74, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -149,7 +137,7 @@ func expertiseTable(data []models.ExpertiseModel) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(expertise.Tags)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 80, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 75, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -209,13 +197,13 @@ func viewTagsModal(data models.ExpertiseModel) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 135, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 130, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h3><button x-on:click=\"viewTagsModalOpen = false\" aria-label=\"close modal\" class=\"cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.4\" class=\"w-5 h-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Dialog Body --><div class=\"\"><!-- Information --><div class=\"px-1 py-2 rounded-sm bg-good/25 flex gap-2 text-good text-xs mt-2\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg><p>You can click on the tag to perform a quick map search </p></div><!-- Tags --><div class=\"flex gap-2 flex-wrap my-2\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h3><button x-on:click=\"viewTagsModalOpen = false\" aria-label=\"close modal\" class=\"cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.4\" class=\"w-5 h-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Dialog Body --><div class=\"\"><!-- Information --><div class=\"px-1 py-2 rounded-sm bg-good/25 flex gap-2 text-neutral-gray text-xs mt-2\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg><p>You can click on the tag to perform a quick map search </p></div><!-- Tags --><div class=\"flex gap-2 flex-wrap my-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -278,7 +266,7 @@ func addTagModal(data models.ExpertiseModel) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 211, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 206, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -291,7 +279,7 @@ func addTagModal(data models.ExpertiseModel) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(data.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 233, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/expertise/expertise.templ`, Line: 228, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {

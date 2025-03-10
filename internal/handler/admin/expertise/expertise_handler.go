@@ -21,10 +21,26 @@ func NewHandler(expertService *expertise_service.Service) *expertiseHandler {
 }
 
 func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
-	results, err := h.expertService.GetAllExpertise()
-	if err != nil {
-		page := pages.Expertise(make([]models.ExpertiseModel, 0))
-		return page.Render(context.Background(), c.Response().Writer)
+	params := c.QueryParams()
+
+	results := make([]*models.ExpertiseModel, 0)
+
+	if params.Has("query") && params.Get("query") != "" {
+		title := params.Get("query")
+
+		expertise, err := h.expertService.FindExpertise(title)
+		if err != nil {
+			page := pages.Expertise(make([]models.ExpertiseModel, 0))
+			return page.Render(context.Background(), c.Response().Writer)
+		}
+		results = append(results, expertise)
+	} else {
+		experitises, err := h.expertService.GetAllExpertise()
+		if err != nil {
+			page := pages.Expertise(make([]models.ExpertiseModel, 0))
+			return page.Render(context.Background(), c.Response().Writer)
+		}
+		results = experitises
 	}
 
 	data := make([]models.ExpertiseModel, 0)
