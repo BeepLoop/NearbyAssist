@@ -248,7 +248,7 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 		accountData.Expertise = append(accountData.Expertise, expertise.Title)
 	}
 
-	getServicesQuery := "SELECT * FROM Service WHERE vendorId = ?"
+	getServicesQuery := "SELECT * FROM Service WHERE vendorId = ? ORDER BY updatedAT DESC"
 	services := make([]*models.ServiceModel, 0)
 	if err := s.db.SelectContext(ctx, &services, getServicesQuery, userId); err != nil {
 		return nil, err

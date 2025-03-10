@@ -1433,13 +1433,6 @@
       }
     }
   }
-  .hover\:bg-pale-gray {
-    &:hover {
-      @media (hover: hover) {
-        background-color: var(--color-pale-gray);
-      }
-    }
-  }
   .hover\:bg-primary {
     &:hover {
       @media (hover: hover) {

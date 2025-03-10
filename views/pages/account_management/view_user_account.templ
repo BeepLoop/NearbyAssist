@@ -6,7 +6,6 @@ import (
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
-	"strings"
 )
 
 templ ViewUserAccount(data models.UserAccountPageData) {
@@ -93,37 +92,106 @@ templ userServices(services []*models.ServiceModel) {
 			<table class="w-full text-left text-sm">
 				<thead class="text-white text-sm font-semibold bg-primary-greener">
 					<tr>
-						<th scope="col" class="p-4">Title</th>
-						<th scope="col" class="p-4">Added on</th>
-						<th scope="col" class="p-4">Tags</th>
-						<th scope="col" class="p-4">Action</th>
+						<th scope="col" class="p-4 text-xs">Title</th>
+						<th scope="col" class="p-4 text-xs">Added on</th>
+						<th scope="col" class="p-4 text-xs">Action</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-300">
 					if len(services) < 1 {
 						<tr class="">
-							<td class="px-6 py-4 text-neutral-dark" align="center" colspan="5" id="emptyTable">Empty</td>
+							<td class="px-6 py-4 text-neutral-dark text-xs" align="center" colspan="3" id="emptyTable">No Service Offered</td>
 						</tr>
 					} else {
 						for _, service := range services {
-							<tr class="relative outline-1 outline-pale-gray text-neutral-dark">
+							<tr class="relative outline-1 outline-pale-gray text-neutral-dark text-xs">
 								<td class="px-6 py-4">{ service.Title }</td>
 								<td class="px-6 py-4">added on { utils.FormatDate(service.CreatedAt) }</td>
 								<td class="px-6 py-4">
-									{ strings.Join(service.TagsAsString, ", ") }
-								</td>
-								<td class="px-6 py-4">
-									<button class="hover:bg-pale-gray cursor-pointer rounded-sm">
-										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"></path>
-										</svg>
-									</button>
+									@viewServiceTags(service.TagsAsString)
 								</td>
 							</tr>
 						}
 					}
 				</tbody>
 			</table>
+		</div>
+	</div>
+}
+
+templ viewServiceTags(tags []string) {
+	<div x-data="{viewTagsModalOpen: false}">
+		<!-- open button -->
+		<button
+			type="button"
+			class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 cursor-pointer"
+			x-on:click="viewTagsModalOpen = true"
+		>
+			<span class="flex gap-1 items-center">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"></path>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+				</svg>
+				<p>View Tags</p>
+			</span>
+		</button>
+		<!-- backdrop -->
+		<div
+			x-cloak
+			x-show="viewTagsModalOpen"
+			x-on:keydown.esc.window="viewTagsModalOpen = false"
+			x-on:click.self="viewTagsModalOpen = false"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="defaultModalTitle"
+			class="fixed inset-0 z-30 bg-neutral-gray/50 grid place-content-center"
+		>
+			<!-- modal content -->
+			<div
+				x-show="viewTagsModalOpen"
+				x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				class="outline-1 outline-pale-gray p-2 rounded-sm bg-white p-4 min-w-72 max-w-80"
+			>
+				<!-- Dialog Header -->
+				<div class="flex items-center justify-between">
+					<h3
+						id="defaultModalTitle"
+						class="font-semibold tracking-wide"
+					>Service Tags</h3>
+					<button
+						x-on:click="viewTagsModalOpen = false"
+						aria-label="close modal"
+						class="cursor-pointer"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="1.4" class="w-5 h-5">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<!-- Dialog Body -->
+				<div class="">
+					<!-- Information -->
+					<div class="px-1 py-2 rounded-sm bg-good/25 flex gap-2 text-neutral-gray text-xs mt-2">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+							<path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"></path>
+						</svg>
+						<p>You can click on the tag to perform a quick map search </p>
+					</div>
+					<!-- Tags -->
+					<div class="flex gap-2 flex-wrap my-2">
+						for _, tag := range tags {
+							<a
+								href={ templ.SafeURL(fmt.Sprintf("/admin/map?query=%s", tag)) }
+								class="mt-2"
+							>
+								@partials.DefaultBadgeSuccess(tag)
+							</a>
+						}
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 }
