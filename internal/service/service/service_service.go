@@ -56,7 +56,7 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 		return "", err
 	}
 
-	extras := make([]models.ExtraModel, 0)
+	extras := make([]*models.ExtraModel, 0)
 	for _, extra := range req.Extras {
 		titleCipher, err := s.encrypt.EncryptString(extra.Title)
 		if err != nil {
@@ -68,7 +68,7 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 			return "", err
 		}
 
-		extras = append(extras, models.ExtraModel{
+		extras = append(extras, &models.ExtraModel{
 			Title:       titleCipher,
 			Description: descCipher,
 			Price:       extra.Price,
@@ -112,7 +112,7 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		service.Description = cipher
 	}
 
-	extras := make([]models.ExtraModel, 0)
+	extras := make([]*models.ExtraModel, 0)
 	for _, extra := range service.Extras {
 		decryptedTitle, err := s.encrypt.DecryptString(extra.Title)
 		if err != nil {
@@ -124,7 +124,7 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 			return nil, err
 		}
 
-		extras = append(extras, models.ExtraModel{
+		extras = append(extras, &models.ExtraModel{
 			Model:           extra.Model,
 			UpdateableModel: extra.UpdateableModel,
 			Title:           decryptedTitle,

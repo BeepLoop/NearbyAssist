@@ -273,6 +273,45 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 		service.TagsAsString = tags
 	}
 
+	getServiceImagesQuery := `
+        SELECT
+            url
+        FROM
+            ServicePhoto
+        WHERE
+            serviceId = ?
+    `
+	for _, service := range accountData.Services {
+		images := make([]string, 0)
+		if err := s.db.SelectContext(ctx, &images, getServiceImagesQuery, service.Id); err != nil {
+			return nil, err
+		}
+
+		service.Images = images
+	}
+
+	getServiceExtrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price,
+            e.createdAt
+        FROM
+            ServiceExtra se
+            JOIN Extra e ON e.id = se.extraId
+        WHERE
+            se.serviceId = ?
+    `
+	for _, service := range accountData.Services {
+		extras := make([]*models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, getServiceExtrasQuery, service.Id); err != nil {
+			return nil, err
+		}
+
+		service.Extras = extras
+	}
+
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}

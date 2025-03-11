@@ -7,5 +7,5 @@ type ExtraModel struct {
 	Description string  `json:"description" db:"description" validate:"required"`
 	Price       float64 `json:"price" db:"price" validate:"required"`
 	Deleted     bool    `json:"deleted" db:"deleted"`
-	ServiceId   string  `db:"serviceId"`
+	ServiceId   string  `db:"serviceId" json:"serviceId,omitempty"`
 }

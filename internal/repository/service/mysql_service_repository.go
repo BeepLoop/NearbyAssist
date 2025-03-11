@@ -184,7 +184,7 @@ func (s *MysqlServiceRepository) FindById(id string) (*models.ServiceModel, erro
             se.serviceId = ? AND e.deleted = 0
     `
 
-	extras := make([]models.ExtraModel, 0)
+	extras := make([]*models.ExtraModel, 0)
 	if err := s.db.SelectContext(ctx, &extras, extrasQuery, id); err != nil {
 		return nil, err
 	}

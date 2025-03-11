@@ -108,6 +108,7 @@ func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, err
 	}
 
 	for _, service := range accountData.Services {
+		// Decrypt service title and description
 		if decrypted, err := s.encrypt.DecryptString(service.Title); err != nil {
 			return nil, err
 		} else {
@@ -118,6 +119,21 @@ func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, err
 			return nil, err
 		} else {
 			service.Description = decrypted
+		}
+
+		// Decrypt service extra title and description
+		for _, extra := range service.Extras {
+			if decrypted, err := s.encrypt.DecryptString(extra.Title); err != nil {
+				return nil, err
+			} else {
+				extra.Title = decrypted
+			}
+
+			if decrypted, err := s.encrypt.DecryptString(extra.Description); err != nil {
+				return nil, err
+			} else {
+				extra.Description = decrypted
+			}
 		}
 	}
 
