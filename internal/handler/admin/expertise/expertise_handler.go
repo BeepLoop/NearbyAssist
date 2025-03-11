@@ -6,6 +6,7 @@ import (
 	expertise_service "nearbyassist/internal/service/expertise"
 	pages "nearbyassist/views/pages/expertise"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -58,12 +59,17 @@ func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
 
 func (h *expertiseHandler) CreateExpertise(c echo.Context) error {
 	title := c.FormValue("title")
+	tags := c.FormValue("tags")
 
-	data := &models.ExpertiseModel{
-		Title: title,
+	if title == "" {
+		return c.Redirect(http.StatusSeeOther, "/admin/expertise?error=invalid_input")
 	}
 
-	if _, err := h.expertService.CreateExpertise(data); err != nil {
+	data := &models.ExpertiseModel{
+		Title: strings.ToLower(title),
+	}
+
+	if _, err := h.expertService.CreateExpertise(data, tags); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/expertise?error=creation_error")
 	}
 

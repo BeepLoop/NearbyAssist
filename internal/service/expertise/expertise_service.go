@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/models"
 	expertise_repo "nearbyassist/internal/repository/expertise"
 	"nearbyassist/internal/service/auth"
+	"strings"
 )
 
 type Service struct {
@@ -20,7 +21,20 @@ func NewService(store expertise_repo.ExpertiseRepository, encrypt auth.Encryptio
 	}
 }
 
-func (s *Service) CreateExpertise(data *models.ExpertiseModel) (string, error) {
+func (s *Service) CreateExpertise(data *models.ExpertiseModel, tagsInput string) (string, error) {
+	// Clean up the tags input
+	if tagsInput != "" {
+		csv := strings.Split(tagsInput, ",")
+		for _, v := range csv {
+			trimmed := strings.TrimSpace(v)
+			if trimmed != "" {
+				data.Tags = append(data.Tags, &models.TagModel{
+					Title: strings.ToLower(trimmed),
+				})
+			}
+		}
+	}
+
 	return s.store.Create(data)
 }
 
