@@ -92,33 +92,33 @@ func dashboardData(data models.DashboardModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid gap-4\"><div class=\"grid gap-4 grid-cols-12\"><div class=\"col-span-3 grid\"><card class=\"w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs text-neutral-gray font-medium\">Verification requests</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"font-semibold text-4xl text-neutral-dark\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid gap-4\"><div class=\"grid gap-4 grid-cols-12\"><div class=\"col-span-3 grid\"><a href=\"/admin/verification-requests\" class=\"grid\"><card class=\"w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs text-neutral-gray font-medium\">Verification requests</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"font-semibold text-4xl text-neutral-dark\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.RequestData.IdentityVerification.Total))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 29, Col: 117}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 30, Col: 118}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></card></div><div class=\"col-span-3 grid\"><card class=\"w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs text-neutral-gray font-medium\">Vendor applications</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"font-semibold text-4xl text-neutral-dark\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></card></a></div><div class=\"col-span-3 grid\"><a href=\"/admin/vendor-applications\" class=\"grid\"><card class=\"w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs text-neutral-gray font-medium\">Vendor applications</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"font-semibold text-4xl text-neutral-dark\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.RequestData.VendorApplication.Total))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 42, Col: 114}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard/dashboard.templ`, Line: 45, Col: 115}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></card></div><div class=\"col-span-3 grid\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></card></a></div><div class=\"col-span-3 grid\"><a href=\"/admin/complaints/bugs\" class=\"grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -126,7 +126,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"col-span-3 grid\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div><div class=\"col-span-3 grid\"><a href=\"/admin/complaints/users\" class=\"grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -134,7 +134,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"grid grid-cols-12 gap-4\"><div class=\"col-span-4 grid\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div></div><div class=\"grid grid-cols-12 gap-4\"><div class=\"col-span-4 grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
