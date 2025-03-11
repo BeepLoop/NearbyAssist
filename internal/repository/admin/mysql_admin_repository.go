@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlAdminRepository struct {
@@ -22,11 +22,7 @@ func (s *MysqlAdminRepository) Create(data *models.AdminModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	query := "INSERT INTO Admin (id, username, password, usernameHash, role) VALUES (:id, :username, :password, :usernameHash, :role)"
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
@@ -44,11 +40,7 @@ func (s *MysqlAdminRepository) Login(data *models.SessionModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	query := "INSERT INTO Session (id, refreshToken) VALUES (:id, :refreshToken)"
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
@@ -76,11 +68,7 @@ func (s *MysqlAdminRepository) Logout(refreshToken string) error {
 		return err
 	}
 
-	id, err := gonanoid.New()
-	if err != nil {
-		return err
-	}
-
+	id := utils.GenerateId()
 	blacklistToken := `INSERT INTO Blacklist (id, token) VALUES (?, ?)`
 	if _, err := tx.ExecContext(ctx, blacklistToken, id, refreshToken); err != nil {
 		return err

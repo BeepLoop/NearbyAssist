@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlApplicationRepository struct {
@@ -24,11 +24,7 @@ func (s *MysqlApplicationRepository) Create(data *models.ApplicationModel) (stri
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	duplicatePendingQuery := `
         SELECT COUNT(id)
@@ -110,11 +106,7 @@ func (s *MysqlApplicationRepository) NewProof(data *models.ApplicationProofModel
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	query := `
         INSERT INTO
@@ -137,11 +129,7 @@ func (s *MysqlApplicationRepository) NewPoliceClearance(data *models.PoliceClear
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	query := `
         INSERT INTO
@@ -237,10 +225,7 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 	}
 	if alreadyVendorResult == 0 {
 		// Applicant is not yet a vendor
-		vendorRowId, err := gonanoid.New()
-		if err != nil {
-			return err
-		}
+		vendorRowId := utils.GenerateId()
 
 		makeUserVendorQuery := `
         INSERT INTO

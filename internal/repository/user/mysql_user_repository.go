@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlUserRepository struct {
@@ -23,11 +23,7 @@ func (s *MysqlUserRepository) CreateUser(user *models.UserModel) (string, error)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	id, err := gonanoid.New()
-	if err != nil {
-		return "", err
-	}
-	user.Id = id
+	user.Id = utils.GenerateUserId()
 
 	query := "INSERT INTO User (id, name, email, imageUrl, emailHash) VALUES (:id, :name, :email, :imageUrl, :emailHash)"
 	if _, err := s.db.NamedExecContext(ctx, query, user); err != nil {
@@ -38,18 +34,14 @@ func (s *MysqlUserRepository) CreateUser(user *models.UserModel) (string, error)
 		return "", context.DeadlineExceeded
 	}
 
-	return id, nil
+	return user.Id, nil
 }
 
 func (s *MysqlUserRepository) Login(data *models.SessionModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	query := "INSERT INTO Session (id, refreshToken) VALUES (:id, :refreshToken)"
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
@@ -77,11 +69,7 @@ func (s *MysqlUserRepository) Logout(refreshToken string) error {
 		return err
 	}
 
-	id, err := gonanoid.New()
-	if err != nil {
-		return err
-	}
-
+	id := utils.GenerateId()
 	blacklistToken := `INSERT INTO Blacklist (id, token) VALUES (?, ?)`
 	if _, err := tx.ExecContext(ctx, blacklistToken, id, refreshToken); err != nil {
 		return err
@@ -556,11 +544,7 @@ func (s *MysqlUserRepository) AddSocial(data *models.SocialModel) error {
             (:id, :userId, :url)
     `
 
-	if generatedId, err := gonanoid.New(); err != nil {
-		return err
-	} else {
-		data.Id = generatedId
-	}
+	data.Id = utils.GenerateId()
 
 	if _, err := s.db.NamedExecContext(ctx, addSocialQuery, data); err != nil {
 		return err

@@ -3,10 +3,10 @@ package saved_service_repo
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlSavedServiceRepository struct {
@@ -21,11 +21,7 @@ func (s *MysqlSavedServiceRepository) SaveService(data *models.SavedServiceModel
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	query := "INSERT INTO SavedService (id, userId, serviceId) VALUES (:id, :userId, :serviceId)"
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {

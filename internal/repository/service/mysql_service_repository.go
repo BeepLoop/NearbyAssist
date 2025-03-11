@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlServiceRepository struct {
@@ -31,11 +31,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
 		return "", err
 	}
 
-	if id, err := gonanoid.New(); err != nil {
-		return "", errors.New("Failed to generate id for service")
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	registerService := `
 	        INSERT INTO
@@ -68,11 +64,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
             )
     `
 	for _, tag := range data.TagsAsString {
-		tagId, err := gonanoid.New()
-		if err != nil {
-			return "", errors.New("Failed to generate id for tag")
-		}
-
+		tagId := utils.GenerateId()
 		if _, err := tx.ExecContext(ctx, registerTag, tagId, data.Id, tag); err != nil {
 			return "", err
 		}
@@ -91,11 +83,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
             (?, ?)
     `
 	for _, extra := range data.Extras {
-		extraId, err := gonanoid.New()
-		if err != nil {
-			return "", errors.New("Failed to generate id for service extra")
-		}
-
+		extraId := utils.GenerateId()
 		if _, err := tx.ExecContext(ctx, registerExtra, extraId, extra.Title, extra.Description, extra.Price, data.Id); err != nil {
 			return "", err
 		}
@@ -459,11 +447,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
         WHERE t.title = ?
     `
 	for _, tag := range updatedService.TagsAsString {
-		generatedId, err := gonanoid.New()
-		if err != nil {
-			return err
-		}
-
+		generatedId := utils.GenerateId()
 		if _, err := tx.ExecContext(ctx, insertTag, generatedId, updatedService.Id, tag); err != nil {
 			if err := tx.Rollback(); err != nil {
 				return err
@@ -493,11 +477,7 @@ func (s *MysqlServiceRepository) AddImage(data *models.ServicePhotoModel) (strin
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if generatedId, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = generatedId
-	}
+	data.Id = utils.GenerateId()
 
 	query := `
         INSERT INTO
@@ -544,11 +524,7 @@ func (s *MysqlServiceRepository) AddExtra(data *models.ExtraModel) (string, erro
 		return "", err
 	}
 
-	if generatedId, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = generatedId
-	}
+	data.Id = utils.GenerateId()
 
 	insertExtraQuery := `
         INSERT INTO

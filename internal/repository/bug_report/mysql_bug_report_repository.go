@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlBugReportRepository struct {
@@ -24,11 +24,7 @@ func (s *MysqlBugReportRepository) Create(data *models.BugReportModel) (string, 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -52,11 +48,7 @@ func (s *MysqlBugReportRepository) Create(data *models.BugReportModel) (string, 
             (?, ?, ?)
     `
 	for _, url := range data.Images {
-		imageId, err := gonanoid.New()
-		if err != nil {
-			return "", err
-		}
-
+		imageId := utils.GenerateId()
 		if _, err := tx.ExecContext(ctx, insertImage, imageId, data.Id, url); err != nil {
 			return "", nil
 		}

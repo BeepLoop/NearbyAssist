@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlExpertiseRepository struct {
@@ -25,11 +25,7 @@ func (s *MysqlExpertiseRepository) Create(data *models.ExpertiseModel) (string, 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if generatedId, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = generatedId
-	}
+	data.Id = utils.GenerateId()
 
 	createQuery := "INSERT INTO Expertise (id, title) VALUES (:id, :title)"
 	if _, err := s.db.NamedExecContext(ctx, createQuery, data); err != nil {
@@ -53,11 +49,7 @@ func (s *MysqlExpertiseRepository) CreateTag(expertiseId string, data *models.Ta
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if generatedId, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = generatedId
-	}
+	data.Id = utils.GenerateId()
 
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {

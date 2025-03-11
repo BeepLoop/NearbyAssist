@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlReviewRepository struct {
@@ -29,11 +29,7 @@ func (s *MysqlReviewRepository) Create(data *models.ReviewModel) (string, error)
 		return "", err
 	}
 
-	if id, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	insertReview := "INSERT INTO Review (id, serviceId, rating, text) VALUES (:id, :serviceId, :rating, :text)"
 	if _, err := tx.NamedExecContext(ctx, insertReview, data); err != nil {

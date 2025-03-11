@@ -3,10 +3,10 @@ package verification_repo
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 type MysqlVerificationRepository struct {
@@ -23,11 +23,7 @@ func (s *MysqlVerificationRepository) Create(data *models.IdentityVerificationMo
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if id, err := gonanoid.New(); err != nil {
-		return "", err
-	} else {
-		data.Id = id
-	}
+	data.Id = utils.GenerateId()
 
 	query := `
         INSERT INTO IdentityVerification 
