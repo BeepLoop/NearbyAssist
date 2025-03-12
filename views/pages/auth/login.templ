@@ -1,9 +1,15 @@
 package pages
 
-import "nearbyassist/views/layout"
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
 
 templ Login() {
 	@layout.BasicLayout() {
+		<!-- toasy component -->
+		@partials.ToastNotification()
+		<!-- login form -->
 		<div class="fixed left-0 right-0 z-0 h-screen grid place-items-center">
 			<div class="w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter">
 				<h2 class="mb-4 text-2xl font-semibold text-center">

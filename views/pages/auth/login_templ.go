@@ -8,7 +8,10 @@ package pages
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "nearbyassist/views/layout"
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
 
 func Login() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -43,7 +46,15 @@ func Login() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"fixed left-0 right-0 z-0 h-screen grid place-items-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter\"><h2 class=\"mb-4 text-2xl font-semibold text-center\">Welcome back</h2><form action=\"/admin/login\" method=\"POST\" class=\"flex flex-col items-center\"><div class=\"mb-4 w-full text-xs\"><input type=\"text\" id=\"username\" name=\"username\" placeholder=\"Username\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" autofocus required></div><div class=\"mb-6 w-full text-xs\"><input type=\"password\" id=\"password\" name=\"password\" placeholder=\"Password\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" required></div><button type=\"submit\" class=\"w-full rounded-md bg-good px-4 py-2 font-semibold text-xs text-white cursor-pointer hover:opacity-75\">Login</button></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- toasy component --> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = partials.ToastNotification().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- login form --> <div class=\"fixed left-0 right-0 z-0 h-screen grid place-items-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter\"><h2 class=\"mb-4 text-2xl font-semibold text-center\">Welcome back</h2><form action=\"/admin/login\" method=\"POST\" class=\"flex flex-col items-center\"><div class=\"mb-4 w-full text-xs\"><input type=\"text\" id=\"username\" name=\"username\" placeholder=\"Username\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" autofocus required></div><div class=\"mb-6 w-full text-xs\"><input type=\"password\" id=\"password\" name=\"password\" placeholder=\"Password\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" required></div><button type=\"submit\" class=\"w-full rounded-md bg-good px-4 py-2 font-semibold text-xs text-white cursor-pointer hover:opacity-75\">Login</button></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

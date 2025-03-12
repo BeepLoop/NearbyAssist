@@ -10,6 +10,8 @@ import (
 
 templ ViewUserAccount(data models.UserAccountPageData) {
 	@layout.Layout() {
+		<!-- toasy component -->
+		@partials.ToastNotification()
 		<!-- back button -->
 		@partials.BackButton()
 		<!-- main content -->

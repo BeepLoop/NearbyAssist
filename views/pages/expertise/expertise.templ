@@ -11,6 +11,8 @@ import (
 
 templ Expertise(data []models.ExpertiseModel) {
 	@layout.Layout() {
+		<!-- toasy component -->
+		@partials.ToastNotification()
 		@partials.PageBanner("Expertise", "")
 		<!-- searchbar -->
 		@searchbar()
