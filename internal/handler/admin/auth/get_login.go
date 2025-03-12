@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/auth"
 	"net/http"
 
@@ -20,6 +21,11 @@ func (h *authHandler) GetLogin(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 	}
 
-	page := pages.Login()
+	flash, _, err := utils.RetrieveFlashMessage(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/?error=session_error")
+	}
+
+	page := pages.Login(flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

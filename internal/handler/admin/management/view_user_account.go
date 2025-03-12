@@ -10,15 +10,17 @@ import (
 )
 
 func (h *managementHandler) ViewUserAccount(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
+
 	userId := c.Param("userId")
 	if userId == "" {
-		page := pages.ViewUserAccount(models.UserAccountPageData{})
+		page := pages.ViewUserAccount(models.UserAccountPageData{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	accountData, err := h.managementService.GetSingleUser(userId)
 	if err != nil {
-		page := pages.ViewUserAccount(models.UserAccountPageData{})
+		page := pages.ViewUserAccount(models.UserAccountPageData{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -36,6 +38,6 @@ func (h *managementHandler) ViewUserAccount(c echo.Context) error {
 		Stat:       accountData.Stat,
 	}
 
-	page := pages.ViewUserAccount(data)
+	page := pages.ViewUserAccount(data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

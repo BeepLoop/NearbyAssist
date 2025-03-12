@@ -161,6 +161,20 @@ templ ToastNotification() {
                           }
                         },
                         init() {
+                            const flash = JSON.parse(document.getElementById("flash").textContent);
+                            const decoded = atob(flash);
+                            if (decoded === "") return;
+
+                            const type = decoded.split(";")[0];
+                            const message = decoded.split(";")[1];
+
+                            if (type === "error") {
+                                this.triggerNotification(message, "error")
+                            } else if (type === "success") {
+                                this.triggerNotification(message, "success")
+                            }
+
+                            // As fallback, show notification base on error query param
                             const params = new URLSearchParams(location.search);
                             if (params.has("error")) {
                                 const message = params.get("error");

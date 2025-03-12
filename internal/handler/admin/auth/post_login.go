@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"fmt"
+	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -15,12 +15,16 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 
 	adminModel, err := h.adminService.Login(username, password)
 	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/login?error=login_error")
+		if err := utils.SetFlashMessage(c, "error", "invalid credentials"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/login?error=login_error")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/login")
 	}
 
 	sess, err := session.Get("session", c)
 	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
+		return c.Redirect(http.StatusSeeOther, "/admin/login")
 	}
 
 	sess.Options = &sessions.Options{
@@ -31,8 +35,7 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 
 	sess.Values["user"] = adminModel
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
-		fmt.Println("error: ", err.Error())
-		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
+		return c.Redirect(http.StatusSeeOther, "/admin/login")
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/admin/dashboard")

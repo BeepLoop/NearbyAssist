@@ -5,8 +5,9 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ Login() {
+templ Login(flash string) {
 	@layout.BasicLayout() {
+		@templ.JSONScript("flash", flash)
 		<!-- toasy component -->
 		@partials.ToastNotification()
 		<!-- login form -->

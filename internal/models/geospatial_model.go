@@ -1,8 +1,9 @@
 package models
 
 import (
-	"nearbyassist/internal/utils"
+	"errors"
 	"strconv"
+	"strings"
 )
 
 type GeoSpatialModel struct {
@@ -12,7 +13,7 @@ type GeoSpatialModel struct {
 
 // String coordinate {latitude},{longitude} ex: 7.544645340539252,126.14141292293003
 func (l *GeoSpatialModel) FromString(coordinate string) error {
-	latitude, longitude, err := utils.ParseCoordinate(coordinate)
+	latitude, longitude, err := ParseCoordinate(coordinate)
 	if err != nil {
 		return err
 	}
@@ -48,4 +49,25 @@ type GeoSpatialSearchResult struct {
 	CompletedTransactions float32 `db:"transactions"` // Number of transactions completed
 
 	Distance float32
+}
+
+func ParseCoordinate(coordinate string) (float64, float64, error) {
+	// Split the string into latitude and longitude
+	coords := strings.Split(coordinate, ",")
+	if len(coords) != 2 {
+		return 0, 0, errors.New("Invalid coordinate")
+	}
+
+	// Parse the latitude and longitude
+	lat, err := strconv.ParseFloat(coords[0], 64)
+	if err != nil {
+		return 0, 0, errors.New("Invalid latitude")
+	}
+
+	lng, err := strconv.ParseFloat(coords[1], 64)
+	if err != nil {
+		return 0, 0, errors.New("Invalid longitude")
+	}
+
+	return lat, lng, nil
 }

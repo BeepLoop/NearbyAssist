@@ -528,7 +528,7 @@ func (s *Service) FindRoute(serviceId string, origin string) (route_engine.Polyl
 		return "", err
 	}
 
-	lat, long, err := utils.ParseCoordinate(origin)
+	lat, long, err := models.ParseCoordinate(origin)
 	if err != nil {
 		return "", err
 	}

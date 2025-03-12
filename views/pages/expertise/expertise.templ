@@ -9,9 +9,10 @@ import (
 	"strconv"
 )
 
-templ Expertise(data []models.ExpertiseModel) {
+templ Expertise(data []models.ExpertiseModel, flash string) {
 	@layout.Layout() {
 		<!-- toasy component -->
+		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()
 		@partials.PageBanner("Expertise", "")
 		<!-- searchbar -->

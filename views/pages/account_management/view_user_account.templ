@@ -8,9 +8,10 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ ViewUserAccount(data models.UserAccountPageData) {
+templ ViewUserAccount(data models.UserAccountPageData, flash string) {
 	@layout.Layout() {
 		<!-- toasy component -->
+		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()
 		<!-- back button -->
 		@partials.BackButton()
