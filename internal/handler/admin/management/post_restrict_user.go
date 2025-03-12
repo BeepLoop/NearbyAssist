@@ -20,5 +20,9 @@ func (h *managementHandler) RestrictUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 	}
 
+	if err := utils.SetFlashMessage(c, "success", "restricted user: "+userId); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId+"?success=restrict_success")
+	}
+
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 }

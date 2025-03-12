@@ -18,5 +18,9 @@ func (h *managementHandler) UnbanUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 	}
 
+	if err := utils.SetFlashMessage(c, "success", "unbanned user: "+userId); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId+"?success=unban_success")
+	}
+
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 }

@@ -18,5 +18,9 @@ func (h *managementHandler) BanUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 	}
 
+	if err := utils.SetFlashMessage(c, "success", "banned user: "+userId); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId+"?success=ban_success")
+	}
+
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 }

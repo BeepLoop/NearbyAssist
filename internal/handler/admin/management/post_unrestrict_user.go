@@ -21,5 +21,9 @@ func (h *managementHandler) UnrestrictUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 	}
 
+	if err := utils.SetFlashMessage(c, "success", "lifted restriction on user: "+userId); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId+"?success=unrestrict_success")
+	}
+
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/"+userId)
 }
