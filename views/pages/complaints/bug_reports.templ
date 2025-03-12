@@ -132,13 +132,7 @@ templ viewBug(bug models.BugReportModel) {
 					<!-- Images -->
 					<div class="grid gap-2 grid-cols-3 mt-4">
 						for _, image := range bug.Images {
-							<div class="outline-1 outline-pale-gray cursor-pointer">
-								<img
-									src={ fmt.Sprintf("/api/v1/resource/%s", image) }
-									alt="image"
-									class=""
-								/>
-							</div>
+							@imageViewer(image)
 						}
 					</div>
 					<!-- Action -->
@@ -162,6 +156,49 @@ templ viewBug(bug models.BugReportModel) {
 						</form>
 					</div>
 				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ imageViewer(image string) {
+	<div x-data="{imageViewerOpen: false}">
+		<!-- Image -->
+		<div
+			x-on:click="imageViewerOpen = true"
+			class="outline-1 outline-pale-gray cursor-pointer"
+		>
+			<img
+				src={ fmt.Sprintf("/api/v1/resource/%s", image) }
+				alt="image"
+				class=""
+			/>
+		</div>
+		<div
+			x-cloak
+			x-show="imageViewerOpen"
+			x-on:keydown.esc.window="imageViewerOpen = false"
+			x-on:click.self="imageViewerOpen = false"
+			x-transition
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="defaultModalTitle"
+			class="fixed inset-0 z-30 bg-neutral-gray/50 grid place-content-center"
+		>
+			<!-- Modal Dialog -->
+			<div
+				x-show="imageViewerOpen"
+				x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				class="outline-1 outline-pale-gray p-2 rounded-sm bg-white p-4"
+			>
+				<img
+					src={ fmt.Sprintf("/api/v1/resource/%s", image) }
+					alt="image"
+					loading="lazy"
+					class="object-cover max-w-[80vw] max-h-[80vh]"
+				/>
 			</div>
 		</div>
 	</div>

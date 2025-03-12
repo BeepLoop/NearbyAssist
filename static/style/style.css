@@ -791,6 +791,9 @@
   .h-screen {
     height: 100vh;
   }
+  .max-h-\[80vh\] {
+    max-height: 80vh;
+  }
   .min-h-\[50svh\] {
     min-height: 50svh;
   }
@@ -841,6 +844,9 @@
   }
   .max-w-80 {
     max-width: calc(var(--spacing) * 80);
+  }
+  .max-w-\[80vw\] {
+    max-width: 80vw;
   }
   .max-w-sm {
     max-width: var(--container-sm);
