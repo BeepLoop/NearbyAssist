@@ -39,6 +39,7 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 			Detail:      complaint.Detail,
 			CreatedAt:   date,
 			CompletedAt: complaint.CompletedAt,
+			Images:      complaint.Images,
 		})
 	}
 

@@ -915,6 +915,9 @@
   .grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
   .grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -1107,9 +1110,6 @@
   .bg-neutral-50 {
     background-color: var(--color-neutral-50);
   }
-  .bg-neutral-gray-lighter {
-    background-color: var(--color-neutral-gray-lighter);
-  }
   .bg-neutral-gray\/50 {
     background-color: color-mix(in oklab, var(--color-neutral-gray) 50%, transparent);
   }
@@ -1119,8 +1119,14 @@
   .bg-primary-greener {
     background-color: var(--color-primary-greener);
   }
+  .bg-primary\/10 {
+    background-color: color-mix(in oklab, var(--color-primary) 10%, transparent);
+  }
   .bg-primary\/25 {
     background-color: color-mix(in oklab, var(--color-primary) 25%, transparent);
+  }
+  .bg-primary\/75 {
+    background-color: color-mix(in oklab, var(--color-primary) 75%, transparent);
   }
   .bg-red-100 {
     background-color: var(--color-red-100);

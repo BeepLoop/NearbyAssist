@@ -90,8 +90,7 @@ templ viewBug(bug models.BugReportModel) {
 				class="fixed top-0 right-0 w-md h-full px-4 pt-4 pb-6 bg-white flex flex-col outline-1 outline-pale-gray overflow-y-scroll"
 			>
 				<!-- Header -->
-				<div class="flex justify-between">
-					<h3 class="font-medium text-sm text-neutral-dark">Bug #{ strconv.Itoa(bug.Id) }</h3>
+				<div class="flex justify-end">
 					<button
 						x-on:click="bugDetailOpen = false"
 						type="button"
@@ -112,15 +111,35 @@ templ viewBug(bug models.BugReportModel) {
 					</button>
 				</div>
 				<!-- Content -->
-				<div class="mt-4">
+				<div class="">
 					<!-- Detail -->
+					<div class="">
+						<h3 class="font-medium text-xl text-neutral-dark">
+							Bug
+							<span class="text-neutral-gray font-bold">
+								#{ strconv.Itoa(bug.Id) }
+							</span>
+						</h3>
+					</div>
 					<div class="outline-1 outline-pale-gray rounded-sm mt-2">
-						<div class="p-2 bg-neutral-gray-lighter">
+						<div class="p-2 bg-primary/75">
 							<p class="text-neutral-dark text-xl font-medium">{ bug.Title }</p>
 						</div>
-						<div class="p-2">
-							<p class="text-neutral-gray text-sm">{ bug.Detail }</p>
+						<div class="p-4 bg-primary/10">
+							<p class="text-neutral-dark text-sm">{ bug.Detail }</p>
 						</div>
+					</div>
+					<!-- Images -->
+					<div class="grid gap-2 grid-cols-3 mt-4">
+						for _, image := range bug.Images {
+							<div class="outline-1 outline-pale-gray cursor-pointer">
+								<img
+									src={ fmt.Sprintf("/api/v1/resource/%s", image) }
+									alt="image"
+									class=""
+								/>
+							</div>
+						}
 					</div>
 					<!-- Action -->
 					<div class="flex justify-end mt-4">
@@ -145,180 +164,5 @@ templ viewBug(bug models.BugReportModel) {
 				</div>
 			</div>
 		</div>
-	</div>
-}
-
-templ carousel(images []string) {
-	<div class="relative w-full overflow-hidden outline-1 outline-pale-gray">
-		<!-- previous button -->
-		<button
-			type="button"
-			id="prevBtn"
-			class="absolute left-5 top-1/2 z-20 flex rounded-full -translate-y-1/2 items-center justify-center bg-surface/40 p-2 text-on-surface transition cursor-pointer"
-		>
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="3" class="size-5 md:size-6 pr-0.5" aria-hidden="true">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-			</svg>
-		</button>
-		<!-- next button -->
-		<button
-			type="button"
-			id="nextBtn"
-			class="absolute right-5 top-1/2 z-20 flex rounded-full -translate-y-1/2 items-center justify-center bg-surface/40 p-2 text-on-surface transition cursor-pointer"
-		>
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="3" class="size-5 md:size-6 pl-0.5" aria-hidden="true">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
-			</svg>
-		</button>
-		<!-- carousel -->
-		<div class="relative min-h-[50svh] w-full bg-neutral-gray/50" id="carousel"></div>
-		@templ.JSONScript("images", images)
-		<script>
-            (function() {
-                function closestSiblingWithId(el, id) {
-                    let sibling = el.previousElementSibling;
-
-                    while(sibling) {
-                        if (sibling.id === id) {
-                            return sibling;
-                        }
-
-                        sibling = sibling.previousElementSibling;
-                    }
-
-                    return null;
-                }
-
-                function createImageElement(imageSrc) {
-                    const classes = [
-                        "absolute",
-                        "w-full",
-                        "h-full",
-                        "inset-0",
-                        "object-cover",
-                        "text-neutral-dark",
-                    ];
-                    const img = document.createElement("img");
-                    classes.forEach(e => img.classList.add(e));
-                    img.src = `/api/v1/resource/${imageSrc}`;
-                    return img;
-                }
-
-                const script = document.currentScript;
-                const images = JSON.parse(script.previousElementSibling.textContent);
-                const nextBtn = closestSiblingWithId(script, "nextBtn");
-                const prevBtn = closestSiblingWithId(script, "prevBtn");
-                const carousel = closestSiblingWithId(script, "carousel");
-                let currImageIndex = 0;
-
-                if (nextBtn) {
-                    nextBtn.addEventListener("click", () => {
-                        if (!images.length) return;
-
-                        if (currImageIndex >= images.length - 1) {
-                            currImageIndex = 0;
-                        } else {
-                            currImageIndex++;
-                        }
-
-                        if (images.length === 0) return;
-                        const img = createImageElement(images[currImageIndex]);
-                        carousel.innerHTML = "";
-                        carousel.append(img);
-                    });
-                }
-
-                if (prevBtn) {
-                    prevBtn.addEventListener("click", () => {
-                        if (!images.length) return;
-
-                        if (currImageIndex <= 0) {
-                            currImageIndex = images.length - 1;
-                        } else {
-                            currImageIndex--;
-                        }
-
-                        if (images.length === 0) return;
-                        const img = createImageElement(images[currImageIndex]);
-                        carousel.innerHTML = "";
-                        carousel.append(img);
-                    });
-                }
-
-                if (images.length === 0) return;
-                const img = createImageElement(images[currImageIndex]);
-                carousel.innerHTML = "";
-                carousel.append(img);
-             })();
-        </script>
-	</div>
-}
-
-templ actions(data models.UserAccountPageData) {
-	<!-- Dropdown Container -->
-	<div
-		x-data="{ userActionsOpen: false }"
-		x-on:keydown.esc.prevent.stop="userActionsOpen = false"
-		class="relative"
-	>
-		<!-- Dropdown Toggle Button -->
-		<button
-			type="button"
-			class="inline-flex gap-2 items-center outline-1 outline-danger rounded-sm px-2 py-1.5 text-sm text-danger fond-medium bg-danger/25 cursor-pointer hover:opacity-75"
-			id="pm-dropdown"
-			aria-haspopup="true"
-			x-bind:aria-expanded="userActionsOpen"
-			x-on:click="userActionsOpen = true"
-		>
-			<span>Actions</span>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 16 16"
-				fill="currentColor"
-				data-slot="icon"
-				class="hi-micro hi-chevron-down inline-block size-5 opacity-50"
-				x-bind:class="{ 'rotate-180': userActionsOpen }"
-			>
-				<path
-					fill-rule="evenodd"
-					d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
-					clip-rule="evenodd"
-				></path>
-			</svg>
-		</button>
-		<!-- END Dropdown Toggle Button -->
-		<!-- Dropdown -->
-		<div
-			x-cloak
-			x-show="userActionsOpen"
-			x-transition:enter="transition ease-out duration-100"
-			x-transition:enter-start="opacity-0 -translate-y-3"
-			x-transition:enter-end="opacity-100 translate-y-0"
-			x-transition:leave="transition ease-in duration-75"
-			x-transition:leave-start="opacity-100 translate-y-0"
-			x-transition:leave-end="opacity-0 -translate-y-3"
-			x-on:click.outside="userActionsOpen = false"
-			role="menu"
-			aria-labelledby="pm-dropdown"
-			class="absolute end-0 z-10 mt-2 w-44"
-		>
-			<div
-				class="outline-1 outline-pale-gray rounded-sm shadow-xl"
-			>
-				<div class="p-1.5 grid gap-1.5">
-					if data.Banned {
-						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/account-management/unban/%s", data.Id), data.Banned)
-					} else {
-						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/account-management/ban/%s", data.Id), data.Banned)
-					}
-					if data.Restricted {
-						@partials.UnrestrictUser(fmt.Sprintf("/admin/account-management/unrestrict/%s", data.Id))
-					} else {
-						@partials.RestrictUser(fmt.Sprintf("/admin/account-management/restrict/%s", data.Id))
-					}
-				</div>
-			</div>
-		</div>
-		<!-- END Dropdown -->
 	</div>
 }
