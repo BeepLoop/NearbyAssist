@@ -26,7 +26,7 @@ func NewService(store repository.UserRepository, encrypt auth.Encryption, hash a
 	return &Service{store: store, encrypt: encrypt, hash: hash, jwt: jwt}
 }
 
-func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse, error) {
+func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.LoginResponse, error) {
 	emailHash, err := s.hash.Generate([]byte(req.Email))
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 	existingUser, err := s.store.FindByEmailHash(emailHash)
 	if err != nil {
 		// If user is not found, continue to registration
-		return s.Register(req, emailHash)
+		return s.ThirdPartyRegister(req, emailHash)
 	}
 
 	// Check if the user is banned
@@ -150,7 +150,7 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 	return response, nil
 }
 
-func (s *Service) Register(req *request.UserLoginPayload, emailHash string) (*response.LoginResponse, error) {
+func (s *Service) ThirdPartyRegister(req *request.UserLoginPayload, emailHash string) (*response.LoginResponse, error) {
 	newUser := new(models.UserModel)
 	newUser.EmailHash = emailHash
 	newUser.ImageUrl = req.Image

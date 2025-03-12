@@ -19,7 +19,7 @@ func NewHandler(userService *user_service.Service) *userHandler {
 	return &userHandler{userService: userService}
 }
 
-func (h *userHandler) Login(c echo.Context) error {
+func (h *userHandler) ThirdPartyLogin(c echo.Context) error {
 	req := new(request.UserLoginPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -35,7 +35,7 @@ func (h *userHandler) Login(c echo.Context) error {
 		})
 	}
 
-	loginResp, err := h.userService.Login(req)
+	response, err := h.userService.ThirdPartyLogin(req)
 	if err != nil {
 		if strings.Contains(err.Error(), user_service.ERR_BANNED_USER) {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -50,7 +50,7 @@ func (h *userHandler) Login(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, loginResp)
+	return c.JSON(http.StatusCreated, response)
 }
 
 func (h *userHandler) Refresh(c echo.Context) error {

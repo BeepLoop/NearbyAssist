@@ -74,7 +74,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 		handler := user.NewHandler(userService)
 
-		userRoute.POST("/login", handler.Login)
+		userRoute.POST("/thirdPartyLogin", handler.ThirdPartyLogin)
 		userRoute.POST("/refresh", handler.Refresh)
 		userRoute.POST("/logout", handler.Logout, middleware.CheckAuth(s.JWT))
 
