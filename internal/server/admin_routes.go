@@ -78,6 +78,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		complaintHandler := complaint.NewHandler(complaintService)
 
 		complaintRoute.GET("/bugs", complaintHandler.GetBugReports)
+		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug)
 		complaintRoute.GET("/users", complaintHandler.GetReportedUsers)
 	}
 

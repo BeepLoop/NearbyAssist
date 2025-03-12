@@ -1,10 +1,5 @@
 package models
 
-type BugReportData struct {
-	ComplaintId string
-	Url         string
-}
-
 type BugReportImageModel struct {
 	Model
 	UpdateableModel

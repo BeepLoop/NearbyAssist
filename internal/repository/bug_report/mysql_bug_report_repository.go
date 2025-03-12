@@ -20,25 +20,33 @@ func NewMysqlBugReportRepository(db *sqlx.DB) *MysqlBugReportRepository {
 	}
 }
 
-func (s *MysqlBugReportRepository) Create(data *models.BugReportModel) (string, error) {
+func (s *MysqlBugReportRepository) Create(data *models.BugReportModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	data.Id = utils.GenerateId()
-
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	insertComplaint := `
         INSERT INTO 
-            BugReport (id, title, detail)
+            BugReport (title, detail)
         VALUES
-            (:id, :title, :detail)
+            (:title, :detail)
     `
-	if _, err := tx.NamedExecContext(ctx, insertComplaint, data); err != nil {
-		return "", err
+	res, err := tx.NamedExecContext(ctx, insertComplaint, data)
+	if err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	bugId, err := res.LastInsertId()
+	if err != nil {
+		return err
 	}
 
 	insertImage := `
@@ -49,27 +57,45 @@ func (s *MysqlBugReportRepository) Create(data *models.BugReportModel) (string, 
     `
 	for _, url := range data.Images {
 		imageId := utils.GenerateId()
-		if _, err := tx.ExecContext(ctx, insertImage, imageId, data.Id, url); err != nil {
-			return "", nil
+		if _, err := tx.ExecContext(ctx, insertImage, imageId, bugId, url); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
+
+			return err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return "", nil
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", context.DeadlineExceeded
+		return context.DeadlineExceeded
 	}
 
-	return data.Id, nil
+	return nil
 }
 
 func (s *MysqlBugReportRepository) GetAll(limit, offset int) ([]*models.BugReportModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getReportsQuery := "SELECT * FROM BugReport ORDER BY createdAt DESC LIMIT ? OFFSET ?"
+	getReportsQuery := `
+        SELECT
+            *
+        FROM
+            BugReport
+        WHERE
+            completedAt IS NULL
+        ORDER BY
+            createdAt DESC
+        LIMIT ? OFFSET ?
+    `
 	reports := make([]*models.BugReportModel, 0)
 	if err := s.db.SelectContext(ctx, &reports, getReportsQuery, limit, offset); err != nil {
 		return nil, err
@@ -92,18 +118,34 @@ func (s *MysqlBugReportRepository) GetAll(limit, offset int) ([]*models.BugRepor
 	return reports, nil
 }
 
-func (s *MysqlBugReportRepository) FindById(id string) (*models.BugReportModel, error) {
+func (s *MysqlBugReportRepository) CompleteBug(bugId int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getReportQuery := "SELECT * FROM ReportedUser WHERE id = ?"
+	query := "UPDATE BugReport SET completedAt = CURRENT_TIMESTAMP() WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, bugId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlBugReportRepository) FindById(id int) (*models.BugReportModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	getReportQuery := "SELECT * FROM BugReport WHERE id = ?"
 
 	bugReport := new(models.BugReportModel)
 	if err := s.db.GetContext(ctx, &bugReport, getReportQuery, id); err != nil {
 		return nil, err
 	}
 
-	if bugReport.Id == "" {
+	if bugReport.Id == 0 {
 		return nil, errors.New("not found")
 	}
 

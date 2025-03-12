@@ -9,6 +9,7 @@ import (
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/utils"
+	"strconv"
 )
 
 type Service struct {
@@ -27,7 +28,7 @@ func NewService(reportUserStore report_user_repo.ReportUserRepository, bugReport
 	}
 }
 
-func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multipart.FileHeader) (string, error) {
+func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multipart.FileHeader) error {
 	reportData := &models.BugReportModel{
 		Title:  req.Title,
 		Detail: req.Detail,
@@ -41,7 +42,7 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 
 		cipher, err := s.encrypt.EncryptFile(bytes)
 		if err != nil {
-			return "", err
+			return err
 		}
 
 		fileData := fs.File{
@@ -50,30 +51,29 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 		}
 		url, err := s.fs.SaveFile(fileData)
 		if err != nil {
-			return "", err
+			return err
 		}
 
 		reportData.Images = append(reportData.Images, url)
 	}
 
 	if cipher, err := s.encrypt.EncryptString(req.Title); err != nil {
-		return "", err
+		return err
 	} else {
 		reportData.Title = cipher
 	}
 
 	if cipher, err := s.encrypt.EncryptString(req.Detail); err != nil {
-		return "", err
+		return err
 	} else {
 		reportData.Detail = cipher
 	}
 
-	complaintId, err := s.bugReportStore.Create(reportData)
-	if err != nil {
-		return "", err
+	if err := s.bugReportStore.Create(reportData); err != nil {
+		return err
 	}
 
-	return complaintId, nil
+	return nil
 }
 
 func (s *Service) GetBugReports(limit, offset int) ([]*models.BugReportModel, error) {
@@ -97,6 +97,15 @@ func (s *Service) GetBugReports(limit, offset int) ([]*models.BugReportModel, er
 	}
 
 	return complaints, nil
+}
+
+func (s *Service) CompleteBug(bugId string) error {
+	id, err := strconv.Atoi(bugId)
+	if err != nil {
+		return err
+	}
+
+	return s.bugReportStore.CompleteBug(id)
 }
 
 func (s *Service) ReportUser(req *request.ReportUserPayload, files []*multipart.FileHeader) (string, error) {

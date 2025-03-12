@@ -21,9 +21,11 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 		offset = DEFAULT_OFFSET
 	}
 
+	flash, _, _ := utils.RetrieveFlashMessage(c)
+
 	complaints, err := h.complaintService.GetBugReports(limit, offset)
 	if err != nil {
-		page := pages.BugReports(make([]models.BugReportModel, 0))
+		page := pages.BugReports(make([]models.BugReportModel, 0), flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -32,13 +34,14 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 		date := utils.FormatDate(complaint.CreatedAt)
 
 		data = append(data, models.BugReportModel{
-			Model:           models.Model{Id: complaint.Id, CreatedAt: date},
-			UpdateableModel: complaint.UpdateableModel,
-			Title:           complaint.Title,
-			Detail:          complaint.Detail,
+			Id:          complaint.Id,
+			Title:       complaint.Title,
+			Detail:      complaint.Detail,
+			CreatedAt:   date,
+			CompletedAt: complaint.CompletedAt,
 		})
 	}
 
-	page := pages.BugReports(data)
+	page := pages.BugReports(data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

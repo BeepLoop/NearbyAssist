@@ -41,17 +41,14 @@ func (h *complaintHandler) CreateBugReport(c echo.Context) error {
 		})
 	}
 
-	complaintId, err := h.complaintService.CreateBugReport(req, files)
-	if err != nil {
+	if err := h.complaintService.CreateBugReport(req, files); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error creating system complaint",
+			Message: "Error creating bug report",
 			Error:   err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusCreated, utils.Mapper{
-		"complaintId": complaintId,
-	})
+	return c.JSON(http.StatusNoContent, nil)
 }
 
 func (h *complaintHandler) ReportUser(c echo.Context) error {
