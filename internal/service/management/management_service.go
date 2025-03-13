@@ -73,6 +73,18 @@ func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, err
 		return nil, err
 	}
 
+	if restricted, expired, err := s.store.IsRestricted(userId); err != nil {
+		return nil, err
+	} else {
+		accountData.Restricted = restricted && !expired
+	}
+
+	if accountData.Restricted {
+		if err := s.store.LiftRestrictionIfExpired(userId); err != nil {
+			return nil, err
+		}
+	}
+
 	if stat, err := s.store.GetSentTransactionCount(userId); err != nil {
 		accountData.Stat.Sent = models.SentStat{}
 	} else {
