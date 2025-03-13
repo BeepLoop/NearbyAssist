@@ -8,4 +8,5 @@ type NotificationRepository interface {
 	UpdateRead(id string) error
 
 	GetAllUnreadByRecipient(id string) ([]*models.NotificationModel, error)
+	GetAllByRecipient(id string) ([]*models.NotificationModel, error)
 }

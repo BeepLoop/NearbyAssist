@@ -8,5 +8,7 @@ type NotificationModel struct {
 	Type      string         `json:"type" db:"type"`
 	Title     string         `json:"title" db:"title"`
 	Content   string         `json:"content" db:"content"`
-	ReadAt    sql.NullString `json:"readAt" db:"readAt"`
+	ReadAt    sql.NullString `json:"-" db:"readAt"`
+
+	IsRead bool `json:"isRead"`
 }

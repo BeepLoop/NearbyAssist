@@ -86,7 +86,35 @@ func (s *MysqlNotificationRepository) GetAllUnreadByRecipient(id string) ([]*mod
             Notification
         WHERE
             recipient = ? AND readAt IS NULL
-        ORDER BY createdAt DESC
+        ORDER BY
+            readAt ASC
+    `
+	if err := s.db.SelectContext(ctx, &notifications, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return notifications, nil
+}
+
+func (s *MysqlNotificationRepository) GetAllByRecipient(id string) ([]*models.NotificationModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	notifications := make([]*models.NotificationModel, 0)
+
+	query := `
+        SELECT
+            *
+        FROM
+            Notification
+        WHERE
+            recipient = ?
+        ORDER BY
+            readAt ASC
     `
 	if err := s.db.SelectContext(ctx, &notifications, query, id); err != nil {
 		return nil, err

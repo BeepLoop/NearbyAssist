@@ -17,10 +17,16 @@ func NewHandler(service *notification_service.Service) *notificationHandler {
 	return &notificationHandler{service: service}
 }
 
-func (h *notificationHandler) GetUnreadNotifications(c echo.Context) error {
+func (h *notificationHandler) GetNotifications(c echo.Context) error {
+	status := "all"
+	statusParam := c.QueryParam("status")
+	if statusParam == "unread" {
+		status = statusParam
+	}
+
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
-	notifications, err := h.service.GetUnreadNotifications(bearerToken)
+	notifications, err := h.service.GetNotifications(bearerToken, status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error retrieving notifications",

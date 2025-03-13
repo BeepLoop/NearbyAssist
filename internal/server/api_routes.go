@@ -302,7 +302,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		notificationService := notification_service.NewService(notificationStore, s.Encrypt, s.JWT)
 		handler := notification.NewHandler(notificationService)
 
-		notificationRoute.GET("", handler.GetUnreadNotifications)
+		notificationRoute.GET("", handler.GetNotifications)
 		notificationRoute.POST("/:notificationId", handler.ReadNotification)
 	}
 

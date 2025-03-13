@@ -21,15 +21,26 @@ func NewService(store notification_repo.NotificationRepository, encrypt auth.Enc
 	}
 }
 
-func (s *Service) GetUnreadNotifications(bearerToken string) ([]*models.NotificationModel, error) {
+func (s *Service) GetNotifications(bearerToken string, status string) ([]*models.NotificationModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return nil, err
 	}
 
-	notifications, err := s.store.GetAllUnreadByRecipient(userId)
-	if err != nil {
-		return nil, err
+	notifications := make([]*models.NotificationModel, 0)
+
+	if status == "unread" {
+		if notifs, err := s.store.GetAllUnreadByRecipient(userId); err != nil {
+			return nil, err
+		} else {
+			notifications = notifs
+		}
+	} else {
+		if notifs, err := s.store.GetAllByRecipient(userId); err != nil {
+			return nil, err
+		} else {
+			notifications = notifs
+		}
 	}
 
 	for _, notification := range notifications {
@@ -44,6 +55,8 @@ func (s *Service) GetUnreadNotifications(bearerToken string) ([]*models.Notifica
 		} else {
 			notification.Content = plainText
 		}
+
+		notification.IsRead = notification.ReadAt.Valid
 	}
 
 	return notifications, nil
