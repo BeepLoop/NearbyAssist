@@ -3,6 +3,7 @@ package complaint
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/complaints"
 	"strconv"
 
@@ -11,6 +12,7 @@ import (
 
 func (h *complaintHandler) GetReportedUsers(c echo.Context) error {
 	params := c.QueryParams()
+	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	results := make([]*models.ReportedUserModel, 0)
 
@@ -29,7 +31,8 @@ func (h *complaintHandler) GetReportedUsers(c echo.Context) error {
 
 		users, err := h.complaintService.GetReportedUsers(limit, offset)
 		if err != nil {
-			page := pages.ReportedUsers(make([]models.ReportedUserModel, 0))
+			empty := make([]models.ReportedUserModel, 0)
+			page := pages.ReportedUsers(empty, flash)
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = users
@@ -46,6 +49,6 @@ func (h *complaintHandler) GetReportedUsers(c echo.Context) error {
 		})
 	}
 
-	page := pages.ReportedUsers(data)
+	page := pages.ReportedUsers(data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

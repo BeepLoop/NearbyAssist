@@ -80,6 +80,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		complaintRoute.GET("/bugs", complaintHandler.GetBugReports)
 		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug)
 		complaintRoute.GET("/users", complaintHandler.GetReportedUsers)
+		complaintRoute.GET("/users/:reportId", complaintHandler.GetReportedUserDetail)
 	}
 
 	applicationRoute := r.Group("/vendor-applications")

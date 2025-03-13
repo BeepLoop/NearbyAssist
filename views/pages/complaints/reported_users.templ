@@ -7,8 +7,11 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ ReportedUsers(users []models.ReportedUserModel) {
+templ ReportedUsers(users []models.ReportedUserModel, flash string) {
 	@layout.Layout() {
+		<!-- toasy component -->
+		@templ.JSONScript("flash", flash)
+		@partials.ToastNotification()
 		@partials.PageBanner("Reported Users", "View reported users")
 		@reportedUsersTable(users)
 		@partials.Pagination()

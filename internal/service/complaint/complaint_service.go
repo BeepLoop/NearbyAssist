@@ -1,6 +1,7 @@
 package complaint_service
 
 import (
+	"encoding/base64"
 	"mime/multipart"
 	"nearbyassist/internal/models"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
@@ -9,6 +10,7 @@ import (
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/utils"
+	"net/http"
 	"strconv"
 )
 
@@ -173,4 +175,51 @@ func (s *Service) GetReportedUsers(limit, offset int) ([]*models.ReportedUserMod
 	}
 
 	return users, nil
+}
+
+func (s *Service) GetReportedUserDetail(reportId string) (*models.ReportedUserModel, error) {
+	report, err := s.reportUserStore.FindById(reportId)
+	if err != nil {
+		return nil, err
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(report.Name); err != nil {
+		return nil, err
+	} else {
+		report.Name = decrypted
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(report.Reason); err != nil {
+		return nil, err
+	} else {
+		report.Reason = decrypted
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(report.Detail); err != nil {
+		return nil, err
+	} else {
+		report.Detail = decrypted
+	}
+
+	return report, nil
+}
+
+func (s *Service) GetFile(path string) (string, error) {
+	file, err := s.fs.GetFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	decrypted, err := s.encrypt.DecryptFile(file)
+	if err != nil {
+		return "", err
+	}
+
+	base64Img := base64.StdEncoding.EncodeToString(decrypted)
+
+	mime := http.DetectContentType(decrypted)
+
+	base64Img = "data:" + mime + ";base64," + base64Img
+
+	return base64Img, nil
 }

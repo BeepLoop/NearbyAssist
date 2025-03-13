@@ -96,10 +96,23 @@ func (s *MysqlReportUserRepository) FindById(id string) (*models.ReportedUserMod
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getUserQuery := "SELECT * FROM ReportedUser WHERE id = ?"
+	getUserQuery := `
+        SELECT
+            ru.id,
+            ru.userId,
+            ru.reason,
+            ru.detail,
+            ru.createdAt,
+            u.name AS name
+        FROM
+            ReportedUser ru
+            JOIN User u ON u.id = ru.userId
+        WHERE
+            ru.id = ?
+    `
 
 	reportedUser := new(models.ReportedUserModel)
-	if err := s.db.GetContext(ctx, &reportedUser, getUserQuery, id); err != nil {
+	if err := s.db.GetContext(ctx, reportedUser, getUserQuery, id); err != nil {
 		return nil, err
 	}
 

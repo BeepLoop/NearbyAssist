@@ -1116,6 +1116,9 @@
   .bg-neutral-50 {
     background-color: var(--color-neutral-50);
   }
+  .bg-neutral-gray\/25 {
+    background-color: color-mix(in oklab, var(--color-neutral-gray) 25%, transparent);
+  }
   .bg-neutral-gray\/50 {
     background-color: color-mix(in oklab, var(--color-neutral-gray) 50%, transparent);
   }

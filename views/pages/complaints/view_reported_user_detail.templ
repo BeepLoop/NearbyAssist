@@ -1,0 +1,68 @@
+package pages
+
+import (
+	"fmt"
+	"nearbyassist/internal/models"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ ViewReportedUserDetail(data models.ReportedUserModel) {
+	@layout.Layout() {
+		<div class="max-w-3xl mx-auto">
+			<!-- Actions -->
+			<div class="flex justify-between">
+				@partials.BackButton()
+				<button
+					type="button"
+					class="p-2 rounded-sm bg-primary text-white font-medium cursor-pointer hover:opacity-75"
+				>Address</button>
+			</div>
+			<!-- Info -->
+			<div class="mt-4">
+				<div class="mt-2">
+					<h3 class="font-bold text-neutral-dark">Reported User:</h3>
+					<span class="inline-flex gap-2 items-center">
+						<p class="text-lg text-neutral-gray">{ data.Name } </p>
+						<a
+							href={ templ.SafeURL(fmt.Sprintf("/admin/account-management/%s", data.UserId)) }
+							class="cursor-pointer px-2 py-1 rounded-sm bg-neutral-gray/25 hover:opacity-75"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"></path>
+							</svg>
+						</a>
+					</span>
+				</div>
+				<div class="mt-2">
+					<h3 class="font-bold text-neutral-dark">User ID:</h3>
+					<p class="text-sm text-neutral-gray">{ data.UserId } </p>
+				</div>
+			</div>
+			<!-- Reason -->
+			<div class="mt-4">
+				<div class="mt-2">
+					<h3 class="font-bold text-neutral-dark">Reason:</h3>
+					<p class="text-sm text-neutral-gray">{ data.Reason } </p>
+				</div>
+				<div class="mt-2">
+					<h3 class="font-bold text-neutral-dark">Detail:</h3>
+					<p class="text-sm text-neutral-gray">{ data.Detail } </p>
+				</div>
+			</div>
+			<!-- Images -->
+			<div class="mt-4">
+				<h4 class="font-bold text-neutral-dark">Images</h4>
+				<div class="grid gap-2 grid-cols-3 mt-2">
+					for _, image := range data.Images {
+						<img
+							src={ image }
+							alt="image"
+							class="outline-1 outline-pale-gray"
+						/>
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
