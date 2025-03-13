@@ -7,4 +7,5 @@ type ReportUserRepository interface {
 	GetAll(limit, offset int) ([]*models.ReportedUserModel, error)
 	FindById(id string) (*models.ReportedUserModel, error)
 	FindByUserId(id string) (*models.ReportedUserModel, error)
+	CloseReport(id string) error
 }

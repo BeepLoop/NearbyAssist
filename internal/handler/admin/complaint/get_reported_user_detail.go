@@ -39,11 +39,12 @@ func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
 			Id:        detail.Id,
 			CreatedAt: utils.FormatDate(detail.CreatedAt),
 		},
-		UserId: detail.UserId,
-		Reason: detail.Reason,
-		Detail: detail.Detail,
-		Images: images,
-		Name:   detail.Name,
+		ReportedBy: detail.ReportedBy,
+		UserId:     detail.UserId,
+		Reason:     detail.Reason,
+		Detail:     detail.Detail,
+		Images:     images,
+		Name:       detail.Name,
 	}
 
 	page := pages.ViewReportedUserDetail(data)

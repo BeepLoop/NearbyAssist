@@ -1,11 +1,14 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS ReportedUser (
     id VARCHAR(255) NOT NULL,
+    reportedBy VARCHAR(255) NOT NULL,
     userId VARCHAR(255) NOT NULL,
     reason VARCHAR(255) NOT NULL,
     detail TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completedAt TIMESTAMP,
     PRIMARY KEY(id),
+    FOREIGN KEY(reportedBy) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY(userId) REFERENCES User(id) ON DELETE CASCADE,
     INDEX(id, userId)
 );

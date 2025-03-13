@@ -77,7 +77,9 @@ func (h *complaintHandler) ReportUser(c echo.Context) error {
 		})
 	}
 
-	reportId, err := h.complaintService.ReportUser(req, files)
+	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+
+	reportId, err := h.complaintService.ReportUser(bearerToken, req, files)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error reporting user",

@@ -2,13 +2,16 @@ package complaint_service
 
 import (
 	"encoding/base64"
+	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/models"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
+	notification_repo "nearbyassist/internal/repository/notification"
 	report_user_repo "nearbyassist/internal/repository/report_user"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
+	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
@@ -17,16 +20,20 @@ import (
 type Service struct {
 	reportUserStore report_user_repo.ReportUserRepository
 	bugReportStore  bug_report_repo.BugReportRepository
+	notifStore      notification_repo.NotificationRepository
 	fs              fs.FileStorage
 	encrypt         auth.Encryption
+	jwt             auth.Authenticator
 }
 
-func NewService(reportUserStore report_user_repo.ReportUserRepository, bugReportStore bug_report_repo.BugReportRepository, fs fs.FileStorage, encrypt auth.Encryption) *Service {
+func NewService(reportUserStore report_user_repo.ReportUserRepository, bugReportStore bug_report_repo.BugReportRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
 	return &Service{
 		reportUserStore: reportUserStore,
 		bugReportStore:  bugReportStore,
+		notifStore:      notifStore,
 		fs:              fs,
 		encrypt:         encrypt,
+		jwt:             jwt,
 	}
 }
 
@@ -111,7 +118,12 @@ func (s *Service) CompleteBug(bugId string) error {
 	return s.bugReportStore.CompleteBug(id)
 }
 
-func (s *Service) ReportUser(req *request.ReportUserPayload, files []*multipart.FileHeader) (string, error) {
+func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload, files []*multipart.FileHeader) (string, error) {
+	reporterId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return "", err
+	}
+
 	reason, err := s.encrypt.EncryptString(req.Reason)
 	if err != nil {
 		return "", err
@@ -123,10 +135,11 @@ func (s *Service) ReportUser(req *request.ReportUserPayload, files []*multipart.
 	}
 
 	reportData := &models.ReportedUserModel{
-		UserId: req.UserId,
-		Reason: reason,
-		Detail: detail,
-		Images: make([]string, 0),
+		ReportedBy: reporterId,
+		UserId:     req.UserId,
+		Reason:     reason,
+		Detail:     detail,
+		Images:     make([]string, 0),
 	}
 
 	for _, file := range files {
@@ -207,6 +220,54 @@ func (s *Service) GetReportedUserDetail(reportId string) (*models.ReportedUserMo
 	}
 
 	return report, nil
+}
+
+func (s *Service) CloseUserReport(reportId, title, detail string) error {
+	report, err := s.reportUserStore.FindById(reportId)
+	if err != nil {
+		return err
+	}
+
+	if err := s.reportUserStore.CloseReport(reportId); err != nil {
+		return err
+	}
+
+	notificationHeading := "User report has been addressed!"
+	notificationContent := "Your recent user report submission has been viewed and addressed!"
+
+	notification := &models.NotificationModel{
+		Recipient: report.ReportedBy,
+		Type:      "generic",
+		Title:     title,
+		Content:   detail,
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return err
+	}
+
+	oneSignal := notification_service.OneSignalInstance
+	if oneSignal != nil {
+		if err := oneSignal.NewUrgentNotification(report.ReportedBy, notificationHeading, notificationContent); err != nil {
+			fmt.Println(err.Error())
+		}
+	} else {
+		fmt.Println("dum dum you forgot to initialize one signal")
+	}
+
+	return nil
 }
 
 func (s *Service) GetFile(path string) (string, error) {

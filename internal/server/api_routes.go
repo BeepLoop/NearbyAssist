@@ -255,7 +255,8 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
-		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, s.FS, s.Encrypt)
+		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, notifStore, s.FS, s.Encrypt, s.JWT)
 		handler := complaint.NewHandler(complaintService)
 
 		complaintRoute.POST("/system", handler.CreateBugReport)

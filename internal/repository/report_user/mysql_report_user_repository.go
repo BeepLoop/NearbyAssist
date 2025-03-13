@@ -33,9 +33,9 @@ func (s *MysqlReportUserRepository) Create(data *models.ReportedUserModel) (stri
 
 	insertQuery := `
         INSERT INTO 
-            ReportedUser (id, userId, reason, detail)
+            ReportedUser (id, reportedBy, userId, reason, detail)
         VALUES
-            (:id, :userId, :reason, :detail)
+            (:id, :reportedBy, :userId, :reason, :detail)
     `
 	if _, err := tx.NamedExecContext(ctx, insertQuery, data); err != nil {
 		return "", err
@@ -69,7 +69,17 @@ func (s *MysqlReportUserRepository) GetAll(limit, offset int) ([]*models.Reporte
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getUsersQuery := "SELECT * FROM ReportedUser ORDER BY createdAt DESC LIMIT ? OFFSET ?"
+	getUsersQuery := `
+        SELECT
+            *
+        FROM
+            ReportedUser
+        WHERE
+            completedAt IS NULL
+        ORDER BY
+            createdAt DESC
+        LIMIT ? OFFSET ?
+    `
 	reportedUsers := make([]*models.ReportedUserModel, 0)
 	if err := s.db.SelectContext(ctx, &reportedUsers, getUsersQuery, limit, offset); err != nil {
 		return nil, err
@@ -99,6 +109,7 @@ func (s *MysqlReportUserRepository) FindById(id string) (*models.ReportedUserMod
 	getUserQuery := `
         SELECT
             ru.id,
+            ru.reportedBy,
             ru.userId,
             ru.reason,
             ru.detail,
@@ -161,4 +172,20 @@ func (s *MysqlReportUserRepository) FindByUserId(userId string) (*models.Reporte
 	}
 
 	return reportedUser, nil
+}
+
+func (s *MysqlReportUserRepository) CloseReport(reportId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE ReportedUser SET completedAt = CURRENT_TIMESTAMP() WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, reportId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
 }

@@ -13,10 +13,7 @@ templ ViewReportedUserDetail(data models.ReportedUserModel) {
 			<!-- Actions -->
 			<div class="flex justify-between">
 				@partials.BackButton()
-				<button
-					type="button"
-					class="p-2 rounded-sm bg-primary text-white font-medium cursor-pointer hover:opacity-75"
-				>Address</button>
+				@addressReport(data)
 			</div>
 			<!-- Info -->
 			<div class="mt-4">
@@ -61,4 +58,96 @@ templ ViewReportedUserDetail(data models.ReportedUserModel) {
 			</div>
 		</div>
 	}
+}
+
+templ addressReport(data models.ReportedUserModel) {
+	<div x-data="{offCanvasOpen: false}">
+		<!-- offCanvas Button -->
+		<button
+			x-on:click="offCanvasOpen = !offCanvasOpen"
+			type="button"
+			class="p-2 rounded-sm bg-primary text-sm text-white font-medium cursor-pointer hover:opacity-75"
+		>Address</button>
+		<!-- offCanvas Backdrop -->
+		<div
+			x-cloak
+			x-show="offCanvasOpen"
+			x-on:keydown.esc.window="offCanvasOpen = false"
+			x-on:click.self="offCanvasOpen = false"
+			role="dialog"
+			class="fixed inset-0 bg-neutral-gray/50"
+		>
+			<!-- offCanvas Sidebar -->
+			<div
+				x-cloak
+				x-show="offCanvasOpen"
+				x-transition:enter="transition ease-out duration-200"
+				x-transition:enter-start="translate-x-full"
+				x-transition:enter-end="translate-x-0"
+				x-transition:leave="transition ease-in duration-200"
+				x-transition:leave-start="translate-x-0"
+				x-transition:leave-end="translate-x-full"
+				role="document"
+				class="fixed top-0 right-0 w-md h-full p-4 bg-white flex flex-col outline-1 outline-pale-gray"
+			>
+				<!-- Header -->
+				<div class="flex justify-end">
+					<button
+						x-on:click="offCanvasOpen = false"
+						type="button"
+						class="flex items-center rounded-sm px-3 py-1.5 cursor-pointer hover:bg-neutral-gray/25 hover:opacity-75"
+					>
+						<svg
+							class="hi-solid hi-x -mx-1 inline-block size-4"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+								clip-rule="evenodd"
+							></path>
+						</svg>
+					</button>
+				</div>
+				<!-- Content -->
+				<div class="mt-4">
+					<form
+						action="/admin/complaints/users/close"
+						method="POST"
+					>
+						<input type="text" hidden name="reportId" value={ data.Id }/>
+						<div class="mt-2">
+							<label for="title" class="font-medium">Title</label>
+							<input
+								type="text"
+								name="title"
+								id="title"
+								placeholder="title"
+								class="outline-1 outline-pale-gray p-2 rounded-sm w-full mt-1.5"
+							/>
+						</div>
+						<div class="mt-2">
+							<label for="detail" class="font-medium">Detail</label>
+							<textarea
+								name="detail"
+								id="detail"
+								rows="6"
+								placeholder="more details..."
+								autocomplete="off"
+								class="text-neutral-dark text-sm outline-1 outline-pale-gray p-2 rounded-sm w-full mt-1.5"
+							></textarea>
+						</div>
+						<div class="flex justify-end mt-4">
+							<button
+								type="submit"
+								class="px-3 py-1.5 rounded-sm bg-primary text-white font-medium cursor-pointer hover:opacity-75"
+							>Okay</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 }

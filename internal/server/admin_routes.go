@@ -74,13 +74,15 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
-		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, s.FS, s.Encrypt)
+		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, notifStore, s.FS, s.Encrypt, s.JWT)
 		complaintHandler := complaint.NewHandler(complaintService)
 
 		complaintRoute.GET("/bugs", complaintHandler.GetBugReports)
 		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug)
 		complaintRoute.GET("/users", complaintHandler.GetReportedUsers)
 		complaintRoute.GET("/users/:reportId", complaintHandler.GetReportedUserDetail)
+		complaintRoute.POST("/users/close", complaintHandler.CloseUserReport)
 	}
 
 	applicationRoute := r.Group("/vendor-applications")

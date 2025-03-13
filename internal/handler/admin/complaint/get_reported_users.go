@@ -45,7 +45,6 @@ func (h *complaintHandler) GetReportedUsers(c echo.Context) error {
 			UserId: report.UserId,
 			Reason: report.Reason,
 			Detail: report.Detail,
-			Images: report.Images,
 		})
 	}
 
