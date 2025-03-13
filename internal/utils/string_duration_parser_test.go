@@ -49,3 +49,30 @@ func TestParseStringDuration(t *testing.T) {
 		assert.Equal(t, test.expected, duration)
 	}
 }
+
+func TestFormatDurationToString(t *testing.T) {
+	tests := []struct {
+		input    time.Duration
+		expected string
+	}{
+		{
+			input:    time.Hour * 24,
+			expected: "1 day",
+		},
+		{
+			input:    time.Hour * 24 * 2,
+			expected: "2 days",
+		},
+		{
+			input:    time.Hour * 5,
+			expected: "5 hours",
+		},
+	}
+
+	for _, test := range tests {
+		result := FormatDurationToString(test.input)
+
+		assert.Equal(t, test.expected, result)
+	}
+
+}

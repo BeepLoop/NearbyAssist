@@ -1,21 +1,30 @@
 package management_service
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
+	notification_repo "nearbyassist/internal/repository/notification"
 	user_repo "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/service/auth"
+	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/utils"
 	"time"
 )
 
 type Service struct {
-	store   user_repo.UserRepository
-	encrypt auth.Encryption
-	hash    auth.Hash
+	store      user_repo.UserRepository
+	notifStore notification_repo.NotificationRepository
+	encrypt    auth.Encryption
+	hash       auth.Hash
 }
 
-func NewService(store user_repo.UserRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
-	return &Service{store: store, encrypt: encrypt, hash: hash}
+func NewService(store user_repo.UserRepository, notifStore notification_repo.NotificationRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
+	return &Service{
+		store:      store,
+		notifStore: notifStore,
+		encrypt:    encrypt,
+		hash:       hash,
+	}
 }
 
 func (s *Service) GetUsers(limit, offset int) ([]*models.UserModel, error) {
@@ -175,7 +184,6 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 	}
 
 	endDate := time.Now().Add(d)
-
 	data := &models.RestrictionModel{
 		UserId:  userId,
 		Reason:  reason,
@@ -186,12 +194,84 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 		return err
 	}
 
+	stringifiedDuration := utils.FormatDurationToString(d)
+
+	notification := &models.NotificationModel{
+		Recipient: userId,
+		Type:      "generic",
+		Title:     "Account Restricted " + stringifiedDuration,
+		Content:   reason,
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return err
+	}
+
+	notificationHeading := "Account Restricted!"
+	notificationContent := "You commited a violation resulting to account restriction."
+
+	oneSignal := notification_service.OneSignalInstance
+	if oneSignal != nil {
+		if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
+			fmt.Println(err.Error())
+		}
+	} else {
+		fmt.Println("dum dum you forgot to initialize one signal")
+	}
+
 	return nil
 }
 
 func (s *Service) UnrestrictUser(userId string) error {
 	if err := s.store.ForceLiftRestriction(userId); err != nil {
 		return err
+	}
+
+	notification := &models.NotificationModel{
+		Recipient: userId,
+		Type:      "success",
+		Title:     "Restriction Lifted",
+		Content:   "The restriction to your account has been lifted by the administrator. Avoid committing violations to prevent future restrictions.",
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return err
+	}
+
+	notificationHeading := "Account Restriction Lifted!"
+	notificationContent := "Your account restriction has been lifted."
+
+	oneSignal := notification_service.OneSignalInstance
+	if oneSignal != nil {
+		if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
+			fmt.Println(err.Error())
+		}
+	} else {
+		fmt.Println("dum dum you forgot to initialize one signal")
 	}
 
 	return nil

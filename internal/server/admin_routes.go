@@ -120,8 +120,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		managementRoute.Use(middleware.CheckSession)
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		managementService := management_service.NewService(userStore, s.Encrypt, s.Hash)
+		managementService := management_service.NewService(userStore, notifStore, s.Encrypt, s.Hash)
 		managementHandler := management.NewHandler(managementService)
 
 		managementRoute.GET("", managementHandler.GetAccountManagement)

@@ -2,7 +2,9 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 )
@@ -39,4 +41,53 @@ func ParseStringDuration(duration string) (time.Duration, error) {
 	default:
 		return time.Second, errors.New("unknown duration")
 	}
+}
+
+func FormatDurationToString(d time.Duration) string {
+	d = d.Abs()
+
+	days := int(d.Hours() / 24)
+	hours := int(d.Hours()) % 24
+	minutes := int(d.Minutes()) % 60
+	seconds := int(d.Seconds()) % 60
+
+	parts := []string{}
+
+	if days > 0 {
+		if days == 1 {
+			parts = append(parts, "1 day")
+		} else {
+			parts = append(parts, fmt.Sprintf("%d days", days))
+		}
+	}
+
+	if hours > 0 {
+		if hours == 1 {
+			parts = append(parts, "1 hour")
+		} else {
+			parts = append(parts, fmt.Sprintf("%d hours", hours))
+		}
+	}
+
+	if minutes > 0 && len(parts) < 2 {
+		if minutes == 1 {
+			parts = append(parts, "1 minute")
+		} else {
+			parts = append(parts, fmt.Sprintf("%d minutes", minutes))
+		}
+	}
+
+	if seconds > 0 && len(parts) < 2 {
+		if seconds == 1 {
+			parts = append(parts, "1 second")
+		} else {
+			parts = append(parts, fmt.Sprintf("%d seconds", seconds))
+		}
+	}
+
+	if len(parts) == 0 {
+		return "0 seconds"
+	}
+
+	return strings.Join(parts, ", ")
 }
