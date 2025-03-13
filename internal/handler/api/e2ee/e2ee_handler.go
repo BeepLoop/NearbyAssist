@@ -6,6 +6,7 @@ import (
 	e2ee_service "nearbyassist/internal/service/e2ee"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -51,6 +52,13 @@ func (h *e2eeHandler) GetKeys(c echo.Context) error {
 
 	keys, err := h.e2eeService.GetKeys(bearerToken)
 	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "Keys not found",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error retrieving keys",
 			Error:   err.Error(),
