@@ -36,7 +36,8 @@ type UserRepository interface {
 	BanUser(userId string) error
 	UnbanUser(userId string) error
 
-	IsRestricted(userId string) (bool, error)
+	// isRestricted, isExpired, error
+	IsRestricted(userId string) (bool, bool, error)
 	RestrictUser(data *models.RestrictionModel) error
 	LiftRestrictionIfExpired(userId string) error
 	ForceLiftRestriction(userId string) error

@@ -155,10 +155,10 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 		user.Banned = banned
 	}
 
-	if restricted, err := s.IsRestricted(user.Id); err != nil {
+	if restricted, expired, err := s.IsRestricted(user.Id); err != nil {
 		return nil, err
 	} else {
-		user.Restricted = restricted
+		user.Restricted = restricted && !expired
 	}
 
 	getUserSocialsQuery := `SELECT url FROM Social WHERE userId = ?`
@@ -212,10 +212,10 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 		accountData.Banned = banned
 	}
 
-	if restricted, err := s.IsRestricted(user.Id); err != nil {
+	if restricted, expired, err := s.IsRestricted(user.Id); err != nil {
 		return nil, err
 	} else {
-		accountData.Restricted = restricted
+		accountData.Restricted = restricted && !expired
 	}
 
 	getExpertiseQuery := `
@@ -412,10 +412,10 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
 		user.Banned = banned
 	}
 
-	if restricted, err := s.IsRestricted(user.Id); err != nil {
+	if restricted, expired, err := s.IsRestricted(user.Id); err != nil {
 		return nil, err
 	} else {
-		user.Restricted = restricted
+		user.Restricted = restricted && !expired
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -652,29 +652,46 @@ func (s *MysqlUserRepository) UnbanUser(userId string) error {
 	return nil
 }
 
-func (s *MysqlUserRepository) IsRestricted(userId string) (bool, error) {
+// Return isRestricted, isExpired, error
+func (s *MysqlUserRepository) IsRestricted(userId string) (bool, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := `
-        SELECT EXISTS (
-            SELECT 1 
-            FROM Restricted 
-            WHERE userId = ? 
-              AND endTime > NOW()
-        ) AS isRestricted;
+	isRestrictedQuery := `
+        SELECT
+            CASE
+                WHEN (SELECT 1 FROM Restricted WHERE userId = ?)
+                THEN 1
+                ELSE 0
+            END AS user_exists;
     `
-
 	isRestricted := false
-	if err := s.db.GetContext(ctx, &isRestricted, query, userId); err != nil {
-		return false, err
+	if err := s.db.GetContext(ctx, &isRestricted, isRestrictedQuery, userId); err != nil {
+		return false, false, err
+	}
+
+	if !isRestricted {
+		return false, false, nil
+	}
+
+	isRestrictionExpiredQuery := `
+        SELECT
+            CASE
+                WHEN (SELECT 1 FROM Restricted WHERE userId = ? AND endTime < NOW())
+                THEN 1
+                ELSE 0
+            END AS isExpired;
+    `
+	isExpired := false
+	if err := s.db.GetContext(ctx, &isExpired, isRestrictionExpiredQuery, userId); err != nil {
+		return false, false, nil
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return false, context.DeadlineExceeded
+		return false, false, context.DeadlineExceeded
 	}
 
-	return isRestricted, nil
+	return isRestricted, isExpired, nil
 }
 
 func (s *MysqlUserRepository) RestrictUser(data *models.RestrictionModel) error {

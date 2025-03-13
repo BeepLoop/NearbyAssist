@@ -286,6 +286,15 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		return nil, err
 	}
 
+	isRestricted, isRestrictionExpired, err := s.store.IsRestricted(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.store.LiftRestrictionIfExpired(user.Id); err != nil {
+		return nil, err
+	}
+
 	decryptedSocials := make([]string, 0)
 	for _, social := range user.Socials {
 		decrypted, err := s.encrypt.DecryptString(social)
@@ -371,7 +380,7 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		Longitude:    user.Longitude.Float64,
 		Expertises:   vendorExpertises,
 		Socials:      user.Socials,
-		IsRestricted: user.Restricted,
+		IsRestricted: isRestricted && !isRestrictionExpired,
 	}
 
 	return response, nil
