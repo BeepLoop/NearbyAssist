@@ -122,20 +122,7 @@ func ViewReportedUserDetail(data models.ReportedUserModel) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, image := range data.Images {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<img src=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(image)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 59, Col: 18}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" class=\"outline-1 outline-pale-gray\">")
+				templ_7745c5c3_Err = partials.ImageViewer(image).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

@@ -38,13 +38,18 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 	}
 
 	for _, file := range files {
-		b, err := utils.FileToBytes(file)
+		bytes, err := utils.FileToBytes(file)
+		if err != nil {
+			return err
+		}
+
+		cipher, err := s.encrypt.EncryptFile(bytes)
 		if err != nil {
 			return err
 		}
 
 		fileData := fs.File{
-			Data:     b,
+			Data:     cipher,
 			Category: fs.BUG_REPORT_DIR,
 		}
 		url, err := s.fs.SaveFile(fileData)

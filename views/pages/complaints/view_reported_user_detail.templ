@@ -55,11 +55,7 @@ templ ViewReportedUserDetail(data models.ReportedUserModel) {
 				<h4 class="font-bold text-neutral-dark">Images</h4>
 				<div class="grid gap-2 grid-cols-3 mt-2">
 					for _, image := range data.Images {
-						<img
-							src={ image }
-							alt="image"
-							class="outline-1 outline-pale-gray"
-						/>
+						@partials.ImageViewer(image)
 					}
 				</div>
 			</div>

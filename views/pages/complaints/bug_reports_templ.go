@@ -9,7 +9,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
@@ -134,7 +133,7 @@ func bugReportTable(bugs []models.BugReportModel) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(bug.Id))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 40, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 39, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -147,7 +146,7 @@ func bugReportTable(bugs []models.BugReportModel) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(bug.CreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 42, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 41, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -203,7 +202,7 @@ func viewBug(bug models.BugReportModel) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(bug.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 120, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 119, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -216,7 +215,7 @@ func viewBug(bug models.BugReportModel) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(bug.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 126, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 125, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -229,7 +228,7 @@ func viewBug(bug models.BugReportModel) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(bug.Detail)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 129, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 128, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -240,7 +239,7 @@ func viewBug(bug models.BugReportModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, image := range bug.Images {
-			templ_7745c5c3_Err = imageViewer(image).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.ImageViewer(image).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -252,68 +251,13 @@ func viewBug(bug models.BugReportModel) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(bug.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 144, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 143, Col: 78}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <button type=\"submit\" class=\"inline-flex items-center gap-2 px-2 py-1.5 rounded-sm text-white font-semibold bg-primary cursor-pointer hover:opacity-75\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z\"></path></svg> <span>Complete</span></button></form></div></div></div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return templ_7745c5c3_Err
-	})
-}
-
-func imageViewer(image string) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var11 == nil {
-			templ_7745c5c3_Var11 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{imageViewerOpen: false}\"><!-- Image --><div x-on:click=\"imageViewerOpen = true\" class=\"outline-1 outline-pale-gray cursor-pointer\"><img src=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/resource/%s", image))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 172, Col: 51}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" class=\"\"></div><div x-cloak x-show=\"imageViewerOpen\" x-on:keydown.esc.window=\"imageViewerOpen = false\" x-on:click.self=\"imageViewerOpen = false\" x-transition role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 bg-neutral-gray/50 grid place-content-center\"><!-- Modal Dialog --><div x-show=\"imageViewerOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"outline-1 outline-pale-gray p-2 rounded-sm bg-white p-4\"><img src=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/resource/%s", image))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 197, Col: 52}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" loading=\"lazy\" class=\"object-cover max-w-[80vw] max-h-[80vh]\"></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

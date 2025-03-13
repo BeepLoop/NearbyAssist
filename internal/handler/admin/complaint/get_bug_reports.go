@@ -2,6 +2,7 @@ package complaint
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/complaints"
@@ -33,14 +34,26 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 	for _, complaint := range complaints {
 		date := utils.FormatDate(complaint.CreatedAt)
 
+		images := make([]string, 0)
+		for _, image := range complaint.Images {
+			base64Image, err := h.complaintService.GetFile(image)
+			if err != nil {
+				fmt.Println("error retrieving bug report image: ", err.Error())
+				continue
+			}
+
+			images = append(images, base64Image)
+		}
+
 		data = append(data, models.BugReportModel{
 			Id:          complaint.Id,
 			Title:       complaint.Title,
 			Detail:      complaint.Detail,
 			CreatedAt:   date,
 			CompletedAt: complaint.CompletedAt,
-			Images:      complaint.Images,
+			Images:      images,
 		})
+
 	}
 
 	page := pages.BugReports(data, flash)
