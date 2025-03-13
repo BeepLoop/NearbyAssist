@@ -52,7 +52,7 @@ func (h *e2eeHandler) GetKeys(c echo.Context) error {
 
 	keys, err := h.e2eeService.GetKeys(bearerToken)
 	if err != nil {
-		if strings.Contains(err.Error(), "no rows in result set") {
+		if strings.Contains(err.Error(), "not found") {
 			return echo.NewHTTPError(http.StatusNotFound, models.Error{
 				Message: "Keys not found",
 				Error:   err.Error(),

@@ -1,6 +1,7 @@
 package e2ee_service
 
 import (
+	"errors"
 	"nearbyassist/internal/models"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
 	"nearbyassist/internal/request"
@@ -52,9 +53,13 @@ func (s *Service) GetKeys(bearerToken string) (map[string]string, error) {
 		return nil, err
 	}
 
-	private, err := s.store.GetPrivatePem(userId)
+	private, exists, err := s.store.GetPrivatePem(userId)
 	if err != nil {
 		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.New("not found")
 	}
 
 	decrypted, err := s.encrypt.DecryptString(private.Pem)

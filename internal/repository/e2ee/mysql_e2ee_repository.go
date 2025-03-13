@@ -72,19 +72,36 @@ func (s *MysqlE2EERepository) NewPrivatePem(data *models.PrivateKeyModel) (strin
 	return data.Id, nil
 }
 
-func (s *MysqlE2EERepository) GetPrivatePem(owner string) (*models.PrivateKeyModel, error) {
+func (s *MysqlE2EERepository) GetPrivatePem(owner string) (*models.PrivateKeyModel, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	existsQuery := `
+        SELECT
+            CASE
+                WHEN EXISTS (SELECT 1 FROM PrivateKey WHERE owner = ?)
+                THEN 1
+                ELSE 0
+            END AS user_exists;
+    `
+	exists := false
+	if err := s.db.GetContext(ctx, &exists, existsQuery, owner); err != nil {
+		return nil, false, err
+	}
+
+	if !exists {
+		return nil, exists, nil
+	}
 
 	privateKey := new(models.PrivateKeyModel)
 	query := "SELECT id, owner, pem FROM PrivateKey WHERE owner = ?"
 	if err := s.db.GetContext(ctx, privateKey, query, owner); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
+		return nil, false, context.DeadlineExceeded
 	}
 
-	return privateKey, nil
+	return privateKey, exists, nil
 }

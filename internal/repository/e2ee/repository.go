@@ -7,5 +7,5 @@ type E2EERepository interface {
 	GetPublicPem(owner string) (*models.PublicKeyModel, error)
 
 	NewPrivatePem(data *models.PrivateKeyModel) (string, error)
-	GetPrivatePem(owner string) (*models.PrivateKeyModel, error)
+	GetPrivatePem(owner string) (*models.PrivateKeyModel, bool, error)
 }
