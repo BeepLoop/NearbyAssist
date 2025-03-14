@@ -3,7 +3,7 @@ package resource
 import (
 	"mime"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/service/fs"
+	resource_service "nearbyassist/internal/service/resource"
 	"net/http"
 	"path/filepath"
 
@@ -11,12 +11,12 @@ import (
 )
 
 type resourceHandler struct {
-	fs fs.FileStorage
+	service *resource_service.Service
 }
 
-func NewHandler(fs fs.FileStorage) *resourceHandler {
+func NewHandler(service *resource_service.Service) *resourceHandler {
 	return &resourceHandler{
-		fs: fs,
+		service: service,
 	}
 }
 
@@ -24,7 +24,7 @@ func (h *resourceHandler) GetFile(c echo.Context) error {
 	path := c.Param("path")
 
 	// Retrieve the file
-	bytes, err := h.fs.GetFile(path)
+	bytes, err := h.service.GetFile(path)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Error{
 			Message: "Failed to get file",

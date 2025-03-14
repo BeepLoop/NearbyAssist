@@ -38,6 +38,7 @@ import (
 	message_service "nearbyassist/internal/service/message"
 	notification_service "nearbyassist/internal/service/notification"
 	qr_service "nearbyassist/internal/service/qr"
+	resource_service "nearbyassist/internal/service/resource"
 	review_service "nearbyassist/internal/service/review"
 	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
@@ -309,7 +310,8 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	resourceRoute := v1.Group("/resource")
 	{
 		// NOTE: This is public
-		handler := resource.NewHandler(s.FS)
+		resourceService := resource_service.NewService(s.FS)
+		handler := resource.NewHandler(resourceService)
 
 		resourceRoute.GET("/:path", handler.GetFile)
 	}
