@@ -23,9 +23,9 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	vendor := new(models.VendorModel)
 	query := `
         SELECT  
-            v.vendorId AS id,
+            v.vendorId,
             v.rating,
-            u.name AS vendor,
+            u.name AS name,
             u.email AS email,
             u.phone AS phone,
             u.imageUrl AS imageUrl
@@ -105,6 +105,15 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
 	services := make([]*models.ServiceModel, 0)
 	if err := s.db.SelectContext(ctx, &services, query, vendorId); err != nil {
 		return nil, err
+	}
+
+	for _, service := range services {
+		tags, err := s.GetTags(service.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		service.Tags = tags
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {

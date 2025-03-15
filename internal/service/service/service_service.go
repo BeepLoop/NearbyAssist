@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/models"
 	service_repo "nearbyassist/internal/repository/service"
+	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/auth"
@@ -17,21 +18,31 @@ import (
 )
 
 type Service struct {
-	store   service_repo.ServiceRepository
-	encrypt auth.Encryption
-	hash    auth.Hash
-	jwt     auth.Authenticator
-	suggest suggestion_engine.Engine
-	route   route_engine.Engine
-	fs      fs.FileStorage
+	serviceStore service_repo.ServiceRepository
+	vendorStore  vendor_repo.VendorRepository
+	encrypt      auth.Encryption
+	hash         auth.Hash
+	jwt          auth.Authenticator
+	suggest      suggestion_engine.Engine
+	route        route_engine.Engine
+	fs           fs.FileStorage
 }
 
-func NewService(store service_repo.ServiceRepository, encrypt auth.Encryption, hash auth.Hash, jwt auth.Authenticator, suggest suggestion_engine.Engine, route route_engine.Engine, fs fs.FileStorage) *Service {
-	return &Service{store: store, encrypt: encrypt, hash: hash, jwt: jwt, suggest: suggest, route: route, fs: fs}
+func NewService(serviceStore service_repo.ServiceRepository, vendorStore vendor_repo.VendorRepository, encrypt auth.Encryption, hash auth.Hash, jwt auth.Authenticator, suggest suggestion_engine.Engine, route route_engine.Engine, fs fs.FileStorage) *Service {
+	return &Service{
+		serviceStore: serviceStore,
+		vendorStore:  vendorStore,
+		encrypt:      encrypt,
+		hash:         hash,
+		jwt:          jwt,
+		suggest:      suggest,
+		route:        route,
+		fs:           fs,
+	}
 }
 
 func (s *Service) CreateService(req *request.NewServicePayload) (string, error) {
-	if err := s.store.IsVendor(req.VendorId); err != nil {
+	if err := s.serviceStore.IsVendor(req.VendorId); err != nil {
 		return "", err
 	}
 
@@ -52,7 +63,7 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 		return "", err
 	}
 
-	if service, err := s.store.FindBySignature(signature); err == nil && service != nil {
+	if service, err := s.serviceStore.FindBySignature(signature); err == nil && service != nil {
 		return "", err
 	}
 
@@ -86,7 +97,7 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 	newService.Signature = signature
 	newService.Extras = extras
 
-	serviceId, err := s.store.Create(newService)
+	serviceId, err := s.serviceStore.Create(newService)
 	if err != nil {
 		return "", err
 	}
@@ -94,8 +105,96 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 	return serviceId, nil
 }
 
+func (s *Service) NewGetService(serviceId string) (*response.DetailedServiceResponse, error) {
+	service, err := s.serviceStore.FindById(serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	if cipher, err := s.encrypt.DecryptString(service.Title); err != nil {
+		return nil, err
+	} else {
+		service.Title = cipher
+	}
+
+	if cipher, err := s.encrypt.DecryptString(service.Description); err != nil {
+		return nil, err
+	} else {
+		service.Description = cipher
+	}
+
+	for _, extra := range service.Extras {
+		if cipher, err := s.encrypt.DecryptString(extra.Title); err != nil {
+			return nil, err
+		} else {
+			extra.Title = cipher
+		}
+
+		if cipher, err := s.encrypt.DecryptString(extra.Description); err != nil {
+			return nil, err
+		} else {
+			extra.Description = cipher
+		}
+	}
+
+	reviews, err := s.serviceStore.GetReviews(serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	countPerRating := response.NewCountPerRating()
+	for _, review := range reviews {
+		switch review.Rating {
+		case 5:
+			countPerRating["five"]++
+		case 4:
+			countPerRating["four"]++
+		case 3:
+			countPerRating["three"]++
+		case 2:
+			countPerRating["two"]++
+		case 1:
+			countPerRating["one"]++
+		}
+	}
+
+	vendor, err := s.vendorStore.FindById(service.VendorId)
+	if err != nil {
+		return nil, err
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(vendor.Name); err != nil {
+		return nil, err
+	} else {
+		vendor.Name = decrypted
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
+		return nil, err
+	} else {
+		vendor.Email = decrypted
+	}
+
+	if vendor.Phone.Valid {
+		if decrypted, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
+			return nil, err
+		} else {
+			vendor.PhoneString = decrypted
+		}
+	}
+
+	response := &response.DetailedServiceResponse{
+		Service:        service,
+		Vendor:         vendor,
+		CountPerRating: countPerRating,
+	}
+
+	return response, nil
+}
+
+// NOTE: Deprecated
 func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
-	service, err := s.store.FindById(serviceId)
+	service, err := s.serviceStore.FindById(serviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -134,13 +233,13 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 	}
 	service.Extras = extras
 
-	if tags, err := s.store.GetTags(serviceId); err != nil {
+	if tags, err := s.serviceStore.GetTags(serviceId); err != nil {
 		return nil, err
 	} else {
 		service.Tags = tags
 	}
 
-	reviews, err := s.store.GetReviews(serviceId)
+	reviews, err := s.serviceStore.GetReviews(serviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -161,20 +260,20 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		}
 	}
 
-	photos, err := s.store.GetPhotos(serviceId)
+	photos, err := s.serviceStore.GetPhotos(serviceId)
 	if err != nil {
 		return nil, err
 	}
 
-	vendor, err := s.store.GetVendorInfo(service.VendorId)
+	vendor, err := s.serviceStore.GetVendorInfo(service.VendorId)
 	if err != nil {
 		return nil, err
 	}
 
-	if decrypted, err := s.encrypt.DecryptString(vendor.Vendor); err != nil {
+	if decrypted, err := s.encrypt.DecryptString(vendor.Name); err != nil {
 		return nil, err
 	} else {
-		vendor.Vendor = decrypted
+		vendor.Name = decrypted
 	}
 
 	if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
@@ -202,7 +301,7 @@ func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
 		Expertise    []string `json:"expertise"`
 	}{
 		Id:           vendor.VendorId,
-		Name:         vendor.Vendor,
+		Name:         vendor.Name,
 		Email:        vendor.Email,
 		Phone:        vendor.Phone.String,
 		ImageUrl:     vendor.ImageUrl,
@@ -227,7 +326,7 @@ func (s *Service) UpdateService(bearerToken, serviceId string, req *request.Upda
 		return err
 	}
 
-	if vendor, err := s.store.GetVendorInfo(userId); err != nil {
+	if vendor, err := s.serviceStore.GetVendorInfo(userId); err != nil {
 		return err
 	} else {
 		if vendor.VendorId != req.VendorId {
@@ -263,7 +362,7 @@ func (s *Service) UpdateService(bearerToken, serviceId string, req *request.Upda
 		updatedService.Signature = signature
 	}
 
-	if err := s.store.Update(updatedService); err != nil {
+	if err := s.serviceStore.Update(updatedService); err != nil {
 		return err
 	}
 
@@ -276,7 +375,7 @@ func (s *Service) AddImage(bearerToken, serviceId string, files []*multipart.Fil
 		return nil, err
 	}
 
-	service, err := s.store.FindById(serviceId)
+	service, err := s.serviceStore.FindById(serviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +406,7 @@ func (s *Service) AddImage(bearerToken, serviceId string, files []*multipart.Fil
 		Url:       url,
 	}
 
-	imageId, err := s.store.AddImage(photoData)
+	imageId, err := s.serviceStore.AddImage(photoData)
 	if err != nil {
 		return nil, err
 	}
@@ -323,7 +422,7 @@ func (s *Service) DeleteImage(bearerToken, imageId string) error {
 		return err
 	}
 
-	photo, err := s.store.FindPhotoById(imageId)
+	photo, err := s.serviceStore.FindPhotoById(imageId)
 	if err != nil {
 		return err
 	}
@@ -334,7 +433,7 @@ func (s *Service) DeleteImage(bearerToken, imageId string) error {
 
 	// TODO: delete file in storage
 
-	if err := s.store.DeleteImage(imageId); err != nil {
+	if err := s.serviceStore.DeleteImage(imageId); err != nil {
 		return err
 	}
 
@@ -347,7 +446,7 @@ func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) (
 		return "", err
 	}
 
-	service, err := s.store.FindById(input.ServiceId)
+	service, err := s.serviceStore.FindById(input.ServiceId)
 	if err != nil {
 		return "", err
 	}
@@ -375,7 +474,7 @@ func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) (
 		data.Description = encrypted
 	}
 
-	extraId, err := s.store.AddExtra(data)
+	extraId, err := s.serviceStore.AddExtra(data)
 	if err != nil {
 		return "", err
 	}
@@ -389,12 +488,12 @@ func (s *Service) EditExtra(bearerToken string, data *request.EditExtraPayload) 
 		return err
 	}
 
-	extra, err := s.store.FindExtraById(data.Id)
+	extra, err := s.serviceStore.FindExtraById(data.Id)
 	if err != nil {
 		return err
 	}
 
-	service, err := s.store.FindById(extra.ServiceId)
+	service, err := s.serviceStore.FindById(extra.ServiceId)
 	if err != nil {
 		return err
 	}
@@ -422,7 +521,7 @@ func (s *Service) EditExtra(bearerToken string, data *request.EditExtraPayload) 
 		updatedExtra.Description = encrypted
 	}
 
-	if err := s.store.EditExtra(updatedExtra); err != nil {
+	if err := s.serviceStore.EditExtra(updatedExtra); err != nil {
 		return err
 	}
 
@@ -435,13 +534,13 @@ func (s *Service) DeleteExtra(bearerToken, extraId string) error {
 		return err
 	}
 
-	extra, err := s.store.FindExtraById(extraId)
+	extra, err := s.serviceStore.FindExtraById(extraId)
 	if err != nil {
 		fmt.Println("find extra by id: ", err.Error())
 		return err
 	}
 
-	service, err := s.store.FindById(extra.ServiceId)
+	service, err := s.serviceStore.FindById(extra.ServiceId)
 	if err != nil {
 		fmt.Println("find service by id: ", err.Error())
 		return err
@@ -451,7 +550,7 @@ func (s *Service) DeleteExtra(bearerToken, extraId string) error {
 		return errors.New("unauthorized")
 	}
 
-	if err := s.store.DeleteExtra(extraId); err != nil {
+	if err := s.serviceStore.DeleteExtra(extraId); err != nil {
 		fmt.Println("delete extra: ", err.Error())
 		return err
 	}
@@ -460,7 +559,7 @@ func (s *Service) DeleteExtra(bearerToken, extraId string) error {
 }
 
 func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSearchResult, error) {
-	services, err := s.store.GeoSpatialSearch(params)
+	services, err := s.serviceStore.GeoSpatialSearch(params)
 	if err != nil {
 		return nil, err
 	}
@@ -468,12 +567,12 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 	// Filter out services with restricted OR banned vendor
 	validServices := make([]*models.GeoSpatialSearchResult, 0)
 	for _, service := range services {
-		restricted, err := s.store.IsVendorRestricted(service.Id)
+		restricted, err := s.serviceStore.IsVendorRestricted(service.Id)
 		if err != nil {
 			return nil, err
 		}
 
-		banned, err := s.store.IsVendorBanned(service.Id)
+		banned, err := s.serviceStore.IsVendorBanned(service.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -523,7 +622,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 }
 
 func (s *Service) FindRoute(serviceId string, origin string) (route_engine.PolylineCode, error) {
-	service, err := s.store.FindById(serviceId)
+	service, err := s.serviceStore.FindById(serviceId)
 	if err != nil {
 		return "", err
 	}

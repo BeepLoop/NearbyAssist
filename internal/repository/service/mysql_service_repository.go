@@ -135,7 +135,7 @@ func (s *MysqlServiceRepository) FindAll() ([]*models.ServiceModel, error) {
 	return services, nil
 }
 
-func (s *MysqlServiceRepository) FindById(id string) (*models.ServiceModel, error) {
+func (s *MysqlServiceRepository) FindById(serviceId string) (*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -155,7 +155,7 @@ func (s *MysqlServiceRepository) FindById(id string) (*models.ServiceModel, erro
         WHERE
             id = ?
     `
-	if err := s.db.GetContext(ctx, service, query, id); err != nil {
+	if err := s.db.GetContext(ctx, service, query, serviceId); err != nil {
 		return nil, err
 	}
 
@@ -173,10 +173,22 @@ func (s *MysqlServiceRepository) FindById(id string) (*models.ServiceModel, erro
     `
 
 	extras := make([]*models.ExtraModel, 0)
-	if err := s.db.SelectContext(ctx, &extras, extrasQuery, id); err != nil {
+	if err := s.db.SelectContext(ctx, &extras, extrasQuery, serviceId); err != nil {
 		return nil, err
 	}
 	service.Extras = extras
+
+	if tags, err := s.GetTags(serviceId); err != nil {
+		return nil, err
+	} else {
+		service.Tags = tags
+	}
+
+	if images, err := s.GetPhotos(serviceId); err != nil {
+		return nil, err
+	} else {
+		service.Images = images
+	}
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
@@ -270,7 +282,6 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
 	if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, vendorId); err != nil {
 		return nil, err
 	}
-
 	vendor.Expertise = expertise
 
 	if ctx.Err() == context.DeadlineExceeded {

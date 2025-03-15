@@ -263,6 +263,9 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 
 	getServiceImagesQuery := `
         SELECT
+            id,
+            serviceId,
+            vendorId,
             url
         FROM
             ServicePhoto
@@ -270,7 +273,7 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
             serviceId = ?
     `
 	for _, service := range accountData.Services {
-		images := make([]string, 0)
+		images := make([]*models.ServicePhotoModel, 0)
 		if err := s.db.SelectContext(ctx, &images, getServiceImagesQuery, service.Id); err != nil {
 			return nil, err
 		}

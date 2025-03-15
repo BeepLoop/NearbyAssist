@@ -3,6 +3,7 @@ package service
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	resource_service "nearbyassist/internal/service/resource"
 	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
 	"nearbyassist/internal/utils"
@@ -15,10 +16,15 @@ import (
 type serviceHandler struct {
 	service_service *service_service.Service
 	save_service    *save_service.Service
+	resourceService *resource_service.Service
 }
 
-func NewHandler(service *service_service.Service, save_service *save_service.Service) *serviceHandler {
-	return &serviceHandler{service_service: service, save_service: save_service}
+func NewHandler(service *service_service.Service, save_service *save_service.Service, resourceService *resource_service.Service) *serviceHandler {
+	return &serviceHandler{
+		service_service: service,
+		save_service:    save_service,
+		resourceService: resourceService,
+	}
 }
 
 func (h *serviceHandler) CreateService(c echo.Context) error {
@@ -59,7 +65,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 		})
 	}
 
-	data, err := h.service_service.GetService(serviceId)
+	detail, err := h.service_service.NewGetService(serviceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error while retrieving service information",
@@ -67,11 +73,17 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 		})
 	}
 
+	for _, image := range detail.Service.Images {
+		signedURL, err := h.resourceService.SignURLWithDefaultDuration(image.Url)
+		if err != nil {
+			c.Logger().Warnf("Error generating service image url: %s\n", err.Error())
+			continue
+		}
+		image.Url = signedURL
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"serviceInfo":    data["serviceInfo"],
-		"vendorInfo":     data["vendorInfo"],
-		"serviceImages":  data["serviceImages"],
-		"countPerRating": data["countPerRating"],
+		"detail": detail,
 	})
 }
 
@@ -354,7 +366,9 @@ func (h *serviceHandler) GetSavedServices(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, services)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"saves": services,
+	})
 }
 
 func (h *serviceHandler) SearchService(c echo.Context) error {

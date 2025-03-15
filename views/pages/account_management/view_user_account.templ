@@ -222,7 +222,7 @@ templ viewService(service *models.ServiceModel) {
 	</div>
 }
 
-templ carousel(images []string) {
+templ carousel(images []*models.ServicePhotoModel) {
 	<div class="relative w-full overflow-hidden outline-1 outline-pale-gray">
 		<!-- previous button -->
 		<button
@@ -296,7 +296,7 @@ templ carousel(images []string) {
                         }
 
                         if (images.length === 0) return;
-                        const img = createImageElement(images[currImageIndex]);
+                        const img = createImageElement(images[currImageIndex].url);
                         carousel.innerHTML = "";
                         carousel.append(img);
                     });
@@ -313,14 +313,14 @@ templ carousel(images []string) {
                         }
 
                         if (images.length === 0) return;
-                        const img = createImageElement(images[currImageIndex]);
+                        const img = createImageElement(images[currImageIndex].url);
                         carousel.innerHTML = "";
                         carousel.append(img);
                     });
                 }
 
                 if (images.length === 0) return;
-                const img = createImageElement(images[currImageIndex]);
+                const img = createImageElement(images[currImageIndex].url);
                 carousel.innerHTML = "";
                 carousel.append(img);
              })();

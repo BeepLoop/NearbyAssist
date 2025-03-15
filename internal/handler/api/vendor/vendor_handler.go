@@ -53,7 +53,7 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		Socials      []string `json:"socials"`
 	}{
 		Id:           vendor.Id,
-		Name:         vendor.Vendor,
+		Name:         vendor.Name,
 		Email:        vendor.Email,
 		Phone:        vendor.Phone.String,
 		ImageUrl:     vendor.ImageUrl,
@@ -103,7 +103,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 			Socials      []string `json:"socials"`
 		}{
 			Id:           vendor.Id,
-			Name:         vendor.Vendor,
+			Name:         vendor.Name,
 			Email:        vendor.Email,
 			Phone:        vendor.Phone.String,
 			ImageUrl:     vendor.ImageUrl,

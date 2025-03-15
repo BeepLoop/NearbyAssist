@@ -4,20 +4,28 @@ import (
 	"nearbyassist/internal/models"
 	saved_service_repo "nearbyassist/internal/repository/saved_service"
 	service_repo "nearbyassist/internal/repository/service"
+	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
-	savedStore   saved_service_repo.SavedServiceRepository
-	serviceStore service_repo.ServiceRepository
-	jwt          auth.Authenticator
-	encrypt      auth.Encryption
+	savedServiceStore saved_service_repo.SavedServiceRepository
+	serviceStore      service_repo.ServiceRepository
+	vendorStore       vendor_repo.VendorRepository
+	jwt               auth.Authenticator
+	encrypt           auth.Encryption
 }
 
-func NewService(store saved_service_repo.SavedServiceRepository, serviceStore service_repo.ServiceRepository, jwt auth.Authenticator, encrypt auth.Encryption) *Service {
-	return &Service{savedStore: store, serviceStore: serviceStore, jwt: jwt, encrypt: encrypt}
+func NewService(savedServiceStore saved_service_repo.SavedServiceRepository, serviceStore service_repo.ServiceRepository, vendorStore vendor_repo.VendorRepository, jwt auth.Authenticator, encrypt auth.Encryption) *Service {
+	return &Service{
+		savedServiceStore: savedServiceStore,
+		serviceStore:      serviceStore,
+		vendorStore:       vendorStore,
+		jwt:               jwt,
+		encrypt:           encrypt,
+	}
 }
 
 func (s *Service) SaveService(bearerToken, serviceId string) error {
@@ -31,7 +39,7 @@ func (s *Service) SaveService(bearerToken, serviceId string) error {
 		ServiceId: serviceId,
 	}
 
-	return s.savedStore.SaveService(data)
+	return s.savedServiceStore.SaveService(data)
 }
 
 func (s *Service) UnsaveService(bearerToken, serviceId string) error {
@@ -45,24 +53,24 @@ func (s *Service) UnsaveService(bearerToken, serviceId string) error {
 		ServiceId: serviceId,
 	}
 
-	return s.savedStore.UnsaveService(data)
+	return s.savedServiceStore.UnsaveService(data)
 }
 
-func (s *Service) GetSavedServices(bearerToken string) (*response.SavedServicesResponse, error) {
+func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServiceResponse, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return nil, err
 	}
 
-	saves, err := s.savedStore.FindByUserId(userId)
+	saves, err := s.savedServiceStore.FindByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	savedServices := &response.SavedServicesResponse{}
+	savedServices := make([]*response.DetailedServiceResponse, 0)
 
-	for _, entry := range saves {
-		service, err := s.serviceStore.FindById(entry.ServiceId)
+	for _, saved := range saves {
+		service, err := s.serviceStore.FindById(saved.ServiceId)
 		if err != nil {
 			return nil, err
 		}
@@ -79,13 +87,21 @@ func (s *Service) GetSavedServices(bearerToken string) (*response.SavedServicesR
 			service.Description = cipher
 		}
 
-		if tags, err := s.serviceStore.GetTags(entry.ServiceId); err != nil {
-			return nil, err
-		} else {
-			service.Tags = tags
+		for _, extra := range service.Extras {
+			if cipher, err := s.encrypt.DecryptString(extra.Title); err != nil {
+				return nil, err
+			} else {
+				extra.Title = cipher
+			}
+
+			if cipher, err := s.encrypt.DecryptString(extra.Description); err != nil {
+				return nil, err
+			} else {
+				extra.Description = cipher
+			}
 		}
 
-		reviews, err := s.serviceStore.GetReviews(entry.ServiceId)
+		reviews, err := s.serviceStore.GetReviews(saved.ServiceId)
 		if err != nil {
 			return nil, err
 		}
@@ -106,20 +122,15 @@ func (s *Service) GetSavedServices(bearerToken string) (*response.SavedServicesR
 			}
 		}
 
-		photos, err := s.serviceStore.GetPhotos(entry.ServiceId)
+		vendor, err := s.vendorStore.FindById(service.VendorId)
 		if err != nil {
 			return nil, err
 		}
 
-		vendor, err := s.serviceStore.GetVendorInfo(service.VendorId)
-		if err != nil {
-			return nil, err
-		}
-
-		if decrypted, err := s.encrypt.DecryptString(vendor.Vendor); err != nil {
+		if decrypted, err := s.encrypt.DecryptString(vendor.Name); err != nil {
 			return nil, err
 		} else {
-			vendor.Vendor = decrypted
+			vendor.Name = decrypted
 		}
 
 		if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
@@ -128,30 +139,21 @@ func (s *Service) GetSavedServices(bearerToken string) (*response.SavedServicesR
 			vendor.Email = decrypted
 		}
 
-		vendorData := struct {
-			Id           string `json:"id"`
-			Name         string `json:"name"`
-			Email        string `json:"email"`
-			ImageUrl     string `json:"imageUrl"`
-			Rating       string `json:"rating"`
-			IsRestricted bool   `json:"isRestricted"`
-		}{
-			Id:           vendor.VendorId,
-			Name:         vendor.Vendor,
-			Email:        vendor.Email,
-			ImageUrl:     vendor.ImageUrl,
-			Rating:       vendor.Rating,
-			IsRestricted: vendor.Restricted,
+		if vendor.Phone.Valid {
+			if decrypted, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
+				return nil, err
+			} else {
+				vendor.PhoneString = decrypted
+			}
 		}
 
-		serviceData := response.SavedServiceData{
+		detailedService := &response.DetailedServiceResponse{
 			Service:        service,
-			Vendor:         vendorData,
-			Photos:         photos,
+			Vendor:         vendor,
 			CountPerRating: countPerRating,
 		}
 
-		savedServices.Services = append(savedServices.Services, serviceData)
+		savedServices = append(savedServices, detailedService)
 	}
 
 	return savedServices, nil

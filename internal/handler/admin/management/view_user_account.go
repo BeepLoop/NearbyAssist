@@ -26,18 +26,15 @@ func (h *managementHandler) ViewUserAccount(c echo.Context) error {
 	}
 
 	for _, service := range accountData.Services {
-		signedURLs := make([]string, 0)
 		for _, image := range service.Images {
-			signedURL, err := h.resourceService.SignURLWithDefaultDuration(image)
+			signedURL, err := h.resourceService.SignURLWithDefaultDuration(image.Url)
 			if err != nil {
 				fmt.Println("Error generating signed url: ", err.Error())
 				continue
 			}
 
-			signedURLs = append(signedURLs, signedURL)
+			image.Url = signedURL
 		}
-
-		service.Images = signedURLs
 	}
 
 	data := models.UserAccountPageData{

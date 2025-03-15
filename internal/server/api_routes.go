@@ -119,9 +119,13 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		serviceRoute.Use(middleware.CheckAuth(s.JWT))
 
+		savedServiceStore := saved_service_repo.NewMysqlSavedServiceRepository(s.DB)
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+
 		serviceManager := service_service.NewService(
 			serviceStore,
+			vendorStore,
 			s.Encrypt,
 			s.Hash,
 			s.JWT,
@@ -129,11 +133,10 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.RouteEngine,
 			s.FS,
 		)
+		savedServiceService := save_service.NewService(savedServiceStore, serviceStore, vendorStore, s.JWT, s.Encrypt)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
-		savedServiceStore := saved_service_repo.NewMysqlSavedServiceRepository(s.DB)
-		savedServiceService := save_service.NewService(savedServiceStore, serviceStore, s.JWT, s.Encrypt)
-
-		handler := service.NewHandler(serviceManager, savedServiceService)
+		handler := service.NewHandler(serviceManager, savedServiceService, resourceService)
 
 		serviceRoute.POST("", handler.CreateService)
 		serviceRoute.GET("/search", handler.SearchService)

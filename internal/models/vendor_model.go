@@ -18,10 +18,11 @@ type VendorModel struct {
 	Restricted bool   `json:"restricted" db:"restricted"`
 
 	// Additional fields for joins
-	Vendor    string         `json:"vendor" db:"vendor"`
-	Email     string         `json:"email" db:"email"`
-	Phone     sql.NullString `db:"phone"`
-	ImageUrl  string         `json:"imageUrl" db:"imageUrl"`
-	Expertise []string       `json:"expertise" db:"expertise"`
-	Socials   []string
+	Name        string         `json:"name" db:"name"`
+	Email       string         `json:"email" db:"email"`
+	Phone       sql.NullString `json:"-" db:"phone"`
+	PhoneString string         `json:"phone"` // Purely for json response
+	ImageUrl    string         `json:"imageUrl" db:"imageUrl"`
+	Expertise   []string       `json:"expertise" db:"expertise"`
+	Socials     []string       `json:"socials"`
 }
