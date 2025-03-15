@@ -36,13 +36,13 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 
 		images := make([]string, 0)
 		for _, image := range complaint.Images {
-			base64Image, err := h.resourceService.GetBase64File(image)
+			signedURL, err := h.resourceService.SignURLWithDefaultDuration(image)
 			if err != nil {
-				fmt.Println("error retrieving bug report image: ", err.Error())
+				fmt.Println("Error generating signed url for bug image: ", err.Error())
 				continue
 			}
 
-			images = append(images, base64Image)
+			images = append(images, signedURL)
 		}
 
 		data = append(data, models.BugReportModel{

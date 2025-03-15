@@ -133,7 +133,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
 		managementService := management_service.NewService(userStore, notifStore, s.Encrypt, s.Hash)
-		managementHandler := management.NewHandler(managementService)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+
+		managementHandler := management.NewHandler(managementService, resourceService)
 
 		managementRoute.GET("", managementHandler.GetAccountManagement)
 		managementRoute.GET("/:userId", managementHandler.ViewUserAccount)

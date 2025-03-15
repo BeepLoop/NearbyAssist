@@ -25,13 +25,13 @@ func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
 
 	images := make([]string, 0)
 	for _, image := range detail.Images {
-		base64Image, err := h.resourceService.GetBase64File(image)
+		signedURL, err := h.resourceService.SignURLWithDefaultDuration(image)
 		if err != nil {
-			fmt.Println("error retrieving image: ", err.Error())
+			fmt.Println("Error generating signed url: ", err.Error())
 			continue
 		}
 
-		images = append(images, base64Image)
+		images = append(images, signedURL)
 	}
 
 	data := models.ReportedUserModel{

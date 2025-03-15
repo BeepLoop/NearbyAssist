@@ -2,6 +2,7 @@ package management
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/account_management"
@@ -22,6 +23,21 @@ func (h *managementHandler) ViewUserAccount(c echo.Context) error {
 	if err != nil {
 		page := pages.ViewUserAccount(models.UserAccountPageData{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
+	}
+
+	for _, service := range accountData.Services {
+		signedURLs := make([]string, 0)
+		for _, image := range service.Images {
+			signedURL, err := h.resourceService.SignURLWithDefaultDuration(image)
+			if err != nil {
+				fmt.Println("Error generating signed url: ", err.Error())
+				continue
+			}
+
+			signedURLs = append(signedURLs, signedURL)
+		}
+
+		service.Images = signedURLs
 	}
 
 	data := models.UserAccountPageData{

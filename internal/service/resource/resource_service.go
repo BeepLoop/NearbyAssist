@@ -31,6 +31,25 @@ func NewService(fs fs.FileStorage, encrypt auth.Encryption, hash auth.Hash) *Ser
 	}
 }
 
+func (s *Service) SignURLWithDefaultDuration(imagePath string) (string, error) {
+	expiry := time.Now().Add(DEFAULT_DURATION).Unix()
+
+	hashInput := fmt.Sprintf("%s:%d", imagePath, expiry)
+	signature, err := s.hash.Generate([]byte(hashInput))
+	if err != nil {
+		return "", err
+	}
+
+	encryptedPath, err := s.encrypt.EncryptString(imagePath)
+	if err != nil {
+		return "", err
+	}
+
+	signedURL := fmt.Sprintf("image?path=%s&expiry=%d&signature=%s", encryptedPath, expiry, signature)
+
+	return signedURL, nil
+}
+
 func (s *Service) SignURL(imagePath string, duration time.Duration) (string, error) {
 	expiry := time.Now().Add(duration).Unix()
 
