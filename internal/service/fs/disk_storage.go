@@ -89,3 +89,12 @@ func (s *DiskStorage) GetFile(path string) ([]byte, error) {
 
 	return bytes, nil
 }
+
+func (s *DiskStorage) DeleteFile(path string) error {
+	workDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(filepath.Join(workDir, path))
+}

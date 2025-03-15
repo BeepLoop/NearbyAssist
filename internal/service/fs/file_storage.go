@@ -36,6 +36,7 @@ type File struct {
 type FileStorage interface {
 	SaveFile(file File) (string, error)
 	GetFile(path string) ([]byte, error)
+	DeleteFile(path string) error
 }
 
 func GetFiletype(file []byte) (FILETYPE, error) {

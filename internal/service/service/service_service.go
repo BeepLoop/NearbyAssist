@@ -426,16 +426,18 @@ func (s *Service) DeleteImage(bearerToken, imageId string) error {
 		return err
 	}
 
-	photo, err := s.serviceStore.FindPhotoById(imageId)
+	image, err := s.serviceStore.FindPhotoById(imageId)
 	if err != nil {
 		return err
 	}
 
-	if photo.VendorId != userId {
+	if image.VendorId != userId {
 		return errors.New("unauthorized")
 	}
 
-	// TODO: delete file in storage
+	if err := s.fs.DeleteFile(image.Url); err != nil {
+		return err
+	}
 
 	if err := s.serviceStore.DeleteImage(imageId); err != nil {
 		return err
