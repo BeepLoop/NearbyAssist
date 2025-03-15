@@ -51,6 +51,13 @@ func (h *resourceHandler) GetPrivateFile(c echo.Context) error {
 
 	file, err := h.resourceService.GetPrivateFile(params.Get("path"), params.Get("signature"), params.Get("expiry"))
 	if err != nil {
+		if strings.Contains(err.Error(), "unvalid resource URL") {
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+				Message: "Invalid resource URL",
+				Error:   err.Error(),
+			})
+		}
+
 		if strings.Contains(err.Error(), "unauthorized access") {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "Unauthorized file access",

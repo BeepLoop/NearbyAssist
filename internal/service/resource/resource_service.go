@@ -55,6 +55,10 @@ func (s *Service) GetRawFile(path string) ([]byte, error) {
 }
 
 func (s *Service) GetPrivateFile(path, signature, expiry string) ([]byte, error) {
+	if path == "" || signature == "" || expiry == "" {
+		return nil, errors.New("invalid resource URL")
+	}
+
 	// Validate expiry
 	expireTime, err := strconv.ParseInt(expiry, 10, 64)
 	if err != nil || time.Now().Unix() > expireTime {
