@@ -310,9 +310,9 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	resourceRoute := v1.Group("/resource")
 	{
 		// NOTE: This is public
-		resourceService := resource_service.NewService(s.FS)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt)
 		handler := resource.NewHandler(resourceService)
 
-		resourceRoute.GET("/:path", handler.GetFile)
+		resourceRoute.GET("/:path", handler.RequestFile)
 	}
 }

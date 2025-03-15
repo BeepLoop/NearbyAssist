@@ -28,6 +28,7 @@ import (
 	expertise_service "nearbyassist/internal/service/expertise"
 	management_service "nearbyassist/internal/service/management"
 	map_service "nearbyassist/internal/service/map"
+	resource_service "nearbyassist/internal/service/resource"
 	tag_service "nearbyassist/internal/service/tag"
 	verification_service "nearbyassist/internal/service/verification"
 
@@ -75,8 +76,11 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+
 		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, notifStore, s.FS, s.Encrypt, s.JWT)
-		complaintHandler := complaint.NewHandler(complaintService)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt)
+
+		complaintHandler := complaint.NewHandler(complaintService, resourceService)
 
 		complaintRoute.GET("/bugs", complaintHandler.GetBugReports)
 		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug)
@@ -91,8 +95,11 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
+
 		applicationService := application_service.NewService(applicationStore, notificationStore, s.FS, s.Encrypt, s.JWT)
-		applicationHandler := application.NewHandler(applicationService)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt)
+
+		applicationHandler := application.NewHandler(applicationService, resourceService)
 
 		applicationRoute.GET("", applicationHandler.GetVendorApplication)
 		applicationRoute.GET("/:applicationId", applicationHandler.GetVendorApplicationDetails)
@@ -106,8 +113,11 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+
 		requestService := verification_service.NewService(requestStore, notificationStore, s.FS, s.Encrypt, s.JWT)
-		requestHandler := verification.NewHandler(requestService)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt)
+
+		requestHandler := verification.NewHandler(requestService, resourceService)
 
 		verificationRoute.GET("", requestHandler.GetIdentityVerification)
 		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails)

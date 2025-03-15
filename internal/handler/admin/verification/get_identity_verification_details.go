@@ -17,19 +17,19 @@ func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) err
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	frontIdBase64, err := h.verificationService.GetFile(request.FrontIdImageUrl)
+	frontIdBase64, err := h.resourceService.GetBase64File(request.FrontIdImageUrl)
 	if err != nil {
 		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{})
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	backIdBase64, err := h.verificationService.GetFile(request.BackIdImageUrl)
+	backIdBase64, err := h.resourceService.GetBase64File(request.BackIdImageUrl)
 	if err != nil {
 		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{})
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	selfieBase64, err := h.verificationService.GetFile(request.FaceImageUrl)
+	selfieBase64, err := h.resourceService.GetBase64File(request.FaceImageUrl)
 	if err != nil {
 		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{})
 		return page.Render(context.Background(), c.Response().Writer)

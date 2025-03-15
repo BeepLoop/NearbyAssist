@@ -41,8 +41,6 @@ type FileStorage interface {
 func GetFiletype(file []byte) (FILETYPE, error) {
 	hexForm := hex.EncodeToString(file)
 
-	return FILETYPE_JPEG, nil
-
 	// NOTE: refer to the link for file signatures
 	// https://www.garykessler.net/library/file_sigs.html
 	// any jpeg format returns jpeg

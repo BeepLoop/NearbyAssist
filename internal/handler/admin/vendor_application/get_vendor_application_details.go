@@ -18,13 +18,13 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	supportingDocBase64, err := h.applicationService.GetFile(application.SupportingDocumentUrl)
+	supportingDocBase64, err := h.resourceService.GetBase64File(application.SupportingDocumentUrl)
 	if err != nil {
 		page := pages.VendorApplicationDetails(models.ApplicationModel{})
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	policeClearanceBase64, err := h.applicationService.GetFile(application.PoliceClearanceUrl)
+	policeClearanceBase64, err := h.resourceService.GetBase64File(application.PoliceClearanceUrl)
 	if err != nil {
 		page := pages.VendorApplicationDetails(models.ApplicationModel{})
 		return page.Render(context.Background(), c.Response().Writer)

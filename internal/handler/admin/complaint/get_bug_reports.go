@@ -36,7 +36,7 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 
 		images := make([]string, 0)
 		for _, image := range complaint.Images {
-			base64Image, err := h.complaintService.GetFile(image)
+			base64Image, err := h.resourceService.GetBase64File(image)
 			if err != nil {
 				fmt.Println("error retrieving bug report image: ", err.Error())
 				continue

@@ -1,7 +1,6 @@
 package complaint_service
 
 import (
-	"encoding/base64"
 	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/models"
@@ -13,7 +12,6 @@ import (
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/utils"
-	"net/http"
 	"strconv"
 )
 
@@ -268,24 +266,4 @@ func (s *Service) CloseUserReport(reportId, title, detail string) error {
 	}
 
 	return nil
-}
-
-func (s *Service) GetFile(path string) (string, error) {
-	file, err := s.fs.GetFile(path)
-	if err != nil {
-		return "", err
-	}
-
-	decrypted, err := s.encrypt.DecryptFile(file)
-	if err != nil {
-		return "", err
-	}
-
-	base64Img := base64.StdEncoding.EncodeToString(decrypted)
-
-	mime := http.DetectContentType(decrypted)
-
-	base64Img = "data:" + mime + ";base64," + base64Img
-
-	return base64Img, nil
 }

@@ -11,23 +11,22 @@ import (
 )
 
 type resourceHandler struct {
-	service *resource_service.Service
+	resourceService *resource_service.Service
 }
 
 func NewHandler(service *resource_service.Service) *resourceHandler {
 	return &resourceHandler{
-		service: service,
+		resourceService: service,
 	}
 }
 
-func (h *resourceHandler) GetFile(c echo.Context) error {
+func (h *resourceHandler) RequestFile(c echo.Context) error {
 	path := c.Param("path")
 
-	// Retrieve the file
-	bytes, err := h.service.GetFile(path)
+	file, err := h.resourceService.GetFile(path)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.Error{
-			Message: "Failed to get file",
+			Message: "Failed to retrieve file",
 			Error:   err.Error(),
 		})
 	}
@@ -37,5 +36,5 @@ func (h *resourceHandler) GetFile(c echo.Context) error {
 		contentType = "application/octet-stream"
 	}
 
-	return c.Blob(http.StatusOK, contentType, bytes)
+	return c.Blob(http.StatusOK, contentType, file)
 }
