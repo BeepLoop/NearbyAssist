@@ -4,10 +4,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"mime"
 	"nearbyassist/internal/service/auth"
 	"nearbyassist/internal/service/fs"
 	"net/http"
-	"net/url"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -32,19 +33,24 @@ func NewService(fs fs.FileStorage, encrypt auth.Encryption, hash auth.Hash) *Ser
 
 func (s *Service) SignURL(imagePath string, duration time.Duration) (string, error) {
 	expiry := time.Now().Add(duration).Unix()
-	data := fmt.Sprintf("%s:%d", imagePath, expiry)
 
-	signature, err := s.hash.Generate([]byte(data))
+	hashInput := fmt.Sprintf("%s:%d", imagePath, expiry)
+	signature, err := s.hash.Generate([]byte(hashInput))
 	if err != nil {
 		return "", err
 	}
 
-	signedURL := fmt.Sprintf("image?path=%s&expiry=%d&signature=%s", url.QueryEscape(imagePath), expiry, signature)
+	encryptedPath, err := s.encrypt.EncryptString(imagePath)
+	if err != nil {
+		return "", err
+	}
+
+	signedURL := fmt.Sprintf("image?path=%s&expiry=%d&signature=%s", encryptedPath, expiry, signature)
 
 	return signedURL, nil
 }
 
-// Returns raw bytes
+// Returns raw bytes (not encrypted)
 func (s *Service) GetRawFile(path string) ([]byte, error) {
 	b, err := s.fs.GetFile(path)
 	if err != nil {
@@ -59,6 +65,11 @@ func (s *Service) GetPrivateFile(path, signature, expiry string) ([]byte, error)
 		return nil, errors.New("invalid resource URL")
 	}
 
+	decryptedPath, err := s.encrypt.DecryptString(path)
+	if err != nil {
+		return nil, err
+	}
+
 	// Validate expiry
 	expireTime, err := strconv.ParseInt(expiry, 10, 64)
 	if err != nil || time.Now().Unix() > expireTime {
@@ -66,7 +77,7 @@ func (s *Service) GetPrivateFile(path, signature, expiry string) ([]byte, error)
 	}
 
 	// Validate signature
-	data := fmt.Sprintf("%s:%s", path, expiry)
+	data := fmt.Sprintf("%s:%s", decryptedPath, expiry)
 	expectedSignature, err := s.hash.Generate([]byte(data))
 	if err != nil {
 		return nil, err
@@ -77,7 +88,7 @@ func (s *Service) GetPrivateFile(path, signature, expiry string) ([]byte, error)
 	}
 
 	// Retrieve file
-	file, err := s.fs.GetFile(path)
+	file, err := s.fs.GetFile(decryptedPath)
 
 	decrypted, err := s.encrypt.DecryptFile(file)
 	if err != nil {
@@ -107,4 +118,15 @@ func (s *Service) ImageToBase64(file []byte) (string, error) {
 	base64Img = "data:" + mime + ";base64," + base64Img
 
 	return base64Img, nil
+}
+
+func (s *Service) GetPathContentType(path string) (string, error) {
+	decryptedPath, err := s.encrypt.DecryptString(path)
+	if err != nil {
+		return "", err
+	}
+
+	contentType := mime.TypeByExtension(filepath.Ext(decryptedPath))
+
+	return contentType, nil
 }

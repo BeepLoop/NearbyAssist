@@ -313,6 +313,6 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		handler := resource.NewHandler(resourceService)
 
-		resourceRoute.GET("/:path", handler.RequestFile)
+		resourceRoute.GET("/:path", handler.GetPrivateFile)
 	}
 }
