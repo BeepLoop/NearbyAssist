@@ -384,15 +384,19 @@ func (s *Service) AddImage(bearerToken, serviceId string, files []*multipart.Fil
 		return nil, errors.New("unauthorized")
 	}
 
-	// NOTE: Not encrypted because its gonna be public anyway
 	file := files[0]
 	bytes, err := utils.FileToBytes(file)
 	if err != nil {
 		return nil, err
 	}
 
+	cipher, err := s.encrypt.EncryptFile(bytes)
+	if err != nil {
+		return nil, err
+	}
+
 	fileData := fs.File{
-		Data:     bytes,
+		Data:     cipher,
 		Category: fs.SERVICE_PHOTO_DIR,
 	}
 	url, err := s.fs.SaveFile(fileData)
