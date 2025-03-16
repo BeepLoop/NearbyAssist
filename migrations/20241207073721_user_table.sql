@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS User (
     phone VARCHAR(255),
     latitude Decimal(12, 10),
     longitude Decimal(13, 10),
-    verified TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: not verified, 1: verified',
+    verified BOOLEAN DEFAULT FALSE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),

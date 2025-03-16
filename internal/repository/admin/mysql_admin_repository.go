@@ -46,7 +46,7 @@ func (s *MysqlAdminRepository) FindById(id string) (*models.AdminModel, error) {
 
 	admin := new(models.AdminModel)
 
-	query := "SELECT id, username, password FROM Admin WHERE id = ?"
+	query := "SELECT id, username, password, mustChangePassword FROM Admin WHERE id = ?"
 	if err := s.db.GetContext(ctx, admin, query, id); err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (s *MysqlAdminRepository) FindByUsernameHash(hash string) (*models.AdminMod
 
 	admin := new(models.AdminModel)
 
-	query := "SELECT id, username, password FROM Admin WHERE usernameHash = ?"
+	query := "SELECT id, username, password, mustChangePassword FROM Admin WHERE usernameHash = ?"
 	if err := s.db.GetContext(ctx, admin, query, hash); err != nil {
 		return nil, err
 	}
@@ -74,4 +74,21 @@ func (s *MysqlAdminRepository) FindByUsernameHash(hash string) (*models.AdminMod
 	}
 
 	return admin, nil
+}
+
+func (s *MysqlAdminRepository) ShouldChangePassword(id string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT mustChangePassword FROM Admin WHERE id = ?"
+	shouldChange := false
+	if err := s.db.GetContext(ctx, &shouldChange, query, id); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return shouldChange, nil
 }
