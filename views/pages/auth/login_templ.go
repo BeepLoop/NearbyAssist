@@ -58,13 +58,83 @@ func Login(flash string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- login form --> <div class=\"fixed left-0 right-0 z-0 h-screen grid place-items-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter\"><h2 class=\"mb-4 text-2xl font-semibold text-center\">Welcome back</h2><form action=\"/admin/login\" method=\"POST\" class=\"flex flex-col items-center\"><div class=\"mb-4 w-full text-xs\"><input type=\"text\" id=\"username\" name=\"username\" placeholder=\"Username\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" autofocus required></div><div class=\"mb-6 w-full text-xs\"><input type=\"password\" id=\"password\" name=\"password\" placeholder=\"Password\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" required></div><button type=\"submit\" class=\"w-full rounded-md bg-good px-4 py-2 font-semibold text-xs text-white cursor-pointer hover:opacity-75\">Login</button></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- login form --> <div class=\"fixed inset-0 z-0 h-screen grid place-items-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter\"><h2 class=\"mb-4 text-2xl font-semibold text-center\">Welcome back</h2>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = loginForm().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = requestPasswordReset().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
 		templ_7745c5c3_Err = layout.BasicLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func loginForm() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form action=\"/admin/login\" method=\"POST\" class=\"flex flex-col items-center\"><div class=\"mb-4 w-full text-xs\"><input type=\"text\" id=\"username\" name=\"username\" placeholder=\"Username\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" autofocus required></div><div class=\"mb-6 w-full text-xs\"><input type=\"password\" id=\"password\" name=\"password\" placeholder=\"Password\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue\" autoComplete=\"off\" required></div><button type=\"submit\" class=\"w-full rounded-md bg-good px-4 py-2 font-semibold text-xs text-white cursor-pointer hover:opacity-75\">Login</button></form>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func requestPasswordReset() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{passwordResetOpen: false}\"><div class=\"flex justify-center mt-4\"><p x-on:click=\"passwordResetOpen = true\" class=\"text-xs text-good cursor-pointer hover:underline\">Forgot Password?</p></div><div x-cloak x-show=\"passwordResetOpen\" x-on:keydown.esc.window=\"passwordResetOpen = false\" x-on:click.self=\"passwordResetOpen = false\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 bg-neutral-gray/50 grid place-content-center\"><!-- Modal Dialog --><div x-show=\"passwordResetOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"outline-1 outline-pale-gray p-2 rounded-sm bg-white p-4 min-w-80 max-w-96\"><!-- Dialog Header --><div class=\"flex items-center justify-between\"><h3 id=\"defaultModalTitle\" class=\"font-semibold text-sm tracking-wide\">Reset Request</h3><button x-on:click=\"passwordResetOpen = false\" aria-label=\"close modal\" class=\"cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.4\" class=\"w-5 h-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Dialog Body --><div class=\"mt-4\"><div class=\"p-2 rounded-sm bg-neutral-gray/25 text-neutral-dark text-xs\"><p>Enter username to submit a password reset request. </p></div><form action=\"/admin/reset\" method=\"POST\" class=\"mt-2\"><input type=\"text\" name=\"username\" placeholder=\"username\" autocomplete=\"off\" autofocus class=\"p-2 rounded-sm outline-1 outline-pale-gray w-full\"><div class=\"flex gap-2 justify-end mt-4\"><button x-on:click=\"passwordResetOpen = false\" type=\"button\" class=\"rounded-sm px-4 py-2 cursor-pointer font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75\">Cancel</button> <button x-on:click=\"passwordResetOpen = false\" type=\"submit\" class=\"rounded-sm bg-primary px-4 py-2 cursor-pointer text-white text-center text-sm font-medium hover:opacity-75\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m4.5 12.75 6 6 9-13.5\"></path></svg><p>Submit</p></span></button></div></form></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

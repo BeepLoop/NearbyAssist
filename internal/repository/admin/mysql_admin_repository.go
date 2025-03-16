@@ -5,6 +5,7 @@ import (
 	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -50,10 +51,6 @@ func (s *MysqlAdminRepository) FindById(id string) (*models.AdminModel, error) {
 	query := "SELECT id, username, password, mustChangePassword FROM Admin WHERE id = ?"
 	if err := s.db.GetContext(ctx, admin, query, id); err != nil {
 		return nil, err
-	}
-
-	if admin.Id == "" {
-		return nil, errors.New("not found")
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -108,13 +105,25 @@ func (s *MysqlAdminRepository) RequestPasswordReset(data *models.PasswordResetRe
 
 	data.Id = utils.GenerateId()
 
-	query := `
+	insertQuery := `
         INSERT INTO
             PasswordResetRequest (id, adminId)
         VALUES
             (:id, :adminId)
     `
-	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
+
+	updateTimestampQuery := "UPDATE PasswordResetRequest SET createdAT = NOW() WHERE adminId = ?"
+
+	_, err := s.db.NamedExecContext(ctx, insertQuery, data)
+	if err != nil {
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			if _, err := s.db.ExecContext(ctx, updateTimestampQuery, data.AdminId); err != nil {
+				return err
+			}
+
+			return nil
+		}
+
 		return err
 	}
 

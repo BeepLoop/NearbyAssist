@@ -59,5 +59,9 @@ func (s *Service) RequestPasswordReset(username string) error {
 		AdminId: account.Id,
 	}
 
-	return s.adminStore.RequestPasswordReset(data)
+	if err := s.adminStore.RequestPasswordReset(data); err != nil {
+		return err
+	}
+
+	return nil
 }

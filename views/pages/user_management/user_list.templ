@@ -2,6 +2,7 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
@@ -15,7 +16,7 @@ type UserAccounts struct {
 	CreatedAt  string
 }
 
-templ UserList(accounts []UserAccounts) {
+templ UserList(accounts []models.UserModel) {
 	@layout.Layout() {
 		@partials.PageBanner("Account Management", "View and manage accounts")
 		<div class="flex justify-end py-2">
@@ -26,7 +27,7 @@ templ UserList(accounts []UserAccounts) {
 	}
 }
 
-templ userTable(accounts []UserAccounts) {
+templ userTable(accounts []models.UserModel) {
 	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="text-white text-sm font-semibold bg-primary-greener">
@@ -50,7 +51,7 @@ templ userTable(accounts []UserAccounts) {
 								<div class="flex w-max items-center gap-2">
 									<img
 										class="size-8 rounded-full object-cover"
-										src={ account.ProfileURL }
+										src={ account.ImageUrl }
 										alt="user avatar"
 									/>
 									<div class="flex flex-col">

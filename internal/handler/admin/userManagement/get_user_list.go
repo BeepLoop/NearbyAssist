@@ -26,7 +26,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 
 		user, err := h.managementService.FindUserByEmail(query)
 		if err != nil {
-			page := pages.UserList(make([]pages.UserAccounts, 0))
+			page := pages.UserList(make([]models.UserModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 
@@ -44,21 +44,23 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 
 		accounts, err := h.managementService.GetUsers(limit, offset)
 		if err != nil {
-			page := pages.UserList(make([]pages.UserAccounts, 0))
+			page := pages.UserList(make([]models.UserModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = accounts
 	}
 
-	data := make([]pages.UserAccounts, 0)
+	data := make([]models.UserModel, 0)
 	for _, account := range results {
-		data = append(data, pages.UserAccounts{
-			Id:         account.Id,
-			Name:       account.Name,
-			Email:      account.Email,
-			ProfileURL: account.ImageUrl,
-			Verified:   account.Verified,
-			CreatedAt:  utils.FormatDate(account.CreatedAt),
+		data = append(data, models.UserModel{
+			Model: models.Model{
+				Id:        account.Id,
+				CreatedAt: utils.FormatDate(account.CreatedAt),
+			},
+			Name:     account.Name,
+			Email:    account.Email,
+			ImageUrl: account.ImageUrl,
+			Verified: account.Verified,
 		})
 	}
 

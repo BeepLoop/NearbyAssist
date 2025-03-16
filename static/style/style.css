@@ -845,6 +845,9 @@
   .max-w-80 {
     max-width: calc(var(--spacing) * 80);
   }
+  .max-w-96 {
+    max-width: calc(var(--spacing) * 96);
+  }
   .max-w-\[80vw\] {
     max-width: 80vw;
   }
@@ -859,6 +862,9 @@
   }
   .min-w-72 {
     min-width: calc(var(--spacing) * 72);
+  }
+  .min-w-80 {
+    min-width: calc(var(--spacing) * 80);
   }
   .flex-1 {
     flex: 1;
@@ -1374,6 +1380,9 @@
   }
   .text-danger {
     color: var(--color-danger);
+  }
+  .text-good {
+    color: var(--color-good);
   }
   .text-gray-100 {
     color: var(--color-gray-100);
