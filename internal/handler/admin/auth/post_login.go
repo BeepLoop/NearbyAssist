@@ -13,7 +13,7 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	adminModel, err := h.adminService.Login(username, password)
+	admin, err := h.adminService.Login(username, password)
 	if err != nil {
 		if err := utils.SetFlashMessage(c, "error", "invalid credentials"); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/login?error=login_error")
@@ -33,7 +33,7 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 		HttpOnly: true,
 	}
 
-	sess.Values["user"] = adminModel
+	sess.Values["user"] = admin
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
 	}

@@ -21,9 +21,14 @@ func (s *MysqlAdminRepository) Create(data *models.AdminModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	data.Id = utils.GenerateId()
+	data.Id = utils.GenerateUserId()
 
-	query := "INSERT INTO Admin (id, username, password, usernameHash, role) VALUES (:id, :username, :password, :usernameHash, :role)"
+	query := `
+        INSERT INTO
+            Admin (id, username, password, usernameHash)
+        VALUES
+            (:id, :username, :password, :usernameHash)
+    `
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
 		return err
 	}
@@ -41,7 +46,7 @@ func (s *MysqlAdminRepository) FindById(id string) (*models.AdminModel, error) {
 
 	admin := new(models.AdminModel)
 
-	query := "SELECT id, username, password, role FROM Admin WHERE id = ?"
+	query := "SELECT id, username, password FROM Admin WHERE id = ?"
 	if err := s.db.GetContext(ctx, admin, query, id); err != nil {
 		return nil, err
 	}
@@ -59,7 +64,7 @@ func (s *MysqlAdminRepository) FindByUsernameHash(hash string) (*models.AdminMod
 
 	admin := new(models.AdminModel)
 
-	query := "SELECT id, username, password, role FROM Admin WHERE usernameHash = ?"
+	query := "SELECT id, username, password FROM Admin WHERE usernameHash = ?"
 	if err := s.db.GetContext(ctx, admin, query, hash); err != nil {
 		return nil, err
 	}
