@@ -24,7 +24,7 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 
 	sess, err := session.Get("session", c)
 	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/login")
+		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
 	}
 
 	sess.Options = &sessions.Options{
@@ -35,8 +35,10 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 
 	sess.Values["user"] = adminModel
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/login")
+		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
 	}
+
+	_ = utils.SetFlashMessage(c, "success", "Logged in")
 
 	return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 }

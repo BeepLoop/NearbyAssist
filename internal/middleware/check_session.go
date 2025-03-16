@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo-contrib/session"
@@ -18,7 +19,11 @@ func CheckSession(next echo.HandlerFunc) echo.HandlerFunc {
 		user := sess.Values["user"]
 		_, ok := user.(models.AdminModel)
 		if !ok {
-			return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_not_found")
+			if err := utils.SetFlashMessage(c, "error", "invalid session"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_not_found")
+			}
+
+			return c.Redirect(http.StatusSeeOther, "/admin/login")
 		}
 
 		return next(c)

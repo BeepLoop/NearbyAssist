@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -23,6 +24,8 @@ func (h *authHandler) PostLogout(c echo.Context) error {
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/dashboard?error=session_error")
 	}
+
+	_ = utils.SetFlashMessage(c, "success", "Logged out")
 
 	return c.Redirect(http.StatusSeeOther, "/admin/login")
 }
