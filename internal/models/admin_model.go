@@ -11,7 +11,7 @@ type AdminModel struct {
 	Model
 	UpdateableModel
 	Username     string    `json:"username" db:"username"`
-	Password     string    `json:"password" db:"password"`
+	Password     string    `json:"-" db:"password"`
 	Role         AdminRole `json:"role" db:"role"`
-	UsernameHash string    `json:"usernameHash" db:"usernameHash"`
+	UsernameHash string    `json:"-" db:"usernameHash"`
 }
