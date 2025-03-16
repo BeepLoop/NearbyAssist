@@ -1,12 +1,13 @@
 package server
 
 import (
+	"nearbyassist/internal/handler/admin/account"
 	"nearbyassist/internal/handler/admin/auth"
 	"nearbyassist/internal/handler/admin/complaint"
 	"nearbyassist/internal/handler/admin/dashboard"
 	"nearbyassist/internal/handler/admin/expertise"
-	"nearbyassist/internal/handler/admin/management"
 	map_handler "nearbyassist/internal/handler/admin/map"
+	"nearbyassist/internal/handler/admin/userManagement"
 	application "nearbyassist/internal/handler/admin/vendor_application"
 	"nearbyassist/internal/handler/admin/verification"
 	"nearbyassist/internal/middleware"
@@ -43,6 +44,15 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 	r.GET("/login", authHandler.GetLogin)
 	r.POST("/login", authHandler.PostLogin)
 	r.POST("/logout", authHandler.PostLogout)
+
+	resetRoute := r.Group("/reset")
+	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+		adminService := admin_service.NewService(adminStore, s.Encrypt, s.Hash)
+		handler := account.NewHandler(adminService)
+
+		resetRoute.POST("", handler.RequestPasswordReset)
+	}
 
 	dashboardRoute := r.Group("/dashboard")
 	{
@@ -125,9 +135,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		verificationRoute.POST("/reject/:requestId", requestHandler.RejectRequest)
 	}
 
-	managementRoute := r.Group("/account-management")
+	userManagementRoute := r.Group("/user-management")
 	{
-		managementRoute.Use(middleware.CheckSession)
+		userManagementRoute.Use(middleware.CheckSession)
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
@@ -135,14 +145,14 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		managementService := management_service.NewService(userStore, notifStore, s.Encrypt, s.Hash)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
-		managementHandler := management.NewHandler(managementService, resourceService)
+		managementHandler := userManagement.NewHandler(managementService, resourceService)
 
-		managementRoute.GET("", managementHandler.GetAccountManagement)
-		managementRoute.GET("/:userId", managementHandler.ViewUserAccount)
-		managementRoute.POST("/ban/:userId", managementHandler.BanUser)
-		managementRoute.POST("/unban/:userId", managementHandler.UnbanUser)
-		managementRoute.POST("/restrict/:userId", managementHandler.RestrictUser)
-		managementRoute.POST("/unrestrict/:userId", managementHandler.UnrestrictUser)
+		userManagementRoute.GET("", managementHandler.GetUserList)
+		userManagementRoute.GET("/:userId", managementHandler.ViewUserAccount)
+		userManagementRoute.POST("/ban/:userId", managementHandler.BanUser)
+		userManagementRoute.POST("/unban/:userId", managementHandler.UnbanUser)
+		userManagementRoute.POST("/restrict/:userId", managementHandler.RestrictUser)
+		userManagementRoute.POST("/unrestrict/:userId", managementHandler.UnrestrictUser)
 	}
 
 	expertiseRoute := r.Group("/expertise")

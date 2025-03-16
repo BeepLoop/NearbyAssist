@@ -2,6 +2,7 @@ package admin_repo
 
 import (
 	"context"
+	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"time"
@@ -51,6 +52,10 @@ func (s *MysqlAdminRepository) FindById(id string) (*models.AdminModel, error) {
 		return nil, err
 	}
 
+	if admin.Id == "" {
+		return nil, errors.New("not found")
+	}
+
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
@@ -67,6 +72,10 @@ func (s *MysqlAdminRepository) FindByUsernameHash(hash string) (*models.AdminMod
 	query := "SELECT id, username, password, mustChangePassword FROM Admin WHERE usernameHash = ?"
 	if err := s.db.GetContext(ctx, admin, query, hash); err != nil {
 		return nil, err
+	}
+
+	if admin.Id == "" {
+		return nil, errors.New("not found")
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -91,4 +100,27 @@ func (s *MysqlAdminRepository) ShouldChangePassword(id string) (bool, error) {
 	}
 
 	return shouldChange, nil
+}
+
+func (s *MysqlAdminRepository) RequestPasswordReset(data *models.PasswordResetRequestModel) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	data.Id = utils.GenerateId()
+
+	query := `
+        INSERT INTO
+            PasswordResetRequest (id, adminId)
+        VALUES
+            (:id, :adminId)
+    `
+	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
 }

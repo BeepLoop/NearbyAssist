@@ -381,14 +381,14 @@ templ actions(data models.UserAccountPageData) {
 			>
 				<div class="p-1.5 grid gap-1.5">
 					if data.Banned {
-						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/account-management/unban/%s", data.Id), data.Banned)
+						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", data.Id), data.Banned)
 					} else {
-						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/account-management/ban/%s", data.Id), data.Banned)
+						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/user-management/ban/%s", data.Id), data.Banned)
 					}
 					if data.Restricted {
-						@partials.UnrestrictUser(fmt.Sprintf("/admin/account-management/unrestrict/%s", data.Id))
+						@partials.UnrestrictUser(fmt.Sprintf("/admin/user-management/unrestrict/%s", data.Id))
 					} else {
-						@partials.RestrictUser(fmt.Sprintf("/admin/account-management/restrict/%s", data.Id))
+						@partials.RestrictUser(fmt.Sprintf("/admin/user-management/restrict/%s", data.Id))
 					}
 				</div>
 			</div>

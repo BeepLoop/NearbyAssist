@@ -9,13 +9,17 @@ import (
 )
 
 type Service struct {
-	store   repository.AdminRepository
-	encrypt auth.Encryption
-	hash    auth.Hash
+	adminStore repository.AdminRepository
+	encrypt    auth.Encryption
+	hash       auth.Hash
 }
 
-func NewService(store repository.AdminRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
-	return &Service{store: store, encrypt: encrypt, hash: hash}
+func NewService(adminStore repository.AdminRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
+	return &Service{
+		adminStore: adminStore,
+		encrypt:    encrypt,
+		hash:       hash,
+	}
 }
 
 func (s *Service) Login(username, password string) (*models.AdminModel, error) {
@@ -24,7 +28,7 @@ func (s *Service) Login(username, password string) (*models.AdminModel, error) {
 		return nil, err
 	}
 
-	admin, err := s.store.FindByUsernameHash(usernameHash)
+	admin, err := s.adminStore.FindByUsernameHash(usernameHash)
 	if err != nil {
 		return nil, err
 	}
@@ -34,4 +38,26 @@ func (s *Service) Login(username, password string) (*models.AdminModel, error) {
 	}
 
 	return admin, nil
+}
+
+func (s *Service) RequestPasswordReset(username string) error {
+	if username == "" {
+		return errors.New("invalid username")
+	}
+
+	usernameHash, err := s.hash.Generate([]byte(username))
+	if err != nil {
+		return err
+	}
+
+	account, err := s.adminStore.FindByUsernameHash(usernameHash)
+	if err != nil {
+		return err
+	}
+
+	data := &models.PasswordResetRequestModel{
+		AdminId: account.Id,
+	}
+
+	return s.adminStore.RequestPasswordReset(data)
 }

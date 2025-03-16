@@ -15,7 +15,7 @@ type UserAccounts struct {
 	CreatedAt  string
 }
 
-templ AccountManagement(accounts []UserAccounts) {
+templ UserList(accounts []UserAccounts) {
 	@layout.Layout() {
 		@partials.PageBanner("Account Management", "View and manage accounts")
 		<div class="flex justify-end py-2">
@@ -71,7 +71,7 @@ templ userTable(accounts []UserAccounts) {
 							<td class="p-4">
 								<ul>
 									<a
-										href={ templ.SafeURL(fmt.Sprintf("/admin/account-management/%s", account.Id)) }
+										href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/%s", account.Id)) }
 										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
 									>
 										view profile
@@ -91,7 +91,7 @@ templ userSearchbar() {
 		class="relative flex w-full max-w-xs flex-col gap-1 text-neutral-gray"
 	>
 		<form
-			action="/admin/account-management"
+			action="/admin/user-management"
 			method="GET"
 		>
 			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="absolute left-2.5 top-1/2 size-5 -translate-y-1/2">

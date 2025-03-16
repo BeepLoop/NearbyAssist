@@ -1,10 +1,10 @@
-package management
+package userManagement
 
 import (
 	"context"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
-	"nearbyassist/views/pages/account_management"
+	pages "nearbyassist/views/pages/user_management"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -15,7 +15,7 @@ const (
 	DEFAULT_OFFSET = 0
 )
 
-func (h *managementHandler) GetAccountManagement(c echo.Context) error {
+func (h *userManagementHandler) GetUserList(c echo.Context) error {
 	params := c.QueryParams()
 
 	results := make([]*models.UserModel, 0)
@@ -26,7 +26,7 @@ func (h *managementHandler) GetAccountManagement(c echo.Context) error {
 
 		user, err := h.managementService.FindUserByEmail(query)
 		if err != nil {
-			page := pages.AccountManagement(make([]pages.UserAccounts, 0))
+			page := pages.UserList(make([]pages.UserAccounts, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 
@@ -44,7 +44,7 @@ func (h *managementHandler) GetAccountManagement(c echo.Context) error {
 
 		accounts, err := h.managementService.GetUsers(limit, offset)
 		if err != nil {
-			page := pages.AccountManagement(make([]pages.UserAccounts, 0))
+			page := pages.UserList(make([]pages.UserAccounts, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = accounts
@@ -62,6 +62,6 @@ func (h *managementHandler) GetAccountManagement(c echo.Context) error {
 		})
 	}
 
-	page := pages.AccountManagement(data)
+	page := pages.UserList(data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

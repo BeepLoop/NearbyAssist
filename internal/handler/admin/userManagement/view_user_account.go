@@ -1,16 +1,16 @@
-package management
+package userManagement
 
 import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
-	pages "nearbyassist/views/pages/account_management"
+	pages "nearbyassist/views/pages/user_management"
 
 	"github.com/labstack/echo/v4"
 )
 
-func (h *managementHandler) ViewUserAccount(c echo.Context) error {
+func (h *userManagementHandler) ViewUserAccount(c echo.Context) error {
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	userId := c.Param("userId")
