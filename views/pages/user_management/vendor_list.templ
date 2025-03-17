@@ -98,7 +98,7 @@ templ vendorTable(accounts []models.VendorModel) {
 							<td class="p-4">
 								<ul>
 									<a
-										href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/vendors/%s", account.Id)) }
+										href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/vendors/%s", account.VendorId)) }
 										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
 									>
 										view profile

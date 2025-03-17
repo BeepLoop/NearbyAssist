@@ -10,18 +10,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *userManagementHandler) ViewUserAccount(c echo.Context) error {
+func (h *userManagementHandler) ViewVendorAccount(c echo.Context) error {
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	userId := c.Param("userId")
 	if userId == "" {
-		page := pages.UserAccountDetail(models.UserAccountPageData{}, flash)
+		page := pages.VendorAccountDetail(models.UserAccountPageData{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	accountData, err := h.managementService.GetSingleUser(userId)
 	if err != nil {
-		page := pages.UserAccountDetail(models.UserAccountPageData{}, flash)
+		page := pages.VendorAccountDetail(models.UserAccountPageData{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -51,6 +51,6 @@ func (h *userManagementHandler) ViewUserAccount(c echo.Context) error {
 		Stat:       accountData.Stat,
 	}
 
-	page := pages.UserAccountDetail(data, flash)
+	page := pages.VendorAccountDetail(data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

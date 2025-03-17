@@ -10,6 +10,7 @@ type UserAccountPageData struct {
 	Address    sql.NullString
 	Banned     bool
 	Restricted bool
+	Verified   bool
 	CreatedAt  string
 
 	Expertise []string

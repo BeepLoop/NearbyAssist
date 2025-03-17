@@ -161,7 +161,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		userManagementRoute.GET("/users", managementHandler.GetUserList)
 		userManagementRoute.GET("/users/:userId", managementHandler.ViewUserAccount)
 		userManagementRoute.GET("/vendors", managementHandler.GetVendorList)
-		userManagementRoute.GET("/vendors/:vendorId", managementHandler.ViewUserAccount)
+		userManagementRoute.GET("/vendors/:userId", managementHandler.ViewVendorAccount)
 		userManagementRoute.POST("/ban/:userId", managementHandler.BanUser)
 		userManagementRoute.POST("/unban/:userId", managementHandler.UnbanUser)
 		userManagementRoute.POST("/restrict/:userId", managementHandler.RestrictUser)

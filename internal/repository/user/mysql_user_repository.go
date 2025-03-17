@@ -225,6 +225,7 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
             name,
             email,
             imageUrl,
+            verified,
             address,
             createdAt
         FROM 
@@ -242,6 +243,7 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 	accountData.Email = user.Email
 	accountData.Address = user.Address
 	accountData.CreatedAt = user.CreatedAt
+	accountData.Verified = user.Verified
 
 	if banned, err := s.IsBanned(user.Id); err != nil {
 		return nil, err

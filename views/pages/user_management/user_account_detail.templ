@@ -1,0 +1,144 @@
+package pages
+
+import (
+	"fmt"
+	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ UserAccountDetail(data models.UserAccountPageData, flash string) {
+	@layout.Layout() {
+		<!-- toasy component -->
+		@templ.JSONScript("flash", flash)
+		@partials.ToastNotification()
+		<!-- back button -->
+		@partials.BackButton()
+		<!-- main content -->
+		<div class="max-w-4xl mx-auto">
+			<!-- user profile -->
+			<div class="flex justify-between">
+				<div class="flex gap-4">
+					<img
+						src={ data.ProfileURL }
+						alt="profile"
+						class="w-44 h-44 aspect-square outline-1 outline-pale-gray"
+					/>
+					<div class="grid gap-2">
+						<!-- name & email -->
+						<div>
+							<h1 class="text-xl font-medium text-neutral-dark">{ data.Name }</h1>
+							<h2 class="text-neutral-gray">{ data.Email }</h2>
+						</div>
+						<!-- id & created at -->
+						<div>
+							<span class="flex gap-2">
+								<p class="font-medium text-neutral-dark">User ID: </p>
+								<p class="text-neutral-gray">{ data.Id }</p>
+							</span>
+							<span class="flex gap-2">
+								<p class="font-medium text-neutral-dark">User Since: </p>
+								<p class="text-neutral-gray">{ data.CreatedAt }</p>
+							</span>
+						</div>
+						<!-- expertise -->
+						<div class="mt-3">
+							<p class="font-medium text-xs">Account Status</p>
+							<div class="mt-2 flex gap-2">
+								if data.Verified {
+									@partials.SoftBadgeSuccess("Verified")
+								} else {
+									@partials.SoftBadgeDanger("Unverified")
+								}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="flex gap-2">
+					@actions(data)
+				</div>
+			</div>
+			<!-- stats -->
+			<div class="mt-8 grid grid-cols-4 gap-4">
+				<div class="outline-1 outline-pale-gray rounded-sm p-2">
+					<!-- Sent Requests -->
+					if data.Stat.Sent.CurrentMonth >= data.Stat.Sent.LastMonth {
+						@partials.Increasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageIncrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
+					} else {
+						@partials.Decreasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageDecrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ actions(data models.UserAccountPageData) {
+	<!-- Dropdown Container -->
+	<div
+		x-data="{ userActionsOpen: false }"
+		x-on:keydown.esc.prevent.stop="userActionsOpen = false"
+		class="relative"
+	>
+		<!-- Dropdown Toggle Button -->
+		<button
+			type="button"
+			class="inline-flex gap-2 items-center outline-1 outline-danger rounded-sm px-2 py-1.5 text-sm text-danger fond-medium bg-danger/25 cursor-pointer hover:opacity-75"
+			id="pm-dropdown"
+			aria-haspopup="true"
+			x-bind:aria-expanded="userActionsOpen"
+			x-on:click="userActionsOpen = true"
+		>
+			<span>Actions</span>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 16 16"
+				fill="currentColor"
+				data-slot="icon"
+				class="hi-micro hi-chevron-down inline-block size-5 opacity-50"
+				x-bind:class="{ 'rotate-180': userActionsOpen }"
+			>
+				<path
+					fill-rule="evenodd"
+					d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+					clip-rule="evenodd"
+				></path>
+			</svg>
+		</button>
+		<!-- END Dropdown Toggle Button -->
+		<!-- Dropdown -->
+		<div
+			x-cloak
+			x-show="userActionsOpen"
+			x-transition:enter="transition ease-out duration-100"
+			x-transition:enter-start="opacity-0 -translate-y-3"
+			x-transition:enter-end="opacity-100 translate-y-0"
+			x-transition:leave="transition ease-in duration-75"
+			x-transition:leave-start="opacity-100 translate-y-0"
+			x-transition:leave-end="opacity-0 -translate-y-3"
+			x-on:click.outside="userActionsOpen = false"
+			role="menu"
+			aria-labelledby="pm-dropdown"
+			class="absolute end-0 z-10 mt-2 w-44"
+		>
+			<div
+				class="outline-1 outline-pale-gray rounded-sm shadow-xl"
+			>
+				<div class="p-1.5 grid gap-1.5">
+					if data.Banned {
+						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", data.Id), data.Banned)
+					} else {
+						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/user-management/ban/%s", data.Id), data.Banned)
+					}
+					if data.Restricted {
+						@partials.UnrestrictUser(fmt.Sprintf("/admin/user-management/unrestrict/%s", data.Id))
+					} else {
+						@partials.RestrictUser(fmt.Sprintf("/admin/user-management/restrict/%s", data.Id))
+					}
+				</div>
+			</div>
+		</div>
+		<!-- END Dropdown -->
+	</div>
+}
