@@ -50,6 +50,10 @@ func (s *Service) RequestPasswordReset(username string) error {
 	return nil
 }
 
+func (s *Service) GetResetRequest(requestId string) (*models.PasswordResetRequestModel, error) {
+	return s.passwordResetStore.FindById(requestId)
+}
+
 func (s *Service) GetResetRequests() ([]*models.PasswordResetRequestModel, error) {
 	requests, err := s.passwordResetStore.GetAll()
 	if err != nil {
@@ -65,4 +69,36 @@ func (s *Service) GetResetRequests() ([]*models.PasswordResetRequestModel, error
 	}
 
 	return requests, nil
+}
+
+func (s *Service) ResetPassword(requestId, newPassword, confirmationUsername, confirmationPassword string) error {
+	usernameHash, err := s.hash.Generate([]byte(confirmationUsername))
+	if err != nil {
+		return err
+	}
+
+	admin, err := s.adminStore.FindByUsernameHash(usernameHash)
+	if err != nil {
+		return err
+	}
+
+	if !auth.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New("Invalid credentials")
+	}
+
+	if !auth.IsPasswordSecure(newPassword) {
+		return errors.New("insecure password")
+	}
+
+	encryptedPassword, err := auth.BcryptPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	return s.passwordResetStore.ResetPassword(requestId, encryptedPassword)
+}
+
+func (s *Service) RejectResetPassword(requestId, reason string) error {
+	// NOTE: Implement reason
+	return s.passwordResetStore.Delete(requestId)
 }

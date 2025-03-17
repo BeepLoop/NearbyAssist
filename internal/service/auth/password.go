@@ -20,3 +20,11 @@ func IsPasswordMatch(hashedPwd, plainPwd string) bool {
 
 	return true
 }
+
+func IsPasswordSecure(password string) bool {
+	if len(password) < 8 {
+		return false
+	}
+
+	return true
+}

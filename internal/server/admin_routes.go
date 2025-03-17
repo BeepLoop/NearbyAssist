@@ -187,5 +187,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		accountManagementRoute.GET("/add", handler.AddAccount)
 		accountManagementRoute.GET("/reset", handler.ResetRequests)
+		accountManagementRoute.POST("/reset/fulfill", handler.FufillResetRequest)
+		accountManagementRoute.POST("/reset/reject", handler.RejectResetRequest)
 	}
 }

@@ -2,12 +2,16 @@ package accountmanagement
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/models"
 	admin_service "nearbyassist/internal/service/admin"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/account_management"
+	"net/http"
+	"strings"
 
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -52,4 +56,85 @@ func (h *accountManagementHandler) ResetRequests(c echo.Context) error {
 
 	page := pages.ResetRequests(data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
+}
+
+func (h *accountManagementHandler) FufillResetRequest(c echo.Context) error {
+	requestId := c.FormValue("requestId")
+	password := c.FormValue("password")
+	confirmationUsername := c.FormValue("confirmationUsername")
+	confirmationPassword := c.FormValue("confirmationPassword")
+
+	// Prevent resetting own account
+	request, err := h.passwordResetService.GetResetRequest(requestId)
+	if err != nil {
+		if err := utils.SetFlashMessage(c, "error", "request not found"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?error=not_found_error")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
+	}
+
+	sess, _ := session.Get("session", c)
+	user := sess.Values["user"]
+	currentSession, ok := user.(models.AdminModel)
+	if !ok {
+		if err := utils.SetFlashMessage(c, "error", "invalid session"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_not_found")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/login")
+	}
+
+	if currentSession.Id == request.AdminId {
+		if err := utils.SetFlashMessage(c, "error", "Resetting own password not allowed"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?error=reset_failed")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
+	}
+
+	// Perform reset
+	if err := h.passwordResetService.ResetPassword(requestId, password, confirmationUsername, confirmationPassword); err != nil {
+		fmt.Println(err.Error())
+		if strings.Contains(err.Error(), "Invalid credentials") {
+			if err := utils.SetFlashMessage(c, "error", "Invalid confirmation credentials"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?error=credential_error")
+			}
+		} else if strings.Contains(err.Error(), "insecure password") {
+			if err := utils.SetFlashMessage(c, "error", "New password not secure enough"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?error=password_rule_error")
+			}
+		} else {
+			if err := utils.SetFlashMessage(c, "error", "Reset password failed"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?error=reset_failed")
+			}
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
+	}
+
+	if err := utils.SetFlashMessage(c, "success", "Request success"); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?success=password_change_success")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
+}
+
+func (h *accountManagementHandler) RejectResetRequest(c echo.Context) error {
+	requestId := c.FormValue("requestId")
+	reason := c.FormValue("reason")
+
+	if err := h.passwordResetService.RejectResetPassword(requestId, reason); err != nil {
+		if err := utils.SetFlashMessage(c, "error", "Rejection failed"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?error=rejection_error")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
+	}
+
+	if err := utils.SetFlashMessage(c, "success", "Reject success"); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?success=reject_success")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
 }

@@ -55,10 +55,6 @@ func (s *MysqlPasswordResetRepository) Create(data *models.PasswordResetRequestM
 	return data.Id, nil
 }
 
-func (s *MysqlPasswordResetRepository) Delete(id string) error {
-	return nil
-}
-
 func (s *MysqlPasswordResetRepository) GetAll() ([]*models.PasswordResetRequestModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -89,9 +85,109 @@ func (s *MysqlPasswordResetRepository) GetAll() ([]*models.PasswordResetRequestM
 }
 
 func (s *MysqlPasswordResetRepository) FindById(id string) (*models.PasswordResetRequestModel, error) {
-	return nil, nil
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM PasswordResetRequest WHERE id = ?"
+
+	request := new(models.PasswordResetRequestModel)
+	if err := s.db.GetContext(ctx, request, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return request, nil
 }
 
 func (s *MysqlPasswordResetRepository) FindByAdminId(id string) (*models.PasswordResetRequestModel, error) {
-	return nil, nil
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM PasswordResetRequest WHERE adminId = ?"
+
+	request := new(models.PasswordResetRequestModel)
+	if err := s.db.GetContext(ctx, request, query, id); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return request, nil
+}
+
+func (s *MysqlPasswordResetRepository) ResetPassword(requestId, newPassword string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	request, err := s.FindById(requestId)
+	if err != nil {
+		return err
+	}
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	updatePasswordQuery := `
+        UPDATE
+            Admin
+        SET
+            password = ?,
+            mustChangePassword = 1
+        WHERE 
+            id = ?
+    `
+
+	if _, err := tx.ExecContext(ctx, updatePasswordQuery, newPassword, request.AdminId); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	removeRequestQuery := "DELETE FROM PasswordResetRequest WHERE id = ?"
+	if _, err := tx.ExecContext(ctx, removeRequestQuery, requestId); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlPasswordResetRepository) Delete(requestId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "DELETE FROM PasswordResetRequest WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, requestId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
 }
