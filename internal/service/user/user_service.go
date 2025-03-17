@@ -16,14 +16,19 @@ const (
 )
 
 type Service struct {
-	store   repository.UserRepository
-	encrypt auth.Encryption
-	hash    auth.Hash
-	jwt     auth.Authenticator
+	userStore repository.UserRepository
+	encrypt   auth.Encryption
+	hash      auth.Hash
+	jwt       auth.Authenticator
 }
 
-func NewService(store repository.UserRepository, encrypt auth.Encryption, hash auth.Hash, jwt auth.Authenticator) *Service {
-	return &Service{store: store, encrypt: encrypt, hash: hash, jwt: jwt}
+func NewService(userStore repository.UserRepository, encrypt auth.Encryption, hash auth.Hash, jwt auth.Authenticator) *Service {
+	return &Service{
+		userStore: userStore,
+		encrypt:   encrypt,
+		hash:      hash,
+		jwt:       jwt,
+	}
 }
 
 func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.LoginResponse, error) {
@@ -32,7 +37,7 @@ func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.Logi
 		return nil, err
 	}
 
-	existingUser, err := s.store.FindByEmailHash(emailHash)
+	existingUser, err := s.userStore.FindByEmailHash(emailHash)
 	if err != nil {
 		// If user is not found, continue to registration
 		return s.ThirdPartyRegister(req, emailHash)
@@ -79,14 +84,14 @@ func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.Logi
 		existingUser.Longitude = sql.NullFloat64{Float64: 0.0, Valid: true}
 	}
 
-	isVendor, err := s.store.IsVendor(existingUser.Id)
+	isVendor, err := s.userStore.IsVendor(existingUser.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	vendorExpertises := make([]response.Expertise, 0)
 	if isVendor {
-		expertises, err := s.store.GetExpertise(existingUser.Id)
+		expertises, err := s.userStore.GetExpertise(existingUser.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -124,7 +129,7 @@ func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.Logi
 	}
 
 	session := models.NewSessionModel(refreshToken)
-	if err := s.store.Login(session); err != nil {
+	if err := s.userStore.Login(session); err != nil {
 		return nil, err
 	}
 
@@ -167,7 +172,7 @@ func (s *Service) ThirdPartyRegister(req *request.UserLoginPayload, emailHash st
 		newUser.Email = cipher
 	}
 
-	userId, err := s.store.CreateUser(newUser)
+	userId, err := s.userStore.CreateUser(newUser)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +192,7 @@ func (s *Service) ThirdPartyRegister(req *request.UserLoginPayload, emailHash st
 	}
 
 	session := models.NewSessionModel(refreshToken)
-	if err := s.store.Login(session); err != nil {
+	if err := s.userStore.Login(session); err != nil {
 		return nil, err
 	}
 
@@ -210,12 +215,12 @@ func (s *Service) ThirdPartyRegister(req *request.UserLoginPayload, emailHash st
 
 func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
 	// Check if refreshToken exists
-	if _, err := s.store.FindSessionByToken(refreshToken); err != nil {
+	if _, err := s.userStore.FindSessionByToken(refreshToken); err != nil {
 		return "", err
 	}
 
 	// Check if refreshToken is blacklisted
-	if err := s.store.IsRefreshTokenBlacklisted(refreshToken); err == nil {
+	if err := s.userStore.IsRefreshTokenBlacklisted(refreshToken); err == nil {
 		return "", err
 	}
 
@@ -225,7 +230,7 @@ func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
 		return "", err
 	}
 
-	user, err := s.store.FindById(userId)
+	user, err := s.userStore.FindById(userId)
 	if err != nil {
 		return "", err
 	}
@@ -259,11 +264,11 @@ func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
 }
 
 func (s *Service) Logout(refreshToken string) error {
-	if _, err := s.store.FindSessionByToken(refreshToken); err != nil {
+	if _, err := s.userStore.FindSessionByToken(refreshToken); err != nil {
 		return err
 	}
 
-	if err := s.store.Logout(refreshToken); err != nil {
+	if err := s.userStore.Logout(refreshToken); err != nil {
 		return err
 	}
 
@@ -276,22 +281,22 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		return nil, err
 	}
 
-	user, err := s.store.FindById(userId)
+	user, err := s.userStore.FindById(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	isVendor, err := s.store.IsVendor(user.Id)
+	isVendor, err := s.userStore.IsVendor(user.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	isRestricted, isRestrictionExpired, err := s.store.IsRestricted(user.Id)
+	isRestricted, isRestrictionExpired, err := s.userStore.IsRestricted(user.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.store.LiftRestrictionIfExpired(user.Id); err != nil {
+	if err := s.userStore.LiftRestrictionIfExpired(user.Id); err != nil {
 		return nil, err
 	}
 
@@ -308,7 +313,7 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 
 	vendorExpertises := make([]response.Expertise, 0)
 	if isVendor {
-		expertises, err := s.store.GetExpertise(user.Id)
+		expertises, err := s.userStore.GetExpertise(user.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -392,7 +397,7 @@ func (s *Service) IsVerified(bearerToken string) (bool, error) {
 		return false, err
 	}
 
-	user, err := s.store.FindById(userId)
+	user, err := s.userStore.FindById(userId)
 	if err != nil {
 		return false, err
 	}
@@ -415,7 +420,7 @@ func (s *Service) AddSocial(bearerToken, url string) error {
 	social.UserId = userId
 	social.Url = encrypted
 
-	if err := s.store.AddSocial(social); err != nil {
+	if err := s.userStore.AddSocial(social); err != nil {
 		return err
 	}
 
@@ -428,7 +433,7 @@ func (s *Service) DeleteSocial(bearerToken, url string) error {
 		return err
 	}
 
-	socials, err := s.store.GetSocials(userId)
+	socials, err := s.userStore.GetSocials(userId)
 	if err != nil {
 		return err
 	}
@@ -449,7 +454,7 @@ func (s *Service) DeleteSocial(bearerToken, url string) error {
 		return errors.New("social not found")
 	}
 
-	if err := s.store.DeleteSocial(userId, socialId); err != nil {
+	if err := s.userStore.DeleteSocial(userId, socialId); err != nil {
 		return err
 	}
 

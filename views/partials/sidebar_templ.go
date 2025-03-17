@@ -156,7 +156,7 @@ func navlist() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = subNavItem("/admin/verification-requests", "Identity Verification").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = subNavItem("/admin/verification-requests", "Identity verification").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -164,7 +164,7 @@ func navlist() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = subNavItem("/admin/vendor-applications", "Vendor Applications").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = subNavItem("/admin/vendor-applications", "Vendor applications").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -186,7 +186,15 @@ func navlist() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = subNavItem("/admin/user-management", "Users").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = subNavItem("/admin/user-management/users", "Basic users").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = subNavItem("/admin/user-management/vendors", "Vendors").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -208,7 +216,7 @@ func navlist() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = subNavItem("/admin/complaints/users", "Reported Users").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = subNavItem("/admin/complaints/users", "Reported users").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -238,7 +246,7 @@ func navlist() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = subNavItem("/admin/account-management/reset", "Password Reset").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = subNavItem("/admin/account-management/reset", "Password reset").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -293,7 +301,7 @@ func navItem(path, title string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(path)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 133, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 134, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -314,7 +322,7 @@ func navItem(path, title string) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 137, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 138, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -356,7 +364,7 @@ func navWithSubItem(title string) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 156, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 157, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -415,7 +423,7 @@ func subNavItem(path, title string) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(path)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 167, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 168, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -428,7 +436,7 @@ func subNavItem(path, title string) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 170, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/sidebar.templ`, Line: 171, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {

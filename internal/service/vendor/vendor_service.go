@@ -8,16 +8,43 @@ import (
 )
 
 type Service struct {
-	store   repository.VendorRepository
-	encrypt auth.Encryption
+	vendorStore repository.VendorRepository
+	encrypt     auth.Encryption
 }
 
-func NewService(store repository.VendorRepository, encrypt auth.Encryption) *Service {
-	return &Service{store: store, encrypt: encrypt}
+func NewService(vendorStore repository.VendorRepository, encrypt auth.Encryption) *Service {
+	return &Service{vendorStore: vendorStore, encrypt: encrypt}
+}
+
+func (s *Service) GetAll(limit, offset int) ([]*models.VendorModel, error) {
+	accounts, err := s.vendorStore.GetAll(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, account := range accounts {
+		if decrypted, err := s.encrypt.DecryptString(account.Name); err != nil {
+			return nil, err
+		} else {
+			account.Name = decrypted
+		}
+
+		if decrypted, err := s.encrypt.DecryptString(account.Email); err != nil {
+			return nil, err
+		} else {
+			account.Email = decrypted
+		}
+
+		if account.Phone.Valid {
+			account.PhoneString = account.Phone.String
+		}
+	}
+
+	return accounts, nil
 }
 
 func (s *Service) GetVendor(vendorId string) (*models.VendorModel, error) {
-	vendor, err := s.store.FindById(vendorId)
+	vendor, err := s.vendorStore.FindById(vendorId)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +84,7 @@ func (s *Service) GetVendor(vendorId string) (*models.VendorModel, error) {
 }
 
 func (s *Service) GetVendorServiceList(vendorId string) ([]*models.ServiceModel, error) {
-	services, err := s.store.GetVendorServiceList(vendorId)
+	services, err := s.vendorStore.GetVendorServiceList(vendorId)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +102,7 @@ func (s *Service) GetVendorServiceList(vendorId string) ([]*models.ServiceModel,
 			service.Description = plain
 		}
 
-		if tags, err := s.store.GetTags(service.Id); err != nil {
+		if tags, err := s.vendorStore.GetTags(service.Id); err != nil {
 			return nil, err
 		} else {
 			service.Tags = tags

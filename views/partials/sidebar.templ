@@ -110,18 +110,19 @@ templ navlist() {
 			@navItem("/admin/map", "Map")
 			@navItem("/admin/expertise", "Expertise")
 			@navWithSubItem("Requests") {
-				@subNavItem("/admin/verification-requests", "Identity Verification")
-				@subNavItem("/admin/vendor-applications", "Vendor Applications")
+				@subNavItem("/admin/verification-requests", "Identity verification")
+				@subNavItem("/admin/vendor-applications", "Vendor applications")
 			}
 			@navWithSubItem("User Management") {
-				@subNavItem("/admin/user-management", "Users")
+				@subNavItem("/admin/user-management/users", "Basic users")
+				@subNavItem("/admin/user-management/vendors", "Vendors")
 			}
 			@navWithSubItem("Reports") {
-				@subNavItem("/admin/complaints/users", "Reported Users")
+				@subNavItem("/admin/complaints/users", "Reported users")
 				@subNavItem("/admin/complaints/bugs", "Bug reports")
 			}
 			@navWithSubItem("Account Management") {
-				@subNavItem("/admin/account-management/reset", "Password Reset")
+				@subNavItem("/admin/account-management/reset", "Password reset")
 			}
 		</ul>
 	</div>

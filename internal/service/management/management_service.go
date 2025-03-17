@@ -12,15 +12,15 @@ import (
 )
 
 type Service struct {
-	store      user_repo.UserRepository
+	userStore  user_repo.UserRepository
 	notifStore notification_repo.NotificationRepository
 	encrypt    auth.Encryption
 	hash       auth.Hash
 }
 
-func NewService(store user_repo.UserRepository, notifStore notification_repo.NotificationRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
+func NewService(userStore user_repo.UserRepository, notifStore notification_repo.NotificationRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
 	return &Service{
-		store:      store,
+		userStore:  userStore,
 		notifStore: notifStore,
 		encrypt:    encrypt,
 		hash:       hash,
@@ -28,7 +28,7 @@ func NewService(store user_repo.UserRepository, notifStore notification_repo.Not
 }
 
 func (s *Service) GetUsers(limit, offset int) ([]*models.UserModel, error) {
-	accounts, err := s.store.GetAllUserAccounts(limit, offset)
+	accounts, err := s.userStore.GetAllUserAccounts(limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (s *Service) FindUserByEmail(email string) (*models.UserModel, error) {
 		return nil, err
 	}
 
-	user, err := s.store.FindByEmailHash(emailHash)
+	user, err := s.userStore.FindByEmailHash(emailHash)
 	if err != nil {
 		return nil, err
 	}
@@ -77,30 +77,30 @@ func (s *Service) FindUserByEmail(email string) (*models.UserModel, error) {
 }
 
 func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, error) {
-	accountData, err := s.store.GetUserAccountPageData(userId)
+	accountData, err := s.userStore.GetUserAccountPageData(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	if restricted, expired, err := s.store.IsRestricted(userId); err != nil {
+	if restricted, expired, err := s.userStore.IsRestricted(userId); err != nil {
 		return nil, err
 	} else {
 		accountData.Restricted = restricted && !expired
 	}
 
 	if accountData.Restricted {
-		if err := s.store.LiftRestrictionIfExpired(userId); err != nil {
+		if err := s.userStore.LiftRestrictionIfExpired(userId); err != nil {
 			return nil, err
 		}
 	}
 
-	if stat, err := s.store.GetSentTransactionCount(userId); err != nil {
+	if stat, err := s.userStore.GetSentTransactionCount(userId); err != nil {
 		accountData.Stat.Sent = models.SentStat{}
 	} else {
 		accountData.Stat.Sent = *stat
 	}
 
-	if stat, err := s.store.GetReceivedTransactionCount(userId); err != nil {
+	if stat, err := s.userStore.GetReceivedTransactionCount(userId); err != nil {
 		accountData.Stat.Received = models.ReceivedStat{}
 	} else {
 		accountData.Stat.Received = *stat
@@ -162,7 +162,7 @@ func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, err
 }
 
 func (s *Service) BanUser(userId string) error {
-	if err := s.store.BanUser(userId); err != nil {
+	if err := s.userStore.BanUser(userId); err != nil {
 		return err
 	}
 
@@ -170,7 +170,7 @@ func (s *Service) BanUser(userId string) error {
 }
 
 func (s *Service) UnbanUser(userId string) error {
-	if err := s.store.UnbanUser(userId); err != nil {
+	if err := s.userStore.UnbanUser(userId); err != nil {
 		return err
 	}
 
@@ -190,7 +190,7 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 		EndTime: utils.FormatDateTime(endDate),
 	}
 
-	if err := s.store.RestrictUser(data); err != nil {
+	if err := s.userStore.RestrictUser(data); err != nil {
 		return err
 	}
 
@@ -235,7 +235,7 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 }
 
 func (s *Service) UnrestrictUser(userId string) error {
-	if err := s.store.ForceLiftRestriction(userId); err != nil {
+	if err := s.userStore.ForceLiftRestriction(userId); err != nil {
 		return err
 	}
 

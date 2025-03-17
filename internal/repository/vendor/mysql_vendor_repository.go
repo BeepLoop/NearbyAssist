@@ -16,6 +16,77 @@ func NewMysqlVendorRepository(db *sqlx.DB) *MysqlVendorRepository {
 	return &MysqlVendorRepository{db: db}
 }
 
+func (s *MysqlVendorRepository) GetAll(limit, offset int) ([]*models.VendorModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT  
+            v.id,
+            v.createdAt,
+            v.vendorId,
+            v.rating,
+            u.name AS name,
+            u.email AS email,
+            u.phone AS phone,
+            u.imageUrl AS imageUrl
+        FROM 
+            Vendor  v
+            JOIN User u ON u.id = v.vendorId
+        LIMIT ? OFFSET ?
+    `
+
+	accounts := make([]*models.VendorModel, 0)
+	if err := s.db.SelectContext(ctx, &accounts, query, limit, offset); err != nil {
+		return nil, err
+	}
+
+	expertiseQuery := `
+        SELECT
+            e.title
+        FROM
+            Expertise e
+            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+        WHERE
+            ve.vendorId = ?
+    `
+
+	getSocialsQuery := `
+        SELECT
+            url
+        FROM
+            Social
+        WHERE
+            userId = ?
+    `
+
+	for _, account := range accounts {
+		if restricted, err := s.IsRestricted(account.VendorId); err != nil {
+			return nil, err
+		} else {
+			account.Restricted = restricted
+		}
+
+		expertise := make([]string, 0)
+		if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, account.VendorId); err != nil {
+			return nil, err
+		}
+		account.Expertise = expertise
+
+		socials := make([]string, 0)
+		if err := s.db.SelectContext(ctx, &socials, getSocialsQuery, account.VendorId); err != nil {
+			return nil, err
+		}
+		account.Socials = socials
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return accounts, nil
+}
+
 func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -23,6 +94,8 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	vendor := new(models.VendorModel)
 	query := `
         SELECT  
+            v.id,
+            v.createdAt,
             v.vendorId,
             v.rating,
             u.name AS name,
@@ -39,7 +112,7 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 		return nil, err
 	}
 
-	if restricted, err := s.IsRestricted(vendor.Id); err != nil {
+	if restricted, err := s.IsRestricted(vendor.VendorId); err != nil {
 		return nil, err
 	} else {
 		vendor.Restricted = restricted
