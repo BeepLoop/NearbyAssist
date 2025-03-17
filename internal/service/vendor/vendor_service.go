@@ -10,10 +10,15 @@ import (
 type Service struct {
 	vendorStore repository.VendorRepository
 	encrypt     core.Encryption
+	hash        core.Hash
 }
 
-func NewService(vendorStore repository.VendorRepository, encrypt core.Encryption) *Service {
-	return &Service{vendorStore: vendorStore, encrypt: encrypt}
+func NewService(vendorStore repository.VendorRepository, encrypt core.Encryption, hash core.Hash) *Service {
+	return &Service{
+		vendorStore: vendorStore,
+		encrypt:     encrypt,
+		hash:        hash,
+	}
 }
 
 func (s *Service) GetAll(limit, offset int) ([]*models.VendorModel, error) {
@@ -43,8 +48,53 @@ func (s *Service) GetAll(limit, offset int) ([]*models.VendorModel, error) {
 	return accounts, nil
 }
 
-func (s *Service) GetVendor(vendorId string) (*models.VendorModel, error) {
-	vendor, err := s.vendorStore.FindById(vendorId)
+func (s *Service) FindByEmail(email string) (*models.VendorModel, error) {
+	emailHash, err := s.hash.Generate([]byte(email))
+	if err != nil {
+		return nil, err
+	}
+
+	vendor, err := s.vendorStore.FindByEmailHash(emailHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if plainText, err := s.encrypt.DecryptString(vendor.Name); err != nil {
+		return nil, err
+	} else {
+		vendor.Name = plainText
+	}
+
+	if plainText, err := s.encrypt.DecryptString(vendor.Email); err != nil {
+		return nil, err
+	} else {
+		vendor.Email = plainText
+	}
+
+	if vendor.Phone.Valid {
+		if plainText, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
+			return nil, err
+		} else {
+			vendor.Phone = sql.NullString{String: plainText, Valid: true}
+		}
+	}
+
+	decryptedSocials := make([]string, 0)
+	for _, social := range vendor.Socials {
+		decrypted, err := s.encrypt.DecryptString(social)
+		if err != nil {
+			return nil, err
+		}
+
+		decryptedSocials = append(decryptedSocials, decrypted)
+	}
+	vendor.Socials = decryptedSocials
+
+	return vendor, nil
+}
+
+func (s *Service) FindById(id string) (*models.VendorModel, error) {
+	vendor, err := s.vendorStore.FindById(id)
 	if err != nil {
 		return nil, err
 	}

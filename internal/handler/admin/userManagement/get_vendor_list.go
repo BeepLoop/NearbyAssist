@@ -19,9 +19,9 @@ func (h *userManagementHandler) GetVendorList(c echo.Context) error {
 	if params.Has("query") && params.Get("query") != "" {
 		query := params.Get("query")
 
-		user, err := h.vendorService.GetVendor(query)
+		user, err := h.vendorService.FindByEmail(query)
 		if err != nil {
-			page := pages.UserList(make([]models.UserModel, 0))
+			page := pages.VendorList(make([]models.VendorModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 
@@ -39,7 +39,7 @@ func (h *userManagementHandler) GetVendorList(c echo.Context) error {
 
 		accounts, err := h.vendorService.GetAll(limit, offset)
 		if err != nil {
-			page := pages.UserList(make([]models.UserModel, 0))
+			page := pages.VendorList(make([]models.VendorModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = accounts

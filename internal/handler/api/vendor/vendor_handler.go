@@ -27,7 +27,7 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		})
 	}
 
-	vendor, err := h.vendorService.GetVendor(vendorId)
+	vendor, err := h.vendorService.FindById(vendorId)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
 			return echo.NewHTTPError(http.StatusNotFound, models.Error{
@@ -74,7 +74,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		})
 	}
 
-	vendor, err := h.vendorService.GetVendor(vendorId)
+	vendor, err := h.vendorService.FindById(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error retrieving vendor information",

@@ -87,6 +87,75 @@ func (s *MysqlVendorRepository) GetAll(limit, offset int) ([]*models.VendorModel
 	return accounts, nil
 }
 
+func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.VendorModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	vendor := new(models.VendorModel)
+	query := `
+        SELECT  
+            v.id,
+            v.createdAt,
+            v.vendorId,
+            v.rating,
+            u.name AS name,
+            u.email AS email,
+            u.phone AS phone,
+            u.imageUrl AS imageUrl
+        FROM 
+            Vendor  v
+            JOIN User u ON u.id = v.vendorId
+        WHERE 
+            u.emailHash = ?
+    `
+	if err := s.db.GetContext(ctx, vendor, query, emailHash); err != nil {
+		return nil, err
+	}
+
+	if restricted, err := s.IsRestricted(vendor.VendorId); err != nil {
+		return nil, err
+	} else {
+		vendor.Restricted = restricted
+	}
+
+	expertiseQuery := `
+        SELECT
+            e.title
+        FROM
+            Expertise e
+            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+        WHERE
+            ve.vendorId = ?
+    `
+
+	expertise := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, vendor.VendorId); err != nil {
+		return nil, err
+	}
+	vendor.Expertise = expertise
+
+	getSocialsQuery := `
+        SELECT
+            url
+        FROM
+            Social
+        WHERE
+            userId = ?
+    `
+
+	socials := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &socials, getSocialsQuery, vendor.VendorId); err != nil {
+		return nil, err
+	}
+	vendor.Socials = socials
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return vendor, nil
+}
+
 func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

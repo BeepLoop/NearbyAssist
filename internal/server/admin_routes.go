@@ -153,7 +153,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		managementService := user_management_service.NewService(userStore, notifStore, s.Encrypt, s.Hash)
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
-		vendorService := vendor_service.NewService(vendorStore, s.Encrypt)
+		vendorService := vendor_service.NewService(vendorStore, s.Encrypt, s.Hash)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		managementHandler := userManagement.NewHandler(managementService, userService, vendorService, resourceService)
@@ -161,7 +161,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		userManagementRoute.GET("/users", managementHandler.GetUserList)
 		userManagementRoute.GET("/users/:userId", managementHandler.ViewUserAccount)
 		userManagementRoute.GET("/vendors", managementHandler.GetVendorList)
-		userManagementRoute.GET("/vendors/:vendorId", managementHandler.GetVendorList)
+		userManagementRoute.GET("/vendors/:vendorId", managementHandler.ViewUserAccount)
 		userManagementRoute.POST("/ban/:userId", managementHandler.BanUser)
 		userManagementRoute.POST("/unban/:userId", managementHandler.UnbanUser)
 		userManagementRoute.POST("/restrict/:userId", managementHandler.RestrictUser)
