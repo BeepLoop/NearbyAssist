@@ -58,7 +58,7 @@ func Login(flash string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- login form --> <div class=\"fixed inset-0 z-0 h-screen grid place-items-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter\"><h2 class=\"mb-4 text-2xl font-semibold text-center\">Welcome back</h2>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- login form --> <div class=\"fixed left-0 right-0 z-0 h-screen grid place-items-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter\"><h2 class=\"mb-4 text-2xl font-semibold text-center\">Welcome back</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
