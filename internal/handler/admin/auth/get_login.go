@@ -6,18 +6,12 @@ import (
 	"nearbyassist/views/pages/auth"
 	"net/http"
 
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
 func (h *authHandler) GetLogin(c echo.Context) error {
-	sess, err := session.Get("session", c)
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/?error=session_error")
-	}
-
-	_, ok := sess.Values["user"]
-	if ok {
+	sess, err := utils.GetAdminFromSession(c)
+	if err == nil && sess != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 	}
 

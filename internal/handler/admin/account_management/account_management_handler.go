@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -74,18 +73,8 @@ func (h *accountManagementHandler) FufillResetRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
 	}
 
-	sess, _ := session.Get("session", c)
-	user := sess.Values["user"]
-	currentSession, ok := user.(models.AdminModel)
-	if !ok {
-		if err := utils.SetFlashMessage(c, "error", "invalid session"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_not_found")
-		}
-
-		return c.Redirect(http.StatusSeeOther, "/admin/login")
-	}
-
-	if currentSession.Id == request.AdminId {
+	admin, _ := utils.GetAdminFromSession(c)
+	if admin.Id == request.AdminId {
 		if err := utils.SetFlashMessage(c, "error", "Resetting own password not allowed"); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?error=reset_failed")
 		}
