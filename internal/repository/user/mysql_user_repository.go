@@ -99,7 +99,7 @@ func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models
 
 	getAccountsQuery := `
         SELECT
-            u.id, u.name, u.email, u.imageUrl, u.verified, u.createdAt
+            u.id, u.name, u.email, u.imageUrl, u.verified, u.createdAt, u.verifiedAt
         FROM
             User u
             LEFT JOIN Vendor v ON v.vendorId = u.id
@@ -173,7 +173,8 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
             phone,
             latitude,
             longitude,
-            createdAt 
+            createdAt,
+            verifiedAt
         FROM 
             User 
         WHERE 
@@ -227,7 +228,8 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
             imageUrl,
             verified,
             address,
-            createdAt
+            createdAt,
+            verifiedAt
         FROM 
             User 
         WHERE 
@@ -244,6 +246,10 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 	accountData.Address = user.Address
 	accountData.CreatedAt = user.CreatedAt
 	accountData.Verified = user.Verified
+
+	if user.VerifiedAt.Valid {
+		accountData.VerifiedAt = user.VerifiedAt.String
+	}
 
 	if banned, err := s.IsBanned(user.Id); err != nil {
 		return nil, err
@@ -438,7 +444,8 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
             phone,
             latitude,
             longitude,
-            createdAt
+            createdAt,
+            verifiedAt
         FROM 
             User 
         WHERE 

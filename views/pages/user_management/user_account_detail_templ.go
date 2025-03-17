@@ -86,7 +86,7 @@ func UserAccountDetail(data models.UserAccountPageData, flash string) templ.Comp
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"profile\" class=\"w-44 h-44 aspect-square outline-1 outline-pale-gray\"><div class=\"grid gap-2\"><!-- name & email --><div><h1 class=\"text-xl font-medium text-neutral-dark\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"profile\" class=\"w-48 h-48 aspect-square outline-1 outline-pale-gray\"><div class=\"grid gap-2\"><!-- name & email --><div><h1 class=\"text-xl font-medium text-neutral-dark\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -138,7 +138,27 @@ func UserAccountDetail(data models.UserAccountPageData, flash string) templ.Comp
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span></div><!-- expertise --><div class=\"mt-3\"><p class=\"font-medium text-xs\">Account Status</p><div class=\"mt-2 flex gap-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex gap-2\"><p class=\"font-medium text-neutral-dark\">Date Verified: </p><p class=\"text-neutral-gray\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if data.VerifiedAt == "" {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("-")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				var templ_7745c5c3_Var8 string
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.VerifiedAt)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user_account_detail.templ`, Line: 50, Col: 27}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span></div><!-- account status --><div class=\"mt-3\"><p class=\"font-medium text-xs\">Account Status</p><div class=\"mt-2 flex gap-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -206,9 +226,9 @@ func actions(data models.UserAccountPageData) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- Dropdown Container --><div x-data=\"{ userActionsOpen: false }\" x-on:keydown.esc.prevent.stop=\"userActionsOpen = false\" class=\"relative\"><!-- Dropdown Toggle Button --><button type=\"button\" class=\"inline-flex gap-2 items-center outline-1 outline-danger rounded-sm px-2 py-1.5 text-sm text-danger fond-medium bg-danger/25 cursor-pointer hover:opacity-75\" id=\"pm-dropdown\" aria-haspopup=\"true\" x-bind:aria-expanded=\"userActionsOpen\" x-on:click=\"userActionsOpen = true\"><span>Actions</span> <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\" data-slot=\"icon\" class=\"hi-micro hi-chevron-down inline-block size-5 opacity-50\" x-bind:class=\"{ &#39;rotate-180&#39;: userActionsOpen }\"><path fill-rule=\"evenodd\" d=\"M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\"></path></svg></button><!-- END Dropdown Toggle Button --><!-- Dropdown --><div x-cloak x-show=\"userActionsOpen\" x-transition:enter=\"transition ease-out duration-100\" x-transition:enter-start=\"opacity-0 -translate-y-3\" x-transition:enter-end=\"opacity-100 translate-y-0\" x-transition:leave=\"transition ease-in duration-75\" x-transition:leave-start=\"opacity-100 translate-y-0\" x-transition:leave-end=\"opacity-0 -translate-y-3\" x-on:click.outside=\"userActionsOpen = false\" role=\"menu\" aria-labelledby=\"pm-dropdown\" class=\"absolute end-0 z-10 mt-2 w-44\"><div class=\"outline-1 outline-pale-gray rounded-sm shadow-xl\"><div class=\"p-1.5 grid gap-1.5\">")

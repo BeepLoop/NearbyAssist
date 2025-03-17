@@ -62,8 +62,8 @@ templ userTable(accounts []models.UserModel) {
 				<tr>
 					<th scope="col" class="p-4">User</th>
 					<th scope="col" class="p-4">Member Since</th>
-					<th scope="col" class="p-4">Status</th>
 					<th scope="col" class="p-4">Date Verified</th>
+					<th scope="col" class="p-4">Status</th>
 					<th scope="col" class="p-4">Action</th>
 				</tr>
 			</thead>
@@ -90,13 +90,19 @@ templ userTable(accounts []models.UserModel) {
 							</td>
 							<td class="p-4">{ account.CreatedAt }</td>
 							<td class="p-4">
+								if account.VerifiedAt.Valid {
+									{ account.VerifiedAt.String }
+								} else {
+									-
+								}
+							</td>
+							<td class="p-4">
 								if account.Verified {
 									@partials.SoftBadgeSuccess("Verified")
 								} else {
 									@partials.SoftBadgeDanger("Unverified")
 								}
 							</td>
-							<td class="p-4">-</td>
 							<td class="p-4">
 								<ul>
 									<a

@@ -49,6 +49,8 @@ func (h *userManagementHandler) ViewUserAccount(c echo.Context) error {
 		Banned:     accountData.Banned,
 		Restricted: accountData.Restricted,
 		Stat:       accountData.Stat,
+		Verified:   accountData.Verified,
+		VerifiedAt: accountData.VerifiedAt,
 	}
 
 	page := pages.UserAccountDetail(data, flash)

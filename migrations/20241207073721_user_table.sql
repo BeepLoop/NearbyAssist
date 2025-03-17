@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS User (
     longitude Decimal(13, 10),
     verified BOOLEAN DEFAULT FALSE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    verifiedAt TIMESTAMP,
     PRIMARY KEY (id),
     INDEX(id, name, emailHash)
 );
