@@ -30,11 +30,12 @@ import (
 	complaint_service "nearbyassist/internal/service/complaint"
 	dashboard_service "nearbyassist/internal/service/dashboard"
 	expertise_service "nearbyassist/internal/service/expertise"
-	management_service "nearbyassist/internal/service/management"
 	map_service "nearbyassist/internal/service/map"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	resource_service "nearbyassist/internal/service/resource"
 	tag_service "nearbyassist/internal/service/tag"
+	user_service "nearbyassist/internal/service/user"
+	"nearbyassist/internal/service/user_management_service"
 	vendor_service "nearbyassist/internal/service/vendor"
 	verification_service "nearbyassist/internal/service/verification"
 
@@ -150,11 +151,12 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		managementService := management_service.NewService(userStore, notifStore, s.Encrypt, s.Hash)
+		managementService := user_management_service.NewService(userStore, notifStore, s.Encrypt, s.Hash)
+		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 		vendorService := vendor_service.NewService(vendorStore, s.Encrypt)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
-		managementHandler := userManagement.NewHandler(managementService, vendorService, resourceService)
+		managementHandler := userManagement.NewHandler(managementService, userService, vendorService, resourceService)
 
 		userManagementRoute.GET("/users", managementHandler.GetUserList)
 		userManagementRoute.GET("/users/:userId", managementHandler.ViewUserAccount)

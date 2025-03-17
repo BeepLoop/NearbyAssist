@@ -275,6 +275,55 @@ func (s *Service) Logout(refreshToken string) error {
 	return nil
 }
 
+func (s *Service) GetAll(limit, offset int) ([]*models.UserModel, error) {
+	accounts, err := s.userStore.GetAllUserAccounts(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, account := range accounts {
+		if decrypted, err := s.encrypt.DecryptString(account.Name); err != nil {
+			return nil, err
+		} else {
+			account.Name = decrypted
+		}
+
+		if decrypted, err := s.encrypt.DecryptString(account.Email); err != nil {
+			return nil, err
+		} else {
+			account.Email = decrypted
+		}
+	}
+
+	return accounts, nil
+}
+
+func (s *Service) FindByEmail(email string) (*models.UserModel, error) {
+	emailHash, err := s.hash.Generate([]byte(email))
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.userStore.FindByEmailHash(emailHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(user.Name); err != nil {
+		return nil, err
+	} else {
+		user.Name = decrypted
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(user.Email); err != nil {
+		return nil, err
+	} else {
+		user.Email = decrypted
+	}
+
+	return user, nil
+}
+
 func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {

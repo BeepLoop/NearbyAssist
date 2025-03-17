@@ -24,7 +24,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 	if params.Has("query") && params.Get("query") != "" {
 		query := params.Get("query")
 
-		user, err := h.managementService.FindUserByEmail(query)
+		user, err := h.userService.FindByEmail(query)
 		if err != nil {
 			page := pages.UserList(make([]models.UserModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
@@ -42,7 +42,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 			offset = DEFAULT_OFFSET
 		}
 
-		accounts, err := h.managementService.GetUsers(limit, offset)
+		accounts, err := h.userService.GetAll(limit, offset)
 		if err != nil {
 			page := pages.UserList(make([]models.UserModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
