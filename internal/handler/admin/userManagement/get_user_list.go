@@ -42,7 +42,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 			offset = DEFAULT_OFFSET
 		}
 
-		accounts, err := h.userService.GetAll(limit, offset)
+		accounts, err := h.userService.GetAllBasicUsers(limit, offset)
 		if err != nil {
 			page := pages.UserList(make([]models.UserModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)

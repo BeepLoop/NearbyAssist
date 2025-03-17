@@ -86,6 +86,43 @@ func (s *MysqlUserRepository) Logout(refreshToken string) error {
 	return nil
 }
 
+func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models.UserModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := make([]*models.UserModel, 0)
+
+	getAccountsQuery := `
+        SELECT
+            u.id, u.name, u.email, u.imageUrl, u.verified, u.createdAt
+        FROM
+            User u
+            LEFT JOIN Vendor v ON v.vendorId = u.id
+        WHERE
+            v.vendorId IS NULL
+        ORDER BY createdAt DESC
+        LIMIT ? OFFSET ?
+    `
+	if err := tx.SelectContext(ctx, &accounts, getAccountsQuery, limit, offset); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return nil, err
+		}
+
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return accounts, nil
+}
+
 func (s *MysqlUserRepository) GetAllUserAccounts(limit, offset int) ([]*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
