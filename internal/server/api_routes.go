@@ -14,6 +14,7 @@ import (
 	"nearbyassist/internal/handler/api/tag"
 	"nearbyassist/internal/handler/api/transaction"
 	"nearbyassist/internal/handler/api/user"
+	userauth_handler "nearbyassist/internal/handler/api/user_auth"
 	"nearbyassist/internal/handler/api/vendor"
 	"nearbyassist/internal/handler/api/verification"
 	"nearbyassist/internal/middleware"
@@ -45,6 +46,7 @@ import (
 	tag_service "nearbyassist/internal/service/tag"
 	transaction_service "nearbyassist/internal/service/transaction"
 	user_service "nearbyassist/internal/service/user"
+	userauth_service "nearbyassist/internal/service/user_auth"
 	vendor_service "nearbyassist/internal/service/vendor"
 	verification_service "nearbyassist/internal/service/verification"
 
@@ -68,26 +70,31 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		}
 	}
 
+	// ===== HEALTH =======
+	authRoute := v1.Group("/auth")
+	{
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		authService := userauth_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
+		handler := userauth_handler.NewHandler(authService)
+
+		authRoute.POST("/thirdPartyLogin", handler.ThirdPartyLogin)
+		authRoute.POST("/refresh", handler.Refresh)
+		authRoute.POST("/logout", handler.Logout, middleware.CheckAuth(s.JWT))
+	}
+
 	// ===== USER =======
 	userRoute := v1.Group("/user")
 	{
+		userRoute.Use(middleware.CheckAuth(s.JWT))
+
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 		handler := user.NewHandler(userService)
 
-		userRoute.POST("/thirdPartyLogin", handler.ThirdPartyLogin)
-		userRoute.POST("/refresh", handler.Refresh)
-		userRoute.POST("/logout", handler.Logout, middleware.CheckAuth(s.JWT))
-
-		protected := userRoute.Group("/protected")
-		{
-			protected.Use(middleware.CheckAuth(s.JWT))
-
-			protected.GET("/me", handler.GetUser)
-			protected.GET("/verified", handler.GetUserVerification)
-			protected.POST("/socials", handler.AddSocial)
-			protected.DELETE("/socials", handler.DeleteSocial)
-		}
+		userRoute.GET("/me", handler.GetUser)
+		userRoute.GET("/verified", handler.GetUserVerification)
+		userRoute.POST("/socials", handler.AddSocial)
+		userRoute.DELETE("/socials", handler.DeleteSocial)
 	}
 
 	// ===== TAGS =======
