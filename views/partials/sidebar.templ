@@ -108,6 +108,7 @@ templ navlist() {
 		<ul class="">
 			@navItem("/admin/dashboard", "Dashboard")
 			@navItem("/admin/map", "Map")
+			@navItem("/admin/expertise", "Expertise")
 			@navWithSubItem("Requests") {
 				@subNavItem("/admin/verification-requests", "Identity Verification")
 				@subNavItem("/admin/vendor-applications", "Vendor Applications")
@@ -115,10 +116,13 @@ templ navlist() {
 			@navWithSubItem("User Management") {
 				@subNavItem("/admin/user-management", "Users")
 			}
-			@navItem("/admin/expertise", "Expertise")
 			@navWithSubItem("Reports") {
 				@subNavItem("/admin/complaints/users", "Reported Users")
 				@subNavItem("/admin/complaints/bugs", "Bug reports")
+			}
+			@navWithSubItem("Account Management") {
+				@subNavItem("/admin/account-management/add", "Add Account")
+				@subNavItem("/admin/account-management/reset", "Password Reset")
 			}
 		</ul>
 	</div>

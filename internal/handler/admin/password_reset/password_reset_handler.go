@@ -1,27 +1,27 @@
-package account
+package passwordreset_handler
 
 import (
-	admin_service "nearbyassist/internal/service/admin"
+	passwordreset_service "nearbyassist/internal/service/password_reset"
 	"nearbyassist/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-type accountHandler struct {
-	adminService *admin_service.Service
+type passwordResetHandler struct {
+	passwordResetService *passwordreset_service.Service
 }
 
-func NewHandler(adminService *admin_service.Service) *accountHandler {
-	return &accountHandler{
-		adminService: adminService,
+func NewHandler(passwordResetService *passwordreset_service.Service) *passwordResetHandler {
+	return &passwordResetHandler{
+		passwordResetService: passwordResetService,
 	}
 }
 
-func (h *accountHandler) RequestPasswordReset(c echo.Context) error {
+func (h *passwordResetHandler) RequestPasswordReset(c echo.Context) error {
 	username := c.FormValue("username")
 
-	if err := h.adminService.RequestPasswordReset(username); err != nil {
+	if err := h.passwordResetService.RequestPasswordReset(username); err != nil {
 		if err := utils.SetFlashMessage(c, "error", "Request failed"); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/?error=request_error")
 		}

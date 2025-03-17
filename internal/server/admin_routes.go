@@ -1,12 +1,13 @@
 package server
 
 import (
-	"nearbyassist/internal/handler/admin/account"
+	accountmanagement "nearbyassist/internal/handler/admin/account_management"
 	"nearbyassist/internal/handler/admin/auth"
 	"nearbyassist/internal/handler/admin/complaint"
 	"nearbyassist/internal/handler/admin/dashboard"
 	"nearbyassist/internal/handler/admin/expertise"
 	map_handler "nearbyassist/internal/handler/admin/map"
+	passwordreset_handler "nearbyassist/internal/handler/admin/password_reset"
 	"nearbyassist/internal/handler/admin/userManagement"
 	application "nearbyassist/internal/handler/admin/vendor_application"
 	"nearbyassist/internal/handler/admin/verification"
@@ -18,6 +19,7 @@ import (
 	expertise_repo "nearbyassist/internal/repository/expertise"
 	map_repo "nearbyassist/internal/repository/map"
 	notification_repo "nearbyassist/internal/repository/notification"
+	passwordreset_repo "nearbyassist/internal/repository/password_reset"
 	report_user_repo "nearbyassist/internal/repository/report_user"
 	tag_repo "nearbyassist/internal/repository/tag"
 	user_repo "nearbyassist/internal/repository/user"
@@ -29,6 +31,7 @@ import (
 	expertise_service "nearbyassist/internal/service/expertise"
 	management_service "nearbyassist/internal/service/management"
 	map_service "nearbyassist/internal/service/map"
+	passwordreset_service "nearbyassist/internal/service/password_reset"
 	resource_service "nearbyassist/internal/service/resource"
 	tag_service "nearbyassist/internal/service/tag"
 	verification_service "nearbyassist/internal/service/verification"
@@ -48,8 +51,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 	resetRoute := r.Group("/reset")
 	{
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
-		adminService := admin_service.NewService(adminStore, s.Encrypt, s.Hash)
-		handler := account.NewHandler(adminService)
+		passwordResetStore := passwordreset_repo.NewMysqlPasswordResetRepository(s.DB)
+
+		passwordResetService := passwordreset_service.NewService(adminStore, passwordResetStore, s.Encrypt, s.Hash)
+		handler := passwordreset_handler.NewHandler(passwordResetService)
 
 		resetRoute.POST("", handler.RequestPasswordReset)
 	}
@@ -166,5 +171,21 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		expertiseRoute.GET("", handler.GetAllExpertise)
 		expertiseRoute.POST("", handler.CreateExpertise)
 		expertiseRoute.POST("/tags", handler.AddTagToExpertise)
+	}
+
+	accountManagementRoute := r.Group("/account-management")
+	{
+		accountManagementRoute.Use(middleware.CheckSession)
+
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+		passwordResetStore := passwordreset_repo.NewMysqlPasswordResetRepository(s.DB)
+
+		adminService := admin_service.NewService(adminStore, s.Encrypt, s.Hash)
+		passwordResetService := passwordreset_service.NewService(adminStore, passwordResetStore, s.Encrypt, s.Hash)
+
+		handler := accountmanagement.NewHandler(adminService, passwordResetService)
+
+		accountManagementRoute.GET("/add", handler.AddAccount)
+		accountManagementRoute.GET("/reset", handler.ResetRequests)
 	}
 }

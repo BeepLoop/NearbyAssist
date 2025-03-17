@@ -5,7 +5,6 @@ import (
 	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
-	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -97,39 +96,4 @@ func (s *MysqlAdminRepository) ShouldChangePassword(id string) (bool, error) {
 	}
 
 	return shouldChange, nil
-}
-
-func (s *MysqlAdminRepository) RequestPasswordReset(data *models.PasswordResetRequestModel) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	data.Id = utils.GenerateId()
-
-	insertQuery := `
-        INSERT INTO
-            PasswordResetRequest (id, adminId)
-        VALUES
-            (:id, :adminId)
-    `
-
-	updateTimestampQuery := "UPDATE PasswordResetRequest SET createdAT = NOW() WHERE adminId = ?"
-
-	_, err := s.db.NamedExecContext(ctx, insertQuery, data)
-	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
-			if _, err := s.db.ExecContext(ctx, updateTimestampQuery, data.AdminId); err != nil {
-				return err
-			}
-
-			return nil
-		}
-
-		return err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	return nil
 }

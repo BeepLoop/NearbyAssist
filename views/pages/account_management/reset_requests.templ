@@ -1,0 +1,54 @@
+package pages
+
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ ResetRequests(requests []models.PasswordResetRequestModel, flash string) {
+	@layout.Layout() {
+		@templ.JSONScript("flash", flash)
+		@partials.ToastNotification()
+		@partials.PageBanner("Password Reset Requests", "")
+		@requestTable(requests)
+	}
+}
+
+templ requestTable(requests []models.PasswordResetRequestModel) {
+	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
+		<table class="w-full text-left text-sm">
+			<thead class="text-white text-sm font-semibold bg-primary-greener">
+				<tr>
+					<th scope="col" class="p-4">Username</th>
+					<th scope="col" class="p-4">Requested On</th>
+					<th scope="col" class="p-4">Action</th>
+				</tr>
+			</thead>
+			<tbody class="divide-y divide-gray-300">
+				if len(requests) < 1 {
+					<tr class="">
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable">Empty</td>
+					</tr>
+				} else {
+					for _, request := range requests {
+						<tr class="text-xs">
+							<td class="p-4">{ request.Username }</td>
+							<td class="p-4">{ request.CreatedAt }</td>
+							<td class="p-4">
+								<ul>
+									<a
+										href="#"
+										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
+									>
+										view profile
+									</a>
+								</ul>
+							</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+}
