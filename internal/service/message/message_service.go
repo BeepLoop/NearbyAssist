@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	message_repo "nearbyassist/internal/repository/message"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 
@@ -15,11 +15,11 @@ import (
 type Service struct {
 	store   message_repo.MessageRepository
 	ws      *websocket.Websocket
-	encrypt auth.Encryption
-	jwt     auth.Authenticator
+	encrypt core.Encryption
+	jwt     core.Authenticator
 }
 
-func NewService(store message_repo.MessageRepository, ws *websocket.Websocket, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
+func NewService(store message_repo.MessageRepository, ws *websocket.Websocket, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{store: store, ws: ws, encrypt: encrypt, jwt: jwt}
 }
 

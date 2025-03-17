@@ -2,13 +2,13 @@ package middleware
 
 import (
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func CheckAuth(jwt auth.Authenticator) echo.MiddlewareFunc {
+func CheckAuth(jwt core.Authenticator) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			token := c.Request().Header.Get("Authorization")

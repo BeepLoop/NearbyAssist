@@ -2,7 +2,7 @@ package server
 
 import (
 	"nearbyassist/internal/config"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
@@ -22,7 +22,7 @@ type ServerConfig struct {
 	RouteEngine      route_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
 
-	Hash    auth.Hash
-	Encrypt auth.Encryption
-	JWT     auth.Authenticator
+	Hash    core.Hash
+	Encrypt core.Encryption
+	JWT     core.Authenticator
 }

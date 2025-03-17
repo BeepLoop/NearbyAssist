@@ -10,7 +10,7 @@ import (
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
@@ -20,15 +20,15 @@ import (
 type Service struct {
 	serviceStore service_repo.ServiceRepository
 	vendorStore  vendor_repo.VendorRepository
-	encrypt      auth.Encryption
-	hash         auth.Hash
-	jwt          auth.Authenticator
+	encrypt      core.Encryption
+	hash         core.Hash
+	jwt          core.Authenticator
 	suggest      suggestion_engine.Engine
 	route        route_engine.Engine
 	fs           fs.FileStorage
 }
 
-func NewService(serviceStore service_repo.ServiceRepository, vendorStore vendor_repo.VendorRepository, encrypt auth.Encryption, hash auth.Hash, jwt auth.Authenticator, suggest suggestion_engine.Engine, route route_engine.Engine, fs fs.FileStorage) *Service {
+func NewService(serviceStore service_repo.ServiceRepository, vendorStore vendor_repo.VendorRepository, encrypt core.Encryption, hash core.Hash, jwt core.Authenticator, suggest suggestion_engine.Engine, route route_engine.Engine, fs fs.FileStorage) *Service {
 	return &Service{
 		serviceStore: serviceStore,
 		vendorStore:  vendorStore,

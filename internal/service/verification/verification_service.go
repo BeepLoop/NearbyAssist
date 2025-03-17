@@ -6,7 +6,7 @@ import (
 	"nearbyassist/internal/models"
 	notification_repo "nearbyassist/internal/repository/notification"
 	verification_repo "nearbyassist/internal/repository/verification"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/utils"
@@ -16,11 +16,11 @@ type Service struct {
 	store      verification_repo.VerificationRepository
 	notifStore notification_repo.NotificationRepository
 	fs         fs.FileStorage
-	encrypt    auth.Encryption
-	jwt        auth.Authenticator
+	encrypt    core.Encryption
+	jwt        core.Authenticator
 }
 
-func NewService(store verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
+func NewService(store verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{store: store, notifStore: notifStore, fs: fs, encrypt: encrypt, jwt: jwt}
 }
 

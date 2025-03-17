@@ -6,7 +6,7 @@ import (
 	"nearbyassist/internal/db"
 	message_repo "nearbyassist/internal/repository/message"
 	"nearbyassist/internal/server"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/route_engine"
@@ -21,13 +21,13 @@ func main() {
 	config := config.GetConfig()
 
 	// Load encryption algorithm
-	encrypt := auth.NewAES([]byte(config.ENCRYPTION_KEY))
+	encrypt := core.NewAES([]byte(config.ENCRYPTION_KEY))
 
 	// Load hashing algorithm
-	hash := auth.NewSha256()
+	hash := core.NewSha256()
 
 	// Load JWT authenticator
-	jwt := auth.NewJWTAuthenticator(config.JWT_SECRET, config.JWT_DURATION)
+	jwt := core.NewJWTAuthenticator(config.JWT_SECRET, config.JWT_DURATION)
 
 	// Load file disk
 	directories := map[fs.Category]string{

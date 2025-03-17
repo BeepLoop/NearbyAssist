@@ -4,15 +4,15 @@ import (
 	"database/sql"
 	"nearbyassist/internal/models"
 	repository "nearbyassist/internal/repository/vendor"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 )
 
 type Service struct {
 	vendorStore repository.VendorRepository
-	encrypt     auth.Encryption
+	encrypt     core.Encryption
 }
 
-func NewService(vendorStore repository.VendorRepository, encrypt auth.Encryption) *Service {
+func NewService(vendorStore repository.VendorRepository, encrypt core.Encryption) *Service {
 	return &Service{vendorStore: vendorStore, encrypt: encrypt}
 }
 

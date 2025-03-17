@@ -3,17 +3,17 @@ package expertise_service
 import (
 	"nearbyassist/internal/models"
 	expertise_repo "nearbyassist/internal/repository/expertise"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"strings"
 )
 
 type Service struct {
 	store   expertise_repo.ExpertiseRepository
-	encrypt auth.Encryption
-	hash    auth.Hash
+	encrypt core.Encryption
+	hash    core.Hash
 }
 
-func NewService(store expertise_repo.ExpertiseRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
+func NewService(store expertise_repo.ExpertiseRepository, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
 		store:   store,
 		encrypt: encrypt,

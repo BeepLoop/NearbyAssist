@@ -2,17 +2,17 @@ package fs
 
 import (
 	"errors"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"os"
 	"path/filepath"
 )
 
 type DiskStorage struct {
 	categoryDirectory map[Category]string
-	hash              auth.Hash
+	hash              core.Hash
 }
 
-func NewDiskStorage(directory map[Category]string, hash auth.Hash) *DiskStorage {
+func NewDiskStorage(directory map[Category]string, hash core.Hash) *DiskStorage {
 	keys := make([]Category, 0, len(directory))
 	for c := range directory {
 		keys = append(keys, c)

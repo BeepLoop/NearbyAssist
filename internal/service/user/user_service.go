@@ -7,7 +7,7 @@ import (
 	repository "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
 )
 
@@ -17,12 +17,12 @@ const (
 
 type Service struct {
 	userStore repository.UserRepository
-	encrypt   auth.Encryption
-	hash      auth.Hash
-	jwt       auth.Authenticator
+	encrypt   core.Encryption
+	hash      core.Hash
+	jwt       core.Authenticator
 }
 
-func NewService(userStore repository.UserRepository, encrypt auth.Encryption, hash auth.Hash, jwt auth.Authenticator) *Service {
+func NewService(userStore repository.UserRepository, encrypt core.Encryption, hash core.Hash, jwt core.Authenticator) *Service {
 	return &Service{
 		userStore: userStore,
 		encrypt:   encrypt,

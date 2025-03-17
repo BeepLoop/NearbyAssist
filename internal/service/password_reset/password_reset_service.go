@@ -5,17 +5,17 @@ import (
 	"nearbyassist/internal/models"
 	admin_repo "nearbyassist/internal/repository/admin"
 	passwordreset_repo "nearbyassist/internal/repository/password_reset"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 )
 
 type Service struct {
 	adminStore         admin_repo.AdminRepository
 	passwordResetStore passwordreset_repo.PasswordResetRepository
-	encrypt            auth.Encryption
-	hash               auth.Hash
+	encrypt            core.Encryption
+	hash               core.Hash
 }
 
-func NewService(adminStore admin_repo.AdminRepository, passwordResetStore passwordreset_repo.PasswordResetRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
+func NewService(adminStore admin_repo.AdminRepository, passwordResetStore passwordreset_repo.PasswordResetRepository, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
 		adminStore:         adminStore,
 		passwordResetStore: passwordResetStore,
@@ -82,15 +82,15 @@ func (s *Service) ResetPassword(requestId, newPassword, confirmationUsername, co
 		return err
 	}
 
-	if !auth.IsPasswordMatch(admin.Password, confirmationPassword) {
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
 		return errors.New("Invalid credentials")
 	}
 
-	if !auth.IsPasswordSecure(newPassword) {
+	if !core.IsPasswordSecure(newPassword) {
 		return errors.New("insecure password")
 	}
 
-	encryptedPassword, err := auth.BcryptPassword(newPassword)
+	encryptedPassword, err := core.BcryptPassword(newPassword)
 	if err != nil {
 		return err
 	}

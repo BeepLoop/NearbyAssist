@@ -3,17 +3,17 @@ package notification_service
 import (
 	"nearbyassist/internal/models"
 	notification_repo "nearbyassist/internal/repository/notification"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
 	store   notification_repo.NotificationRepository
-	encrypt auth.Encryption
-	jwt     auth.Authenticator
+	encrypt core.Encryption
+	jwt     core.Authenticator
 }
 
-func NewService(store notification_repo.NotificationRepository, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
+func NewService(store notification_repo.NotificationRepository, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{
 		store:   store,
 		encrypt: encrypt,

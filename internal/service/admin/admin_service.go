@@ -5,16 +5,16 @@ import (
 
 	"nearbyassist/internal/models"
 	admin_repo "nearbyassist/internal/repository/admin"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 )
 
 type Service struct {
 	adminStore admin_repo.AdminRepository
-	encrypt    auth.Encryption
-	hash       auth.Hash
+	encrypt    core.Encryption
+	hash       core.Hash
 }
 
-func NewService(adminStore admin_repo.AdminRepository, encrypt auth.Encryption, hash auth.Hash) *Service {
+func NewService(adminStore admin_repo.AdminRepository, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
 		adminStore: adminStore,
 		encrypt:    encrypt,
@@ -33,7 +33,7 @@ func (s *Service) Login(username, password string) (*models.AdminModel, error) {
 		return nil, err
 	}
 
-	if auth.IsPasswordMatch(admin.Password, password) == false {
+	if core.IsPasswordMatch(admin.Password, password) == false {
 		return nil, errors.New("Invalid credentials")
 	}
 

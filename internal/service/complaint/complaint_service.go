@@ -8,7 +8,7 @@ import (
 	notification_repo "nearbyassist/internal/repository/notification"
 	report_user_repo "nearbyassist/internal/repository/report_user"
 	"nearbyassist/internal/request"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/utils"
@@ -20,11 +20,11 @@ type Service struct {
 	bugReportStore  bug_report_repo.BugReportRepository
 	notifStore      notification_repo.NotificationRepository
 	fs              fs.FileStorage
-	encrypt         auth.Encryption
-	jwt             auth.Authenticator
+	encrypt         core.Encryption
+	jwt             core.Authenticator
 }
 
-func NewService(reportUserStore report_user_repo.ReportUserRepository, bugReportStore bug_report_repo.BugReportRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
+func NewService(reportUserStore report_user_repo.ReportUserRepository, bugReportStore bug_report_repo.BugReportRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{
 		reportUserStore: reportUserStore,
 		bugReportStore:  bugReportStore,

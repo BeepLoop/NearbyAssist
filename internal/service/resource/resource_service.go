@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"mime"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	"net/http"
 	"path/filepath"
@@ -19,11 +19,11 @@ const (
 
 type Service struct {
 	fs      fs.FileStorage
-	encrypt auth.Encryption
-	hash    auth.Hash
+	encrypt core.Encryption
+	hash    core.Hash
 }
 
-func NewService(fs fs.FileStorage, encrypt auth.Encryption, hash auth.Hash) *Service {
+func NewService(fs fs.FileStorage, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
 		fs:      fs,
 		encrypt: encrypt,

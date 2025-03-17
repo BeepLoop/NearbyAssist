@@ -5,17 +5,17 @@ import (
 	"nearbyassist/internal/models"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
 	"nearbyassist/internal/request"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
 	store   e2ee_repo.E2EERepository
-	encrypt auth.Encryption
-	jwt     auth.Authenticator
+	encrypt core.Encryption
+	jwt     core.Authenticator
 }
 
-func NewService(store e2ee_repo.E2EERepository, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
+func NewService(store e2ee_repo.E2EERepository, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{store: store, encrypt: encrypt, jwt: jwt}
 }
 

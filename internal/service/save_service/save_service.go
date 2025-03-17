@@ -6,7 +6,7 @@ import (
 	service_repo "nearbyassist/internal/repository/service"
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/response"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
 )
 
@@ -14,11 +14,11 @@ type Service struct {
 	savedServiceStore saved_service_repo.SavedServiceRepository
 	serviceStore      service_repo.ServiceRepository
 	vendorStore       vendor_repo.VendorRepository
-	jwt               auth.Authenticator
-	encrypt           auth.Encryption
+	jwt               core.Authenticator
+	encrypt           core.Encryption
 }
 
-func NewService(savedServiceStore saved_service_repo.SavedServiceRepository, serviceStore service_repo.ServiceRepository, vendorStore vendor_repo.VendorRepository, jwt auth.Authenticator, encrypt auth.Encryption) *Service {
+func NewService(savedServiceStore saved_service_repo.SavedServiceRepository, serviceStore service_repo.ServiceRepository, vendorStore vendor_repo.VendorRepository, jwt core.Authenticator, encrypt core.Encryption) *Service {
 	return &Service{
 		savedServiceStore: savedServiceStore,
 		serviceStore:      serviceStore,

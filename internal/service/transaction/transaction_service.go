@@ -6,17 +6,17 @@ import (
 	transaction_repo "nearbyassist/internal/repository/transaction"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
 	store   transaction_repo.TransactionRepository
-	encrypt auth.Encryption
-	jwt     auth.Authenticator
+	encrypt core.Encryption
+	jwt     core.Authenticator
 }
 
-func NewService(store transaction_repo.TransactionRepository, encrypt auth.Encryption, jwt auth.Authenticator) *Service {
+func NewService(store transaction_repo.TransactionRepository, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{store: store, encrypt: encrypt, jwt: jwt}
 }
 

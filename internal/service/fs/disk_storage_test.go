@@ -5,7 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/png"
-	"nearbyassist/internal/service/auth"
+	"nearbyassist/internal/service/core"
 	"testing"
 )
 
@@ -30,7 +30,7 @@ func TestSaveFile(t *testing.T) {
 	directory := map[Category]string{
 		ID_BACK: testOutDir,
 	}
-	hash := auth.NewSha256()
+	hash := core.NewSha256()
 	disk := NewDiskStorage(directory, hash)
 
 	location, err := disk.SaveFile(File{
