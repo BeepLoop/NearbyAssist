@@ -38,7 +38,5 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
 	}
 
-	_ = utils.SetFlashMessage(c, "success", "Logged in")
-
 	return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 }
