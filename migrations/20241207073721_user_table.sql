@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS User (
     phone VARCHAR(255),
     latitude Decimal(12, 10),
     longitude Decimal(13, 10),
-    verified BOOLEAN DEFAULT FALSE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     verifiedAt TIMESTAMP,
     PRIMARY KEY (id),

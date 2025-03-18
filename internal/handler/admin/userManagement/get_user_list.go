@@ -52,10 +52,6 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 
 	data := make([]models.UserModel, 0)
 	for _, account := range results {
-		if account.VerifiedAt.Valid {
-			account.VerifiedAt.String = utils.FormatDate(account.VerifiedAt.String)
-		}
-
 		data = append(data, models.UserModel{
 			Model: models.Model{
 				Id:        account.Id,

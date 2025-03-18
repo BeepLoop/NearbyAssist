@@ -8,6 +8,6 @@ type VerificationRepository interface {
 	GetAll(status string) ([]*models.IdentityVerificationModel, error)
 	FindById(id string) (*models.IdentityVerificationModel, error)
 
-	AcceptRequest(id string) error
-	RejectRequest(id string) error
+	AcceptRequest(requestId string) error
+	RejectRequest(requestId, reason string) error
 }

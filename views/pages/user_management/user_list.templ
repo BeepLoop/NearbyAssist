@@ -7,15 +7,6 @@ import (
 	"nearbyassist/views/partials"
 )
 
-type UserAccounts struct {
-	Id         string
-	ProfileURL string
-	Name       string
-	Email      string
-	Verified   bool
-	CreatedAt  string
-}
-
 templ UserList(accounts []models.UserModel) {
 	@layout.Layout() {
 		@partials.PageBanner("User List", "")
@@ -89,13 +80,7 @@ templ userTable(accounts []models.UserModel) {
 								</div>
 							</td>
 							<td class="p-4">{ account.CreatedAt }</td>
-							<td class="p-4">
-								if account.VerifiedAt.Valid {
-									{ account.VerifiedAt.String }
-								} else {
-									-
-								}
-							</td>
+							<td class="p-4">{ account.VerifiedAt } </td>
 							<td class="p-4">
 								if account.Verified {
 									@partials.SoftBadgeSuccess("Verified")

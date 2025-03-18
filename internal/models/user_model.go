@@ -12,18 +12,20 @@ const (
 
 type UserModel struct {
 	Model
-	Name       string          `json:"name" db:"name"`
-	Email      string          `json:"email" db:"email"`
-	EmailHash  string          `json:"emailHash" db:"emailHash"`
-	ImageUrl   string          `json:"imageUrl" db:"imageUrl"`
-	Address    sql.NullString  `json:"address" db:"address"`
-	Phone      sql.NullString  `json:"phone" db:"phone"`
-	Latitude   sql.NullFloat64 `json:"latitude" db:"latitude"`
-	Longitude  sql.NullFloat64 `json:"longitude" db:"longitude"`
-	Banned     bool            `db:"banned"`
-	Restricted bool            `db:"restricted"`
-	Verified   bool            `json:"verified" db:"verified"`
-	VerifiedAt sql.NullString  `json:"-" db:"verifiedAt"`
+	Name      string          `json:"name" db:"name"`
+	Email     string          `json:"email" db:"email"`
+	EmailHash string          `json:"emailHash" db:"emailHash"`
+	ImageUrl  string          `json:"imageUrl" db:"imageUrl"`
+	Address   sql.NullString  `json:"address" db:"address"`
+	Phone     sql.NullString  `json:"phone" db:"phone"`
+	Latitude  sql.NullFloat64 `json:"latitude" db:"latitude"`
+	Longitude sql.NullFloat64 `json:"longitude" db:"longitude"`
+
+	Banned     bool `db:"banned"`
+	Restricted bool `db:"restricted"`
+
+	Verified   bool   `json:"verified" db:"verified"`
+	VerifiedAt string `json:"-" db:"verifiedAt"`
 
 	// Socials
 	Socials []string

@@ -14,4 +14,5 @@ type IdentityVerificationModel struct {
 	BackIdImageUrl  string `json:"backIdImageUrl" db:"backIdImageUrl" validate:"required"`
 	FaceImageUrl    string `json:"faceImageUrl" db:"faceImageUrl" validate:"required"`
 	Status          string `json:"status" db:"status"`
+	RejectionReason string `db:"rejectionReason"`
 }

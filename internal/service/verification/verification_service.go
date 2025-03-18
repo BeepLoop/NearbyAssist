@@ -13,15 +13,21 @@ import (
 )
 
 type Service struct {
-	store      verification_repo.VerificationRepository
-	notifStore notification_repo.NotificationRepository
-	fs         fs.FileStorage
-	encrypt    core.Encryption
-	jwt        core.Authenticator
+	verificationStore verification_repo.VerificationRepository
+	notifStore        notification_repo.NotificationRepository
+	fs                fs.FileStorage
+	encrypt           core.Encryption
+	jwt               core.Authenticator
 }
 
-func NewService(store verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
-	return &Service{store: store, notifStore: notifStore, fs: fs, encrypt: encrypt, jwt: jwt}
+func NewService(verificationStore verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
+	return &Service{
+		verificationStore: verificationStore,
+		notifStore:        notifStore,
+		fs:                fs,
+		encrypt:           encrypt,
+		jwt:               jwt,
+	}
 }
 
 func (s *Service) CreateVerificationRequest(name, phone, address, idType, idNumber, bearerToken string, latitude, longitude float64, files []*multipart.FileHeader) (string, error) {
@@ -112,7 +118,7 @@ func (s *Service) CreateVerificationRequest(name, phone, address, idType, idNumb
 		}
 	}
 
-	verificationId, err := s.store.Create(req)
+	verificationId, err := s.verificationStore.Create(req)
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +127,7 @@ func (s *Service) CreateVerificationRequest(name, phone, address, idType, idNumb
 }
 
 func (s *Service) GetRequest(id string) (*models.IdentityVerificationModel, error) {
-	request, err := s.store.FindById(id)
+	request, err := s.verificationStore.FindById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +154,7 @@ func (s *Service) GetRequest(id string) (*models.IdentityVerificationModel, erro
 }
 
 func (s *Service) GetIdentityVerificationRequests() ([]*models.IdentityVerificationModel, error) {
-	requests, err := s.store.GetAll("pending")
+	requests, err := s.verificationStore.GetAll("pending")
 	if err != nil {
 		return nil, err
 	}
@@ -177,17 +183,17 @@ func (s *Service) GetIdentityVerificationRequests() ([]*models.IdentityVerificat
 }
 
 func (s *Service) AcceptRequest(id string) error {
-	request, err := s.store.FindById(id)
+	request, err := s.verificationStore.FindById(id)
 	if err != nil {
 		return err
 	}
 
-	if err := s.store.AcceptRequest(id); err != nil {
+	if err := s.verificationStore.AcceptRequest(id); err != nil {
 		return err
 	}
 
 	notificationHeading := "Identity Verification Accepted"
-	notificationContent := "Congratulations! Your identity verification request has been accepted. Go to your settings and Sync Account to see the changes."
+	notificationContent := "Congratulations! Your identity verification request is approved."
 
 	notification := &models.NotificationModel{
 		Recipient: request.UserId,
@@ -225,23 +231,28 @@ func (s *Service) AcceptRequest(id string) error {
 }
 
 func (s *Service) RejectRequest(id, reason string) error {
-	request, err := s.store.FindById(id)
+	request, err := s.verificationStore.FindById(id)
 	if err != nil {
 		return err
 	}
 
-	if err := s.store.RejectRequest(id); err != nil {
+	encryptedReason, err := s.encrypt.EncryptString(reason)
+	if err != nil {
+		return err
+	}
+
+	if err := s.verificationStore.RejectRequest(id, encryptedReason); err != nil {
 		return err
 	}
 
 	notificationHeading := "Identity Verification Rejected"
-	notificationContent := "Identity Verification Rejected" + reason
+	notificationContent := "Your verification request is denied"
 
 	notification := &models.NotificationModel{
 		Recipient: request.UserId,
 		Type:      "fail",
 		Title:     notificationHeading,
-		Content:   notificationContent,
+		Content:   "Your identity verification request is rejected. Reason of rejection: " + reason,
 	}
 
 	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {

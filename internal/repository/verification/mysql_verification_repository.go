@@ -26,8 +26,20 @@ func (s *MysqlVerificationRepository) Create(data *models.IdentityVerificationMo
 	data.Id = utils.GenerateId()
 
 	query := `
-        INSERT INTO IdentityVerification 
-            (id, userId, name, address, phone, latitude, longitude, idType, idNumber, frontIdImageUrl, backIdImageUrl, faceImageUrl)
+        INSERT INTO
+            IdentityVerification 
+            (id,
+            userId,
+            name,
+            address,
+            phone,
+            latitude,
+            longitude,
+            idType,
+            idNumber,
+            frontIdImageUrl,
+            backIdImageUrl,
+            faceImageUrl)
         VALUES 
             ( :id, :userId, :name, :address, :phone, :latitude, :longitude, :idType, :idNumber, :frontIdImageUrl, :backIdImageUrl, :faceImageUrl)
     `
@@ -161,12 +173,21 @@ func (s *MysqlVerificationRepository) AcceptRequest(id string) error {
 	return nil
 }
 
-func (s *MysqlVerificationRepository) RejectRequest(id string) error {
+func (s *MysqlVerificationRepository) RejectRequest(id, reason string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "UPDATE IdentityVerification SET status = 'rejected' WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, id); err != nil {
+	query := `
+        UPDATE
+            IdentityVerification
+        SET
+            status = 'rejected',
+            rejectionReason = ?
+        WHERE
+            id = ?
+    `
+
+	if _, err := s.db.ExecContext(ctx, query, reason, id); err != nil {
 		return err
 	}
 

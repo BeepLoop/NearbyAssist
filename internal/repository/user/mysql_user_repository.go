@@ -99,7 +99,7 @@ func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models
 
 	getAccountsQuery := `
         SELECT
-            u.id, u.name, u.email, u.imageUrl, u.verified, u.createdAt, u.verifiedAt
+            u.id, u.name, u.email, u.imageUrl, u.createdAt
         FROM
             User u
             LEFT JOIN Vendor v ON v.vendorId = u.id
@@ -114,6 +114,15 @@ func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models
 		}
 
 		return nil, err
+	}
+
+	for _, account := range accounts {
+		verified, date, err := s.IsVerified(account.Id)
+		if err != nil {
+			return nil, err
+		}
+		account.Verified = verified
+		account.VerifiedAt = date
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -136,7 +145,7 @@ func (s *MysqlUserRepository) GetAllUserAccounts(limit, offset int) ([]*models.U
 
 	getAccountsQuery := `
         SELECT
-            id, name, email, imageUrl, verified, createdAt
+            id, name, email, imageUrl, createdAt
         FROM
             User
         ORDER BY createdAt DESC
@@ -149,6 +158,15 @@ func (s *MysqlUserRepository) GetAllUserAccounts(limit, offset int) ([]*models.U
 		}
 
 		return nil, err
+	}
+
+	for _, account := range accounts {
+		verified, date, err := s.IsVerified(account.Id)
+		if err != nil {
+			return nil, err
+		}
+		account.Verified = verified
+		account.VerifiedAt = date
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -168,13 +186,11 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
             name,
             email,
             imageUrl,
-            verified,
             address,
             phone,
             latitude,
             longitude,
-            createdAt,
-            verifiedAt
+            createdAt
         FROM 
             User 
         WHERE 
@@ -185,6 +201,13 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	err := s.db.GetContext(ctx, user, getUserQuery, id)
 	if err != nil {
 		return nil, err
+	}
+
+	if verified, date, err := s.IsVerified(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Verified = verified
+		user.VerifiedAt = date
 	}
 
 	if banned, err := s.IsBanned(user.Id); err != nil {
@@ -226,10 +249,8 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
             name,
             email,
             imageUrl,
-            verified,
             address,
-            createdAt,
-            verifiedAt
+            createdAt
         FROM 
             User 
         WHERE 
@@ -245,10 +266,12 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 	accountData.Email = user.Email
 	accountData.Address = user.Address
 	accountData.CreatedAt = user.CreatedAt
-	accountData.Verified = user.Verified
 
-	if user.VerifiedAt.Valid {
-		accountData.VerifiedAt = user.VerifiedAt.String
+	if verified, date, err := s.IsVerified(user.Id); err != nil {
+		return nil, err
+	} else {
+		accountData.Verified = verified
+		accountData.VerifiedAt = date
 	}
 
 	if banned, err := s.IsBanned(user.Id); err != nil {
@@ -439,13 +462,11 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
             name,
             email,
             imageUrl,
-            verified,
             address,
             phone,
             latitude,
             longitude,
-            createdAt,
-            verifiedAt
+            createdAt
         FROM 
             User 
         WHERE 
@@ -453,6 +474,13 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
     `
 	if err := s.db.GetContext(ctx, user, query, emailHash); err != nil {
 		return nil, err
+	}
+
+	if verified, date, err := s.IsVerified(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Verified = verified
+		user.VerifiedAt = date
 	}
 
 	if banned, err := s.IsBanned(user.Id); err != nil {
@@ -638,6 +666,31 @@ func (s *MysqlUserRepository) DeleteSocial(userId, id string) error {
 	}
 
 	return nil
+}
+
+func (s *MysqlUserRepository) IsVerified(userId string) (bool, string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT updatedAt FROM IdentityVerification WHERE userId = ? AND status = 'approved' LIMIT 1"
+	updatedAt := ""
+	if err := s.db.GetContext(ctx, &updatedAt, query, userId); err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return false, "", nil
+		}
+
+		return false, "", err
+	}
+
+	if updatedAt == "" {
+		return false, "", nil
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, "", context.DeadlineExceeded
+	}
+
+	return true, updatedAt, nil
 }
 
 func (s *MysqlUserRepository) IsBanned(userId string) (bool, error) {

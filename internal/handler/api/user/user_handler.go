@@ -41,7 +41,7 @@ func (h *userHandler) GetUser(c echo.Context) error {
 	})
 }
 
-func (h *userHandler) VerifyUserIdentity(c echo.Context) error {
+func (h *userHandler) RequestIdentityVerification(c echo.Context) error {
 	name := c.FormValue("name")
 	phone := c.FormValue("phone")
 	address := c.FormValue("address")
@@ -106,17 +106,6 @@ func (h *userHandler) VerifyUserIdentity(c echo.Context) error {
 			Error:   err.Error(),
 		})
 	}
-
-	user, err := h.userService.GetUser(bearerToken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error retrieving user information",
-			Error:   err.Error(),
-		})
-	}
-
-	// TODO: Handle notifying the user of the verification status
-	_ = user
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"verification": verificationId,
