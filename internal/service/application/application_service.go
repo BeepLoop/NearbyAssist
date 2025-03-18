@@ -1,6 +1,7 @@
 package application_service
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/models"
@@ -132,14 +133,14 @@ func (s *Service) AcceptRequest(applicationId string) error {
 		return err
 	}
 
-	notificationHeading := "Add Service Request Accepted"
-	notificationContent := "Congratulations! You successfully added expertise in: " + application.Expertise
+	notificationHeading := "Expertise request granted"
+	notificationContent := "Congratulations! Your expertise request has been granted."
 
 	notification := &models.NotificationModel{
 		Recipient: application.ApplicantId,
 		Type:      "success",
 		Title:     "Sucessfully added an expertise",
-		Content:   notificationContent,
+		Content:   "Congratulations! You successfully added expertise in: " + application.Expertise,
 	}
 
 	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
@@ -171,23 +172,32 @@ func (s *Service) AcceptRequest(applicationId string) error {
 }
 
 func (s *Service) RejectRequest(id, reason string) error {
+	if reason == "" {
+		return errors.New("invalid reason")
+	}
+
+	encryptedReason, err := s.encrypt.EncryptString(reason)
+	if err != nil {
+		return err
+	}
+
+	if err := s.store.RejectRequest(id, encryptedReason); err != nil {
+		return err
+	}
+
 	application, err := s.store.FindById(id)
 	if err != nil {
 		return err
 	}
 
-	if err := s.store.RejectRequest(id); err != nil {
-		return err
-	}
-
-	notificationHeading := "Add Expertise Rejected"
-	notificationContent := fmt.Sprintf("We are sorry to inform you that your request to add expertise in %s is denied. Reason: %s", application.Expertise, reason)
+	notificationHeading := "Expertise request denied"
+	notificationContent := "We are sorry to inform that your request is rejected."
 
 	notification := &models.NotificationModel{
 		Recipient: application.ApplicantId,
 		Type:      "fail",
 		Title:     notificationHeading,
-		Content:   notificationContent,
+		Content:   fmt.Sprintf("We are sorry to inform you that your request to add expertise in %s is denied. Reason: %s", application.Expertise, reason),
 	}
 
 	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {

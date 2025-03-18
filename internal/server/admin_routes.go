@@ -121,8 +121,8 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		applicationRoute.GET("", applicationHandler.GetVendorApplication)
 		applicationRoute.GET("/:applicationId", applicationHandler.GetVendorApplicationDetails)
-		applicationRoute.POST("/accept/:applicationId", applicationHandler.AcceptRequest)
-		applicationRoute.POST("/reject/:applicationId", applicationHandler.RejectRequest)
+		applicationRoute.POST("/accept", applicationHandler.AcceptRequest)
+		applicationRoute.POST("/reject", applicationHandler.RejectRequest)
 	}
 
 	verificationRoute := r.Group("/verification-requests")
@@ -139,8 +139,8 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		verificationRoute.GET("", requestHandler.GetIdentityVerification)
 		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails)
-		verificationRoute.POST("/accept/:requestId", requestHandler.AcceptRequest)
-		verificationRoute.POST("/reject/:requestId", requestHandler.RejectRequest)
+		verificationRoute.POST("/accept", requestHandler.AcceptRequest)
+		verificationRoute.POST("/reject", requestHandler.RejectRequest)
 	}
 
 	userManagementRoute := r.Group("/user-management")

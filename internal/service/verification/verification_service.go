@@ -1,6 +1,7 @@
 package verification_service
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/models"
@@ -231,9 +232,8 @@ func (s *Service) AcceptRequest(id string) error {
 }
 
 func (s *Service) RejectRequest(id, reason string) error {
-	request, err := s.verificationStore.FindById(id)
-	if err != nil {
-		return err
+	if reason == "" {
+		return errors.New("invalid reason")
 	}
 
 	encryptedReason, err := s.encrypt.EncryptString(reason)
@@ -245,8 +245,13 @@ func (s *Service) RejectRequest(id, reason string) error {
 		return err
 	}
 
+	request, err := s.verificationStore.FindById(id)
+	if err != nil {
+		return err
+	}
+
 	notificationHeading := "Identity Verification Rejected"
-	notificationContent := "Your verification request is denied"
+	notificationContent := "Your verification request is rejected"
 
 	notification := &models.NotificationModel{
 		Recipient: request.UserId,

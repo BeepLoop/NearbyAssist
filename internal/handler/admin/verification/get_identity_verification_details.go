@@ -3,35 +3,38 @@ package verification
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/identity_verification"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
+
 	requestId := c.Param("requestId")
 
 	request, err := h.verificationService.GetRequest(requestId)
 	if err != nil {
-		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{})
+		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	frontIdBase64, err := h.resourceService.GetBase64File(request.FrontIdImageUrl)
 	if err != nil {
-		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{})
+		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	backIdBase64, err := h.resourceService.GetBase64File(request.BackIdImageUrl)
 	if err != nil {
-		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{})
+		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	selfieBase64, err := h.resourceService.GetBase64File(request.FaceImageUrl)
 	if err != nil {
-		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{})
+		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -49,6 +52,6 @@ func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) err
 		FaceImageUrl:    selfieBase64,
 	}
 
-	page := pages.IdentityVerificationDetails(data)
+	page := pages.IdentityVerificationDetails(data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

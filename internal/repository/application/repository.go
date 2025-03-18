@@ -11,5 +11,5 @@ type ApplicationRepository interface {
 	GetAll(status string) ([]*models.ApplicationModel, error)
 
 	AcceptRequest(applicationId string) error
-	RejectRequest(applicationId string) error
+	RejectRequest(applicationId, reason string) error
 }

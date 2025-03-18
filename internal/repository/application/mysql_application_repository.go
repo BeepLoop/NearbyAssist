@@ -281,12 +281,20 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 	return nil
 }
 
-func (s *MysqlApplicationRepository) RejectRequest(applicationId string) error {
+func (s *MysqlApplicationRepository) RejectRequest(applicationId, reason string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "UPDATE Application SET status = 'rejected' WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, applicationId); err != nil {
+	query := `
+        UPDATE
+            Application
+        SET 
+            status = 'rejected',
+            reason = ?
+        WHERE
+            id = ?
+    `
+	if _, err := s.db.ExecContext(ctx, query, reason, applicationId); err != nil {
 		return err
 	}
 
