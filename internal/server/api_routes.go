@@ -16,7 +16,6 @@ import (
 	"nearbyassist/internal/handler/api/user"
 	userauth_handler "nearbyassist/internal/handler/api/user_auth"
 	"nearbyassist/internal/handler/api/vendor"
-	"nearbyassist/internal/handler/api/verification"
 	"nearbyassist/internal/middleware"
 	application_repo "nearbyassist/internal/repository/application"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
@@ -88,11 +87,17 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userRoute.Use(middleware.CheckAuth(s.JWT))
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
-		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
-		handler := user.NewHandler(userService)
+		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 
-		userRoute.GET("/me", handler.GetUser)
-		userRoute.GET("/verified", handler.GetUserVerification)
+		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
+		userVerificationService := verification_service.NewService(verificationStore, notificationStore, s.FS, s.Encrypt, s.JWT)
+
+		handler := user.NewHandler(userService, userVerificationService)
+
+		userRoute.GET("", handler.GetUser)
+		userRoute.GET("/verify", handler.GetUserVerification)
+		userRoute.POST("/verify", handler.VerifyUserIdentity)
 		userRoute.POST("/socials", handler.AddSocial)
 		userRoute.DELETE("/socials", handler.DeleteSocial)
 	}
@@ -218,29 +223,6 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		reviewRoute.POST("", handler.CreateReview)
 		reviewRoute.GET("/:reviewId", handler.GetReview)
 		reviewRoute.GET("/service/:serviceId", handler.GetServiceReviews)
-	}
-
-	// ===== VERIFICATION =======
-	verificationRoute := v1.Group("/verification")
-	{
-		verificationRoute.Use(middleware.CheckAuth(s.JWT))
-
-		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
-
-		useStore := user_repo.NewMysqlUserRepository(s.DB)
-		userService := user_service.NewService(useStore, s.Encrypt, s.Hash, s.JWT)
-
-		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
-		verificationService := verification_service.NewService(
-			verificationStore,
-			notificationStore,
-			s.FS,
-			s.Encrypt,
-			s.JWT,
-		)
-		handler := verification.NewHandler(verificationService, userService)
-
-		verificationRoute.POST("/identity", handler.CreateIdentityVerification)
 	}
 
 	// ===== CHAT =======

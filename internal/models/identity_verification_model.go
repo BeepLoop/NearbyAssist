@@ -1,12 +1,5 @@
 package models
 
-type DefaultIdentityVerificationData struct {
-	Name     string
-	Address  string
-	IdType   string
-	IdNumber string
-}
-
 type IdentityVerificationModel struct {
 	Model
 	UpdateableModel
