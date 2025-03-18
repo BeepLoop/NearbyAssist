@@ -20,19 +20,19 @@ func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) err
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	frontIdBase64, err := h.resourceService.GetBase64File(request.FrontIdImageUrl)
+	fontIdImage, err := h.resourceService.SignURLWithDefaultDuration(request.FrontIdImageUrl)
 	if err != nil {
 		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	backIdBase64, err := h.resourceService.GetBase64File(request.BackIdImageUrl)
+	backIdImage, err := h.resourceService.SignURLWithDefaultDuration(request.BackIdImageUrl)
 	if err != nil {
 		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	selfieBase64, err := h.resourceService.GetBase64File(request.FaceImageUrl)
+	selfieImage, err := h.resourceService.SignURLWithDefaultDuration(request.FaceImageUrl)
 	if err != nil {
 		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
@@ -47,9 +47,9 @@ func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) err
 		IdType:          request.IdType,
 		IdNumber:        request.IdNumber,
 		Status:          request.Status,
-		FrontIdImageUrl: frontIdBase64,
-		BackIdImageUrl:  backIdBase64,
-		FaceImageUrl:    selfieBase64,
+		FrontIdImageUrl: fontIdImage,
+		BackIdImageUrl:  backIdImage,
+		FaceImageUrl:    selfieImage,
 	}
 
 	page := pages.IdentityVerificationDetails(data, flash)

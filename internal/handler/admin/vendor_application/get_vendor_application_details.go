@@ -22,13 +22,13 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	supportingDocBase64, err := h.resourceService.GetBase64File(application.SupportingDocumentUrl)
+	supportingDocumentImage, err := h.resourceService.SignURLWithDefaultDuration(application.SupportingDocumentUrl)
 	if err != nil {
 		page := pages.VendorApplicationDetails(models.ApplicationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	policeClearanceBase64, err := h.resourceService.GetBase64File(application.PoliceClearanceUrl)
+	policeClearanceImage, err := h.resourceService.SignURLWithDefaultDuration(application.PoliceClearanceUrl)
 	if err != nil {
 		page := pages.VendorApplicationDetails(models.ApplicationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
@@ -40,8 +40,8 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 		GeoSpatialModel:       application.GeoSpatialModel,
 		ApplicantId:           application.ApplicantId,
 		ExpertiseId:           application.ExpertiseId,
-		SupportingDocumentUrl: supportingDocBase64,
-		PoliceClearanceUrl:    policeClearanceBase64,
+		SupportingDocumentUrl: supportingDocumentImage,
+		PoliceClearanceUrl:    policeClearanceImage,
 		Status:                application.Status,
 		ApplicantName:         application.ApplicantName,
 		Expertise:             application.Expertise,
