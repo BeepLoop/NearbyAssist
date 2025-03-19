@@ -26,7 +26,7 @@ func (s *MysqlDashboardRepository) GetUserData() (*models.UserData, error) {
 		return nil, err
 	}
 
-	countVerifiedQuery := "SELECT COUNT(id) FROM User WHERE verified = 1"
+	countVerifiedQuery := "SELECT COUNT(id) FROM IdentityVerification WHERE status = 'approved'"
 	verifiedCount := 0
 	if err := s.db.GetContext(ctx, &verifiedCount, countVerifiedQuery); err != nil {
 		return nil, err

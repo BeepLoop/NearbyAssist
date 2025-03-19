@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS User (
     latitude Decimal(12, 10),
     longitude Decimal(13, 10),
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    verifiedAt TIMESTAMP,
     PRIMARY KEY (id),
     INDEX(id, name, emailHash)
 );
