@@ -49,7 +49,7 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel, flas
 						<input type="text" hidden="true" value={ request.Id } name="requestId"/>
 						<button
 							type="submit"
-							class="flex-1 px-4 py-2 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary"
+							class="flex-1 px-4 py-2 bg-primary text-white font-medium rounded-sm cursor-pointer hover:opacity-75"
 						>
 							Approve
 						</button>
@@ -85,7 +85,7 @@ templ rejectButton(requestId string) {
 		<button
 			x-on:click="offCanvasOpen = !offCanvasOpen"
 			type="button"
-			class="p-2 rounded-sm bg-danger/25 text-sm text-danger font-medium cursor-pointer hover:opacity-75"
+			class="px-4 py-2 rounded-sm bg-danger text-sm text-white font-medium cursor-pointer hover:opacity-75"
 		>Reject</button>
 		<!-- offCanvas Backdrop -->
 		<div
@@ -140,14 +140,14 @@ templ rejectButton(requestId string) {
 					>
 						<input type="text" hidden="off" value={ requestId } name="applicationId"/>
 						<div>
-							<label for="reason">Reason</label>
+							<label for="reason" class="font-medium text-neutral-dark">Reason</label>
 							<textarea
 								name="reason"
 								id="reason"
 								rows="6"
 								placeholder="reason..."
 								autocomplete="off"
-								class="text-neutral-dark text-sm outline-1 outline-pale-gray p-2 rounded-sm w-full"
+								class="text-neutral-dark text-sm outline-1 outline-pale-gray p-2 rounded-sm w-full mt-1.5"
 							></textarea>
 						</div>
 						<div class="flex justify-end">

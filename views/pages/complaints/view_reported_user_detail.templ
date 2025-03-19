@@ -22,7 +22,7 @@ templ ViewReportedUserDetail(data models.ReportedUserModel) {
 					<span class="inline-flex gap-2 items-center">
 						<p class="text-lg text-neutral-gray">{ data.Name } </p>
 						<a
-							href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/%s", data.UserId)) }
+							href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/users/%s", data.UserId)) }
 							class="cursor-pointer px-2 py-1 rounded-sm bg-neutral-gray/25 hover:opacity-75"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
