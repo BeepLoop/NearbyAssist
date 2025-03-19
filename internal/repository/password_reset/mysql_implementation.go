@@ -120,6 +120,31 @@ func (s *MysqlPasswordResetRepository) FindByAdminId(id string) (*models.Passwor
 	return request, nil
 }
 
+func (s *MysqlPasswordResetRepository) ChangePassword(adminId, newPassword string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        UPDATE
+            Admin
+        SET
+            password = ?,
+            mustChangePassword = 0
+        WHERE
+            id = ?
+    `
+
+	if _, err := s.db.ExecContext(ctx, query, newPassword, adminId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlPasswordResetRepository) ResetPassword(requestId, newPassword string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

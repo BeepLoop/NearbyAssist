@@ -7,6 +7,7 @@ type PasswordResetRepository interface {
 	GetAll() ([]*models.PasswordResetRequestModel, error)
 	FindById(id string) (*models.PasswordResetRequestModel, error)
 	FindByAdminId(id string) (*models.PasswordResetRequestModel, error)
+	ChangePassword(adminId, newPassword string) error
 	ResetPassword(requestId, newPassword string) error
 	Delete(requestId string) error
 }

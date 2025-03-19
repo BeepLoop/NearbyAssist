@@ -60,11 +60,16 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		handler := passwordreset_handler.NewHandler(passwordResetService)
 
 		resetRoute.POST("", handler.RequestPasswordReset)
+		resetRoute.GET("/cp", handler.ChangePassword)
+		resetRoute.POST("/cp", handler.PostChangePassword)
 	}
 
 	dashboardRoute := r.Group("/dashboard")
 	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
 		dashboardRoute.Use(middleware.CheckSession)
+		dashboardRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		dashboardStore := dashboard_repo.NewMysqlDashboardRepository(s.DB)
 		dashboardService := dashboard_service.NewService(dashboardStore)
@@ -75,7 +80,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	mapRoute := r.Group("/map")
 	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
 		mapRoute.Use(middleware.CheckSession)
+		mapRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		tagStore := tag_repo.NewMysqlTagRepository(s.DB)
 		tagService := tag_service.NewService(tagStore)
@@ -89,7 +97,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	complaintRoute := r.Group("/complaints")
 	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
 		complaintRoute.Use(middleware.CheckSession)
+		complaintRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
@@ -109,7 +120,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	applicationRoute := r.Group("/vendor-applications")
 	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
 		applicationRoute.Use(middleware.CheckSession)
+		applicationRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
@@ -127,7 +141,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	verificationRoute := r.Group("/verification-requests")
 	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
 		verificationRoute.Use(middleware.CheckSession)
+		verificationRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
@@ -145,7 +162,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	userManagementRoute := r.Group("/user-management")
 	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
 		userManagementRoute.Use(middleware.CheckSession)
+		userManagementRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
@@ -170,7 +190,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	expertiseRoute := r.Group("/expertise")
 	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
 		expertiseRoute.Use(middleware.CheckSession)
+		expertiseRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		expertiseStore := expertise_repo.NewMysqlExpertiseRepository(s.DB)
 		expertiseService := expertise_service.NewService(expertiseStore, s.Encrypt, s.Hash)
@@ -183,9 +206,11 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 	accountManagementRoute := r.Group("/account-management")
 	{
-		accountManagementRoute.Use(middleware.CheckSession)
-
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
+		accountManagementRoute.Use(middleware.CheckSession)
+		accountManagementRoute.Use(middleware.CheckMustChangePass(adminStore))
+
 		passwordResetStore := passwordreset_repo.NewMysqlPasswordResetRepository(s.DB)
 
 		adminService := admin_service.NewService(adminStore, s.Encrypt, s.Hash)

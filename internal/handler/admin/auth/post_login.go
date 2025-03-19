@@ -38,5 +38,13 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
 	}
 
+	if admin.MustChangePassword {
+		if err := utils.SetFlashMessage(c, "error", "You are required to change your password"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/reset/cp?error=must_change_password")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/reset/cp")
+	}
+
 	return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 }

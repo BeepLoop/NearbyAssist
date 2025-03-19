@@ -83,7 +83,7 @@ func (h *accountManagementHandler) FufillResetRequest(c echo.Context) error {
 	}
 
 	// Perform reset
-	if err := h.passwordResetService.ResetPassword(requestId, password, confirmationUsername, confirmationPassword); err != nil {
+	if err := h.passwordResetService.FulfillResetPassword(requestId, password, confirmationUsername, confirmationPassword); err != nil {
 		fmt.Println(err.Error())
 		if strings.Contains(err.Error(), "Invalid credentials") {
 			if err := utils.SetFlashMessage(c, "error", "Invalid confirmation credentials"); err != nil {

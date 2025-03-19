@@ -71,7 +71,38 @@ func (s *Service) GetResetRequests() ([]*models.PasswordResetRequestModel, error
 	return requests, nil
 }
 
-func (s *Service) ResetPassword(requestId, newPassword, confirmationUsername, confirmationPassword string) error {
+func (s *Service) ChangePassword(username, oldPassword, newPassword, confirmationPassword string) error {
+	if newPassword != confirmationPassword {
+		return errors.New("password mismatch")
+	}
+
+	usernameHash, err := s.hash.Generate([]byte(username))
+	if err != nil {
+		return err
+	}
+
+	admin, err := s.adminStore.FindByUsernameHash(usernameHash)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, oldPassword) {
+		return errors.New("invalid password")
+	}
+
+	if !core.IsPasswordSecure(newPassword) {
+		return errors.New("insecure password")
+	}
+
+	encryptedPassword, err := core.BcryptPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	return s.passwordResetStore.ChangePassword(admin.Id, encryptedPassword)
+}
+
+func (s *Service) FulfillResetPassword(requestId, newPassword, confirmationUsername, confirmationPassword string) error {
 	usernameHash, err := s.hash.Generate([]byte(confirmationUsername))
 	if err != nil {
 		return err
