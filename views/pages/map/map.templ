@@ -16,7 +16,7 @@ templ Map(data models.MapPageDataModel, flash string) {
 			<div class="flex gap-4">
 				<div class="">
 					@searchBar(data.Tags)
-					<span class="text-sm text-neutral-dark font-medium">
+					<span class="text-sm font-medium text-neutral-dark">
 						Result: { strconv.Itoa(len(data.Services)) }
 					</span>
 				</div>
@@ -30,7 +30,7 @@ templ Map(data models.MapPageDataModel, flash string) {
 
 templ searchBar(tags []string) {
 	<div>
-		<div class="relative flex justify-end my-3">
+		<div class="relative my-3 flex justify-end">
 			@templ.JSONScript("tags", tags)
 			<form
 				action="/admin/map"
@@ -41,13 +41,13 @@ templ searchBar(tags []string) {
 					id="searchInput"
 					name="query"
 					autocomplete="off"
-					class="p-2 rounded-sm text-sm outline-1 outline-pale-gray"
 					placeholder="service"
 					autofocus
+					class="rounded-sm border border-neutral-gray-lighter p-2 text-sm focus:border-primary focus:outline-none"
 				/>
 				<button
 					type="submit"
-					class="p-2 rounded-md bg-primary hover:opacity-75 text-sm text-white"
+					class="cursor-pointer rounded-md bg-primary p-2 text-sm text-white hover:opacity-75"
 				>Search</button>
 				<script>
                     (function() {
@@ -59,7 +59,7 @@ templ searchBar(tags []string) {
                      })();
                 </script>
 			</form>
-			<div id="resultBox" class="absolute top-full left-0 right-0 bg-white shadow-xl"></div>
+			<div id="resultBox" class="absolute top-full right-0 left-0 bg-white shadow-xl"></div>
 		</div>
 		<script>
             const tags = JSON.parse(document.getElementById("tags").textContent);

@@ -3,7 +3,7 @@ package partials
 import "nearbyassist/internal/models"
 
 templ MapComponent(data models.MapPageDataModel) {
-	<div id="map" class="h-[80vh] outline-1 outline-gray-300"></div>
+	<div id="map" class="h-[80vh] outline-1 outline-pale-gray"></div>
 	@templ.JSONScript("services", data.Services)
 	<script>
         (function() {

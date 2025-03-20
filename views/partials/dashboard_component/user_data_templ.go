@@ -33,7 +33,7 @@ func UserData(data models.UserData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<card class=\"relative w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<card class=\"relative w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -37,7 +37,7 @@ func Transaction(data models.WeeklyTransactionData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<card class=\"w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<card class=\"w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -45,7 +45,7 @@ func Transaction(data models.WeeklyTransactionData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-2\"><!-- Title --><span class=\"flex justify-between mb-2\"><p class=\"text-xs text-neutral-gray font-medium\">Transactions</p><p class=\"text-xs text-neutral-gray font-medium\">(last 7 days)</p></span><!-- Count --><div class=\"flex items-baseline gap-2\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-2\"><!-- Title --><span class=\"mb-2 flex justify-between\"><p class=\"text-xs font-medium text-neutral-gray\">Transactions</p><p class=\"text-xs font-medium text-neutral-gray\">(last 7 days)</p></span><!-- Count --><div class=\"flex items-baseline gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -60,7 +60,7 @@ func Transaction(data models.WeeklyTransactionData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"font-semibold text-4xl text-neutral-dark\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"text-4xl font-semibold text-neutral-dark\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -73,7 +73,7 @@ func Transaction(data models.WeeklyTransactionData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></div><div class=\"p-2\"><!-- Chart --><div id=\"transactionChart\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-xs font-semibold text-neutral-gray\">total</p></div></div><div class=\"p-2\"><!-- Chart --><div id=\"transactionChart\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

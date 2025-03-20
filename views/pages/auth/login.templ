@@ -11,9 +11,9 @@ templ Login(flash string) {
 		<!-- toasy component -->
 		@partials.ToastNotification()
 		<!-- login form -->
-		<div class="fixed left-0 right-0 z-0 h-screen grid place-items-center">
+		<div class="fixed right-0 left-0 z-0 grid h-screen place-items-center">
 			<div class="w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter">
-				<h2 class="mb-4 text-2xl font-semibold text-center">
+				<h2 class="mb-4 text-center text-2xl font-semibold">
 					Welcome back
 				</h2>
 				@loginForm()
@@ -35,7 +35,7 @@ templ loginForm() {
 				id="username"
 				name="username"
 				placeholder="Username"
-				class="mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue"
+				class="mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-primary focus:outline-none"
 				autoComplete="off"
 				autofocus
 				required
@@ -47,14 +47,14 @@ templ loginForm() {
 				id="password"
 				name="password"
 				placeholder="Password"
-				class="mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-blue focus:outline-none focus:ring-blue"
+				class="mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-primary focus:outline-none"
 				autoComplete="off"
 				required
 			/>
 		</div>
 		<button
 			type="submit"
-			class="w-full rounded-md bg-good px-4 py-2 font-semibold text-xs text-white cursor-pointer hover:opacity-75"
+			class="w-full cursor-pointer rounded-md bg-good px-4 py-2 text-xs font-semibold text-white hover:opacity-75"
 		>
 			Login
 		</button>
@@ -63,10 +63,10 @@ templ loginForm() {
 
 templ requestPasswordReset() {
 	<div x-data="{passwordResetOpen: false}">
-		<div class="flex justify-center mt-4">
+		<div class="mt-4 flex justify-center">
 			<p
 				x-on:click="passwordResetOpen = true"
-				class="text-xs text-good cursor-pointer hover:underline"
+				class="cursor-pointer text-xs text-good hover:underline"
 			>Forgot Password?</p>
 		</div>
 		<div
@@ -77,7 +77,7 @@ templ requestPasswordReset() {
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="defaultModalTitle"
-			class="fixed inset-0 z-30 bg-neutral-gray/50 grid place-content-center"
+			class="fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50"
 		>
 			<!-- Modal Dialog -->
 			<div
@@ -85,24 +85,24 @@ templ requestPasswordReset() {
 				x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
 				x-transition:enter-start="opacity-0"
 				x-transition:enter-end="opacity-100"
-				class="outline-1 outline-pale-gray p-2 rounded-sm bg-white p-4 min-w-80 max-w-96"
+				class="max-w-96 min-w-80 rounded-sm bg-white p-2 p-4 outline-1 outline-pale-gray"
 			>
 				<!-- Dialog Header -->
 				<div class="flex items-center justify-between">
-					<h3 id="defaultModalTitle" class="font-semibold text-sm tracking-wide">Reset Request</h3>
+					<h3 id="defaultModalTitle" class="text-sm font-semibold tracking-wide">Reset Request</h3>
 					<button
 						x-on:click="passwordResetOpen = false"
 						aria-label="close modal"
 						class="cursor-pointer"
 					>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="1.4" class="w-5 h-5">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="1.4" class="h-5 w-5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
 						</svg>
 					</button>
 				</div>
 				<!-- Dialog Body -->
 				<div class="mt-4">
-					<div class="p-2 rounded-sm bg-neutral-gray/25 text-neutral-dark text-xs">
+					<div class="rounded-sm bg-neutral-gray/25 p-2 text-xs text-neutral-dark">
 						<p>Enter username to submit a password reset request. </p>
 					</div>
 					<form
@@ -116,20 +116,20 @@ templ requestPasswordReset() {
 							placeholder="username"
 							autocomplete="off"
 							autofocus
-							class="p-2 rounded-sm outline-1 outline-pale-gray w-full"
+							class="w-full rounded-sm border border-neutral-gray-lighter p-2 focus:border-primary focus:outline-none"
 						/>
-						<div class="flex gap-2 justify-end mt-4">
+						<div class="mt-4 flex justify-end gap-2">
 							<button
 								x-on:click="passwordResetOpen = false"
 								type="button"
-								class="rounded-sm px-4 py-2 cursor-pointer font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75"
+								class="cursor-pointer rounded-sm px-4 py-2 font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75"
 							>Cancel</button>
 							<button
 								x-on:click="passwordResetOpen = false"
 								type="submit"
-								class="rounded-sm bg-primary px-4 py-2 cursor-pointer text-white text-center text-sm font-medium hover:opacity-75"
+								class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-center text-sm font-medium text-white hover:opacity-75"
 							>
-								<span class="flex gap-1 items-center">
+								<span class="flex items-center gap-1">
 									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
 										<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"></path>
 									</svg>

@@ -9,7 +9,7 @@ import (
 
 templ ViewReportedUserDetail(data models.ReportedUserModel) {
 	@layout.Layout() {
-		<div class="max-w-3xl mx-auto">
+		<div class="mx-auto max-w-3xl">
 			<!-- Actions -->
 			<div class="flex justify-between">
 				@partials.BackButton()
@@ -19,11 +19,11 @@ templ ViewReportedUserDetail(data models.ReportedUserModel) {
 			<div class="mt-4">
 				<div class="mt-2">
 					<h3 class="font-bold text-neutral-dark">Reported User:</h3>
-					<span class="inline-flex gap-2 items-center">
+					<span class="inline-flex items-center gap-2">
 						<p class="text-lg text-neutral-gray">{ data.Name } </p>
 						<a
 							href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/users/%s", data.UserId)) }
-							class="cursor-pointer px-2 py-1 rounded-sm bg-neutral-gray/25 hover:opacity-75"
+							class="cursor-pointer rounded-sm bg-neutral-gray/25 px-2 py-1 hover:opacity-75"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"></path>
@@ -50,7 +50,7 @@ templ ViewReportedUserDetail(data models.ReportedUserModel) {
 			<!-- Images -->
 			<div class="mt-4">
 				<h4 class="font-bold text-neutral-dark">Images</h4>
-				<div class="grid gap-2 grid-cols-3 mt-2">
+				<div class="mt-2 grid grid-cols-3 gap-2">
 					for _, image := range data.Images {
 						@partials.ImageViewer(image)
 					}
@@ -66,7 +66,7 @@ templ addressReport(data models.ReportedUserModel) {
 		<button
 			x-on:click="offCanvasOpen = !offCanvasOpen"
 			type="button"
-			class="p-2 rounded-sm bg-primary text-sm text-white font-medium cursor-pointer hover:opacity-75"
+			class="cursor-pointer rounded-sm bg-primary p-2 text-sm font-medium text-white hover:opacity-75"
 		>Address</button>
 		<!-- offCanvas Backdrop -->
 		<div
@@ -88,14 +88,14 @@ templ addressReport(data models.ReportedUserModel) {
 				x-transition:leave-start="translate-x-0"
 				x-transition:leave-end="translate-x-full"
 				role="document"
-				class="fixed top-0 right-0 w-md h-full p-4 bg-white flex flex-col outline-1 outline-pale-gray"
+				class="fixed top-0 right-0 flex h-full w-md flex-col bg-white p-4 outline-1 outline-pale-gray"
 			>
 				<!-- Header -->
 				<div class="flex justify-end">
 					<button
 						x-on:click="offCanvasOpen = false"
 						type="button"
-						class="flex items-center rounded-sm px-3 py-1.5 cursor-pointer hover:bg-neutral-gray/25 hover:opacity-75"
+						class="flex cursor-pointer items-center rounded-sm px-3 py-1.5 hover:bg-neutral-gray/25 hover:opacity-75"
 					>
 						<svg
 							class="hi-solid hi-x -mx-1 inline-block size-4"
@@ -117,7 +117,12 @@ templ addressReport(data models.ReportedUserModel) {
 						action="/admin/complaints/users/close"
 						method="POST"
 					>
-						<input type="text" hidden name="reportId" value={ data.Id }/>
+						<input
+							type="text"
+							hidden
+							name="reportId"
+							value={ data.Id }
+						/>
 						<div class="mt-2">
 							<label for="title" class="font-medium">Title</label>
 							<input
@@ -125,7 +130,7 @@ templ addressReport(data models.ReportedUserModel) {
 								name="title"
 								id="title"
 								placeholder="title"
-								class="outline-1 outline-pale-gray p-2 rounded-sm w-full mt-1.5"
+								class="mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 focus:border-primary focus:outline-none"
 							/>
 						</div>
 						<div class="mt-2">
@@ -136,13 +141,13 @@ templ addressReport(data models.ReportedUserModel) {
 								rows="6"
 								placeholder="more details..."
 								autocomplete="off"
-								class="text-neutral-dark text-sm outline-1 outline-pale-gray p-2 rounded-sm w-full mt-1.5"
+								class="mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none"
 							></textarea>
 						</div>
-						<div class="flex justify-end mt-4">
+						<div class="mt-4 flex justify-end">
 							<button
 								type="submit"
-								class="px-3 py-1.5 rounded-sm bg-primary text-white font-medium cursor-pointer hover:opacity-75"
+								class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 font-medium text-white hover:opacity-75"
 							>Okay</button>
 						</div>
 					</form>

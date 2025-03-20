@@ -1641,14 +1641,16 @@
       }
     }
   }
+  .hover\:outline-primary {
+    &:hover {
+      @media (hover: hover) {
+        outline-color: var(--color-primary);
+      }
+    }
+  }
   .focus\:border-primary {
     &:focus {
       border-color: var(--color-primary);
-    }
-  }
-  .focus\:border-success {
-    &:focus {
-      border-color: var(--color-success);
     }
   }
   .focus\:outline-none {
@@ -1676,16 +1678,6 @@
   .active\:outline-offset-0 {
     &:active {
       outline-offset: 0px;
-    }
-  }
-  .disabled\:cursor-not-allowed {
-    &:disabled {
-      cursor: not-allowed;
-    }
-  }
-  .disabled\:opacity-75 {
-    &:disabled {
-      opacity: 75%;
     }
   }
   .motion-reduce\:transition-opacity {

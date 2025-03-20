@@ -12,7 +12,7 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel, flas
 	@partials.ToastNotification()
 	@layout.Layout() {
 		@partials.PageBanner("Request Details", "Here are the details of the identity verification")
-		<div class="max-w-6xl mx-auto grid grid-cols-10 gap-4">
+		<div class="mx-auto grid max-w-6xl grid-cols-10 gap-4">
 			<div class="col-span-3">
 				<table class="w-full text-left text-sm">
 					<tbody>
@@ -46,10 +46,15 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel, flas
 						action="/admin/verification-requests/accept"
 						method="POST"
 					>
-						<input type="text" hidden="true" value={ request.Id } name="requestId"/>
+						<input
+							type="text"
+							hidden="true"
+							value={ request.Id }
+							name="requestId"
+						/>
 						<button
 							type="submit"
-							class="flex-1 px-4 py-2 bg-primary text-white font-medium rounded-sm cursor-pointer hover:opacity-75"
+							class="flex-1 cursor-pointer rounded-sm bg-primary px-4 py-2 font-medium text-white hover:opacity-75"
 						>
 							Approve
 						</button>
@@ -58,7 +63,7 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel, flas
 				</div>
 			</div>
 			<!-- Images -->
-			<div class="col-span-7 p-2 grid-cols-9 gap-2">
+			<div class="col-span-7 grid-cols-9 gap-2 p-2">
 				<img
 					src={ fmt.Sprintf("/api/v1/resource/%s", request.FrontIdImageUrl) }
 					alt="image"
@@ -85,7 +90,7 @@ templ rejectButton(requestId string) {
 		<button
 			x-on:click="offCanvasOpen = !offCanvasOpen"
 			type="button"
-			class="px-4 py-2 rounded-sm bg-danger text-sm text-white font-medium cursor-pointer hover:opacity-75"
+			class="cursor-pointer rounded-sm bg-danger px-4 py-2 text-sm font-medium text-white hover:opacity-75"
 		>Reject</button>
 		<!-- offCanvas Backdrop -->
 		<div
@@ -107,15 +112,15 @@ templ rejectButton(requestId string) {
 				x-transition:leave-start="translate-x-0"
 				x-transition:leave-end="translate-x-full"
 				role="document"
-				class="fixed top-0 right-0 w-md h-full p-4 bg-white flex flex-col outline-1 outline-pale-gray"
+				class="fixed top-0 right-0 flex h-full w-md flex-col bg-white p-4 outline-1 outline-pale-gray"
 			>
 				<!-- Header -->
 				<div class="flex justify-between">
-					<h3 class="font-medium text-sm text-neutral-dark">Rejection Reason</h3>
+					<h3 class="text-sm font-medium text-neutral-dark">Rejection Reason</h3>
 					<button
 						x-on:click="offCanvasOpen = false"
 						type="button"
-						class="flex items-center rounded-sm px-3 py-1.5 cursor-pointer hover:bg-neutral-gray/25 hover:opacity-75"
+						class="flex cursor-pointer items-center rounded-sm px-3 py-1.5 hover:bg-neutral-gray/25 hover:opacity-75"
 					>
 						<svg
 							class="hi-solid hi-x -mx-1 inline-block size-4"
@@ -138,7 +143,12 @@ templ rejectButton(requestId string) {
 						method="POST"
 						class="grid gap-4"
 					>
-						<input type="text" hidden="off" value={ requestId } name="applicationId"/>
+						<input
+							type="text"
+							hidden="off"
+							value={ requestId }
+							name="applicationId"
+						/>
 						<div>
 							<label for="reason" class="font-medium text-neutral-dark">Reason</label>
 							<textarea
@@ -147,13 +157,13 @@ templ rejectButton(requestId string) {
 								rows="6"
 								placeholder="reason..."
 								autocomplete="off"
-								class="text-neutral-dark text-sm outline-1 outline-pale-gray p-2 rounded-sm w-full mt-1.5"
+								class="mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none"
 							></textarea>
 						</div>
 						<div class="flex justify-end">
 							<button
 								type="submit"
-								class="p-2 rounded-sm bg-danger font-semibold text-sm text-white bg-danger cursor-pointer hover:opacity-75"
+								class="cursor-pointer rounded-sm bg-danger bg-danger p-2 text-sm font-semibold text-white hover:opacity-75"
 							>Continue</button>
 						</div>
 					</form>

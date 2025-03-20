@@ -92,7 +92,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid gap-4\"><div class=\"grid gap-4 grid-cols-12\"><div class=\"col-span-3 grid\"><a href=\"/admin/verification-requests\" class=\"grid\"><card class=\"w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs text-neutral-gray font-medium\">Verification requests</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"font-semibold text-4xl text-neutral-dark\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<section class=\"grid gap-4\"><div class=\"grid grid-cols-12 gap-4\"><div class=\"col-span-3 grid\"><a href=\"/admin/verification-requests\" class=\"grid\"><card class=\"w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs font-medium text-neutral-gray\">Verification requests</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"text-4xl font-semibold text-neutral-dark\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -105,7 +105,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></card></a></div><div class=\"col-span-3 grid\"><a href=\"/admin/vendor-applications\" class=\"grid\"><card class=\"w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs text-neutral-gray font-medium\">Vendor applications</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"font-semibold text-4xl text-neutral-dark\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-xs font-semibold text-neutral-gray\">total</p></div></card></a></div><div class=\"col-span-3 grid\"><a href=\"/admin/vendor-applications\" class=\"grid\"><card class=\"w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary\"><!-- Title --><span class=\"flex justify-between p-2\"><p class=\"text-xs font-medium text-neutral-gray\">Vendor applications</p></span><!-- Count --><div class=\"flex items-baseline gap-2 p-2\"><p class=\"text-4xl font-semibold text-neutral-dark\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -118,7 +118,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"font-semibold text-xs text-neutral-gray\">total</p></div></card></a></div><div class=\"col-span-3 grid\"><a href=\"/admin/complaints/bugs\" class=\"grid\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-xs font-semibold text-neutral-gray\">total</p></div></card></a></div><div class=\"col-span-3 grid\"><a href=\"/admin/complaints/bugs\" class=\"grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

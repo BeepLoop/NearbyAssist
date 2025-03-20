@@ -5,7 +5,7 @@ import "nearbyassist/internal/models"
 var loadUserDataChart = templ.NewOnceHandle()
 
 templ UserData(data models.UserData) {
-	<card class="relative w-full outline-1 outline-pale-gray rounded-sm hover:shadow-xl">
+	<card class="relative w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary">
 		@templ.JSONScript("userData", data)
 		<div class="grid grid-cols-2 gap-2 p-2">
 			<a href="/admin/user-management" class="grid">

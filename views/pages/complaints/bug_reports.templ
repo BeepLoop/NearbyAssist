@@ -140,7 +140,12 @@ templ viewBug(bug models.BugReportModel) {
 							action="/admin/complaints/bugs/complete"
 							method="POST"
 						>
-							<input type="text" hidden="true" name="id" value={ strconv.Itoa(bug.Id) }/>
+							<input
+								type="text"
+								hidden="true"
+								name="id"
+								value={ strconv.Itoa(bug.Id) }
+							/>
 							<button
 								type="submit"
 								class="inline-flex items-center gap-2 px-2 py-1.5 rounded-sm text-white font-semibold bg-primary cursor-pointer hover:opacity-75"

@@ -52,7 +52,7 @@ func VendorList(accounts []models.VendorModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- searchbar --> <div class=\"flex justify-end py-2\"><div class=\"relative flex w-full max-w-xs flex-col gap-1 text-neutral-gray\"><form action=\"/admin/user-management/vendors\" method=\"GET\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" aria-hidden=\"true\" class=\"absolute left-2.5 top-1/2 size-5 -translate-y-1/2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg> <input type=\"search\" class=\"w-full rounded-sm outline-1 outline-pale-gray py-2 pl-10 pr-2 text-sm disabled:cursor-not-allowed disabled:opacity-75\" name=\"query\" placeholder=\"Search email\" autocomplete=\"off\" aria-label=\"search\" id=\"searchInput\"><script>\n                        const searchInput = document.getElementById(\"searchInput\");\n                        const params = new URLSearchParams(location.search);\n                        if (params.has(\"query\")) {\n                            searchInput.value = params.get(\"query\");\n                        }\n                    </script></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- searchbar --> <div class=\"flex justify-end py-2\"><div class=\"relative flex w-full max-w-xs flex-col gap-1 text-neutral-gray\"><form action=\"/admin/user-management/vendors\" method=\"GET\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" aria-hidden=\"true\" class=\"absolute top-1/2 left-2.5 size-5 -translate-y-1/2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg> <input type=\"search\" name=\"query\" placeholder=\"Search email\" autocomplete=\"off\" aria-label=\"search\" id=\"searchInput\" class=\"w-full rounded-sm border border-neutral-gray-lighter py-2 pr-2 pl-10 text-sm focus:border-primary focus:outline-none\"><script>\n                        const searchInput = document.getElementById(\"searchInput\");\n                        const params = new URLSearchParams(location.search);\n                        if (params.has(\"query\")) {\n                            searchInput.value = params.get(\"query\");\n                        }\n                    </script></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -99,7 +99,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"text-white text-sm font-semibold bg-primary-greener\"><tr><th scope=\"col\" class=\"p-4\">User</th><th scope=\"col\" class=\"p-4\">Rating</th><th scope=\"col\" class=\"p-4\">Vendor Since</th><th scope=\"col\" class=\"p-4\">Status</th><th scope=\"col\" class=\"p-4\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">User</th><th scope=\"col\" class=\"p-4\">Rating</th><th scope=\"col\" class=\"p-4\">Vendor Since</th><th scope=\"col\" class=\"p-4\">Status</th><th scope=\"col\" class=\"p-4\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -199,7 +199,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0\">view profile</a></ul></td></tr>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-min rounded-sm p-1 font-semibold whitespace-nowrap text-neutral-gray outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0\">view profile</a></ul></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
