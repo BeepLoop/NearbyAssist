@@ -145,7 +145,6 @@ func (s *MysqlVerificationRepository) AcceptRequest(id string) error {
             User u
         JOIN IdentityVerification iv ON u.id = iv.userId
         SET
-            u.verified = 1,
             u.address = iv.address,
             u.phone = iv.phone,
             u.latitude = iv.latitude,
