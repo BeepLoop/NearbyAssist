@@ -2,6 +2,7 @@ package user_repo
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
@@ -304,7 +305,7 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 		accountData.Expertise = append(accountData.Expertise, expertise.Title)
 	}
 
-	getServicesQuery := "SELECT * FROM Service WHERE vendorId = ? ORDER BY updatedAT DESC"
+	getServicesQuery := "SELECT * FROM Service WHERE vendorId = ? ORDER BY updatedAt DESC"
 	services := make([]*models.ServiceModel, 0)
 	if err := s.db.SelectContext(ctx, &services, getServicesQuery, userId); err != nil {
 		return nil, err
@@ -673,7 +674,7 @@ func (s *MysqlUserRepository) IsVerified(userId string) (bool, string, error) {
 	defer cancel()
 
 	query := "SELECT updatedAt FROM IdentityVerification WHERE userId = ? AND status = 'approved' LIMIT 1"
-	updatedAt := ""
+	var updatedAt sql.NullString
 	if err := s.db.GetContext(ctx, &updatedAt, query, userId); err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
 			return false, "", nil
@@ -682,7 +683,7 @@ func (s *MysqlUserRepository) IsVerified(userId string) (bool, string, error) {
 		return false, "", err
 	}
 
-	if updatedAt == "" {
+	if !updatedAt.Valid {
 		return false, "", nil
 	}
 
@@ -690,7 +691,7 @@ func (s *MysqlUserRepository) IsVerified(userId string) (bool, string, error) {
 		return false, "", context.DeadlineExceeded
 	}
 
-	return true, updatedAt, nil
+	return true, updatedAt.String, nil
 }
 
 func (s *MysqlUserRepository) IsBanned(userId string) (bool, error) {
