@@ -43,7 +43,7 @@ templ requestsData(requests []models.IdentityVerificationModel) {
 								<ul>
 									<a
 										href={ templ.SafeURL(fmt.Sprintf("/admin/verification-requests/%s", request.Id)) }
-										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
+										class="w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75"
 									>
 										view request
 									</a>

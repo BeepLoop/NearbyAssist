@@ -1145,6 +1145,9 @@
   .bg-warning {
     background-color: var(--color-warning);
   }
+  .bg-warning-light\/25 {
+    background-color: color-mix(in oklab, var(--color-warning-light) 25%, transparent);
+  }
   .bg-warning-light\/75 {
     background-color: color-mix(in oklab, var(--color-warning-light) 75%, transparent);
   }
@@ -1486,8 +1489,14 @@
   .outline-pale-gray {
     outline-color: var(--color-pale-gray);
   }
+  .outline-primary {
+    outline-color: var(--color-primary);
+  }
   .outline-success {
     outline-color: var(--color-success);
+  }
+  .outline-warning {
+    outline-color: var(--color-warning);
   }
   .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);

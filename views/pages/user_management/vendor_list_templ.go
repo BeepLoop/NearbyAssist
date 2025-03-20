@@ -199,7 +199,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-min rounded-sm p-1 font-semibold whitespace-nowrap text-neutral-gray outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0\">view profile</a></ul></td></tr>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75\">view profile</a></ul></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

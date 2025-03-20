@@ -92,7 +92,7 @@ templ userTable(accounts []models.UserModel) {
 								<ul>
 									<a
 										href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/users/%s", account.Id)) }
-										class="w-min rounded-sm p-1 font-semibold whitespace-nowrap text-neutral-gray outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
+										class="w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75"
 									>
 										view profile
 									</a>

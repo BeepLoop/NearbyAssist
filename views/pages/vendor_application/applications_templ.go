@@ -99,7 +99,7 @@ func applicationsData(applications []models.ApplicationModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"text-white text-sm font-semibold bg-primary-greener\"><tr><th scope=\"col\" class=\"p-4\">Request ID</th><th scope=\"col\" class=\"p-4\">User</th><th scope=\"col\" class=\"p-4\">Applied On</th><th scope=\"col\" class=\"p-4\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">Request ID</th><th scope=\"col\" class=\"p-4\">User</th><th scope=\"col\" class=\"p-4\">Applied On</th><th scope=\"col\" class=\"p-4\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -158,7 +158,7 @@ func applicationsData(applications []models.ApplicationModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0\">view request</a></ul></td></tr>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75\">view request</a></ul></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

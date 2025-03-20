@@ -102,7 +102,7 @@ templ viewTagsModal(data models.ExpertiseModel) {
 		<!-- open button -->
 		<button
 			type="button"
-			class="w-min cursor-pointer rounded-sm p-1 font-semibold whitespace-nowrap text-neutral-gray outline-1 outline-neutral-gray hover:opacity-75"
+			class="w-min cursor-pointer rounded-sm bg-warning-light/25 p-1 pr-1.5 font-semibold whitespace-nowrap text-warning outline-1 outline-warning hover:opacity-75"
 			x-on:click="viewTagsModalOpen = true"
 		>
 			<span class="flex items-center gap-1">
@@ -179,7 +179,7 @@ templ addTagModal(data models.ExpertiseModel) {
 		<!-- open button -->
 		<button
 			type="button"
-			class="w-min cursor-pointer rounded-sm p-1 font-semibold whitespace-nowrap text-neutral-gray outline-1 outline-neutral-gray hover:opacity-75"
+			class="w-min cursor-pointer rounded-sm bg-success/25 p-1 pr-1.5 font-semibold whitespace-nowrap text-success outline-1 outline-success hover:opacity-75"
 			x-on:click="addTagModalOpen = true"
 		>
 			<span class="flex items-center gap-1">
@@ -263,7 +263,7 @@ templ addExpertise() {
 		<button
 			x-on:click="offCanvasOpen = !offCanvasOpen"
 			type="button"
-			class="cursor-pointer rounded-sm bg-primary/25 p-2 text-sm font-medium text-primary hover:opacity-75"
+			class="cursor-pointer rounded-sm bg-primary/25 p-2 text-sm font-medium text-primary outline-1 outline-primary hover:opacity-75"
 		>New Expertise</button>
 		<!-- offCanvas Backdrop -->
 		<div
