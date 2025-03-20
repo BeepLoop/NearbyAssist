@@ -7,15 +7,17 @@ import (
 	"strconv"
 )
 
-templ Map(data models.MapPageDataModel) {
+templ Map(data models.MapPageDataModel, flash string) {
 	@layout.Layout() {
+		@templ.JSONScript("flash", flash)
+		@partials.ToastNotification()
 		<div class="pb-4">
 			@partials.PageBanner("Map", "")
 			<div class="flex gap-4">
 				<div class="">
 					@searchBar(data.Tags)
 					<span class="text-sm text-neutral-dark font-medium">
-						Result: { strconv.Itoa(len(data.Markers)) }
+						Result: { strconv.Itoa(len(data.Services)) }
 					</span>
 				</div>
 				<div class="flex-1">

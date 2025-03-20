@@ -135,6 +135,41 @@ func (s *MysqlServiceRepository) FindAll() ([]*models.ServiceModel, error) {
 	return services, nil
 }
 
+func (s *MysqlServiceRepository) FindAllByTag(tag string) ([]*models.ServiceModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	services := make([]*models.ServiceModel, 0)
+
+	query := `
+        SELECT
+            s.id,
+            s.createdAt,
+            s.vendorId,
+            s.title,
+            s.description,
+            FORMAT(s.rate, 2) as rate,
+            s.latitude, 
+            s.longitude
+        FROM 
+            ServiceTag st
+            JOIN Service s ON s.id = st.serviceId
+            JOIN Tag t ON t.id = st.tagId
+        WHERE
+            t.title = ?
+    `
+
+	if err := s.db.SelectContext(ctx, &services, query, tag); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return services, nil
+}
+
 func (s *MysqlServiceRepository) FindById(serviceId string) (*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

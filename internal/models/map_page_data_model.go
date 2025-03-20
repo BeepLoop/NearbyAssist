@@ -1,6 +1,6 @@
 package models
 
 type MapPageDataModel struct {
-	Markers []GeoSpatialModel `json:"markers"`
-	Tags    []string          `json:"tags"`
+	Services []ServiceModel `json:"services"`
+	Tags     []string       `json:"tags"`
 }

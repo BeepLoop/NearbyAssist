@@ -2,13 +2,90 @@ package partials
 
 import "nearbyassist/internal/models"
 
-var mapScriptLoader = templ.NewOnceHandle()
-
 templ MapComponent(data models.MapPageDataModel) {
 	<div id="map" class="h-[80vh] outline-1 outline-gray-300"></div>
-	@templ.JSONScript("markers", data.Markers)
-	@mapScriptLoader.Once() {
-		<script src="/static/script/OpenLayers.js"></script>
-		<script src="/static/script/mapComponent.js"></script>
-	}
+	@templ.JSONScript("services", data.Services)
+	<script>
+        (function() {
+            const services = JSON.parse(document.getElementById("services").textContent);
+
+            const middleOfTagum = [125.80935362791702, 7.446905276490894];
+
+            const map = new maplibregl.Map({
+                style: 'https://tiles.openfreemap.org/styles/bright',
+                center: middleOfTagum,
+                zoom: 12,
+                container: 'map',
+            })
+
+            let marker = new maplibregl.Marker({
+                color: "red",
+            });
+
+            const bounds = new maplibregl.LngLatBounds();
+            services.forEach(service => {
+                bounds.extend([service.longitude, service.latitude]);
+            });
+            map.fitBounds(bounds, {
+                padding: 100,
+                maxZoom: 16,
+            });
+
+            services.forEach(service => {
+                const popup = createPopup(service);
+                let marker = new maplibregl.Marker({color: "red"});
+                const coord = new maplibregl.LngLat(service.longitude, service.latitude);
+                marker.setLngLat(coord);
+                marker.setPopup(popup);
+                marker.addTo(map);
+            })
+
+            const nav = new maplibregl.NavigationControl();
+            map.addControl(nav, "bottom-right");
+
+            function createPopup(service) {
+                let popup = new maplibregl.Popup({
+                    closeButton: false,
+                    focusAfterOpen: false,
+                });
+                const div = document.createElement("div");
+
+                const hStyles = [
+                    "font-medium",
+                    "text-xl",
+                    "mb-2",
+                ];
+                const h = document.createElement("h2");
+                h.innerText = service.title;
+                hStyles.forEach(style => {
+                    h.classList.add(style);
+                });
+
+                const aStyles = [
+                    "rounded-sm",
+                    "px-2",
+                    "py-1",
+                    "text-xs",
+                    "font-medium",
+                    "bg-primary",
+                    "text-white",
+                    "cursor-pointer",
+                    "hover:opacity-75",
+                ];
+                const a = document.createElement("a");
+                a.href = `/admin/user-management/vendors/${service.vendorId}`
+                a.innerText = "View"
+                aStyles.forEach(style => {
+                    a.classList.add(style);
+                });
+
+                div.appendChild(h);
+                div.appendChild(a);
+
+                popup.setDOMContent(div);
+
+                return popup;
+            }
+         })();
+    </script>
 }

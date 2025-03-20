@@ -21,6 +21,7 @@ import (
 	notification_repo "nearbyassist/internal/repository/notification"
 	passwordreset_repo "nearbyassist/internal/repository/password_reset"
 	report_user_repo "nearbyassist/internal/repository/report_user"
+	service_repo "nearbyassist/internal/repository/service"
 	tag_repo "nearbyassist/internal/repository/tag"
 	user_repo "nearbyassist/internal/repository/user"
 	vendor_repo "nearbyassist/internal/repository/vendor"
@@ -86,10 +87,12 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		mapRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		tagStore := tag_repo.NewMysqlTagRepository(s.DB)
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
+
 		tagService := tag_service.NewService(tagStore)
 
 		mapStore := map_repo.NewMysqlMapRepository(s.DB)
-		mapService := map_service.NewService(mapStore)
+		mapService := map_service.NewService(mapStore, serviceStore, s.Encrypt)
 		mapHandler := map_handler.NewHandler(mapService, tagService)
 
 		mapRoute.GET("", mapHandler.GetMap)
