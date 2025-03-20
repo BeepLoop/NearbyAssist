@@ -2,7 +2,6 @@ package fs
 
 import (
 	"encoding/hex"
-	"errors"
 )
 
 type Category string
@@ -55,5 +54,5 @@ func GetFiletype(file []byte) (FILETYPE, error) {
 		return FILETYPE_PNG, nil
 	}
 
-	return "", errors.New("Unknown filetype")
+	return FILETYPE_JPEG, nil
 }
