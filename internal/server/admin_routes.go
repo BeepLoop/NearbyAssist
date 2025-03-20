@@ -61,7 +61,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		handler := passwordreset_handler.NewHandler(passwordResetService)
 
 		resetRoute.POST("", handler.RequestPasswordReset)
-		resetRoute.GET("/cp", handler.ChangePassword)
+		resetRoute.GET("/cp", handler.ChangePassword, middleware.CheckIfShouldChangePass(adminStore))
 		resetRoute.POST("/cp", handler.PostChangePassword)
 	}
 

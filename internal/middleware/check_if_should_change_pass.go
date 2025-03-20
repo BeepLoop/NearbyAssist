@@ -8,8 +8,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Redirect the user to reset if required to change password
-func CheckMustChangePass(repo admin_repo.AdminRepository) echo.MiddlewareFunc {
+// Redirect the user away from reset if not required to change pass
+func CheckIfShouldChangePass(repo admin_repo.AdminRepository) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			activeSession, err := utils.GetAdminFromSession(c)
@@ -30,12 +30,8 @@ func CheckMustChangePass(repo admin_repo.AdminRepository) echo.MiddlewareFunc {
 				return c.Redirect(http.StatusSeeOther, "/admin/login")
 			}
 
-			if admin.MustChangePassword {
-				if err := utils.SetFlashMessage(c, "error", "You are required to change your password"); err != nil {
-					return c.Redirect(http.StatusSeeOther, "/admin/reset/cp?error=must_change_password")
-				}
-
-				return c.Redirect(http.StatusSeeOther, "/admin/reset/cp")
+			if !admin.MustChangePassword {
+				return c.Redirect(http.StatusSeeOther, "/")
 			}
 
 			return next(c)
