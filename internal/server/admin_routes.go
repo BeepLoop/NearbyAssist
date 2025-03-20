@@ -172,11 +172,12 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
 		managementService := user_management_service.NewService(userStore, notifStore, s.Encrypt, s.Hash)
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
-		vendorService := vendor_service.NewService(vendorStore, s.Encrypt, s.Hash)
+		vendorService := vendor_service.NewService(vendorStore, serviceStore, s.Encrypt, s.Hash)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		managementHandler := userManagement.NewHandler(managementService, userService, vendorService, resourceService)

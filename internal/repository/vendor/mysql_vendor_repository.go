@@ -163,7 +163,7 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	vendor := new(models.VendorModel)
 	query := `
         SELECT  
-            v.id,
+            v.vendorId,
             v.createdAt,
             v.vendorId,
             v.rating,
@@ -235,8 +235,8 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
             vendorId,
             title,
             description,
-            rate,
-            latitude,
+            format(rate, 2) as rate,
+            latitude, 
             longitude
         FROM 
             Service
@@ -249,13 +249,31 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
 		return nil, err
 	}
 
+	extrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN ServiceExtra se ON se.extraId = e.id
+        WHERE
+            se.serviceId = ? AND e.deleted = 0
+    `
+
 	for _, service := range services {
-		tags, err := s.GetTags(service.Id)
-		if err != nil {
+		extras := make([]*models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, extrasQuery, service.Id); err != nil {
 			return nil, err
 		}
+		service.Extras = extras
 
-		service.Tags = tags
+		if tags, err := s.GetTags(service.Id); err != nil {
+			return nil, err
+		} else {
+			service.Tags = tags
+		}
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {

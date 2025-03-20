@@ -119,8 +119,12 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		vendorRoute.Use(middleware.CheckAuth(s.JWT))
 
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
-		vendorService := vendor_service.NewService(vendorStore, s.Encrypt, s.Hash)
-		handler := vendor.NewHandler(vendorService)
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
+
+		vendorService := vendor_service.NewService(vendorStore, serviceStore, s.Encrypt, s.Hash)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+
+		handler := vendor.NewHandler(vendorService, resourceService)
 
 		vendorRoute.GET("/:vendorId", handler.GetVendor)
 		vendorRoute.GET("/services/:vendorId", handler.GetVendorServiceList)

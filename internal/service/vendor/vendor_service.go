@@ -3,21 +3,25 @@ package vendor_service
 import (
 	"database/sql"
 	"nearbyassist/internal/models"
-	repository "nearbyassist/internal/repository/vendor"
+	service_repo "nearbyassist/internal/repository/service"
+	"nearbyassist/internal/repository/vendor"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 )
 
 type Service struct {
-	vendorStore repository.VendorRepository
-	encrypt     core.Encryption
-	hash        core.Hash
+	vendorStore  vendor_repo.VendorRepository
+	serviceStore service_repo.ServiceRepository
+	encrypt      core.Encryption
+	hash         core.Hash
 }
 
-func NewService(vendorStore repository.VendorRepository, encrypt core.Encryption, hash core.Hash) *Service {
+func NewService(vendorStore vendor_repo.VendorRepository, serviceStore service_repo.ServiceRepository, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
-		vendorStore: vendorStore,
-		encrypt:     encrypt,
-		hash:        hash,
+		vendorStore:  vendorStore,
+		serviceStore: serviceStore,
+		encrypt:      encrypt,
+		hash:         hash,
 	}
 }
 
@@ -133,31 +137,75 @@ func (s *Service) FindById(id string) (*models.VendorModel, error) {
 	return vendor, nil
 }
 
-func (s *Service) GetVendorServiceList(vendorId string) ([]*models.ServiceModel, error) {
+func (s *Service) GetVendorServicesList(vendorId string) (*response.DetailVendorResponse, error) {
+	vendor, err := s.vendorStore.FindById(vendorId)
+	if err != nil {
+		return nil, err
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(vendor.Name); err != nil {
+		return nil, err
+	} else {
+		vendor.Name = decrypted
+	}
+
+	if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
+		return nil, err
+	} else {
+		vendor.Email = decrypted
+	}
+
+	if vendor.Phone.Valid {
+		if decrypted, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
+			return nil, err
+		} else {
+			vendor.PhoneString = decrypted
+		}
+	}
+
 	services, err := s.vendorStore.GetVendorServiceList(vendorId)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, service := range services {
-		if plain, err := s.encrypt.DecryptString(service.Title); err != nil {
+		if images, err := s.serviceStore.GetPhotos(service.Id); err != nil {
 			return nil, err
 		} else {
-			service.Title = plain
+			service.Images = images
 		}
 
-		if plain, err := s.encrypt.DecryptString(service.Description); err != nil {
+		if cipher, err := s.encrypt.DecryptString(service.Title); err != nil {
 			return nil, err
 		} else {
-			service.Description = plain
+			service.Title = cipher
 		}
 
-		if tags, err := s.vendorStore.GetTags(service.Id); err != nil {
+		if cipher, err := s.encrypt.DecryptString(service.Description); err != nil {
 			return nil, err
 		} else {
-			service.Tags = tags
+			service.Description = cipher
+		}
+
+		for _, extra := range service.Extras {
+			if cipher, err := s.encrypt.DecryptString(extra.Title); err != nil {
+				return nil, err
+			} else {
+				extra.Title = cipher
+			}
+
+			if cipher, err := s.encrypt.DecryptString(extra.Description); err != nil {
+				return nil, err
+			} else {
+				extra.Description = cipher
+			}
 		}
 	}
 
-	return services, nil
+	detailedVendor := &response.DetailVendorResponse{
+		Vendor:   vendor,
+		Services: services,
+	}
+
+	return detailedVendor, nil
 }
