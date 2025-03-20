@@ -11,13 +11,17 @@ import (
 )
 
 type Service struct {
-	store   transaction_repo.TransactionRepository
-	encrypt core.Encryption
-	jwt     core.Authenticator
+	transactionStore transaction_repo.TransactionRepository
+	encrypt          core.Encryption
+	jwt              core.Authenticator
 }
 
-func NewService(store transaction_repo.TransactionRepository, encrypt core.Encryption, jwt core.Authenticator) *Service {
-	return &Service{store: store, encrypt: encrypt, jwt: jwt}
+func NewService(transactionStore transaction_repo.TransactionRepository, encrypt core.Encryption, jwt core.Authenticator) *Service {
+	return &Service{
+		transactionStore: transactionStore,
+		encrypt:          encrypt,
+		jwt:              jwt,
+	}
 }
 
 func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string, error) {
@@ -27,21 +31,18 @@ func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string,
 	transaction.ServiceId = req.ServiceId
 	transaction.Cost = req.Cost
 
-	extras := make([]models.ExtraModel, 0)
+	extras := make([]*models.ExtraModel, 0)
 	for _, extra := range req.Extras {
-		extras = append(extras, models.ExtraModel{
+		extras = append(extras, &models.ExtraModel{
 			Model: models.Model{
 				Id: extra.Id,
 			},
-			Title:       extra.Title,
-			Description: extra.Description,
-			Price:       extra.Price,
 		})
 	}
 
 	transaction.Extras = extras
 
-	transactionId, err := s.store.Create(transaction)
+	transactionId, err := s.transactionStore.Create(transaction)
 	if err != nil {
 		return "", err
 	}
@@ -50,7 +51,7 @@ func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string,
 }
 
 func (s *Service) GetTransaction(transactionId string) (*models.TransactionModel, error) {
-	transaction, err := s.store.FindById(transactionId)
+	transaction, err := s.transactionStore.FindById(transactionId)
 	if err != nil {
 		return nil, err
 	}
@@ -79,26 +80,19 @@ func (s *Service) GetTransaction(transactionId string) (*models.TransactionModel
 		transaction.Service.Description = plain
 	}
 
-	extras := make([]models.ExtraModel, 0)
 	for _, extra := range transaction.Extras {
-		title, err := s.encrypt.DecryptString(extra.Title)
-		if err != nil {
+		if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
 			return nil, err
+		} else {
+			extra.Title = title
 		}
 
-		description, err := s.encrypt.DecryptString(extra.Description)
-		if err != nil {
+		if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
 			return nil, err
+		} else {
+			extra.Description = description
 		}
-
-		extras = append(extras, models.ExtraModel{
-			Model:       extra.Model,
-			Title:       title,
-			Description: description,
-			Price:       extra.Price,
-		})
 	}
-	transaction.Extras = extras
 
 	return transaction, nil
 }
@@ -109,7 +103,7 @@ func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
 		return err
 	}
 
-	transaction, err := s.store.FindById(transactionId)
+	transaction, err := s.transactionStore.FindById(transactionId)
 	if err != nil {
 		return err
 	}
@@ -126,7 +120,7 @@ func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
 		return errors.New("Unauthorized cancel request")
 	}
 
-	if err := s.store.Cancel(transactionId); err != nil {
+	if err := s.transactionStore.Cancel(transactionId); err != nil {
 		return err
 	}
 
@@ -139,7 +133,7 @@ func (s *Service) AcceptTransactionRequest(bearerToken, transactionId string) er
 		return err
 	}
 
-	transaction, err := s.store.FindById(transactionId)
+	transaction, err := s.transactionStore.FindById(transactionId)
 	if err != nil {
 		return err
 	}
@@ -156,7 +150,7 @@ func (s *Service) AcceptTransactionRequest(bearerToken, transactionId string) er
 		return errors.New("Unauthorized accept request")
 	}
 
-	if err := s.store.Accept(transactionId); err != nil {
+	if err := s.transactionStore.Accept(transactionId); err != nil {
 		return err
 	}
 
@@ -169,7 +163,7 @@ func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) er
 		return err
 	}
 
-	transaction, err := s.store.FindById(transactionId)
+	transaction, err := s.transactionStore.FindById(transactionId)
 	if err != nil {
 		return err
 	}
@@ -186,7 +180,7 @@ func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) er
 		return errors.New("Unauthorized accept request")
 	}
 
-	if err := s.store.Reject(transactionId); err != nil {
+	if err := s.transactionStore.Reject(transactionId); err != nil {
 		return err
 	}
 
@@ -194,7 +188,7 @@ func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) er
 }
 
 func (s *Service) GetTransactionSummary(transactionId string) (*response.TransactionSummary, error) {
-	transactionData, err := s.store.GetSummary(transactionId)
+	transactionData, err := s.transactionStore.GetSummary(transactionId)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +232,7 @@ func (s *Service) GetUserTransactionList(bearerToken string) ([]*models.Transact
 		return nil, err
 	}
 
-	transactions, err := s.store.GetMyTransactions(userId)
+	transactions, err := s.transactionStore.GetMyTransactions(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -266,7 +260,7 @@ func (s *Service) GetTransactionUserSent(bearerToken string) ([]*models.Transact
 		return nil, err
 	}
 
-	transactions, err := s.store.GetTransactionSent(userId)
+	transactions, err := s.transactionStore.GetTransactionSent(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -296,26 +290,19 @@ func (s *Service) GetTransactionUserSent(bearerToken string) ([]*models.Transact
 			transaction.Service.Description = plain
 		}
 
-		extras := make([]models.ExtraModel, 0)
 		for _, extra := range transaction.Extras {
-			title, err := s.encrypt.DecryptString(extra.Title)
-			if err != nil {
+			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
 				return nil, err
+			} else {
+				extra.Title = title
 			}
 
-			description, err := s.encrypt.DecryptString(extra.Description)
-			if err != nil {
+			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
 				return nil, err
+			} else {
+				extra.Description = description
 			}
-
-			extras = append(extras, models.ExtraModel{
-				Model:       extra.Model,
-				Title:       title,
-				Description: description,
-				Price:       extra.Price,
-			})
 		}
-		transaction.Extras = extras
 	}
 
 	return transactions, nil
@@ -327,7 +314,7 @@ func (s *Service) GetTransactionUserReceived(bearerToken string) ([]*models.Tran
 		return nil, err
 	}
 
-	transactions, err := s.store.GetTransactionReceived(userId)
+	transactions, err := s.transactionStore.GetTransactionReceived(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -357,26 +344,19 @@ func (s *Service) GetTransactionUserReceived(bearerToken string) ([]*models.Tran
 			transaction.Service.Description = plain
 		}
 
-		extras := make([]models.ExtraModel, 0)
 		for _, extra := range transaction.Extras {
-			title, err := s.encrypt.DecryptString(extra.Title)
-			if err != nil {
+			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
 				return nil, err
+			} else {
+				extra.Title = title
 			}
 
-			description, err := s.encrypt.DecryptString(extra.Description)
-			if err != nil {
+			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
 				return nil, err
+			} else {
+				extra.Description = description
 			}
-
-			extras = append(extras, models.ExtraModel{
-				Model:       extra.Model,
-				Title:       title,
-				Description: description,
-				Price:       extra.Price,
-			})
 		}
-		transaction.Extras = extras
 	}
 
 	return transactions, nil
@@ -388,7 +368,7 @@ func (s *Service) GetRecentTransactions(bearerToken string) ([]*models.Transacti
 		return nil, err
 	}
 
-	transactions, err := s.store.GetRecent(userId)
+	transactions, err := s.transactionStore.GetRecent(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -418,26 +398,19 @@ func (s *Service) GetRecentTransactions(bearerToken string) ([]*models.Transacti
 			transaction.Service.Description = plain
 		}
 
-		extras := make([]models.ExtraModel, 0)
 		for _, extra := range transaction.Extras {
-			title, err := s.encrypt.DecryptString(extra.Title)
-			if err != nil {
+			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
 				return nil, err
+			} else {
+				extra.Title = title
 			}
 
-			description, err := s.encrypt.DecryptString(extra.Description)
-			if err != nil {
+			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
 				return nil, err
+			} else {
+				extra.Description = description
 			}
-
-			extras = append(extras, models.ExtraModel{
-				Model:       extra.Model,
-				Title:       title,
-				Description: description,
-				Price:       extra.Price,
-			})
 		}
-		transaction.Extras = extras
 	}
 
 	return transactions, nil
@@ -449,7 +422,7 @@ func (s *Service) GetConfirmedTransactions(bearerToken string) ([]*models.Transa
 		return nil, err
 	}
 
-	transactions, err := s.store.GetConfirmed(userId)
+	transactions, err := s.transactionStore.GetConfirmed(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -479,26 +452,19 @@ func (s *Service) GetConfirmedTransactions(bearerToken string) ([]*models.Transa
 			transaction.Service.Description = plain
 		}
 
-		extras := make([]models.ExtraModel, 0)
 		for _, extra := range transaction.Extras {
-			title, err := s.encrypt.DecryptString(extra.Title)
-			if err != nil {
+			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
 				return nil, err
+			} else {
+				extra.Title = title
 			}
 
-			description, err := s.encrypt.DecryptString(extra.Description)
-			if err != nil {
+			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
 				return nil, err
+			} else {
+				extra.Description = description
 			}
-
-			extras = append(extras, models.ExtraModel{
-				Model:       extra.Model,
-				Title:       title,
-				Description: description,
-				Price:       extra.Price,
-			})
 		}
-		transaction.Extras = extras
 	}
 
 	return transactions, nil
@@ -510,7 +476,7 @@ func (s *Service) GetReviewableTransactions(bearerToken string) ([]*models.Trans
 		return nil, err
 	}
 
-	reviewables, err := s.store.GetReviewableTransactions(userId)
+	reviewables, err := s.transactionStore.GetReviewableTransactions(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -540,26 +506,19 @@ func (s *Service) GetReviewableTransactions(bearerToken string) ([]*models.Trans
 			reviewable.Service.Description = plain
 		}
 
-		extras := make([]models.ExtraModel, 0)
 		for _, extra := range reviewable.Extras {
-			title, err := s.encrypt.DecryptString(extra.Title)
-			if err != nil {
+			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
 				return nil, err
+			} else {
+				extra.Title = title
 			}
 
-			description, err := s.encrypt.DecryptString(extra.Description)
-			if err != nil {
+			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
 				return nil, err
+			} else {
+				extra.Description = description
 			}
-
-			extras = append(extras, models.ExtraModel{
-				Model:       extra.Model,
-				Title:       title,
-				Description: description,
-				Price:       extra.Price,
-			})
 		}
-		reviewable.Extras = extras
 	}
 
 	return reviewables, nil
@@ -571,7 +530,7 @@ func (s *Service) GetTransactionHistory(bearerToken string) ([]*models.Transacti
 		return nil, err
 	}
 
-	transactions, err := s.store.GetHistory(userId)
+	transactions, err := s.transactionStore.GetHistory(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -601,26 +560,20 @@ func (s *Service) GetTransactionHistory(bearerToken string) ([]*models.Transacti
 			transaction.Service.Description = plain
 		}
 
-		extras := make([]models.ExtraModel, 0)
 		for _, extra := range transaction.Extras {
-			title, err := s.encrypt.DecryptString(extra.Title)
-			if err != nil {
+			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
 				return nil, err
+			} else {
+				extra.Title = title
 			}
 
-			description, err := s.encrypt.DecryptString(extra.Description)
-			if err != nil {
+			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
 				return nil, err
+			} else {
+				extra.Description = description
 			}
 
-			extras = append(extras, models.ExtraModel{
-				Model:       extra.Model,
-				Title:       title,
-				Description: description,
-				Price:       extra.Price,
-			})
 		}
-		transaction.Extras = extras
 	}
 
 	return transactions, nil
@@ -632,7 +585,7 @@ func (s *Service) CompleteTransaction(bearerToken, transactionId string) error {
 		return err
 	}
 
-	if transaction, err := s.store.FindById(transactionId); err != nil {
+	if transaction, err := s.transactionStore.FindById(transactionId); err != nil {
 		return err
 	} else {
 		if transaction.VendorId != userId {
@@ -640,7 +593,7 @@ func (s *Service) CompleteTransaction(bearerToken, transactionId string) error {
 		}
 	}
 
-	if err := s.store.MarkComplete(transactionId); err != nil {
+	if err := s.transactionStore.MarkComplete(transactionId); err != nil {
 		return err
 	}
 

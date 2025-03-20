@@ -120,7 +120,7 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
 		fmt.Println("error get service: ", err.Error())
 		return nil, err
 	}
-	transaction.Service = *service
+	transaction.Service = service
 
 	extrasQuery := `
         SELECT
@@ -135,7 +135,7 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
             te.transactionId = ?
     `
 
-	extras := make([]models.ExtraModel, 0)
+	extras := make([]*models.ExtraModel, 0)
 	if err := s.db.SelectContext(ctx, &extras, extrasQuery, transaction.Id); err != nil {
 		fmt.Println("error get extra: ", err.Error())
 		return nil, err
@@ -264,7 +264,7 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
     `
 
 	for _, transaction := range transactions {
-		extras := make([]models.ExtraModel, 0)
+		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
 		}
@@ -274,7 +274,7 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
 		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
 			return nil, err
 		}
-		transaction.Service = *service
+		transaction.Service = service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -345,7 +345,7 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
     `
 
 	for _, transaction := range transactions {
-		extras := make([]models.ExtraModel, 0)
+		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
 		}
@@ -355,7 +355,7 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
 		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
 			return nil, err
 		}
-		transaction.Service = *service
+		transaction.Service = service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -426,7 +426,7 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
     `
 
 	for _, transaction := range transactions {
-		extras := make([]models.ExtraModel, 0)
+		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
 		}
@@ -436,7 +436,7 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
 		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
 			return nil, err
 		}
-		transaction.Service = *service
+		transaction.Service = service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -509,7 +509,7 @@ func (s *MysqlTransactionRepository) GetRecent(userId string) ([]*models.Transac
     `
 
 	for _, transaction := range transactions {
-		extras := make([]models.ExtraModel, 0)
+		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
 		}
@@ -519,7 +519,7 @@ func (s *MysqlTransactionRepository) GetRecent(userId string) ([]*models.Transac
 		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
 			return nil, err
 		}
-		transaction.Service = *service
+		transaction.Service = service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -591,7 +591,7 @@ func (s *MysqlTransactionRepository) GetConfirmed(id string) ([]*models.Transact
     `
 
 	for _, transaction := range transactions {
-		extras := make([]models.ExtraModel, 0)
+		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
 		}
@@ -601,7 +601,7 @@ func (s *MysqlTransactionRepository) GetConfirmed(id string) ([]*models.Transact
 		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
 			return nil, err
 		}
-		transaction.Service = *service
+		transaction.Service = service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -673,7 +673,7 @@ func (s *MysqlTransactionRepository) GetHistory(id string) ([]*models.Transactio
     `
 
 	for _, transaction := range transactions {
-		extras := make([]models.ExtraModel, 0)
+		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
 		}
@@ -683,7 +683,7 @@ func (s *MysqlTransactionRepository) GetHistory(id string) ([]*models.Transactio
 		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
 			return nil, err
 		}
-		transaction.Service = *service
+		transaction.Service = service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -755,7 +755,7 @@ func (s *MysqlTransactionRepository) GetReviewableTransactions(userId string) ([
     `
 
 	for _, transaction := range transactions {
-		extras := make([]models.ExtraModel, 0)
+		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
 		}
@@ -765,7 +765,7 @@ func (s *MysqlTransactionRepository) GetReviewableTransactions(userId string) ([
 		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
 			return nil, err
 		}
-		transaction.Service = *service
+		transaction.Service = service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {

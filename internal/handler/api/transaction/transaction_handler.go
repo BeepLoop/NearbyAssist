@@ -7,7 +7,6 @@ import (
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -175,49 +174,8 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 		}
 	}
 
-	response := []struct {
-		Id       string              `json:"id"`
-		Cost     float64             `json:"cost"`
-		Vendor   string              `json:"vendor"`
-		Client   string              `json:"client"`
-		VendorId string              `json:"vendorId"`
-		ClientId string              `json:"clientId"`
-		Status   string              `json:"status"`
-		Service  models.ServiceModel `json:"service"`
-		Extras   []models.ExtraModel `json:"extras"`
-	}{}
-
-	for _, transaction := range transactions {
-		cost, err := strconv.ParseFloat(transaction.Cost, 64)
-		if err != nil {
-			return err
-		}
-
-		response = append(response, struct {
-			Id       string              `json:"id"`
-			Cost     float64             `json:"cost"`
-			Vendor   string              `json:"vendor"`
-			Client   string              `json:"client"`
-			VendorId string              `json:"vendorId"`
-			ClientId string              `json:"clientId"`
-			Status   string              `json:"status"`
-			Service  models.ServiceModel `json:"service"`
-			Extras   []models.ExtraModel `json:"extras"`
-		}{
-			Id:       transaction.Id,
-			Cost:     cost,
-			Vendor:   transaction.Vendor,
-			Client:   transaction.Client,
-			VendorId: transaction.VendorId,
-			ClientId: transaction.ClientId,
-			Status:   string(transaction.Status),
-			Service:  transaction.Service,
-			Extras:   transaction.Extras,
-		})
-	}
-
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactions": response,
+		"transactions": transactions,
 	})
 }
 
