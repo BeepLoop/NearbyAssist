@@ -116,18 +116,18 @@ templ requestPasswordReset() {
 							placeholder="username"
 							autocomplete="off"
 							autofocus
-							class="w-full rounded-sm border border-neutral-gray-lighter p-2 focus:border-primary focus:outline-none"
+							class="w-full rounded-sm border border-neutral-gray-lighter p-2 text-xs text-neutral-dark focus:border-primary focus:outline-none"
 						/>
 						<div class="mt-4 flex justify-end gap-2">
 							<button
 								x-on:click="passwordResetOpen = false"
 								type="button"
-								class="cursor-pointer rounded-sm px-4 py-2 font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75"
+								class="cursor-pointer rounded-sm px-4 py-2 text-xs font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75"
 							>Cancel</button>
 							<button
 								x-on:click="passwordResetOpen = false"
 								type="submit"
-								class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-center text-sm font-medium text-white hover:opacity-75"
+								class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-center text-xs font-medium text-white hover:opacity-75"
 							>
 								<span class="flex items-center gap-1">
 									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
