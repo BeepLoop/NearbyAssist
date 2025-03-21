@@ -253,13 +253,13 @@ func (s *MysqlServiceRepository) IsVendor(vendorId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	count := 0
-	query := "SELECT COUNT(id) FROM Vendor WHERE vendorId = ?"
-	if err := s.db.GetContext(ctx, &count, query, vendorId); err != nil {
+	isVendor := false
+	query := "SELECT EXISTS (SELECT 1 FROM Vendor WHERE vendorId = ?) AS is_vendor"
+	if err := s.db.GetContext(ctx, &isVendor, query, vendorId); err != nil {
 		return err
 	}
 
-	if count == 0 {
+	if !isVendor {
 		return errors.New("vendorId not vendor")
 	}
 
@@ -785,7 +785,6 @@ func (s *MysqlServiceRepository) GetAllByVendorId(vendorId string) ([]*models.Se
 
 	query := `
         SELECT
-            id,
             vendorId,
             description,
             rate,

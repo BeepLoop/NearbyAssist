@@ -209,7 +209,7 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 
 	checkIfAlreadyVendorQuery := `
         SELECT 
-            COUNT(v.id)
+            COUNT(v.vendorId)
         FROM 
             Vendor v
             JOIN Application a ON a.applicantId = v.vendorId
@@ -225,12 +225,9 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 		return err
 	}
 	if alreadyVendorResult == 0 {
-		// Applicant is not yet a vendor
-		vendorRowId := utils.GenerateId()
-
 		makeUserVendorQuery := `
         INSERT INTO
-            Vendor (id, vendorId)
+            Vendor (vendorId)
         SELECT
             ?, u.id
         FROM
@@ -239,7 +236,7 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
         WHERE
             a.id = ?
     `
-		if _, err := tx.ExecContext(ctx, makeUserVendorQuery, vendorRowId, applicationId); err != nil {
+		if _, err := tx.ExecContext(ctx, makeUserVendorQuery, applicationId); err != nil {
 			if err := tx.Rollback(); err != nil {
 				return err
 			}

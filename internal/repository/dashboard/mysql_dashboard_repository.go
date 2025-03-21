@@ -32,7 +32,7 @@ func (s *MysqlDashboardRepository) GetUserData() (*models.UserData, error) {
 		return nil, err
 	}
 
-	countExpertsQuery := "SELECT COUNT(id) FROM Vendor"
+	countExpertsQuery := "SELECT COUNT(vendorId) FROM Vendor"
 	vendorCount := 0
 	if err := s.db.GetContext(ctx, &vendorCount, countExpertsQuery); err != nil {
 		return nil, err

@@ -167,9 +167,9 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(account.CreatedAt)
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(account.JoinedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor_list.templ`, Line: 90, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor_list.templ`, Line: 90, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {

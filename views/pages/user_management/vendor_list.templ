@@ -87,7 +87,7 @@ templ vendorTable(accounts []models.VendorModel) {
 									</svg>
 								</span>
 							</td>
-							<td class="p-4">{ account.CreatedAt }</td>
+							<td class="p-4">{ account.JoinedAt }</td>
 							<td class="p-4">
 								if account.Restricted {
 									@partials.SoftBadgeDanger("Restricted")

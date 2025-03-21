@@ -22,8 +22,7 @@ func (s *MysqlVendorRepository) GetAll(limit, offset int) ([]*models.VendorModel
 
 	query := `
         SELECT  
-            v.id,
-            v.createdAt,
+            v.joinedAt,
             v.vendorId,
             v.rating,
             u.name AS name,
@@ -94,8 +93,7 @@ func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.Vendo
 	vendor := new(models.VendorModel)
 	query := `
         SELECT  
-            v.id,
-            v.createdAt,
+            v.joinedAt,
             v.vendorId,
             v.rating,
             u.name AS name,
@@ -164,7 +162,7 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	query := `
         SELECT  
             v.vendorId,
-            v.createdAt,
+            v.joinedAt,
             v.vendorId,
             v.rating,
             u.name AS name,
@@ -231,7 +229,6 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
 
 	query := `
         SELECT
-            id,
             vendorId,
             title,
             description,

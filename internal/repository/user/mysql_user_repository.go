@@ -545,9 +545,9 @@ func (s *MysqlUserRepository) IsVendor(userId string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	count := 0
-	query := "SELECT COUNT(id) FROM Vendor WHERE vendorId = ?"
-	if err := s.db.GetContext(ctx, &count, query, userId); err != nil {
+	isVendor := false
+	query := "SELECT EXISTS (SELECT 1 FROM Vendor WHERE vendorId = ?) AS is_vendor"
+	if err := s.db.GetContext(ctx, &isVendor, query, userId); err != nil {
 		return false, err
 	}
 
@@ -555,11 +555,7 @@ func (s *MysqlUserRepository) IsVendor(userId string) (bool, error) {
 		return false, context.DeadlineExceeded
 	}
 
-	if count > 0 {
-		return true, nil
-	}
-
-	return false, nil
+	return isVendor, nil
 }
 
 func (s *MysqlUserRepository) GetExpertise(userId string) ([]*models.ExpertiseModel, error) {
