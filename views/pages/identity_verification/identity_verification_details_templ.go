@@ -228,7 +228,7 @@ func rejectButton(requestId string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"applicationId\"><div><label for=\"reason\" class=\"font-medium text-neutral-dark\">Reason</label> <textarea name=\"reason\" id=\"reason\" rows=\"6\" placeholder=\"reason...\" autocomplete=\"off\" class=\"mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none\"></textarea></div><div class=\"flex justify-end\"><button type=\"submit\" class=\"cursor-pointer rounded-sm bg-danger bg-danger p-2 text-sm font-semibold text-white hover:opacity-75\">Continue</button></div></form></div></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"requestId\"><div><label for=\"reason\" class=\"font-medium text-neutral-dark\">Reason</label> <textarea name=\"reason\" id=\"reason\" rows=\"6\" placeholder=\"reason...\" autocomplete=\"off\" class=\"mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none\"></textarea></div><div class=\"flex justify-end\"><button type=\"submit\" class=\"cursor-pointer rounded-sm bg-danger bg-danger p-2 text-sm font-semibold text-white hover:opacity-75\">Continue</button></div></form></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
