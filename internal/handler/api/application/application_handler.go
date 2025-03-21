@@ -61,17 +61,6 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 		})
 	}
 
-	user, err := h.userService.GetUser(bearerToken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error retrieving user information",
-			Error:   err.Error(),
-		})
-	}
-
-	// TODO: Handle notifying the user of the application status
-	_ = user
-
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"application": applicationId,
 	})
