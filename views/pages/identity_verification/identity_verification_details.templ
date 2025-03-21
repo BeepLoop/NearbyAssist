@@ -33,6 +33,10 @@ templ IdentityVerificationDetails(request models.IdentityVerificationModel, flas
 							<td class="py-2">{ request.IdNumber }</td>
 						</tr>
 						<tr>
+							<th class="py-2 font-medium text-neutral-dark">Date Applied:</th>
+							<td class="py-2">{ request.CreatedAt }</td>
+						</tr>
+						<tr>
 							<th class="py-2 font-medium text-neutral-dark">Status:</th>
 							<td class="py-2">
 								@partials.SoftBadgeWarning(request.Status)

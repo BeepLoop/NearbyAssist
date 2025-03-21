@@ -18,10 +18,11 @@ func (h *verificationHandler) GetIdentityVerification(c echo.Context) error {
 
 	data := make([]models.IdentityVerificationModel, 0)
 	for _, request := range requests {
-		date := utils.FormatDate(request.CreatedAt)
-
 		data = append(data, models.IdentityVerificationModel{
-			Model:           models.Model{Id: request.Id, CreatedAt: date},
+			Model: models.Model{
+				Id:        request.Id,
+				CreatedAt: utils.FormatDate(request.CreatedAt),
+			},
 			UserId:          request.UserId,
 			Status:          request.Status,
 			Name:            request.Name,

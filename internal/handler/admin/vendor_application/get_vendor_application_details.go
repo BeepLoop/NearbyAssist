@@ -36,7 +36,10 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 	}
 
 	data := models.ApplicationModel{
-		Model:                 application.Model,
+		Model: models.Model{
+			Id:        application.Id,
+			CreatedAt: utils.FormatDate(application.CreatedAt),
+		},
 		UpdateableModel:       application.UpdateableModel,
 		GeoSpatialModel:       application.GeoSpatialModel,
 		ApplicantId:           application.ApplicantId,

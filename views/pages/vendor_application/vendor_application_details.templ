@@ -21,6 +21,10 @@ templ VendorApplicationDetails(application models.ApplicationModel, flash string
 							<td class="py-2">{ application.ApplicantName }</td>
 						</tr>
 						<tr>
+							<th class="py-2 font-medium text-neutral-dark">Date Applied:</th>
+							<td class="py-2">{ application.CreatedAt }</td>
+						</tr>
+						<tr>
 							<th class="py-2 font-medium text-neutral-dark">Expertise:</th>
 							<td class="py-2">{ application.Expertise }</td>
 						</tr>

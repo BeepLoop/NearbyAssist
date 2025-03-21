@@ -77,6 +77,7 @@ func (s *MysqlApplicationRepository) FindById(id string) (*models.ApplicationMod
 	query := `
         SELECT 
             a.id,
+            a.createdAt,
             a.applicantId,
             a.expertiseId,
             a.supportingDocumentUrl,
