@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/vendor_application"
@@ -86,6 +87,7 @@ func (h *applicationHandler) RejectRequest(c echo.Context) error {
 	}
 
 	if err := h.applicationService.RejectRequest(applicationId, reason); err != nil {
+		fmt.Println(err.Error())
 		if strings.Contains(err.Error(), "invalid reason") {
 			if err := utils.SetFlashMessage(c, "error", "Provide a reason for rejection"); err != nil {
 				return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=invalid_reason_error")

@@ -290,7 +290,7 @@ func (s *MysqlApplicationRepository) RejectRequest(applicationId, reason string)
             Application
         SET 
             status = 'rejected',
-            reason = ?
+            rejectionReason = ?
         WHERE
             id = ?
     `
