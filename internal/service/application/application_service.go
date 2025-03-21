@@ -14,15 +14,21 @@ import (
 )
 
 type Service struct {
-	store      application_repo.ApplicationRepository
-	notifStore notification_repo.NotificationRepository
-	fs         fs.FileStorage
-	encrypt    core.Encryption
-	jwt        core.Authenticator
+	applicationStore application_repo.ApplicationRepository
+	notifStore       notification_repo.NotificationRepository
+	fs               fs.FileStorage
+	encrypt          core.Encryption
+	jwt              core.Authenticator
 }
 
-func NewService(store application_repo.ApplicationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
-	return &Service{store: store, notifStore: notifStore, fs: fs, encrypt: encrypt, jwt: jwt}
+func NewService(applicationStore application_repo.ApplicationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
+	return &Service{
+		applicationStore: applicationStore,
+		notifStore:       notifStore,
+		fs:               fs,
+		encrypt:          encrypt,
+		jwt:              jwt,
+	}
 }
 
 func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*multipart.FileHeader) (string, error) {
@@ -77,7 +83,7 @@ func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*mu
 		}
 	}
 
-	applicationId, err := s.store.Create(application)
+	applicationId, err := s.applicationStore.Create(application)
 	if err != nil {
 		return "", err
 	}
@@ -86,7 +92,7 @@ func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*mu
 }
 
 func (s *Service) GetApplications() ([]*models.ApplicationModel, error) {
-	applications, err := s.store.GetAll("pending")
+	applications, err := s.applicationStore.GetAll("pending")
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +109,7 @@ func (s *Service) GetApplications() ([]*models.ApplicationModel, error) {
 }
 
 func (s *Service) GetApplicationDetail(applicationId string) (*models.ApplicationModel, error) {
-	application, err := s.store.FindById(applicationId)
+	application, err := s.applicationStore.FindById(applicationId)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +124,7 @@ func (s *Service) GetApplicationDetail(applicationId string) (*models.Applicatio
 }
 
 func (s *Service) AcceptRequest(applicationId string) error {
-	application, err := s.store.FindById(applicationId)
+	application, err := s.applicationStore.FindById(applicationId)
 	if err != nil {
 		return err
 	}
@@ -129,7 +135,7 @@ func (s *Service) AcceptRequest(applicationId string) error {
 		application.ApplicantName = decrypted
 	}
 
-	if err := s.store.AcceptRequest(applicationId); err != nil {
+	if err := s.applicationStore.AcceptRequest(applicationId); err != nil {
 		return err
 	}
 
@@ -181,11 +187,11 @@ func (s *Service) RejectRequest(id, reason string) error {
 		return err
 	}
 
-	if err := s.store.RejectRequest(id, encryptedReason); err != nil {
+	if err := s.applicationStore.RejectRequest(id, encryptedReason); err != nil {
 		return err
 	}
 
-	application, err := s.store.FindById(id)
+	application, err := s.applicationStore.FindById(id)
 	if err != nil {
 		return err
 	}

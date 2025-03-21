@@ -191,72 +191,54 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 		return err
 	}
 
+	now := utils.CurrentTimeStamp()
+
 	updateApplicationStatusQuery := `
         UPDATE
             Application
         SET
             status = 'approved'
+            updatedAt = ?
         WHERE
             id = ?
     `
-	if _, err := tx.ExecContext(ctx, updateApplicationStatusQuery, applicationId); err != nil {
+	if _, err := tx.ExecContext(ctx, updateApplicationStatusQuery, now, applicationId); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
 
 		return err
-	}
-
-	checkIfAlreadyVendorQuery := `
-        SELECT 
-            COUNT(v.vendorId)
-        FROM 
-            Vendor v
-            JOIN Application a ON a.applicantId = v.vendorId
-        WHERE 
-            a.id = ?
-    `
-	alreadyVendorResult := 0
-	if err := tx.GetContext(ctx, &alreadyVendorResult, checkIfAlreadyVendorQuery, applicationId); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-
-		return err
-	}
-	if alreadyVendorResult == 0 {
-		makeUserVendorQuery := `
-        INSERT INTO
-            Vendor (vendorId)
-        SELECT
-            ?, u.id
-        FROM
-            User u 
-            JOIN Application a ON a.applicantId = u.id
-        WHERE
-            a.id = ?
-    `
-		if _, err := tx.ExecContext(ctx, makeUserVendorQuery, applicationId); err != nil {
-			if err := tx.Rollback(); err != nil {
-				return err
-			}
-
-			return err
-		}
 	}
 
 	addUserExpertiseQuery := `
         INSERT INTO
             UserExpertise (userId, expertiseId)
         SELECT
-            v.vendorId, a.expertiseId
+            applicantId, expertiseId
         FROM 
-            Application a
-            JOIN Vendor v ON v.vendorId = a.applicantId
+            Application
         WHERE
-            a.id = ?
+            id = ?
     `
 	if _, err := tx.ExecContext(ctx, addUserExpertiseQuery, applicationId); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	createVendorQuery := `
+        INSERT IGNORE
+            Vendor (vendorId)
+        SELECT DISTINCT
+            applicantId
+        FROM
+            Application
+        WHERE
+            id = ?
+    `
+	if _, err := tx.ExecContext(ctx, createVendorQuery, applicationId); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
