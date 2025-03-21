@@ -245,9 +245,9 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 		}
 	}
 
-	addVendorExpertiseQuery := `
+	addUserExpertiseQuery := `
         INSERT INTO
-            VendorExpertise (vendorId, expertiseId)
+            UserExpertise (userId, expertiseId)
         SELECT
             v.vendorId, a.expertiseId
         FROM 
@@ -256,7 +256,7 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
         WHERE
             a.id = ?
     `
-	if _, err := tx.ExecContext(ctx, addVendorExpertiseQuery, applicationId); err != nil {
+	if _, err := tx.ExecContext(ctx, addUserExpertiseQuery, applicationId); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}

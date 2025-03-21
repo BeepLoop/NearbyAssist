@@ -308,9 +308,9 @@ func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorM
             e.title
         FROM
             Expertise e
-            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+            JOIN UserExpertise ve ON ve.expertiseId = e.id
         WHERE
-            ve.vendorId = ?
+            ve.userId = ?
     `
 
 	expertise := make([]string, 0)

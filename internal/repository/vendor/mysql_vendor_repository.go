@@ -45,9 +45,9 @@ func (s *MysqlVendorRepository) GetAll(limit, offset int) ([]*models.VendorModel
             e.title
         FROM
             Expertise e
-            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+            JOIN UserExpertise ve ON ve.expertiseId = e.id
         WHERE
-            ve.vendorId = ?
+            ve.userId = ?
     `
 
 	getSocialsQuery := `
@@ -121,9 +121,9 @@ func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.Vendo
             e.title
         FROM
             Expertise e
-            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+            JOIN UserExpertise ve ON ve.expertiseId = e.id
         WHERE
-            ve.vendorId = ?
+            ve.userId = ?
     `
 
 	expertise := make([]string, 0)
@@ -190,9 +190,9 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
             e.title
         FROM
             Expertise e
-            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+            JOIN UserExpertise ve ON ve.expertiseId = e.id
         WHERE
-            ve.vendorId = ?
+            ve.userId = ?
     `
 
 	expertise := make([]string, 0)

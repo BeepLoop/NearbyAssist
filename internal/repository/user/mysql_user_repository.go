@@ -291,10 +291,10 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
         SELECT
             e.title
         FROM
-            VendorExpertise ve
+            UserExpertise ve
             JOIN Expertise e ON e.id = ve.expertiseId
         WHERE
-            ve.vendorId = ?
+            ve.userId = ?
     `
 	expertise := make([]*models.ExpertiseModel, 0)
 	if err := s.db.SelectContext(ctx, &expertise, getExpertiseQuery, userId); err != nil {
@@ -569,9 +569,9 @@ func (s *MysqlUserRepository) GetExpertise(userId string) ([]*models.ExpertiseMo
             e.title
         FROM 
             Expertise e
-            JOIN VendorExpertise ve ON ve.expertiseId = e.id
+            JOIN UserExpertise ve ON ve.expertiseId = e.id
         WHERE
-            ve.vendorId = ?
+            ve.userId = ?
     `
 
 	expertises := make([]*models.ExpertiseModel, 0)
