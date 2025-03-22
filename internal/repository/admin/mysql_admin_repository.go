@@ -47,7 +47,7 @@ func (s *MysqlAdminRepository) FindById(id string) (*models.AdminModel, error) {
 
 	admin := new(models.AdminModel)
 
-	query := "SELECT id, username, password, mustChangePassword FROM Admin WHERE id = ?"
+	query := "SELECT id, username, email, password, mustChangePassword FROM Admin WHERE id = ?"
 	if err := s.db.GetContext(ctx, admin, query, id); err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (s *MysqlAdminRepository) FindByUsernameHash(hash string) (*models.AdminMod
 
 	admin := new(models.AdminModel)
 
-	query := "SELECT id, username, password, mustChangePassword FROM Admin WHERE usernameHash = ?"
+	query := "SELECT id, username, email, password, mustChangePassword FROM Admin WHERE usernameHash = ?"
 	if err := s.db.GetContext(ctx, admin, query, hash); err != nil {
 		return nil, err
 	}

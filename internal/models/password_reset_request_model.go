@@ -6,4 +6,5 @@ type PasswordResetRequestModel struct {
 
 	// Join fields
 	Username string `db:"username"`
+	Email    string `db:"email"`
 }

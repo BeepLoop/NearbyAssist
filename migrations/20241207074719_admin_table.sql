@@ -2,13 +2,15 @@
 CREATE TABLE IF NOT EXISTS Admin (
     id VARCHAR(255) NOT NULL,
     username VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     usernameHash VARCHAR(64) NOT NULL,
+    emailHash VARCHAR(64) NOT NULL,
     mustChangePassword BOOLEAN DEFAULT FALSE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
-    INDEX(id, usernameHash)
+    INDEX(id, usernameHash, emailHash)
 );
 -- +goose StatementBegin
 SELECT 'up SQL query';

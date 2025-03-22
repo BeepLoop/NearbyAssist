@@ -64,7 +64,8 @@ func (s *MysqlPasswordResetRepository) GetAll() ([]*models.PasswordResetRequestM
             prr.id,
             prr.adminId,
             prr.createdAt,
-            a.username
+            a.username,
+            a.email
         FROM
             PasswordResetRequest prr
             JOIN Admin a ON a.id = prr.adminId
