@@ -28,7 +28,7 @@ import (
 	user_repo "nearbyassist/internal/repository/user"
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	verification_repo "nearbyassist/internal/repository/verification"
-	admin_service "nearbyassist/internal/service/admin"
+	adminauth_service "nearbyassist/internal/service/admin_auth"
 	application_service "nearbyassist/internal/service/application"
 	complaint_service "nearbyassist/internal/service/complaint"
 	dashboard_service "nearbyassist/internal/service/dashboard"
@@ -46,8 +46,9 @@ import (
 )
 
 func (s *Server) AdminRoutes(r *echo.Group) {
-	authStore := admin_repo.NewMysqlAdminRepository(s.DB)
-	authService := admin_service.NewService(authStore, s.Encrypt, s.Hash)
+	adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+	authService := adminauth_service.NewService(adminStore, s.Encrypt, s.Hash)
+
 	authHandler := auth.NewHandler(authService)
 
 	r.GET("/login", authHandler.GetLogin)
@@ -225,10 +226,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		passwordResetStore := passwordreset_repo.NewMysqlPasswordResetRepository(s.DB)
 
-		adminService := admin_service.NewService(adminStore, s.Encrypt, s.Hash)
 		passwordResetService := passwordreset_service.NewService(adminStore, passwordResetStore, s.Encrypt, s.Hash)
 
-		handler := accountmanagement.NewHandler(adminService, passwordResetService)
+		handler := accountmanagement.NewHandler(passwordResetService)
 
 		accountManagementRoute.GET("/add", handler.AddAccount)
 		accountManagementRoute.GET("/reset", handler.ResetRequests)

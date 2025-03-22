@@ -1,13 +1,15 @@
 package auth
 
 import (
-	admin_service "nearbyassist/internal/service/admin"
+	adminauth_service "nearbyassist/internal/service/admin_auth"
 )
 
 type authHandler struct {
-	adminService *admin_service.Service
+	authService *adminauth_service.Service
 }
 
-func NewHandler(adminService *admin_service.Service) *authHandler {
-	return &authHandler{adminService: adminService}
+func NewHandler(adminService *adminauth_service.Service) *authHandler {
+	return &authHandler{
+		authService: adminService,
+	}
 }

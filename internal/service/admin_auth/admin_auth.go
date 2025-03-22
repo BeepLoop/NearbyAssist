@@ -1,8 +1,7 @@
-package admin_service
+package adminauth_service
 
 import (
 	"errors"
-
 	"nearbyassist/internal/models"
 	admin_repo "nearbyassist/internal/repository/admin"
 	"nearbyassist/internal/service/core"

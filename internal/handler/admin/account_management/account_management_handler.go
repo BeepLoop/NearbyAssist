@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
-	admin_service "nearbyassist/internal/service/admin"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/account_management"
@@ -15,13 +14,11 @@ import (
 )
 
 type accountManagementHandler struct {
-	adminService         *admin_service.Service
 	passwordResetService *passwordreset_service.Service
 }
 
-func NewHandler(adminService *admin_service.Service, passwordResetService *passwordreset_service.Service) *accountManagementHandler {
+func NewHandler(passwordResetService *passwordreset_service.Service) *accountManagementHandler {
 	return &accountManagementHandler{
-		adminService:         adminService,
 		passwordResetService: passwordResetService,
 	}
 }
