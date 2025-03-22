@@ -22,10 +22,12 @@ import (
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
 	message_repo "nearbyassist/internal/repository/message"
 	notification_repo "nearbyassist/internal/repository/notification"
+	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
 	report_user_repo "nearbyassist/internal/repository/report_user"
 	review_repo "nearbyassist/internal/repository/review"
 	saved_service_repo "nearbyassist/internal/repository/saved_service"
 	service_repo "nearbyassist/internal/repository/service"
+	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
 	tag_repo "nearbyassist/internal/repository/tag"
 	transaction_repo "nearbyassist/internal/repository/transaction"
 	user_repo "nearbyassist/internal/repository/user"
@@ -206,10 +208,12 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 
+		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
+		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
+		policeClearanceStore := policeclearance_repo.NewMysqlImplementation(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
-		applicationService := application_service.NewService(applicationStore, notificationStore, s.FS, s.Encrypt, s.JWT)
+		applicationService := application_service.NewService(applicationStore, supportingImageStore, policeClearanceStore, notificationStore, s.FS, s.Encrypt, s.JWT)
 		handler := application.NewHandler(applicationService, userService)
 
 		applicationRoute.POST("", handler.CreateApplication)

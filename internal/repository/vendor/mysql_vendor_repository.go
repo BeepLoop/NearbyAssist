@@ -331,3 +331,25 @@ func (s *MysqlVendorRepository) IsRestricted(userId string) (bool, error) {
 
 	return isRestricted, nil
 }
+
+func (s *MysqlVendorRepository) AddExpertise(userId, expertiseId, supportingImageId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        INSERT INTO
+            UserExpertise (userId, expertiseId, supportingImage)
+        VALUES
+            (?, ?, ?)
+    `
+
+	if _, err := s.db.ExecContext(ctx, query, userId, expertiseId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}

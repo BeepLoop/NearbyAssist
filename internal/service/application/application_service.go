@@ -7,6 +7,8 @@ import (
 	"nearbyassist/internal/models"
 	application_repo "nearbyassist/internal/repository/application"
 	notification_repo "nearbyassist/internal/repository/notification"
+	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
+	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
@@ -14,20 +16,24 @@ import (
 )
 
 type Service struct {
-	applicationStore application_repo.ApplicationRepository
-	notifStore       notification_repo.NotificationRepository
-	fs               fs.FileStorage
-	encrypt          core.Encryption
-	jwt              core.Authenticator
+	applicationStore     application_repo.ApplicationRepository
+	supportingImageStore supportingimage_repo.Repository
+	policeClearanceStore policeclearance_repo.Repository
+	notifStore           notification_repo.NotificationRepository
+	fs                   fs.FileStorage
+	encrypt              core.Encryption
+	jwt                  core.Authenticator
 }
 
-func NewService(applicationStore application_repo.ApplicationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
+func NewService(applicationStore application_repo.ApplicationRepository, supportingImageStore supportingimage_repo.Repository, policeClearanceStore policeclearance_repo.Repository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{
-		applicationStore: applicationStore,
-		notifStore:       notifStore,
-		fs:               fs,
-		encrypt:          encrypt,
-		jwt:              jwt,
+		applicationStore:     applicationStore,
+		supportingImageStore: supportingImageStore,
+		policeClearanceStore: policeClearanceStore,
+		notifStore:           notifStore,
+		fs:                   fs,
+		encrypt:              encrypt,
+		jwt:                  jwt,
 	}
 }
 
@@ -63,7 +69,11 @@ func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*mu
 				return "", err
 			}
 
-			application.PoliceClearanceUrl = url
+			id, err := s.policeClearanceStore.Create(url)
+			if err != nil {
+				return "", err
+			}
+			application.PoliceClearance = id
 
 		case "supportingDocument":
 			fileData := fs.File{
@@ -75,7 +85,11 @@ func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*mu
 				return "", err
 			}
 
-			application.SupportingDocumentUrl = url
+			id, err := s.supportingImageStore.Create(url)
+			if err != nil {
+				return "", err
+			}
+			application.SupportingDocument = id
 
 		default:
 			return "", err

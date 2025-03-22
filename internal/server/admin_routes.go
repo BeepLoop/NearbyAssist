@@ -20,8 +20,10 @@ import (
 	map_repo "nearbyassist/internal/repository/map"
 	notification_repo "nearbyassist/internal/repository/notification"
 	passwordreset_repo "nearbyassist/internal/repository/password_reset"
+	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
 	report_user_repo "nearbyassist/internal/repository/report_user"
 	service_repo "nearbyassist/internal/repository/service"
+	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
 	tag_repo "nearbyassist/internal/repository/tag"
 	user_repo "nearbyassist/internal/repository/user"
 	vendor_repo "nearbyassist/internal/repository/vendor"
@@ -128,10 +130,12 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		applicationRoute.Use(middleware.CheckSession)
 		applicationRoute.Use(middleware.CheckMustChangePass(adminStore))
 
-		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
+		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
+		policeClearanceStore := policeclearance_repo.NewMysqlImplementation(s.DB)
+		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		applicationService := application_service.NewService(applicationStore, notificationStore, s.FS, s.Encrypt, s.JWT)
+		applicationService := application_service.NewService(applicationStore, supportingImageStore, policeClearanceStore, notificationStore, s.FS, s.Encrypt, s.JWT)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		applicationHandler := application.NewHandler(applicationService, resourceService)
@@ -200,7 +204,11 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		expertiseRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		expertiseStore := expertise_repo.NewMysqlExpertiseRepository(s.DB)
-		expertiseService := expertise_service.NewService(expertiseStore, s.Encrypt, s.Hash)
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
+
+		expertiseService := expertise_service.NewService(userStore, vendorStore, expertiseStore, supportingImageStore, s.FS, s.Encrypt, s.Hash, s.JWT)
 		handler := expertise.NewHandler(expertiseService)
 
 		expertiseRoute.GET("", handler.GetAllExpertise)

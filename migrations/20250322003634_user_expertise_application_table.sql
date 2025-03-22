@@ -4,14 +4,16 @@ CREATE TABLE IF NOT EXISTS Application (
     applicantId VARCHAR(255) NOT NULL,
     expertiseId VARCHAR(255) NOT NULL,
     status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
-    supportingDocumentUrl VARCHAR(255) NOT NULL,
-    policeClearanceUrl VARCHAR(255) NOT NULL,
+    supportingDocument VARCHAR(255) NOT NULL,
+    policeClearance VARCHAR(255) NOT NULL,
     rejectionReason TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(applicantId) REFERENCES User(id),
     FOREIGN KEY(expertiseId) REFERENCES Expertise(id),
+    FOREIGN KEY(supportingDocument) REFERENCES SupportingImage(id),
+    FOREIGN KEY(policeClearance) REFERENCES PoliceClearance(id),
     INDEX(id)
 );
 -- +goose StatementBegin

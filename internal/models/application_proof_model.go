@@ -1,9 +1,0 @@
-package models
-
-type ApplicationProofModel struct {
-	Model
-	UpdateableModel
-	ApplicationId string `db:"applicationId"`
-	ApplicantId   string `db:"applicantId"`
-	Url           string `db:"url"`
-}

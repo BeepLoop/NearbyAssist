@@ -24,39 +24,40 @@ func (s *MysqlApplicationRepository) Create(data *models.ApplicationModel) (stri
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	data.Id = utils.GenerateId()
-
-	duplicatePendingQuery := `
-        SELECT COUNT(id)
-        FROM Application
-        WHERE applicantId = ? AND expertiseId = ? AND status = 'pending'
+	checkDupePending := `
+        SELECT EXISTS
+            (SELECT 1 FROM Application WHERE applicantId = ? AND expertiseId = ? AND status = 'pending')
+        AS has_duplicate_pending
     `
-	dupePendingResult := 0
-	if err := s.db.GetContext(ctx, &dupePendingResult, duplicatePendingQuery, data.ApplicantId, data.ExpertiseId); err != nil {
+
+	hasDupePending := false
+	if err := s.db.GetContext(ctx, &hasDupePending, checkDupePending, data.ApplicantId, data.ExpertiseId); err != nil {
 		return "", err
 	}
-	if dupePendingResult != 0 {
+	if hasDupePending {
 		return "", errors.New("Duplicate entry")
 	}
 
-	alreadyApprovedExpertiseCheck := `
-        SELECT COUNT(id)
-        FROM Application
-        WHERE applicantId = ? AND expertiseId = ? AND status = 'approved'
+	checkAlreadyApproved := `
+        SELECT EXISTS
+            (SELECT 1 FROM Application WHERE applicantId = ? AND expertiseId = ? AND status = 'approved')
+        AS already_approved
     `
-	alreadyApprovedResult := 0
-	if err := s.db.GetContext(ctx, &alreadyApprovedResult, alreadyApprovedExpertiseCheck, data.ApplicantId, data.ExpertiseId); err != nil {
+
+	alreadyApproved := false
+	if err := s.db.GetContext(ctx, &alreadyApproved, checkAlreadyApproved, data.ApplicantId, data.ExpertiseId); err != nil {
 		return "", err
 	}
-	if alreadyApprovedResult != 0 {
+	if alreadyApproved {
 		return "", errors.New("Already approved")
 	}
 
+	data.Id = utils.GenerateId()
 	createQuery := `
         INSERT INTO
-            Application (id, applicantId, expertiseId, supportingDocumentUrl, policeClearanceUrl)
+            Application (id, applicantId, expertiseId, supportingDocument, policeClearance)
         VALUES
-            (:id, :applicantId, :expertiseId, :supportingDocumentUrl, :policeClearanceUrl)
+            (:id, :applicantId, :expertiseId, :supportingDocument, :policeClearance)
     `
 	if _, err := s.db.NamedExecContext(ctx, createQuery, data); err != nil {
 		return "", err
@@ -80,8 +81,10 @@ func (s *MysqlApplicationRepository) FindById(id string) (*models.ApplicationMod
             a.createdAt,
             a.applicantId,
             a.expertiseId,
-            a.supportingDocumentUrl,
-            a.policeClearanceUrl,
+            a.supportingDocument,
+            a.policeClearance,
+            i.url AS supportingDocumentUrl,
+            p.url AS policeClearanceUrl,
             a.status,
             u.name AS applicantName,
             e.title AS expertise
@@ -89,6 +92,8 @@ func (s *MysqlApplicationRepository) FindById(id string) (*models.ApplicationMod
             Application a
             JOIN User u ON u.id = a.applicantId
             JOIN Expertise e ON e.id = a.expertiseId
+            JOIN SupportingImage i ON i.id = a.supportingDocument
+            JOIN PoliceClearance p ON p.id = a.policeClearance
         WHERE
             a.id = ?
     `
@@ -103,7 +108,7 @@ func (s *MysqlApplicationRepository) FindById(id string) (*models.ApplicationMod
 	return application, nil
 }
 
-func (s *MysqlApplicationRepository) NewProof(data *models.ApplicationProofModel) (string, error) {
+func (s *MysqlApplicationRepository) NewSupportingImage(data *models.SupportingImageModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -111,9 +116,9 @@ func (s *MysqlApplicationRepository) NewProof(data *models.ApplicationProofModel
 
 	query := `
         INSERT INTO
-            ApplicationProof (id, applicationId, applicantId, url)
+            SupportingImage (id, url)
         VALUES
-            (:id, :applicationId, :applicantId, :url)
+            (:id, :url)
     `
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
 		return "", err
@@ -134,9 +139,9 @@ func (s *MysqlApplicationRepository) NewPoliceClearance(data *models.PoliceClear
 
 	query := `
         INSERT INTO
-            PoliceClearance (id, applicationId, applicantId, url)
+            PoliceClearance (id, url)
         VALUES
-            (:id, :applicationId, :applicantId, :url)
+            (:id, :url)
     `
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
 		return "", err
@@ -161,13 +166,17 @@ func (s *MysqlApplicationRepository) GetAll(status string) ([]*models.Applicatio
             a.applicantId,
             a.expertiseId,
             a.createdAt,
-            a.supportingDocumentUrl,
-            a.policeClearanceUrl,
+            a.supportingDocument,
+            a.policeClearance,
+            i.url AS supportingDocumentUrl,
+            p.url AS policeClearanceUrl,
             a.status,
             u.name AS applicantName
         FROM
             Application a
             JOIN User u ON u.id = a.applicantId
+            JOIN SupportingImage i ON i.id = a.supportingDocument
+            JOIN PoliceClearance p ON p.id = a.policeClearance
         WHERE
             a.status = ?
     `
@@ -212,9 +221,9 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 
 	addUserExpertiseQuery := `
         INSERT INTO
-            UserExpertise (userId, expertiseId)
+            UserExpertise (userId, expertiseId, supportingImage)
         SELECT
-            applicantId, expertiseId
+            applicantId, expertiseId, supportingDocument
         FROM 
             Application
         WHERE
