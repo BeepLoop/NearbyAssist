@@ -1,0 +1,14 @@
+package pages
+
+import (
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ AccountList(flash string) {
+	@layout.Layout() {
+		@templ.JSONScript("flash", flash)
+		@partials.ToastNotification()
+		@partials.PageBanner("Accounts", "")
+	}
+}

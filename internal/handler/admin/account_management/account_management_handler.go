@@ -23,8 +23,10 @@ func NewHandler(passwordResetService *passwordreset_service.Service) *accountMan
 	}
 }
 
-func (h accountManagementHandler) AddAccount(c echo.Context) error {
-	page := pages.AddAccount()
+func (h accountManagementHandler) GetAccounts(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
+
+	page := pages.AccountList(flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }
 
