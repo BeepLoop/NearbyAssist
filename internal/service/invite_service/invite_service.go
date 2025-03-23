@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"nearbyassist/internal/config"
 	"nearbyassist/internal/models"
 	admin_repo "nearbyassist/internal/repository/admin"
 	invitation_repo "nearbyassist/internal/repository/invitation"
@@ -15,7 +16,6 @@ import (
 )
 
 type Service struct {
-	domain      string
 	adminStore  admin_repo.AdminRepository
 	inviteStore invitation_repo.Repository
 	mailer      mailer.Mailer
@@ -23,9 +23,8 @@ type Service struct {
 	hash        core.Hash
 }
 
-func NewService(domain string, adminStore admin_repo.AdminRepository, inviteStore invitation_repo.Repository, mailer mailer.Mailer, encrypt core.Encryption, hash core.Hash) *Service {
+func NewService(adminStore admin_repo.AdminRepository, inviteStore invitation_repo.Repository, mailer mailer.Mailer, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
-		domain:      domain,
 		adminStore:  adminStore,
 		inviteStore: inviteStore,
 		mailer:      mailer,
@@ -83,7 +82,7 @@ func (s *Service) Invite(username, email, duration string) error {
 	}
 
 	// TODO: sent email to invited user
-	joinUrl := fmt.Sprintf("%s/admin/invites/join", s.domain)
+	joinUrl := fmt.Sprintf("%s/admin/invites/join", config.Instance.DOMAIN)
 	payload := &mailer.InvitationPayload{
 		Username:   username,
 		Email:      email,

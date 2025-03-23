@@ -24,11 +24,33 @@ func (h *handler) SendInvite(c echo.Context) error {
 	email := c.FormValue("email")
 	duration := c.FormValue("duration")
 
-	if err := h.inviteService.Invite(username, email, duration); err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+	if username == "" || email == "" {
+		if err := utils.SetFlashMessage(c, "error", "Invalid invite information"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts?error=invite_error")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts")
 	}
 
-	return c.JSON(http.StatusNoContent, nil)
+	if err := h.inviteService.Invite(username, email, duration); err != nil {
+		if strings.Contains(err.Error(), "duplicate username") {
+			if err := utils.SetFlashMessage(c, "error", "Username already in use"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts?error=invite_error")
+			}
+		} else {
+			if err := utils.SetFlashMessage(c, "error", "Error sending invite"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts?error=invite_error")
+			}
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts")
+	}
+
+	if err := utils.SetFlashMessage(c, "success", "Invitation send"); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts?success=invitation_sent")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts")
 }
 
 func (h *handler) JoinInvite(c echo.Context) error {

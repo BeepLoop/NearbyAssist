@@ -20,8 +20,6 @@ import (
 type Server struct {
 	LOG_FILE *os.File
 
-	Domain string
-
 	Echo           *echo.Echo
 	Port           string
 	AllowedOrigins []string
@@ -52,8 +50,6 @@ func NewServer(options ServerConfig) (*Server, error) {
 	}
 
 	NewServer := &Server{
-		Domain: options.Config.DOMAIN,
-
 		Echo:           echo.New(),
 		Port:           options.Config.PORT,
 		AllowedOrigins: options.Config.ALLOWED_ORIGINS,
