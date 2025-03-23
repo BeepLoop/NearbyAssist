@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/handler/admin/complaint"
 	"nearbyassist/internal/handler/admin/dashboard"
 	"nearbyassist/internal/handler/admin/expertise"
+	"nearbyassist/internal/handler/admin/invitation"
 	map_handler "nearbyassist/internal/handler/admin/map"
 	passwordreset_handler "nearbyassist/internal/handler/admin/password_reset"
 	"nearbyassist/internal/handler/admin/userManagement"
@@ -17,6 +18,7 @@ import (
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
 	expertise_repo "nearbyassist/internal/repository/expertise"
+	invitation_repo "nearbyassist/internal/repository/invitation"
 	map_repo "nearbyassist/internal/repository/map"
 	notification_repo "nearbyassist/internal/repository/notification"
 	passwordreset_repo "nearbyassist/internal/repository/password_reset"
@@ -33,6 +35,7 @@ import (
 	complaint_service "nearbyassist/internal/service/complaint"
 	dashboard_service "nearbyassist/internal/service/dashboard"
 	expertise_service "nearbyassist/internal/service/expertise"
+	"nearbyassist/internal/service/invite_service"
 	map_service "nearbyassist/internal/service/map"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	resource_service "nearbyassist/internal/service/resource"
@@ -234,5 +237,16 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		accountManagementRoute.GET("/reset", handler.ResetRequests)
 		accountManagementRoute.POST("/reset/fulfill", handler.FufillResetRequest)
 		accountManagementRoute.POST("/reset/reject", handler.RejectResetRequest)
+	}
+
+	invitationRoute := r.Group("/invites")
+	{
+		inviteStore := invitation_repo.NewMysqlRepository(s.DB)
+		inviteService := invite_service.NewService(s.Domain, inviteStore, s.Mailer, s.Encrypt, s.Hash)
+
+		handler := invitation.NewHandler(inviteService)
+
+		invitationRoute.POST("", handler.SendInvite, middleware.CheckSession)
+		invitationRoute.GET("/join", handler.JoinInvite)
 	}
 }

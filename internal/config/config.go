@@ -14,6 +14,8 @@ var (
 )
 
 type Config struct {
+	DOMAIN string
+
 	PORT            string
 	LOG_FILE        string
 	ALLOWED_ORIGINS []string
@@ -64,6 +66,8 @@ func initialize() *Config {
 	}
 
 	return &Config{
+		DOMAIN: getEnv("DOMAIN", "http://localhost:3000"),
+
 		PORT:            getEnv("PORT", "3000"),
 		LOG_FILE:        getEnv("LOG_FILE", "logs/server.log"),
 		ALLOWED_ORIGINS: strings.Split(getEnv("ALLOWED_ORIGINS", "http://127.0.0.1:3001"), ","),

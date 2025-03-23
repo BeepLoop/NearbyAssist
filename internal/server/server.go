@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/mailer"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
@@ -19,6 +20,8 @@ import (
 type Server struct {
 	LOG_FILE *os.File
 
+	Domain string
+
 	Echo           *echo.Echo
 	Port           string
 	AllowedOrigins []string
@@ -27,6 +30,8 @@ type Server struct {
 
 	DB *sqlx.DB
 	FS fs.FileStorage
+
+	Mailer mailer.Mailer
 
 	RouteEngine      route_engine.Engine
 	SuggestionEngine suggestion_engine.Engine
@@ -47,6 +52,8 @@ func NewServer(options ServerConfig) (*Server, error) {
 	}
 
 	NewServer := &Server{
+		Domain: options.Config.DOMAIN,
+
 		Echo:           echo.New(),
 		Port:           options.Config.PORT,
 		AllowedOrigins: options.Config.ALLOWED_ORIGINS,
@@ -56,6 +63,8 @@ func NewServer(options ServerConfig) (*Server, error) {
 
 		DB: options.DB,
 		FS: options.FS,
+
+		Mailer: options.Mailer,
 
 		Hash:    options.Hash,
 		Encrypt: options.Encrypt,

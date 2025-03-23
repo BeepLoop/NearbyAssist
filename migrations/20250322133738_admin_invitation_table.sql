@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS Invitation (
-    id VARCHAR(255) NOT NULL,
+    id CHAR(36) DEFAULT (UUID()),
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     code VARCHAR(255) NOT NULL,

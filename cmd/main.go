@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/mailer"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/route_engine"
 	"nearbyassist/internal/service/suggestion_engine"
@@ -42,6 +43,9 @@ func main() {
 	}
 	storage := fs.NewDiskStorage(directories, hash)
 
+	// Load mailer
+	mailer := mailer.NewConsoleMailer(config.DOMAIN)
+
 	// Load database configuration
 	mysql, err := db.NewMysql(mysql.Config{
 		User:                 config.DB_USER,
@@ -69,6 +73,8 @@ func main() {
 
 		DB: mysql,
 		FS: storage,
+
+		Mailer: mailer,
 
 		JWT:     jwt,
 		Encrypt: encrypt,

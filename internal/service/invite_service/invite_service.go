@@ -1,24 +1,31 @@
 package invite_service
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"nearbyassist/internal/models"
 	invitation_repo "nearbyassist/internal/repository/invitation"
 	"nearbyassist/internal/service/core"
+	"nearbyassist/internal/service/mailer"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
+	domain      string
 	inviteStore invitation_repo.Repository
+	mailer      mailer.Mailer
 	encrypt     core.Encryption
 	hash        core.Hash
 }
 
-func NewService(inviteStore invitation_repo.Repository, encrypt core.Encryption, hash core.Hash) *Service {
+func NewService(domain string, inviteStore invitation_repo.Repository, mailer mailer.Mailer, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
+		domain:      domain,
 		inviteStore: inviteStore,
+		mailer:      mailer,
 		encrypt:     encrypt,
 		hash:        hash,
 	}
@@ -60,9 +67,17 @@ func (s *Service) Invite(username, email, duration string) error {
 		ExpiredAt:    utils.FormatDateTime(expiryDate),
 	}
 
-	s.inviteStore.Create(invitation)
+	if _, err := s.inviteStore.Create(invitation); err != nil {
+		return err
+	}
 
 	// TODO: sent email to invited user
+	joinUrl := fmt.Sprintf("%s/admin/invites/join", s.domain)
+	payload := mailer.NewInvitationPayload(joinUrl, invitation.Code)
+
+	if err := s.mailer.Send(context.Background(), payload); err != nil {
+		return err
+	}
 
 	return nil
 }
