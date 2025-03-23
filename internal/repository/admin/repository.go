@@ -4,6 +4,7 @@ import "nearbyassist/internal/models"
 
 type AdminRepository interface {
 	Create(data *models.AdminModel) error
+	GetAll() ([]*models.AdminModel, error)
 	FindById(id string) (*models.AdminModel, error)
 	FindByUsernameHash(hash string) (*models.AdminModel, error)
 	DoesUsernameExists(usernamehash string) (bool, error)

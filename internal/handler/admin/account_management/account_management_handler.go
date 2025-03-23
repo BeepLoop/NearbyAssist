@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
+	admin_service "nearbyassist/internal/service/admin"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/account_management"
@@ -14,19 +15,41 @@ import (
 )
 
 type accountManagementHandler struct {
+	adminService         *admin_service.Service
 	passwordResetService *passwordreset_service.Service
 }
 
-func NewHandler(passwordResetService *passwordreset_service.Service) *accountManagementHandler {
+func NewHandler(adminService *admin_service.Service, passwordResetService *passwordreset_service.Service) *accountManagementHandler {
 	return &accountManagementHandler{
+		adminService:         adminService,
 		passwordResetService: passwordResetService,
 	}
 }
 
-func (h accountManagementHandler) GetAccounts(c echo.Context) error {
+func (h *accountManagementHandler) GetAccounts(c echo.Context) error {
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
-	page := pages.AccountList(flash)
+	accounts, err := h.adminService.GetAll()
+	if err != nil {
+		fmt.Println(err.Error())
+		page := pages.AccountList(make([]models.AdminModel, 0), flash)
+		return page.Render(context.Background(), c.Response().Writer)
+	}
+
+	data := make([]models.AdminModel, 0)
+	for _, account := range accounts {
+		data = append(data, models.AdminModel{
+			Model: models.Model{
+				Id:        account.Id,
+				CreatedAt: utils.FormatDate(account.CreatedAt),
+			},
+			Username:           account.Username,
+			Email:              account.Email,
+			MustChangePassword: account.MustChangePassword,
+		})
+	}
+
+	page := pages.AccountList(data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }
 
