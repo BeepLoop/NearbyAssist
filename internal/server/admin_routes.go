@@ -242,7 +242,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 	invitationRoute := r.Group("/invites")
 	{
 		inviteStore := invitation_repo.NewMysqlRepository(s.DB)
-		inviteService := invite_service.NewService(s.Domain, inviteStore, s.Mailer, s.Encrypt, s.Hash)
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
+		inviteService := invite_service.NewService(s.Domain, adminStore, inviteStore, s.Mailer, s.Encrypt, s.Hash)
 
 		handler := invitation.NewHandler(inviteService)
 

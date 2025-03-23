@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"nearbyassist/internal/models"
+	admin_repo "nearbyassist/internal/repository/admin"
 	invitation_repo "nearbyassist/internal/repository/invitation"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/mailer"
@@ -15,15 +16,17 @@ import (
 
 type Service struct {
 	domain      string
+	adminStore  admin_repo.AdminRepository
 	inviteStore invitation_repo.Repository
 	mailer      mailer.Mailer
 	encrypt     core.Encryption
 	hash        core.Hash
 }
 
-func NewService(domain string, inviteStore invitation_repo.Repository, mailer mailer.Mailer, encrypt core.Encryption, hash core.Hash) *Service {
+func NewService(domain string, adminStore admin_repo.AdminRepository, inviteStore invitation_repo.Repository, mailer mailer.Mailer, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
 		domain:      domain,
+		adminStore:  adminStore,
 		inviteStore: inviteStore,
 		mailer:      mailer,
 		encrypt:     encrypt,
@@ -65,6 +68,14 @@ func (s *Service) Invite(username, email, duration string) error {
 		EmailHash:    emailHash,
 		Code:         utils.GenerateId(),
 		ExpiredAt:    utils.FormatDateTime(expiryDate),
+	}
+
+	doesExists, err := s.adminStore.DoesUsernameExists(usernameHash)
+	if err != nil {
+		return err
+	}
+	if doesExists {
+		return errors.New("duplicate username")
 	}
 
 	if _, err := s.inviteStore.Create(invitation); err != nil {
