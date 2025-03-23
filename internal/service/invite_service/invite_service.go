@@ -112,7 +112,13 @@ func (s *Service) Join(code string) error {
 		return errors.New("invitation expired")
 	}
 
-	if err := s.inviteStore.Accept(invitation.Id); err != nil {
+	defaultPassword := "password_default"
+	encryptedDefaultPassword, err := core.BcryptPassword(defaultPassword)
+	if err != nil {
+		return err
+	}
+
+	if err := s.inviteStore.Accept(invitation.Id, encryptedDefaultPassword); err != nil {
 		return err
 	}
 

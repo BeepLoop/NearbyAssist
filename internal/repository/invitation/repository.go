@@ -7,5 +7,5 @@ type Repository interface {
 	FindById(inviteId string) (*models.InvitationModel, error)
 	FindByCode(code string) (*models.InvitationModel, error)
 	IsExpired(inviteId string) (bool, error)
-	Accept(inviteId string) error
+	Accept(inviteId, defaultPassword string) error
 }

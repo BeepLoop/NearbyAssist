@@ -102,7 +102,7 @@ func (s *mysqlRepository) IsExpired(inviteId string) (bool, error) {
 	return isExpired, nil
 }
 
-func (s *mysqlRepository) Accept(inviteId string) error {
+func (s *mysqlRepository) Accept(inviteId, defualtPassword string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -115,14 +115,14 @@ func (s *mysqlRepository) Accept(inviteId string) error {
         INSERT INTO
             Admin(id, username, email, password, usernameHash, emailHash, mustChangePassword)
         SELECT
-            ?, username, email, 'password_default', usernameHash, emailHash, 1
+            ?, username, email, ?, usernameHash, emailHash, 1
         FROM
             Invitation
         WHERE
             id = ?
     `
 	adminId := utils.GenerateUserId()
-	if _, err := tx.ExecContext(ctx, createAdmin, adminId, inviteId); err != nil {
+	if _, err := tx.ExecContext(ctx, createAdmin, adminId, defualtPassword, inviteId); err != nil {
 		return err
 	}
 
