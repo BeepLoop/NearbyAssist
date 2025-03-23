@@ -73,7 +73,7 @@ func (s *Service) Invite(username, email, duration string) error {
 
 	// TODO: sent email to invited user
 	joinUrl := fmt.Sprintf("%s/admin/invites/join", s.domain)
-	payload := mailer.NewInvitationPayload(joinUrl, invitation.Code)
+	payload := mailer.NewInvitationPayload(username, joinUrl, invitation.Code)
 
 	if err := s.mailer.Send(context.Background(), payload); err != nil {
 		return err
