@@ -6,21 +6,22 @@ import (
 	"text/template"
 )
 
-type invitationPayload struct {
-	username   string
-	joinUrl    string
-	inviteCode string
+type InvitationPayload struct {
+	Username   string
+	Email      string
+	JoinURL    string
+	InviteCode string
 }
 
-func NewInvitationPayload(username, joinUrl, code string) *invitationPayload {
-	return &invitationPayload{
-		username:   username,
-		joinUrl:    joinUrl,
-		inviteCode: code,
+func NewInvitationPayload(username, joinUrl, code string) *InvitationPayload {
+	return &InvitationPayload{
+		Username:   username,
+		JoinURL:    joinUrl,
+		InviteCode: code,
 	}
 }
 
-func (p *invitationPayload) GetContent() string {
+func (p *InvitationPayload) GetHTML() string {
 	emailTemplate := `
         <!DOCTYPE html>
         <html>
@@ -74,8 +75,8 @@ func (p *invitationPayload) GetContent() string {
 		Username   string
 		InviteLink string
 	}{
-		Username:   p.username,
-		InviteLink: fmt.Sprintf("%s?code=%s", p.joinUrl, p.inviteCode),
+		Username:   p.Username,
+		InviteLink: fmt.Sprintf("%s?code=%s", p.JoinURL, p.InviteCode),
 	}
 
 	templ, err := template.New("invitation").Parse(emailTemplate)
@@ -89,4 +90,12 @@ func (p *invitationPayload) GetContent() string {
 	}
 
 	return buf.String()
+}
+
+func (p *InvitationPayload) GetRecipient() string {
+	return p.Email
+}
+
+func (p *InvitationPayload) GetSubject() string {
+	return "NearbyAssist Invitation"
 }

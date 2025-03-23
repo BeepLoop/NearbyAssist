@@ -19,40 +19,44 @@ import (
 
 func main() {
 	// Load configuration file
-	config := config.GetConfig()
+	cfg := config.GetConfig()
 
 	// Load encryption algorithm
-	encrypt := core.NewAES([]byte(config.ENCRYPTION_KEY))
+	encrypt := core.NewAES([]byte(cfg.ENCRYPTION_KEY))
 
 	// Load hashing algorithm
 	hash := core.NewSha256()
 
 	// Load JWT authenticator
-	jwt := core.NewJWTAuthenticator(config.JWT_SECRET, config.JWT_DURATION)
+	jwt := core.NewJWTAuthenticator(cfg.JWT_SECRET, cfg.JWT_DURATION)
 
 	// Load file disk
 	directories := map[fs.Category]string{
-		fs.ID_BACK:               config.ID_BACK_DIR,
-		fs.ID_FRONT:              config.ID_FRONT_DIR,
-		fs.FACE:                  config.FACE_IMG_DIR,
-		fs.APPLICATION_PROOF_DIR: config.APPLICATION_PROOF_DIR,
-		fs.SERVICE_PHOTO_DIR:     config.SERVICE_PHOTO_DIR,
-		fs.POLICE_CLEARANCE_DIR:  config.POLICE_CLEARANCE_DIR,
-		fs.BUG_REPORT_DIR:        config.BUG_REPORT_DIR,
-		fs.REPORT_USER_DIR:       config.REPORT_USER_DIR,
+		fs.ID_BACK:               cfg.ID_BACK_DIR,
+		fs.ID_FRONT:              cfg.ID_FRONT_DIR,
+		fs.FACE:                  cfg.FACE_IMG_DIR,
+		fs.APPLICATION_PROOF_DIR: cfg.APPLICATION_PROOF_DIR,
+		fs.SERVICE_PHOTO_DIR:     cfg.SERVICE_PHOTO_DIR,
+		fs.POLICE_CLEARANCE_DIR:  cfg.POLICE_CLEARANCE_DIR,
+		fs.BUG_REPORT_DIR:        cfg.BUG_REPORT_DIR,
+		fs.REPORT_USER_DIR:       cfg.REPORT_USER_DIR,
 	}
 	storage := fs.NewDiskStorage(directories, hash)
 
 	// Load mailer
-	mailer := mailer.NewConsoleMailer(config.DOMAIN)
+	// mailer := mailer.NewConsoleMailer()
+	mailer := mailer.NewPostmarkMailer(
+		config.MustGetEnv("POSTMARK_SERVER_TOKEN"),
+		config.MustGetEnv("POSTMARK_ACCOUNT_TOKEN"),
+	)
 
 	// Load database configuration
 	mysql, err := db.NewMysql(mysql.Config{
-		User:                 config.DB_USER,
-		Passwd:               config.DB_PWD,
-		Net:                  config.DB_NET,
-		Addr:                 config.DB_HOST + ":" + config.DB_PORT,
-		DBName:               config.DB_NAME,
+		User:                 cfg.DB_USER,
+		Passwd:               cfg.DB_PWD,
+		Net:                  cfg.DB_NET,
+		Addr:                 cfg.DB_HOST + ":" + cfg.DB_PORT,
+		DBName:               cfg.DB_NAME,
 		AllowNativePasswords: true,
 		ParseTime:            true,
 	})
@@ -64,10 +68,10 @@ func main() {
 	chatStore := message_repo.NewMysqlChatRepository(mysql)
 	ws := websocket.NewWebsocket(chatStore)
 
-	notification_service.NewOneSignal(config.ONE_SIGNAL_APP_ID, config.ONE_SIGNAL_API_KEY)
+	notification_service.NewOneSignal(cfg.ONE_SIGNAL_APP_ID, cfg.ONE_SIGNAL_API_KEY)
 
 	serverConfig := server.ServerConfig{
-		Config: config,
+		Config: cfg,
 
 		WS: ws,
 
@@ -80,7 +84,7 @@ func main() {
 		Encrypt: encrypt,
 		Hash:    hash,
 
-		RouteEngine:      route_engine.NewOSRM(config),
+		RouteEngine:      route_engine.NewOSRM(cfg),
 		SuggestionEngine: suggestion_engine.NewWeightedScoring(),
 	}
 

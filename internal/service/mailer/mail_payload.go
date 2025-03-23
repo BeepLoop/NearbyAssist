@@ -1,5 +1,7 @@
 package mailer
 
 type MailPayload interface {
-	GetContent() string
+	GetHTML() string
+	GetRecipient() string
+	GetSubject() string
 }

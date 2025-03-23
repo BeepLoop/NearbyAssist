@@ -6,21 +6,17 @@ import (
 	"time"
 )
 
-type consoleMailer struct {
-	domain string
-}
+type consoleMailer struct{}
 
-func NewConsoleMailer(domain string) *consoleMailer {
-	return &consoleMailer{
-		domain: domain,
-	}
+func NewConsoleMailer() *consoleMailer {
+	return &consoleMailer{}
 }
 
 func (m *consoleMailer) Send(parentCtx context.Context, payload MailPayload) error {
 	ctx, cancel := context.WithTimeout(parentCtx, 5*time.Second)
 	defer cancel()
 
-	fmt.Println(payload.GetContent())
+	fmt.Println(payload.GetHTML())
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return context.DeadlineExceeded
