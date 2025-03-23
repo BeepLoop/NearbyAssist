@@ -1,11 +1,11 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS Invitation (
     id CHAR(36) DEFAULT (UUID()),
-    username VARCHAR(255) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
     code VARCHAR(255) NOT NULL,
     usernameHash VARCHAR(255) NOT NULL,
-    emailHash VARCHAR(255) NOT NULL,
+    emailHash VARCHAR(255) NOT NULL UNIQUE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expiredAt TIMESTAMP NOT NULL,
     PRIMARY KEY(id),

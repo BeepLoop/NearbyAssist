@@ -28,6 +28,7 @@ func (s *mysqlRepository) Create(invitation *models.InvitationModel) (string, er
             Invitation (username, email, code, usernameHash, emailHash, expiredAt)
         VALUES
             (:username, :email, :code, :usernameHash, :emailHash, :expiredAt)
+        ON DUPLICATE KEY UPDATE expiredAt = :expiredAt
     `
 
 	invitation.Id = utils.GenerateId()

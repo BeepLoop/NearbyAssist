@@ -2,7 +2,6 @@ package mailer
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/mrz1836/postmark"
