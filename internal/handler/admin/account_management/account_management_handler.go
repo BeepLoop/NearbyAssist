@@ -52,6 +52,7 @@ func (h *accountManagementHandler) GetAccounts(c echo.Context) error {
 			},
 			Username:           account.Username,
 			Email:              account.Email,
+			Role:               account.Role,
 			MustChangePassword: account.MustChangePassword,
 		})
 	}

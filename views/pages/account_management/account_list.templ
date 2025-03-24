@@ -27,12 +27,13 @@ templ accountsTable(accounts []models.AdminModel) {
 					<th scope="col" class="p-4">Username</th>
 					<th scope="col" class="p-4">Email</th>
 					<th scope="col" class="p-4">Created At</th>
+					<th scope="col" class="p-4">Role</th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-300">
 				if len(accounts) < 1 {
 					<tr class="">
-						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable">Empty</td>
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="5" id="emptyTable">Empty</td>
 					</tr>
 				} else {
 					for _, account := range accounts {
@@ -41,6 +42,13 @@ templ accountsTable(accounts []models.AdminModel) {
 							<td class="p-4">{ account.Username } </td>
 							<td class="p-4">{ account.Email } </td>
 							<td class="p-4">{ account.CreatedAt } </td>
+							<td class="p-4">
+								if account.Role == "admin" {
+									@partials.SoftBadgeSuccess(account.Role)
+								} else {
+									@partials.SoftBadgeWarning(account.Role)
+								}
+							</td>
 						</tr>
 					}
 				}
