@@ -16,15 +16,15 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 	admin, err := h.authService.Login(username, password)
 	if err != nil {
 		if err := utils.SetFlashMessage(c, "error", "invalid credentials"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/login?error=login_error")
+			return c.Redirect(http.StatusSeeOther, "/auth/login?error=login_error")
 		}
 
-		return c.Redirect(http.StatusSeeOther, "/admin/login")
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
 	sess, err := session.Get("session", c)
 	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
+		return c.Redirect(http.StatusSeeOther, "/auth/login?error=session_error")
 	}
 
 	sess.Options = &sessions.Options{
@@ -35,7 +35,7 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 
 	sess.Values["user"] = admin
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/login?error=session_error")
+		return c.Redirect(http.StatusSeeOther, "/auth/login?error=session_error")
 	}
 
 	if admin.MustChangePassword {

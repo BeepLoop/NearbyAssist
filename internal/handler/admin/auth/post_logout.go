@@ -27,5 +27,5 @@ func (h *authHandler) PostLogout(c echo.Context) error {
 
 	_ = utils.SetFlashMessage(c, "success", "Logged out")
 
-	return c.Redirect(http.StatusSeeOther, "/admin/login")
+	return c.Redirect(http.StatusSeeOther, "/auth/login")
 }

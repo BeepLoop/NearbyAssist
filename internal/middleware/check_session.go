@@ -12,10 +12,10 @@ func CheckSession(next echo.HandlerFunc) echo.HandlerFunc {
 		_, err := utils.GetAdminFromSession(c)
 		if err != nil {
 			if err := utils.SetFlashMessage(c, "error", "invalid session"); err != nil {
-				return c.Redirect(http.StatusSeeOther, "/admin/login?error=invalid_session_error")
+				return c.Redirect(http.StatusSeeOther, "/auth/login?error=invalid_session_error")
 			}
 
-			return c.Redirect(http.StatusSeeOther, "/admin/login")
+			return c.Redirect(http.StatusSeeOther, "/auth/login")
 		}
 
 		return next(c)

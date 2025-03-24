@@ -15,19 +15,19 @@ func CheckMustChangePass(repo admin_repo.AdminRepository) echo.MiddlewareFunc {
 			activeSession, err := utils.GetAdminFromSession(c)
 			if err != nil {
 				if err := utils.SetFlashMessage(c, "error", "invalid session"); err != nil {
-					return c.Redirect(http.StatusSeeOther, "/admin/login?error=invalid_session_error")
+					return c.Redirect(http.StatusSeeOther, "/auth/login?error=invalid_session_error")
 				}
 
-				return c.Redirect(http.StatusSeeOther, "/admin/login")
+				return c.Redirect(http.StatusSeeOther, "/auth/login")
 			}
 
 			admin, err := repo.FindById(activeSession.Id)
 			if err != nil {
 				if err := utils.SetFlashMessage(c, "error", "Unknown user"); err != nil {
-					return c.Redirect(http.StatusSeeOther, "/admin/login?error=unknown_users_session")
+					return c.Redirect(http.StatusSeeOther, "/auth/login?error=unknown_users_session")
 				}
 
-				return c.Redirect(http.StatusSeeOther, "/admin/login")
+				return c.Redirect(http.StatusSeeOther, "/auth/login")
 			}
 
 			if admin.MustChangePassword {

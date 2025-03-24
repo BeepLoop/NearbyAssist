@@ -19,6 +19,9 @@ func (s *Server) routes() {
 		s.v1ApiRoutes(v1)
 	}
 
+	auth := s.Echo.Group("/auth")
+	s.AuthRoutes(auth)
+
 	admin := s.Echo.Group("/admin")
 	s.AdminRoutes(admin)
 

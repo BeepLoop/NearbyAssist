@@ -7,7 +7,7 @@ templ Sidebar() {
 			@navlist()
 		</div>
 		<div class="">
-			<form action="/admin/logout" method="POST">
+			<form action="/auth/logout" method="POST">
 				<button
 					type="submit"
 					class="w-full flex items-center gap-2 px-4 py-2 text-sm text-neutral-dark outline-1 outline-pale-gray hover:bg-danger/50 cursor-pointer"
@@ -87,7 +87,7 @@ templ user() {
 			class="z-50 absolute left-full bottom-2 flex w-fit min-w-48 flex-col overflow-hidden rounded-sm outline-1 outline-pale-gray bg-white shadow-xl"
 			role="menu"
 		>
-			<form action="/admin/logout" method="POST">
+			<form action="/auth/logout" method="POST">
 				<button
 					type="submit"
 					class="w-full flex items-center gap-2 px-4 py-2 text-sm text-neutral-dark hover:bg-danger/50"

@@ -2,7 +2,6 @@ package server
 
 import (
 	accountmanagement "nearbyassist/internal/handler/admin/account_management"
-	"nearbyassist/internal/handler/admin/auth"
 	"nearbyassist/internal/handler/admin/complaint"
 	"nearbyassist/internal/handler/admin/dashboard"
 	"nearbyassist/internal/handler/admin/expertise"
@@ -31,7 +30,6 @@ import (
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	verification_repo "nearbyassist/internal/repository/verification"
 	admin_service "nearbyassist/internal/service/admin"
-	adminauth_service "nearbyassist/internal/service/admin_auth"
 	application_service "nearbyassist/internal/service/application"
 	complaint_service "nearbyassist/internal/service/complaint"
 	dashboard_service "nearbyassist/internal/service/dashboard"
@@ -50,15 +48,6 @@ import (
 )
 
 func (s *Server) AdminRoutes(r *echo.Group) {
-	adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
-	authService := adminauth_service.NewService(adminStore, s.Encrypt, s.Hash)
-
-	authHandler := auth.NewHandler(authService)
-
-	r.GET("/login", authHandler.GetLogin)
-	r.POST("/login", authHandler.PostLogin)
-	r.POST("/logout", authHandler.PostLogout)
-
 	resetRoute := r.Group("/reset")
 	{
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)

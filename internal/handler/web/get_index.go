@@ -7,5 +7,5 @@ import (
 )
 
 func GetIndex(c echo.Context) error {
-	return c.Redirect(http.StatusSeeOther, "/admin/login")
+	return c.Redirect(http.StatusSeeOther, "/auth/login")
 }

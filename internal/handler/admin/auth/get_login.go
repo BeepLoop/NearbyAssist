@@ -15,10 +15,7 @@ func (h *authHandler) GetLogin(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 	}
 
-	flash, _, err := utils.RetrieveFlashMessage(c)
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/?error=session_error")
-	}
+	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	page := pages.Login(flash)
 	return page.Render(context.Background(), c.Response().Writer)
