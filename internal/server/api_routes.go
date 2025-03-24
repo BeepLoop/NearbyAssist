@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/handler/api/application"
 	"nearbyassist/internal/handler/api/complaint"
 	"nearbyassist/internal/handler/api/e2ee"
+	"nearbyassist/internal/handler/api/expertise"
 	"nearbyassist/internal/handler/api/health"
 	"nearbyassist/internal/handler/api/message"
 	"nearbyassist/internal/handler/api/notification"
@@ -20,6 +21,7 @@ import (
 	application_repo "nearbyassist/internal/repository/application"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
+	expertise_repo "nearbyassist/internal/repository/expertise"
 	message_repo "nearbyassist/internal/repository/message"
 	notification_repo "nearbyassist/internal/repository/notification"
 	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
@@ -36,6 +38,7 @@ import (
 	application_service "nearbyassist/internal/service/application"
 	complaint_service "nearbyassist/internal/service/complaint"
 	e2ee_service "nearbyassist/internal/service/e2ee"
+	expertise_service "nearbyassist/internal/service/expertise"
 	health_service "nearbyassist/internal/service/health"
 	message_service "nearbyassist/internal/service/message"
 	notification_service "nearbyassist/internal/service/notification"
@@ -113,6 +116,23 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		tagRoute.GET("", handler.GetTags)
 		tagRoute.GET("/expertise", handler.GetExpertise)
+	}
+
+	// ===== Expertise =======
+	expertiseRoute := v1.Group("/expertise")
+	{
+		expertiseRoute.Use(middleware.CheckAuth(s.JWT))
+
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+		expertiseStore := expertise_repo.NewMysqlExpertiseRepository(s.DB)
+		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
+
+		expertiseService := expertise_service.NewService(userStore, vendorStore, expertiseStore, supportingImageStore, s.FS, s.Encrypt, s.Hash, s.JWT)
+
+		handler := expertise.NewHandler(expertiseService)
+
+		expertiseRoute.POST("/add", handler.AddUserExpertise)
 	}
 
 	// ===== VENDOR =======
