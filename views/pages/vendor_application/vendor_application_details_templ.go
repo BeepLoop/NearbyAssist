@@ -60,67 +60,20 @@ func VendorApplicationDetails(application models.ApplicationModel, flash string)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"mx-auto grid max-w-6xl grid-cols-10 gap-4\"><div class=\"col-span-3\"><table class=\"w-full text-left text-sm\"><tbody><tr><th class=\"py-2 font-medium text-neutral-dark\">Applicant:</th><td class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"mx-auto max-w-4xl\"><!-- Actions --><div class=\"flex justify-end gap-2\"><form action=\"/admin/vendor-applications/accept\" method=\"POST\"><input type=\"text\" hidden=\"true\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(application.ApplicantName)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(application.Id)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 21, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 25, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr><tr><th class=\"py-2 font-medium text-neutral-dark\">Date Applied:</th><td class=\"py-2\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(application.CreatedAt)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 25, Col: 47}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr><tr><th class=\"py-2 font-medium text-neutral-dark\">Expertise:</th><td class=\"py-2\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(application.Expertise)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 29, Col: 47}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr><tr><th class=\"py-2 font-medium text-neutral-dark\">Status:</th><td class=\"py-2\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = partials.SoftBadgeWarning("pending").Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr></tbody></table><!-- Action Buttons --><div class=\"mt-6 flex gap-4\"><form action=\"/admin/vendor-applications/accept\" method=\"POST\"><input type=\"text\" hidden=\"true\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(application.Id)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 48, Col: 29}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"applicationId\"> <button type=\"submit\" class=\"flex-1 cursor-pointer rounded-sm bg-primary px-4 py-2 font-medium text-white hover:opacity-75\">Approve</button></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"applicationId\"> <button type=\"submit\" class=\"cursor-pinter flex-1 rounded-sm bg-primary px-4 py-2 text-xs font-medium text-white hover:opacity-75\">Approve</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -128,33 +81,61 @@ func VendorApplicationDetails(application models.ApplicationModel, flash string)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- Images --><div class=\"col-span-7 grid-cols-8 gap-2 p-2\"><img src=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><!-- Divider --><div class=\"mt-4 border-t-2 border-solid border-t-pale-gray outline-none\"></div><!-- Information --><div class=\"mt-4 grid gap-4\"><div class=\"flex gap-2 \"><h3 class=\"font-medium text-neutral-dark\">Applicant Name:</h3><p class=\"text-neutral-gray\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/resource/%s", application.SupportingDocumentUrl))
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(application.ApplicantName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 64, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 43, Col: 61}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" class=\"col-span-4\"> <img src=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/resource/%s", application.PoliceClearanceUrl))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 69, Col: 77}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"flex gap-2\"><h3 class=\"font-medium text-neutral-dark\">Date Applied:</h3><p class=\"text-neutral-gray\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" class=\"col-span-4\"></div></div>")
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(application.CreatedAt)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 47, Col: 57}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"flex gap-2 \"><h3 class=\"font-medium text-neutral-dark\">Applying for:</h3>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = partials.DefaultBadgeSuccess(application.Expertise).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"flex gap-2\"><h3 class=\"font-medium text-neutral-dark\">Status:</h3>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = partials.SoftBadgeWarning(application.Status).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><!-- Divider --><div class=\"mt-4 border-t-2 border-solid border-t-pale-gray outline-none\"></div><!-- Images --><div class=\"mt-4\"><h3 class=\"mb-4 font-medium text-neutral-dark\">Documents</h3><div class=\"grid grid-cols-2 gap-2\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = imageViewer("Supporting Document", fmt.Sprintf("/api/v1/resource/%s", application.SupportingDocumentUrl)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = imageViewer("Police Clearance", fmt.Sprintf("/api/v1/resource/%s", application.PoliceClearanceUrl)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -184,25 +165,93 @@ func rejectButton(applicationId string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var9 == nil {
-			templ_7745c5c3_Var9 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{offCanvasOpen: false}\"><!-- offCanvas Button --><button x-on:click=\"offCanvasOpen = !offCanvasOpen\" type=\"button\" class=\"cursor-pointer rounded-sm bg-danger px-4 py-2 text-sm font-medium text-white hover:opacity-75\">Reject</button><!-- offCanvas Backdrop --><div x-cloak x-show=\"offCanvasOpen\" x-on:keydown.esc.window=\"offCanvasOpen = false\" x-on:click.self=\"offCanvasOpen = false\" role=\"dialog\" class=\"fixed inset-0 bg-neutral-gray/50\"><!-- offCanvas Sidebar --><div x-cloak x-show=\"offCanvasOpen\" x-transition:enter=\"transition ease-out duration-200\" x-transition:enter-start=\"translate-x-full\" x-transition:enter-end=\"translate-x-0\" x-transition:leave=\"transition ease-in duration-200\" x-transition:leave-start=\"translate-x-0\" x-transition:leave-end=\"translate-x-full\" role=\"document\" class=\"fixed top-0 right-0 flex h-full w-md flex-col bg-white p-4 outline-1 outline-pale-gray\"><!-- Header --><div class=\"flex justify-between\"><h3 class=\"text-sm font-medium text-neutral-dark\">Rejection Reason</h3><button x-on:click=\"offCanvasOpen = false\" type=\"button\" class=\"flex cursor-pointer items-center rounded-sm px-3 py-1.5 hover:bg-neutral-gray/25 hover:opacity-75\"><svg class=\"hi-solid hi-x -mx-1 inline-block size-4\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z\" clip-rule=\"evenodd\"></path></svg></button></div><!-- Content --><div class=\"mt-4\"><form action=\"/admin/vendor-applications/reject\" method=\"POST\" class=\"grid gap-4\"><input type=\"text\" hidden=\"off\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{offCanvasOpen: false}\"><!-- offCanvas Button --><button x-on:click=\"offCanvasOpen = !offCanvasOpen\" type=\"button\" class=\"cursor-pointer rounded-sm bg-danger px-4 py-2 text-xs font-medium text-white hover:opacity-75\">Reject</button><!-- offCanvas Backdrop --><div x-cloak x-show=\"offCanvasOpen\" x-on:keydown.esc.window=\"offCanvasOpen = false\" x-on:click.self=\"offCanvasOpen = false\" role=\"dialog\" class=\"fixed inset-0 bg-neutral-gray/50\"><!-- offCanvas Sidebar --><div x-cloak x-show=\"offCanvasOpen\" x-transition:enter=\"transition ease-out duration-200\" x-transition:enter-start=\"translate-x-full\" x-transition:enter-end=\"translate-x-0\" x-transition:leave=\"transition ease-in duration-200\" x-transition:leave-start=\"translate-x-0\" x-transition:leave-end=\"translate-x-full\" role=\"document\" class=\"fixed top-0 right-0 flex h-full w-md flex-col bg-white p-4 outline-1 outline-pale-gray\"><!-- Header --><div class=\"flex justify-between\"><h3 class=\"text-sm font-medium text-neutral-dark\">Rejection Reason</h3><button x-on:click=\"offCanvasOpen = false\" type=\"button\" class=\"flex cursor-pointer items-center rounded-sm px-3 py-1.5 hover:bg-neutral-gray/25 hover:opacity-75\"><svg class=\"hi-solid hi-x -mx-1 inline-block size-4\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z\" clip-rule=\"evenodd\"></path></svg></button></div><!-- Content --><div class=\"mt-4\"><form action=\"/admin/vendor-applications/reject\" method=\"POST\" class=\"grid gap-4\"><input type=\"text\" hidden=\"off\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(applicationId)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 134, Col: 28}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"applicationId\"><div><label for=\"reason\" class=\"font-medium text-neutral-dark\">Reason</label> <textarea name=\"reason\" id=\"reason\" rows=\"6\" placeholder=\"reason...\" autocomplete=\"off\" class=\"mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none\"></textarea></div><div class=\"flex justify-end\"><button type=\"submit\" class=\"cursor-pointer rounded-sm bg-danger bg-danger p-2 text-sm font-semibold text-white hover:opacity-75\">Continue</button></div></form></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func imageViewer(title, image string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{imageViewerOpen: false}\"><!-- Image --><div x-on:click=\"imageViewerOpen = true\" class=\"cursor-pointer outline-1 outline-pale-gray\"><img src=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(image)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 168, Col: 19}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" class=\"aspect-square object-contain\"></div><!-- Backdrop --><div x-cloak x-show=\"imageViewerOpen\" x-on:keydown.esc.window=\"imageViewerOpen = false\" x-on:click.self=\"imageViewerOpen = false\" x-transition role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50\"><!-- Modal Dialog --><div x-show=\"imageViewerOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"rounded-sm bg-white p-2 p-4 outline-1 outline-pale-gray\"><h3 class=\"mb-2 font-medium\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(applicationId)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 140, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 190, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"applicationId\"><div><label for=\"reason\" class=\"font-medium text-neutral-dark\">Reason</label> <textarea name=\"reason\" id=\"reason\" rows=\"6\" placeholder=\"reason...\" autocomplete=\"off\" class=\"mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none\"></textarea></div><div class=\"flex justify-end\"><button type=\"submit\" class=\"cursor-pointer rounded-sm bg-danger bg-danger p-2 text-sm font-semibold text-white hover:opacity-75\">Continue</button></div></form></div></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h3><img src=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(image)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/vendor_application/vendor_application_details.templ`, Line: 192, Col: 16}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" loading=\"lazy\" class=\"max-h-[80vh] max-w-[80vw] min-w-60 object-cover\"></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
