@@ -18,10 +18,27 @@ func NewService(adminStore admin_repo.AdminRepository, encrypt core.Encryption) 
 	}
 }
 
-func (s *Service) GetAll() ([]*models.AdminModel, error) {
-	accounts, err := s.adminStore.GetAll()
-	if err != nil {
-		return nil, err
+func (s *Service) GetAll(filter string) ([]*models.AdminModel, error) {
+	accounts := make([]*models.AdminModel, 0)
+
+	if filter == "" || filter == "all" {
+		if res, err := s.adminStore.GetAll(); err != nil {
+			return nil, err
+		} else {
+			accounts = res
+		}
+	} else if filter == "admin" {
+		if res, err := s.adminStore.GetAllAdmin(); err != nil {
+			return nil, err
+		} else {
+			accounts = res
+		}
+	} else if filter == "staff" {
+		if res, err := s.adminStore.GetAllStaff(); err != nil {
+			return nil, err
+		} else {
+			accounts = res
+		}
 	}
 
 	for _, account := range accounts {

@@ -59,6 +59,42 @@ func (s *MysqlAdminRepository) GetAll() ([]*models.AdminModel, error) {
 	return accounts, nil
 }
 
+func (s *MysqlAdminRepository) GetAllAdmin() ([]*models.AdminModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT id, username, email, mustChangePassword, createdAt FROM Admin WHERE role = 'admin' ORDER BY createdAt DESC"
+
+	accounts := make([]*models.AdminModel, 0)
+	if err := s.db.SelectContext(ctx, &accounts, query); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return accounts, nil
+}
+
+func (s *MysqlAdminRepository) GetAllStaff() ([]*models.AdminModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT id, username, email, mustChangePassword, createdAt FROM Admin WHERE role = 'staff' ORDER BY createdAt DESC"
+
+	accounts := make([]*models.AdminModel, 0)
+	if err := s.db.SelectContext(ctx, &accounts, query); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return accounts, nil
+}
+
 func (s *MysqlAdminRepository) FindById(id string) (*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

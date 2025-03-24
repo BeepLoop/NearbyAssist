@@ -29,7 +29,9 @@ func NewHandler(adminService *admin_service.Service, passwordResetService *passw
 func (h *accountManagementHandler) GetAccounts(c echo.Context) error {
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
-	accounts, err := h.adminService.GetAll()
+	filter := c.QueryParam("filter")
+
+	accounts, err := h.adminService.GetAll(filter)
 	if err != nil {
 		fmt.Println(err.Error())
 		page := pages.AccountList(make([]models.AdminModel, 0), flash)
