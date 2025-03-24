@@ -27,6 +27,11 @@ func NewHandler(adminService *admin_service.Service, passwordResetService *passw
 }
 
 func (h *accountManagementHandler) GetAccounts(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	filter := c.QueryParam("filter")
@@ -34,7 +39,7 @@ func (h *accountManagementHandler) GetAccounts(c echo.Context) error {
 	accounts, err := h.adminService.GetAll(filter)
 	if err != nil {
 		fmt.Println(err.Error())
-		page := pages.AccountList(make([]models.AdminModel, 0), flash)
+		page := pages.AccountList(*admin, make([]models.AdminModel, 0), flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -51,17 +56,22 @@ func (h *accountManagementHandler) GetAccounts(c echo.Context) error {
 		})
 	}
 
-	page := pages.AccountList(data, flash)
+	page := pages.AccountList(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }
 
 func (h *accountManagementHandler) ResetRequests(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	requests, err := h.passwordResetService.GetResetRequests()
 	if err != nil {
 		c.Logger().Warnf("Error getting reset requests: %s", err.Error())
-		page := pages.ResetRequests(make([]models.PasswordResetRequestModel, 0), flash)
+		page := pages.ResetRequests(*admin, make([]models.PasswordResetRequestModel, 0), flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -77,7 +87,7 @@ func (h *accountManagementHandler) ResetRequests(c echo.Context) error {
 		})
 	}
 
-	page := pages.ResetRequests(data, flash)
+	page := pages.ResetRequests(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }
 

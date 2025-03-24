@@ -5,36 +5,42 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/identity_verification"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	requestId := c.Param("requestId")
 
 	request, err := h.verificationService.GetRequest(requestId)
 	if err != nil {
-		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
+		page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	fontIdImage, err := h.resourceService.SignURLWithDefaultDuration(request.FrontIdImageUrl)
 	if err != nil {
-		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
+		page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	backIdImage, err := h.resourceService.SignURLWithDefaultDuration(request.BackIdImageUrl)
 	if err != nil {
-		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
+		page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	selfieImage, err := h.resourceService.SignURLWithDefaultDuration(request.FaceImageUrl)
 	if err != nil {
-		page := pages.IdentityVerificationDetails(models.IdentityVerificationModel{}, flash)
+		page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -52,6 +58,6 @@ func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) err
 		FaceImageUrl:    selfieImage,
 	}
 
-	page := pages.IdentityVerificationDetails(data, flash)
+	page := pages.IdentityVerificationDetails(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

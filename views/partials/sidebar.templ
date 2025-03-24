@@ -1,10 +1,12 @@
 package partials
 
-templ Sidebar() {
+import "nearbyassist/internal/models"
+
+templ Sidebar(user models.AdminModel) {
 	<div class="h-screen flex flex-col outline-1 outline-pale-gray justify-between bg-white">
 		<div>
 			@logo()
-			@navlist()
+			@navlist(user)
 		</div>
 		<div class="">
 			<form action="/auth/logout" method="POST">
@@ -103,12 +105,16 @@ templ user() {
 	</div>
 }
 
-templ navlist() {
+templ navlist(user models.AdminModel) {
 	<div class="pl-3 text-xs">
 		<ul class="">
-			@navItem("/admin/dashboard", "Dashboard")
+			if user.Role == "admin" {
+				@navItem("/admin/dashboard", "Dashboard")
+			}
 			@navItem("/admin/map", "Map")
-			@navItem("/admin/expertise", "Expertise")
+			if user.Role == "admin" {
+				@navItem("/admin/expertise", "Expertise")
+			}
 			@navWithSubItem("Requests") {
 				@subNavItem("/admin/verification-requests", "Identity verification")
 				@subNavItem("/admin/vendor-applications", "Vendor applications")
@@ -119,11 +125,15 @@ templ navlist() {
 			}
 			@navWithSubItem("Reports") {
 				@subNavItem("/admin/complaints/users", "Reported users")
-				@subNavItem("/admin/complaints/bugs", "Bug reports")
+				if user.Role == "admin" {
+					@subNavItem("/admin/complaints/bugs", "Bug reports")
+				}
 			}
-			@navWithSubItem("Account Management") {
-				@subNavItem("/admin/account-management/accounts", "Accounts")
-				@subNavItem("/admin/account-management/reset", "Password reset")
+			if user.Role == "admin" {
+				@navWithSubItem("Account Management") {
+					@subNavItem("/admin/account-management/accounts", "Accounts")
+					@subNavItem("/admin/account-management/reset", "Password reset")
+				}
 			}
 		</ul>
 	</div>

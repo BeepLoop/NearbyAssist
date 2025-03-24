@@ -7,8 +7,8 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ ViewReportedUserDetail(data models.ReportedUserModel) {
-	@layout.Layout() {
+templ ViewReportedUserDetail(user models.AdminModel, data models.ReportedUserModel) {
+	@layout.Layout(user) {
 		<div class="mx-auto max-w-3xl">
 			<!-- Actions -->
 			<div class="flex justify-between">

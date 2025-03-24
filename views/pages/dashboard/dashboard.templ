@@ -8,8 +8,8 @@ import (
 	"strconv"
 )
 
-templ Dashboard(data models.DashboardModel) {
-	@layout.Layout() {
+templ Dashboard(user models.AdminModel, data models.DashboardModel) {
+	@layout.Layout(user) {
 		@partials.PageBanner("Overview", "Monitor your activities")
 		@dashboardData(data)
 	}

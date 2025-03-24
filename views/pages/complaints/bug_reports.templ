@@ -7,8 +7,8 @@ import (
 	"strconv"
 )
 
-templ BugReports(bugs []models.BugReportModel, flash string) {
-	@layout.Layout() {
+templ BugReports(user models.AdminModel, bugs []models.BugReportModel, flash string) {
+	@layout.Layout(user) {
 		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()
 		@partials.PageBanner("Bug Reports", "View reported bugs")

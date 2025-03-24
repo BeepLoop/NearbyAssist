@@ -5,14 +5,20 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/identity_verification"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *verificationHandler) GetIdentityVerification(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	requests, err := h.verificationService.GetIdentityVerificationRequests()
 	if err != nil {
-		page := pages.IdentityVerification(make([]models.IdentityVerificationModel, 0))
+		page := pages.IdentityVerification(*admin, make([]models.IdentityVerificationModel, 0))
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -35,6 +41,6 @@ func (h *verificationHandler) GetIdentityVerification(c echo.Context) error {
 		})
 	}
 
-	page := pages.IdentityVerification(data)
+	page := pages.IdentityVerification(*admin, data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

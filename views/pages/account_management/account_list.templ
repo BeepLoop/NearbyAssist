@@ -6,8 +6,8 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ AccountList(accounts []models.AdminModel, flash string) {
-	@layout.Layout() {
+templ AccountList(user models.AdminModel, accounts []models.AdminModel, flash string) {
+	@layout.Layout(user) {
 		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()
 		@partials.PageBanner("Accounts", "")

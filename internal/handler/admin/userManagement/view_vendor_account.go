@@ -6,22 +6,28 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/user_management"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *userManagementHandler) ViewVendorAccount(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	userId := c.Param("userId")
 	if userId == "" {
-		page := pages.VendorAccountDetail(models.UserAccountPageData{}, flash)
+		page := pages.VendorAccountDetail(*admin, models.UserAccountPageData{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	accountData, err := h.managementService.GetSingleUser(userId)
 	if err != nil {
-		page := pages.VendorAccountDetail(models.UserAccountPageData{}, flash)
+		page := pages.VendorAccountDetail(*admin, models.UserAccountPageData{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -51,6 +57,6 @@ func (h *userManagementHandler) ViewVendorAccount(c echo.Context) error {
 		Stat:       accountData.Stat,
 	}
 
-	page := pages.VendorAccountDetail(data, flash)
+	page := pages.VendorAccountDetail(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

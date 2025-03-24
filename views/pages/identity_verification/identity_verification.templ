@@ -7,8 +7,8 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ IdentityVerification(requests []models.IdentityVerificationModel) {
-	@layout.Layout() {
+templ IdentityVerification(user models.AdminModel, requests []models.IdentityVerificationModel) {
+	@layout.Layout(user) {
 		@partials.PageBanner("Verification requests", "View and manage identity verification requests")
 		@requestsData(requests)
 		@partials.Pagination()

@@ -13,25 +13,30 @@ import (
 )
 
 func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	applicationId := c.Param("applicationId")
 
 	application, err := h.applicationService.GetApplicationDetail(applicationId)
 	if err != nil {
-		page := pages.VendorApplicationDetails(models.ApplicationModel{}, flash)
+		page := pages.VendorApplicationDetails(*admin, models.ApplicationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	supportingDocumentImage, err := h.resourceService.SignURLWithDefaultDuration(application.SupportingDocumentUrl)
 	if err != nil {
-		page := pages.VendorApplicationDetails(models.ApplicationModel{}, flash)
+		page := pages.VendorApplicationDetails(*admin, models.ApplicationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
 	policeClearanceImage, err := h.resourceService.SignURLWithDefaultDuration(application.PoliceClearanceUrl)
 	if err != nil {
-		page := pages.VendorApplicationDetails(models.ApplicationModel{}, flash)
+		page := pages.VendorApplicationDetails(*admin, models.ApplicationModel{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -51,7 +56,7 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 		Expertise:             application.Expertise,
 	}
 
-	page := pages.VendorApplicationDetails(data, flash)
+	page := pages.VendorApplicationDetails(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }
 

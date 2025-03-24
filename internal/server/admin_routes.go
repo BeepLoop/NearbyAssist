@@ -65,6 +65,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 	{
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 
+		dashboardRoute.Use(middleware.EnsureAdmin)
 		dashboardRoute.Use(middleware.CheckSession)
 		dashboardRoute.Use(middleware.CheckMustChangePass(adminStore))
 
@@ -110,11 +111,12 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		complaintHandler := complaint.NewHandler(complaintService, resourceService)
 
-		complaintRoute.GET("/bugs", complaintHandler.GetBugReports)
-		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug)
 		complaintRoute.GET("/users", complaintHandler.GetReportedUsers)
 		complaintRoute.GET("/users/:reportId", complaintHandler.GetReportedUserDetail)
 		complaintRoute.POST("/users/close", complaintHandler.CloseUserReport)
+
+		complaintRoute.GET("/bugs", complaintHandler.GetBugReports, middleware.EnsureAdmin)
+		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug, middleware.EnsureAdmin)
 	}
 
 	applicationRoute := r.Group("/vendor-applications")
@@ -194,6 +196,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 	{
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 
+		expertiseRoute.Use(middleware.EnsureAdmin)
 		expertiseRoute.Use(middleware.CheckSession)
 		expertiseRoute.Use(middleware.CheckMustChangePass(adminStore))
 
@@ -214,6 +217,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 	{
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 
+		accountManagementRoute.Use(middleware.EnsureAdmin)
 		accountManagementRoute.Use(middleware.CheckSession)
 		accountManagementRoute.Use(middleware.CheckMustChangePass(adminStore))
 
@@ -239,7 +243,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		handler := invitation.NewHandler(inviteService)
 
-		invitationRoute.POST("", handler.SendInvite, middleware.CheckSession)
+		invitationRoute.POST("", handler.SendInvite, middleware.CheckSession, middleware.EnsureAdmin)
 		invitationRoute.GET("/join", handler.JoinInvite)
 	}
 }

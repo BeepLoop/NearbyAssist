@@ -7,10 +7,10 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ IdentityVerificationDetails(request models.IdentityVerificationModel, flash string) {
+templ IdentityVerificationDetails(user models.AdminModel, request models.IdentityVerificationModel, flash string) {
 	@templ.JSONScript("flash", flash)
 	@partials.ToastNotification()
-	@layout.Layout() {
+	@layout.Layout(user) {
 		@partials.PageBanner("Request Details", "Here are the details of the identity verification")
 		<div class="mx-auto max-w-4xl">
 			<!-- Actions -->

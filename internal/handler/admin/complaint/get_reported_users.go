@@ -5,12 +5,18 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/complaints"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *complaintHandler) GetReportedUsers(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	params := c.QueryParams()
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 
@@ -32,7 +38,7 @@ func (h *complaintHandler) GetReportedUsers(c echo.Context) error {
 		users, err := h.complaintService.GetReportedUsers(limit, offset)
 		if err != nil {
 			empty := make([]models.ReportedUserModel, 0)
-			page := pages.ReportedUsers(empty, flash)
+			page := pages.ReportedUsers(*admin, empty, flash)
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = users
@@ -48,6 +54,6 @@ func (h *complaintHandler) GetReportedUsers(c echo.Context) error {
 		})
 	}
 
-	page := pages.ReportedUsers(data, flash)
+	page := pages.ReportedUsers(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

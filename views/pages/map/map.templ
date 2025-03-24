@@ -7,8 +7,8 @@ import (
 	"strconv"
 )
 
-templ Map(data models.MapPageDataModel, flash string) {
-	@layout.Layout() {
+templ Map(user models.AdminModel, data models.MapPageDataModel, flash string) {
+	@layout.Layout(user) {
 		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()
 		<div class="pb-4">

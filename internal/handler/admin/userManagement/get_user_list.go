@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/user_management"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -16,6 +17,11 @@ const (
 )
 
 func (h *userManagementHandler) GetUserList(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	params := c.QueryParams()
 
 	results := make([]*models.UserModel, 0)
@@ -26,7 +32,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 
 		user, err := h.userService.FindByEmail(query)
 		if err != nil {
-			page := pages.UserList(make([]models.UserModel, 0))
+			page := pages.UserList(*admin, make([]models.UserModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 
@@ -44,7 +50,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 
 		accounts, err := h.userService.GetAllBasicUsers(limit, offset)
 		if err != nil {
-			page := pages.UserList(make([]models.UserModel, 0))
+			page := pages.UserList(*admin, make([]models.UserModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = accounts
@@ -65,6 +71,6 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 		})
 	}
 
-	page := pages.UserList(data)
+	page := pages.UserList(*admin, data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

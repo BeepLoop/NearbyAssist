@@ -23,6 +23,11 @@ func NewHandler(expertService *expertise_service.Service) *expertiseHandler {
 }
 
 func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	params := c.QueryParams()
 	results := make([]*models.ExpertiseModel, 0)
 
@@ -33,14 +38,14 @@ func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
 
 		expertise, err := h.expertService.FindExpertise(title)
 		if err != nil {
-			page := pages.Expertise(make([]models.ExpertiseModel, 0), flash)
+			page := pages.Expertise(*admin, make([]models.ExpertiseModel, 0), flash)
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = append(results, expertise)
 	} else {
 		experitises, err := h.expertService.GetAllExpertise()
 		if err != nil {
-			page := pages.Expertise(make([]models.ExpertiseModel, 0), flash)
+			page := pages.Expertise(*admin, make([]models.ExpertiseModel, 0), flash)
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = experitises
@@ -55,7 +60,7 @@ func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
 		})
 	}
 
-	page := pages.Expertise(data, flash)
+	page := pages.Expertise(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }
 

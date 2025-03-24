@@ -46,5 +46,9 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/reset/cp")
 	}
 
+	if admin.Role != "admin" {
+		return c.Redirect(http.StatusSeeOther, "/admin/map")
+	}
+
 	return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 }

@@ -7,8 +7,8 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ VendorList(accounts []models.VendorModel) {
-	@layout.Layout() {
+templ VendorList(user models.AdminModel, accounts []models.VendorModel) {
+	@layout.Layout(user) {
 		@partials.PageBanner("Vendor list", "")
 		<!-- searchbar -->
 		<div class="flex justify-end py-2">

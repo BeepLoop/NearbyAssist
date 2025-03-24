@@ -7,8 +7,8 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ Applications(applications []models.ApplicationModel) {
-	@layout.Layout() {
+templ Applications(user models.AdminModel, applications []models.ApplicationModel) {
+	@layout.Layout(user) {
 		@partials.PageBanner("Vendor Applications", "View and manage vendor applications")
 		@applicationsData(applications)
 		@partials.Pagination()

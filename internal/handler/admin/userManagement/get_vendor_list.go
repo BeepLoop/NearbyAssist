@@ -5,12 +5,18 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/user_management"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *userManagementHandler) GetVendorList(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	params := c.QueryParams()
 
 	results := make([]*models.VendorModel, 0)
@@ -21,7 +27,7 @@ func (h *userManagementHandler) GetVendorList(c echo.Context) error {
 
 		user, err := h.vendorService.FindByEmail(query)
 		if err != nil {
-			page := pages.VendorList(make([]models.VendorModel, 0))
+			page := pages.VendorList(*admin, make([]models.VendorModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 
@@ -39,7 +45,7 @@ func (h *userManagementHandler) GetVendorList(c echo.Context) error {
 
 		accounts, err := h.vendorService.GetAll(limit, offset)
 		if err != nil {
-			page := pages.VendorList(make([]models.VendorModel, 0))
+			page := pages.VendorList(*admin, make([]models.VendorModel, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		results = accounts
@@ -61,6 +67,6 @@ func (h *userManagementHandler) GetVendorList(c echo.Context) error {
 		})
 	}
 
-	page := pages.VendorList(data)
+	page := pages.VendorList(*admin, data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

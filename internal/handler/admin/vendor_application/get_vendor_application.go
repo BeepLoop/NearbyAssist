@@ -5,14 +5,20 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/vendor_application"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	applications, err := h.applicationService.GetApplications()
 	if err != nil {
-		page := pages.Applications(make([]models.ApplicationModel, 0))
+		page := pages.Applications(*admin, make([]models.ApplicationModel, 0))
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -33,6 +39,6 @@ func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
 		})
 	}
 
-	page := pages.Applications(data)
+	page := pages.Applications(*admin, data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

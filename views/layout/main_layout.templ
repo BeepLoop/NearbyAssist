@@ -1,15 +1,18 @@
 package layout
 
-import "nearbyassist/views/partials"
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/views/partials"
+)
 
-templ Layout() {
+templ Layout(user models.AdminModel) {
 	<!DOCTYPE html>
 	<html lang="en">
 		@head()
 		<body class="font-roboto">
 			<div class="grid h-screen grid-cols-12 text-sm">
 				<div class="col-span-2">
-					@partials.Sidebar()
+					@partials.Sidebar(user)
 				</div>
 				<main class="overflow-scroll col-span-10 px-4 py-2">
 					{ children... }

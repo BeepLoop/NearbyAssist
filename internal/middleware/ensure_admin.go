@@ -20,7 +20,7 @@ func EnsureAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// NOTE: update redirect to staff route if role is not admin
 		if activeSession.Role != "admin" {
-			return c.Redirect(http.StatusSeeOther, "/")
+			return c.Redirect(http.StatusSeeOther, "/admin/map")
 		}
 
 		return next(c)

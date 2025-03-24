@@ -2,7 +2,6 @@ package server
 
 import (
 	"nearbyassist/internal/handler/web"
-	"nearbyassist/internal/middleware"
 )
 
 func (s *Server) routes() {
@@ -23,7 +22,7 @@ func (s *Server) routes() {
 	auth := s.Echo.Group("/auth")
 	s.AuthRoutes(auth)
 
-	admin := s.Echo.Group("/admin", middleware.EnsureAdmin)
+	admin := s.Echo.Group("/admin")
 	s.AdminRoutes(admin)
 
 	s.Echo.RouteNotFound("/*", web.GetNotFound)

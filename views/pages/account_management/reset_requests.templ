@@ -6,8 +6,8 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ ResetRequests(requests []models.PasswordResetRequestModel, flash string) {
-	@layout.Layout() {
+templ ResetRequests(user models.AdminModel, requests []models.PasswordResetRequestModel, flash string) {
+	@layout.Layout(user) {
 		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()
 		@partials.PageBanner("Password Reset Requests", "")

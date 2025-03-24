@@ -8,8 +8,8 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ UserAccountDetail(data models.UserAccountPageData, flash string) {
-	@layout.Layout() {
+templ UserAccountDetail(user models.AdminModel, data models.UserAccountPageData, flash string) {
+	@layout.Layout(user) {
 		<!-- toasy component -->
 		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()

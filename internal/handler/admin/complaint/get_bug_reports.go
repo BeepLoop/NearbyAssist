@@ -6,12 +6,18 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/complaints"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *complaintHandler) GetBugReports(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	limit, err := strconv.Atoi(c.QueryParam("limit"))
 	if err != nil {
 		limit = DEFAULT_LIMIT
@@ -26,7 +32,7 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 
 	complaints, err := h.complaintService.GetBugReports(limit, offset)
 	if err != nil {
-		page := pages.BugReports(make([]models.BugReportModel, 0), flash)
+		page := pages.BugReports(*admin, make([]models.BugReportModel, 0), flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -56,6 +62,6 @@ func (h *complaintHandler) GetBugReports(c echo.Context) error {
 
 	}
 
-	page := pages.BugReports(data, flash)
+	page := pages.BugReports(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

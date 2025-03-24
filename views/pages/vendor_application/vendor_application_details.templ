@@ -7,10 +7,10 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ VendorApplicationDetails(application models.ApplicationModel, flash string) {
+templ VendorApplicationDetails(user models.AdminModel, application models.ApplicationModel, flash string) {
 	@templ.JSONScript("flash", flash)
 	@partials.ToastNotification()
-	@layout.Layout() {
+	@layout.Layout(user) {
 		@partials.PageBanner("Application Details", "Here are the details of the application")
 		<div class="mx-auto max-w-4xl">
 			<!-- Actions -->

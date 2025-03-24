@@ -12,6 +12,11 @@ import (
 )
 
 func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	reportId := c.Param("reportId")
 
 	detail, err := h.complaintService.GetReportedUserDetail(reportId)
@@ -47,6 +52,6 @@ func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
 		Name:       detail.Name,
 	}
 
-	page := pages.ViewReportedUserDetail(data)
+	page := pages.ViewReportedUserDetail(*admin, data)
 	return page.Render(context.Background(), c.Response().Writer)
 }
