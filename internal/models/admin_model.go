@@ -9,4 +9,5 @@ type AdminModel struct {
 	UsernameHash       string `json:"-" db:"usernameHash"`
 	EmailHash          string `json:"-" db:"emailHash"`
 	MustChangePassword bool   `json:"-" db:"mustChangePassword"`
+	Role               string `json:"role" db:"role"`
 }

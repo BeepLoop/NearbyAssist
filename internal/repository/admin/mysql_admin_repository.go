@@ -45,7 +45,7 @@ func (s *MysqlAdminRepository) GetAll() ([]*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, username, email, mustChangePassword, createdAt FROM Admin ORDER BY createdAt DESC"
+	query := "SELECT id, username, email, mustChangePassword, role, createdAt FROM Admin ORDER BY createdAt DESC"
 
 	accounts := make([]*models.AdminModel, 0)
 	if err := s.db.SelectContext(ctx, &accounts, query); err != nil {
@@ -63,7 +63,7 @@ func (s *MysqlAdminRepository) GetAllAdmin() ([]*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, username, email, mustChangePassword, createdAt FROM Admin WHERE role = 'admin' ORDER BY createdAt DESC"
+	query := "SELECT id, username, email, mustChangePassword, role, createdAt FROM Admin WHERE role = 'admin' ORDER BY createdAt DESC"
 
 	accounts := make([]*models.AdminModel, 0)
 	if err := s.db.SelectContext(ctx, &accounts, query); err != nil {
@@ -81,7 +81,7 @@ func (s *MysqlAdminRepository) GetAllStaff() ([]*models.AdminModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, username, email, mustChangePassword, createdAt FROM Admin WHERE role = 'staff' ORDER BY createdAt DESC"
+	query := "SELECT id, username, email, mustChangePassword, role, createdAt FROM Admin WHERE role = 'staff' ORDER BY createdAt DESC"
 
 	accounts := make([]*models.AdminModel, 0)
 	if err := s.db.SelectContext(ctx, &accounts, query); err != nil {
@@ -101,7 +101,7 @@ func (s *MysqlAdminRepository) FindById(id string) (*models.AdminModel, error) {
 
 	admin := new(models.AdminModel)
 
-	query := "SELECT id, username, email, password, mustChangePassword FROM Admin WHERE id = ?"
+	query := "SELECT id, username, email, password, mustChangePassword, role FROM Admin WHERE id = ?"
 	if err := s.db.GetContext(ctx, admin, query, id); err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (s *MysqlAdminRepository) FindByUsernameHash(hash string) (*models.AdminMod
 
 	admin := new(models.AdminModel)
 
-	query := "SELECT id, username, email, password, mustChangePassword FROM Admin WHERE usernameHash = ?"
+	query := "SELECT id, username, email, password, mustChangePassword, role FROM Admin WHERE usernameHash = ?"
 	if err := s.db.GetContext(ctx, admin, query, hash); err != nil {
 		return nil, err
 	}
