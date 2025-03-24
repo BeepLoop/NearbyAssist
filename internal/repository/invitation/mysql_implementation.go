@@ -25,9 +25,9 @@ func (s *mysqlRepository) Create(invitation *models.InvitationModel) (string, er
 
 	createInvite := `
         INSERT INTO
-            Invitation (username, email, code, usernameHash, emailHash, expiredAt)
+            Invitation (username, email, code, password, usernameHash, emailHash, expiredAt)
         VALUES
-            (:username, :email, :code, :usernameHash, :emailHash, :expiredAt)
+            (:username, :email, :code, :password, :usernameHash, :emailHash, :expiredAt)
         ON DUPLICATE KEY UPDATE expiredAt = :expiredAt
     `
 
@@ -102,7 +102,7 @@ func (s *mysqlRepository) IsExpired(inviteId string) (bool, error) {
 	return isExpired, nil
 }
 
-func (s *mysqlRepository) Accept(inviteId, defualtPassword string) error {
+func (s *mysqlRepository) Accept(inviteId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -115,14 +115,14 @@ func (s *mysqlRepository) Accept(inviteId, defualtPassword string) error {
         INSERT INTO
             Admin(id, username, email, password, usernameHash, emailHash, mustChangePassword)
         SELECT
-            ?, username, email, ?, usernameHash, emailHash, 1
+            ?, username, email, password, usernameHash, emailHash, 1
         FROM
             Invitation
         WHERE
             id = ?
     `
 	adminId := utils.GenerateUserId()
-	if _, err := tx.ExecContext(ctx, createAdmin, adminId, defualtPassword, inviteId); err != nil {
+	if _, err := tx.ExecContext(ctx, createAdmin, adminId, inviteId); err != nil {
 		return err
 	}
 

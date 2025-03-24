@@ -33,7 +33,7 @@ func NewService(adminStore admin_repo.AdminRepository, inviteStore invitation_re
 	}
 }
 
-func (s *Service) Invite(username, email, duration string) error {
+func (s *Service) Invite(username, email, defaultPassword, duration string) error {
 	d, err := utils.ParseStringDuration(duration)
 	if err != nil {
 		return err
@@ -60,12 +60,18 @@ func (s *Service) Invite(username, email, duration string) error {
 		return err
 	}
 
+	encryptedDefaultPassword, err := core.BcryptPassword(defaultPassword)
+	if err != nil {
+		return err
+	}
+
 	invitation := &models.InvitationModel{
 		Username:     encryptedUsername,
 		UsernameHash: usernameHash,
 		Email:        encryptedEmail,
 		EmailHash:    emailHash,
 		Code:         utils.GenerateId(),
+		Password:     encryptedDefaultPassword,
 		ExpiredAt:    utils.FormatDateTime(expiryDate),
 	}
 
@@ -112,13 +118,7 @@ func (s *Service) Join(code string) error {
 		return errors.New("invitation expired")
 	}
 
-	defaultPassword := "password_default"
-	encryptedDefaultPassword, err := core.BcryptPassword(defaultPassword)
-	if err != nil {
-		return err
-	}
-
-	if err := s.inviteStore.Accept(invitation.Id, encryptedDefaultPassword); err != nil {
+	if err := s.inviteStore.Accept(invitation.Id); err != nil {
 		return err
 	}
 

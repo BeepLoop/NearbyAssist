@@ -21,10 +21,11 @@ func NewHandler(inviteService *invite_service.Service) *handler {
 
 func (h *handler) SendInvite(c echo.Context) error {
 	username := c.FormValue("username")
+	defaultPassword := c.FormValue("defaultPassword")
 	email := c.FormValue("email")
 	duration := c.FormValue("duration")
 
-	if username == "" || email == "" {
+	if username == "" || email == "" || defaultPassword == "" {
 		if err := utils.SetFlashMessage(c, "error", "Invalid invite information"); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts?error=invite_error")
 		}
@@ -32,7 +33,7 @@ func (h *handler) SendInvite(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts")
 	}
 
-	if err := h.inviteService.Invite(username, email, duration); err != nil {
+	if err := h.inviteService.Invite(username, email, defaultPassword, duration); err != nil {
 		if strings.Contains(err.Error(), "duplicate username") {
 			if err := utils.SetFlashMessage(c, "error", "Username already in use"); err != nil {
 				return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts?error=invite_error")

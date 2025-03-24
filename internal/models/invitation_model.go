@@ -5,6 +5,7 @@ type InvitationModel struct {
 	Username     string `db:"username"`
 	Email        string `db:"email"`
 	Code         string `db:"code"`
+	Password     string `db:"password"`
 	UsernameHash string `db:"usernameHash"`
 	EmailHash    string `db:"emailHash"`
 	CreatedAt    string `db:"createdAt"`
