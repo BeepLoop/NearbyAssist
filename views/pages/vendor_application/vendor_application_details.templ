@@ -12,64 +12,58 @@ templ VendorApplicationDetails(application models.ApplicationModel, flash string
 	@partials.ToastNotification()
 	@layout.Layout() {
 		@partials.PageBanner("Application Details", "Here are the details of the application")
-		<div class="mx-auto grid max-w-6xl grid-cols-10 gap-4">
-			<div class="col-span-3">
-				<table class="w-full text-left text-sm">
-					<tbody>
-						<tr>
-							<th class="py-2 font-medium text-neutral-dark">Applicant:</th>
-							<td class="py-2">{ application.ApplicantName }</td>
-						</tr>
-						<tr>
-							<th class="py-2 font-medium text-neutral-dark">Date Applied:</th>
-							<td class="py-2">{ application.CreatedAt }</td>
-						</tr>
-						<tr>
-							<th class="py-2 font-medium text-neutral-dark">Expertise:</th>
-							<td class="py-2">{ application.Expertise }</td>
-						</tr>
-						<tr>
-							<th class="py-2 font-medium text-neutral-dark">Status:</th>
-							<td class="py-2">
-								@partials.SoftBadgeWarning("pending")
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<!-- Action Buttons -->
-				<div class="mt-6 flex gap-4">
-					<form
-						action="/admin/vendor-applications/accept"
-						method="POST"
+		<div class="mx-auto max-w-4xl">
+			<!-- Actions -->
+			<div class="flex justify-end gap-2">
+				<form
+					action="/admin/vendor-applications/accept"
+					method="POST"
+				>
+					<input
+						type="text"
+						hidden="true"
+						value={ application.Id }
+						name="applicationId"
+					/>
+					<button
+						type="submit"
+						class="cursor-pinter flex-1 rounded-sm bg-primary px-4 py-2 text-xs font-medium text-white hover:opacity-75"
 					>
-						<input
-							type="text"
-							hidden="true"
-							value={ application.Id }
-							name="applicationId"
-						/>
-						<button
-							type="submit"
-							class="flex-1 cursor-pointer rounded-sm bg-primary px-4 py-2 font-medium text-white hover:opacity-75"
-						>
-							Approve
-						</button>
-					</form>
-					@rejectButton(application.Id)
+						Approve
+					</button>
+				</form>
+				@rejectButton(application.Id)
+			</div>
+			<!-- Divider -->
+			<div class="mt-4 border-t-2 border-solid border-t-pale-gray outline-none"></div>
+			<!-- Information -->
+			<div class="mt-4 grid gap-4">
+				<div class="flex gap-2 ">
+					<h3 class="font-medium text-neutral-dark">Applicant Name:</h3>
+					<p class="text-neutral-gray">{ application.ApplicantName }</p>
+				</div>
+				<div class="flex gap-2">
+					<h3 class="font-medium text-neutral-dark">Date Applied:</h3>
+					<p class="text-neutral-gray">{ application.CreatedAt }</p>
+				</div>
+				<div class="flex gap-2 ">
+					<h3 class="font-medium text-neutral-dark">Applying for:</h3>
+					@partials.DefaultBadgeSuccess(application.Expertise)
+				</div>
+				<div class="flex gap-2">
+					<h3 class="font-medium text-neutral-dark">Status:</h3>
+					@partials.SoftBadgeWarning(application.Status)
 				</div>
 			</div>
+			<!-- Divider -->
+			<div class="mt-4 border-t-2 border-solid border-t-pale-gray outline-none"></div>
 			<!-- Images -->
-			<div class="col-span-7 grid-cols-8 gap-2 p-2">
-				<img
-					src={ fmt.Sprintf("/api/v1/resource/%s", application.SupportingDocumentUrl) }
-					alt="image"
-					class="col-span-4"
-				/>
-				<img
-					src={ fmt.Sprintf("/api/v1/resource/%s", application.PoliceClearanceUrl) }
-					alt="image"
-					class="col-span-4"
-				/>
+			<div class="mt-4">
+				<h3 class="mb-4 font-medium text-neutral-dark">Documents</h3>
+				<div class="grid grid-cols-2 gap-2">
+					@imageViewer("Supporting Document", fmt.Sprintf("/api/v1/resource/%s", application.SupportingDocumentUrl))
+					@imageViewer("Police Clearance", fmt.Sprintf("/api/v1/resource/%s", application.PoliceClearanceUrl))
+				</div>
 			</div>
 		</div>
 	}
@@ -81,7 +75,7 @@ templ rejectButton(applicationId string) {
 		<button
 			x-on:click="offCanvasOpen = !offCanvasOpen"
 			type="button"
-			class="cursor-pointer rounded-sm bg-danger px-4 py-2 text-sm font-medium text-white hover:opacity-75"
+			class="cursor-pointer rounded-sm bg-danger px-4 py-2 text-xs font-medium text-white hover:opacity-75"
 		>Reject</button>
 		<!-- offCanvas Backdrop -->
 		<div
@@ -159,6 +153,47 @@ templ rejectButton(applicationId string) {
 						</div>
 					</form>
 				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ imageViewer(title, image string) {
+	<div x-data="{imageViewerOpen: false}">
+		<!-- Image -->
+		<div
+			x-on:click="imageViewerOpen = true"
+			class="cursor-pointer outline-1 outline-pale-gray"
+		>
+			<img src={ image } alt="image" class="aspect-square object-contain"/>
+		</div>
+		<!-- Backdrop -->
+		<div
+			x-cloak
+			x-show="imageViewerOpen"
+			x-on:keydown.esc.window="imageViewerOpen = false"
+			x-on:click.self="imageViewerOpen = false"
+			x-transition
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="defaultModalTitle"
+			class="fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50"
+		>
+			<!-- Modal Dialog -->
+			<div
+				x-show="imageViewerOpen"
+				x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				class="rounded-sm bg-white p-2 p-4 outline-1 outline-pale-gray"
+			>
+				<h3 class="mb-2 font-medium">{ title }</h3>
+				<img
+					src={ image }
+					alt="image"
+					loading="lazy"
+					class="max-h-[80vh] max-w-[80vw] min-w-60 object-cover"
+				/>
 			</div>
 		</div>
 	</div>
