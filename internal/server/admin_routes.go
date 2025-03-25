@@ -53,7 +53,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 		passwordResetStore := passwordreset_repo.NewMysqlPasswordResetRepository(s.DB)
 
-		passwordResetService := passwordreset_service.NewService(adminStore, passwordResetStore, s.Encrypt, s.Hash)
+		passwordResetService := passwordreset_service.NewService(adminStore, passwordResetStore, s.Mailer, s.Encrypt, s.Hash)
 		handler := passwordreset_handler.NewHandler(passwordResetService)
 
 		resetRoute.POST("", handler.RequestPasswordReset)
@@ -223,7 +223,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		passwordResetStore := passwordreset_repo.NewMysqlPasswordResetRepository(s.DB)
 
-		passwordResetService := passwordreset_service.NewService(adminStore, passwordResetStore, s.Encrypt, s.Hash)
+		passwordResetService := passwordreset_service.NewService(adminStore, passwordResetStore, s.Mailer, s.Encrypt, s.Hash)
 		adminService := admin_service.NewService(adminStore, s.Encrypt)
 
 		handler := accountmanagement.NewHandler(adminService, passwordResetService)

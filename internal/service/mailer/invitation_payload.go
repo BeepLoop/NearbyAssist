@@ -13,14 +13,6 @@ type InvitationPayload struct {
 	InviteCode string
 }
 
-func NewInvitationPayload(username, joinUrl, code string) *InvitationPayload {
-	return &InvitationPayload{
-		Username:   username,
-		JoinURL:    joinUrl,
-		InviteCode: code,
-	}
-}
-
 func (p *InvitationPayload) GetHTML() string {
 	emailTemplate := `
         <!DOCTYPE html>

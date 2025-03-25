@@ -32,8 +32,19 @@ func (s *Service) Login(username, password string) (*models.AdminModel, error) {
 		return nil, err
 	}
 
-	if core.IsPasswordMatch(admin.Password, password) == false {
-		return nil, errors.New("Invalid credentials")
+	if admin.MustChangePassword {
+		decryptedPassword, err := s.encrypt.DecryptString(admin.Password)
+		if err != nil {
+			return nil, err
+		}
+
+		if password != decryptedPassword {
+			return nil, errors.New("Invalid credentials")
+		}
+	} else {
+		if !core.IsPasswordMatch(admin.Password, password) {
+			return nil, errors.New("Invalid credentials")
+		}
 	}
 
 	return admin, nil

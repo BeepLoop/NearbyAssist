@@ -2,7 +2,6 @@ package accountmanagement
 
 import (
 	"context"
-	"fmt"
 	"nearbyassist/internal/models"
 	admin_service "nearbyassist/internal/service/admin"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
@@ -38,7 +37,6 @@ func (h *accountManagementHandler) GetAccounts(c echo.Context) error {
 
 	accounts, err := h.adminService.GetAll(filter)
 	if err != nil {
-		fmt.Println(err.Error())
 		page := pages.AccountList(*admin, make([]models.AdminModel, 0), flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
@@ -119,7 +117,6 @@ func (h *accountManagementHandler) FufillResetRequest(c echo.Context) error {
 
 	// Perform reset
 	if err := h.passwordResetService.FulfillResetPassword(requestId, password, confirmationUsername, confirmationPassword); err != nil {
-		fmt.Println(err.Error())
 		if strings.Contains(err.Error(), "Invalid credentials") {
 			if err := utils.SetFlashMessage(c, "error", "Invalid confirmation credentials"); err != nil {
 				return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?error=credential_error")

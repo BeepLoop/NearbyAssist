@@ -60,7 +60,9 @@ func (s *Service) Invite(username, email, defaultPassword, duration string) erro
 		return err
 	}
 
-	encryptedDefaultPassword, err := core.BcryptPassword(defaultPassword)
+	// NOTE: Password is encrypted with AES256 instead of BCrypt in order to
+	// decrypt it and send an email to the user
+	encryptedDefaultPassword, err := s.encrypt.EncryptString(defaultPassword)
 	if err != nil {
 		return err
 	}
@@ -87,7 +89,6 @@ func (s *Service) Invite(username, email, defaultPassword, duration string) erro
 		return err
 	}
 
-	// TODO: sent email to invited user
 	joinUrl := fmt.Sprintf("%s/admin/invites/join", config.Instance.DOMAIN)
 	payload := &mailer.InvitationPayload{
 		Username:   username,
@@ -119,6 +120,32 @@ func (s *Service) Join(code string) error {
 	}
 
 	if err := s.inviteStore.Accept(invitation.Id); err != nil {
+		return err
+	}
+
+	username, err := s.encrypt.DecryptString(invitation.Username)
+	if err != nil {
+		return err
+	}
+
+	password, err := s.encrypt.DecryptString(invitation.Password)
+	if err != nil {
+		return err
+	}
+
+	email, err := s.encrypt.DecryptString(invitation.Email)
+	if err != nil {
+		return err
+	}
+
+	payload := &mailer.InviteAcceptedPayload{
+		Username:  username,
+		Password:  password,
+		Email:     email,
+		LoginLink: fmt.Sprintf("%s/auth/login", config.Instance.DOMAIN),
+	}
+
+	if err := s.mailer.Send(context.Background(), payload); err != nil {
 		return err
 	}
 
