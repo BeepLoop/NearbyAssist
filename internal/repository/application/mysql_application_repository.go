@@ -206,7 +206,7 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
         UPDATE
             Application
         SET
-            status = 'approved'
+            status = 'approved',
             updatedAt = ?
         WHERE
             id = ?

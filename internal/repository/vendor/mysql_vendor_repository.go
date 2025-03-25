@@ -229,6 +229,7 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
 
 	query := `
         SELECT
+            id,
             vendorId,
             title,
             description,
