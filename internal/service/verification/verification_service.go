@@ -10,21 +10,24 @@ import (
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
+	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
 	verificationStore verification_repo.VerificationRepository
 	notifStore        notification_repo.NotificationRepository
+	ws                websocket.Socket
 	fs                fs.FileStorage
 	encrypt           core.Encryption
 	jwt               core.Authenticator
 }
 
-func NewService(verificationStore verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
+func NewService(verificationStore verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, ws websocket.Socket, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{
 		verificationStore: verificationStore,
 		notifStore:        notifStore,
+		ws:                ws,
 		fs:                fs,
 		encrypt:           encrypt,
 		jwt:               jwt,
@@ -219,6 +222,14 @@ func (s *Service) AcceptRequest(id string) error {
 		return err
 	}
 
+	event := &websocket.EventModel{
+		ReceiverId: request.UserId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(event)
+
 	oneSignal := notification_service.OneSignalInstance
 	if oneSignal != nil {
 		if err := oneSignal.NewUrgentNotification(request.UserId, notificationHeading, notificationContent); err != nil {
@@ -275,6 +286,14 @@ func (s *Service) RejectRequest(id, reason string) error {
 	if err := s.notifStore.Create(notification); err != nil {
 		return err
 	}
+
+	event := &websocket.EventModel{
+		ReceiverId: request.UserId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(event)
 
 	oneSignal := notification_service.OneSignalInstance
 	if oneSignal != nil {

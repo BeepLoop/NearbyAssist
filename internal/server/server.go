@@ -24,7 +24,7 @@ type Server struct {
 	Port           string
 	AllowedOrigins []string
 
-	WS *websocket.Websocket
+	WS websocket.Socket
 
 	DB *sqlx.DB
 	FS fs.FileStorage
@@ -81,7 +81,7 @@ func (s *Server) Start() error {
 	s.middlewares()
 	s.routes()
 
-	s.WS.Start()
+	s.WS.StartListening()
 
 	if err := s.Echo.Start(":" + s.Port); err != nil {
 		s.LOG_FILE.Close()

@@ -7,6 +7,7 @@ import (
 	user_repo "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/service/core"
 	notification_service "nearbyassist/internal/service/notification"
+	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 	"time"
 )
@@ -14,14 +15,16 @@ import (
 type Service struct {
 	userStore  user_repo.UserRepository
 	notifStore notification_repo.NotificationRepository
+	ws         websocket.Socket
 	encrypt    core.Encryption
 	hash       core.Hash
 }
 
-func NewService(userStore user_repo.UserRepository, notifStore notification_repo.NotificationRepository, encrypt core.Encryption, hash core.Hash) *Service {
+func NewService(userStore user_repo.UserRepository, notifStore notification_repo.NotificationRepository, ws websocket.Socket, encrypt core.Encryption, hash core.Hash) *Service {
 	return &Service{
 		userStore:  userStore,
 		notifStore: notifStore,
+		ws:         ws,
 		encrypt:    encrypt,
 		hash:       hash,
 	}
@@ -170,6 +173,14 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 		return err
 	}
 
+	event := &websocket.EventModel{
+		ReceiverId: userId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(event)
+
 	notificationHeading := "Account Restricted!"
 	notificationContent := "You commited a violation resulting to account restriction."
 
@@ -212,6 +223,14 @@ func (s *Service) UnrestrictUser(userId string) error {
 	if err := s.notifStore.Create(notification); err != nil {
 		return err
 	}
+
+	event := &websocket.EventModel{
+		ReceiverId: userId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(event)
 
 	notificationHeading := "Account Restriction Lifted!"
 	notificationContent := "Your account restriction has been lifted."

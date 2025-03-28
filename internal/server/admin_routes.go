@@ -152,7 +152,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		requestService := verification_service.NewService(requestStore, notificationStore, s.FS, s.Encrypt, s.JWT)
+		requestService := verification_service.NewService(requestStore, notificationStore, s.WS, s.FS, s.Encrypt, s.JWT)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		requestHandler := verification.NewHandler(requestService, resourceService)
@@ -175,7 +175,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		managementService := user_management_service.NewService(userStore, notifStore, s.Encrypt, s.Hash)
+		managementService := user_management_service.NewService(userStore, notifStore, s.WS, s.Encrypt, s.Hash)
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 		vendorService := vendor_service.NewService(vendorStore, serviceStore, s.Encrypt, s.Hash)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)

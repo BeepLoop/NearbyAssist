@@ -17,6 +17,7 @@ import (
 	"nearbyassist/internal/handler/api/user"
 	userauth_handler "nearbyassist/internal/handler/api/user_auth"
 	"nearbyassist/internal/handler/api/vendor"
+	websocket_handler "nearbyassist/internal/handler/api/websocket"
 	"nearbyassist/internal/middleware"
 	application_repo "nearbyassist/internal/repository/application"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
@@ -96,7 +97,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
-		userVerificationService := verification_service.NewService(verificationStore, notificationStore, s.FS, s.Encrypt, s.JWT)
+		userVerificationService := verification_service.NewService(verificationStore, notificationStore, s.WS, s.FS, s.Encrypt, s.JWT)
 
 		handler := user.NewHandler(userService, userVerificationService)
 
@@ -256,18 +257,15 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	// ===== CHAT =======
 	chatRoute := v1.Group("/chat")
 	{
+		chatRoute.Use(middleware.CheckAuth(s.JWT))
+
 		messageStore := message_repo.NewMysqlChatRepository(s.DB)
 		messageService := message_service.NewService(messageStore, s.WS, s.Encrypt, s.JWT)
 		handler := message.NewHandler(messageService)
 
-		// NOTE: this route is separated because it is not possible to pass
-		// headers to connection request, thus unable to authenticate the user.
-		// Instead, access token is passed as a query parameter
-		chatRoute.GET("/ws", handler.ConnectWebsocket)
-
-		chatRoute.GET("/messages/:otherUserId", handler.GetMessages, middleware.CheckAuth(s.JWT))
-		chatRoute.GET("/conversations", handler.GetConversationList, middleware.CheckAuth(s.JWT))
-		chatRoute.POST("/send", handler.SendMessage, middleware.CheckAuth(s.JWT))
+		chatRoute.POST("/send", handler.SendMessage)
+		chatRoute.GET("/messages/:otherUserId", handler.GetMessages)
+		chatRoute.GET("/conversations", handler.GetConversationList)
 	}
 
 	// ===== COMPLAINT =======
@@ -334,5 +332,17 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		handler := resource.NewHandler(resourceService)
 
 		resourceRoute.GET("/:path", handler.GetPrivateFile)
+	}
+
+	websocketRoute := v1.Group("/ws")
+	{
+		// websocketRoute.Use(middleware.CheckAuth(s.JWT))
+
+		handler := websocket_handler.NewHandler(s.WS, s.JWT)
+
+		// NOTE: this route is separate because I have problems passing JWT from
+		// client Authorization header and continuously pass updated token on
+		// reconnect. Hard skill issues
+		websocketRoute.GET("", handler.Connect)
 	}
 }

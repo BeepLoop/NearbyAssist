@@ -15,7 +15,7 @@ import (
 type ServerConfig struct {
 	Config *config.Config
 
-	WS *websocket.Websocket
+	WS websocket.Socket
 
 	DB *sqlx.DB
 	FS fs.FileStorage

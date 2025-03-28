@@ -18,10 +18,6 @@ func NewHandler(messageService *message_service.Service) *messageHandler {
 	return &messageHandler{messageService: messageService}
 }
 
-func (h *messageHandler) ConnectWebsocket(c echo.Context) error {
-	return h.messageService.ConnectWebsocket(c)
-}
-
 func (h *messageHandler) GetMessages(c echo.Context) error {
 	otherUserId := c.Param("otherUserId")
 	if otherUserId == "" {
