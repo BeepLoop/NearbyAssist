@@ -131,8 +131,17 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		policeClearanceStore := policeclearance_repo.NewMysqlImplementation(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		applicationService := application_service.NewService(applicationStore, supportingImageStore, policeClearanceStore, notificationStore, s.FS, s.Encrypt, s.JWT)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+		applicationService := application_service.NewService(
+			applicationStore,
+			supportingImageStore,
+			policeClearanceStore,
+			notificationStore,
+			s.WS,
+			s.FS,
+			s.Encrypt,
+			s.JWT,
+		)
 
 		applicationHandler := application.NewHandler(applicationService, resourceService)
 
@@ -149,10 +158,19 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		verificationRoute.Use(middleware.CheckSession)
 		verificationRoute.Use(middleware.CheckMustChangePass(adminStore))
 
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		requestService := verification_service.NewService(requestStore, notificationStore, s.WS, s.FS, s.Encrypt, s.JWT)
+		requestService := verification_service.NewService(
+			userStore,
+			requestStore,
+			notificationStore,
+			s.WS,
+			s.FS,
+			s.Encrypt,
+			s.JWT,
+		)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		requestHandler := verification.NewHandler(requestService, resourceService)

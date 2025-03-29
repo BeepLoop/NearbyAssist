@@ -12,6 +12,7 @@ import (
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
+	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 )
 
@@ -20,17 +21,28 @@ type Service struct {
 	supportingImageStore supportingimage_repo.Repository
 	policeClearanceStore policeclearance_repo.Repository
 	notifStore           notification_repo.NotificationRepository
+	ws                   websocket.Socket
 	fs                   fs.FileStorage
 	encrypt              core.Encryption
 	jwt                  core.Authenticator
 }
 
-func NewService(applicationStore application_repo.ApplicationRepository, supportingImageStore supportingimage_repo.Repository, policeClearanceStore policeclearance_repo.Repository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
+func NewService(
+	applicationStore application_repo.ApplicationRepository,
+	supportingImageStore supportingimage_repo.Repository,
+	policeClearanceStore policeclearance_repo.Repository,
+	notifStore notification_repo.NotificationRepository,
+	ws websocket.Socket,
+	fs fs.FileStorage,
+	encrypt core.Encryption,
+	jwt core.Authenticator,
+) *Service {
 	return &Service{
 		applicationStore:     applicationStore,
 		supportingImageStore: supportingImageStore,
 		policeClearanceStore: policeClearanceStore,
 		notifStore:           notifStore,
+		ws:                   ws,
 		fs:                   fs,
 		encrypt:              encrypt,
 		jwt:                  jwt,
@@ -184,6 +196,22 @@ func (s *Service) AcceptRequest(applicationId string) error {
 		fmt.Println(err.Error())
 	}
 
+	notifEvent := &websocket.EventModel{
+		ReceiverId: application.ApplicantId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	// send sync event to instruct client to pull the udpated values
+	syncEvent := &websocket.EventModel{
+		ReceiverId: application.ApplicantId,
+		Type:       websocket.EVT_SYNC,
+		Payload:    nil,
+	}
+
+	s.ws.Send(notifEvent)
+	s.ws.Send(syncEvent)
+
 	return nil
 }
 
@@ -236,6 +264,14 @@ func (s *Service) RejectRequest(id, reason string) error {
 	if err := oneSignal.NewUrgentNotification(application.ApplicantId, notificationHeading, notificationContent); err != nil {
 		fmt.Println(err.Error())
 	}
+
+	event := &websocket.EventModel{
+		ReceiverId: application.ApplicantId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(event)
 
 	return nil
 }

@@ -97,7 +97,15 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
-		userVerificationService := verification_service.NewService(verificationStore, notificationStore, s.WS, s.FS, s.Encrypt, s.JWT)
+		userVerificationService := verification_service.NewService(
+			userStore,
+			verificationStore,
+			notificationStore,
+			s.WS,
+			s.FS,
+			s.Encrypt,
+			s.JWT,
+		)
 
 		handler := user.NewHandler(userService, userVerificationService)
 
@@ -234,7 +242,17 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		policeClearanceStore := policeclearance_repo.NewMysqlImplementation(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		applicationService := application_service.NewService(applicationStore, supportingImageStore, policeClearanceStore, notificationStore, s.FS, s.Encrypt, s.JWT)
+		applicationService := application_service.NewService(
+			applicationStore,
+			supportingImageStore,
+			policeClearanceStore,
+			notificationStore,
+			s.WS,
+			s.FS,
+			s.Encrypt,
+			s.JWT,
+		)
+
 		handler := application.NewHandler(applicationService, userService)
 
 		applicationRoute.POST("", handler.CreateApplication)

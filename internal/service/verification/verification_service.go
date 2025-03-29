@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/models"
 	notification_repo "nearbyassist/internal/repository/notification"
+	user_repo "nearbyassist/internal/repository/user"
 	verification_repo "nearbyassist/internal/repository/verification"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
@@ -15,6 +16,7 @@ import (
 )
 
 type Service struct {
+	userStore         user_repo.UserRepository
 	verificationStore verification_repo.VerificationRepository
 	notifStore        notification_repo.NotificationRepository
 	ws                websocket.Socket
@@ -23,8 +25,9 @@ type Service struct {
 	jwt               core.Authenticator
 }
 
-func NewService(verificationStore verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, ws websocket.Socket, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
+func NewService(userStore user_repo.UserRepository, verificationStore verification_repo.VerificationRepository, notifStore notification_repo.NotificationRepository, ws websocket.Socket, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
 	return &Service{
+		userStore:         userStore,
 		verificationStore: verificationStore,
 		notifStore:        notifStore,
 		ws:                ws,
@@ -222,18 +225,26 @@ func (s *Service) AcceptRequest(id string) error {
 		return err
 	}
 
-	event := &websocket.EventModel{
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(request.UserId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	notifEvent := &websocket.EventModel{
 		ReceiverId: request.UserId,
 		Type:       websocket.EVT_NOTIF,
 		Payload:    notification,
 	}
 
-	s.ws.Send(event)
-
-	oneSignal := notification_service.MustGetInstance()
-	if err := oneSignal.NewUrgentNotification(request.UserId, notificationHeading, notificationContent); err != nil {
-		fmt.Println(err.Error())
+	// send sync event to instruct client to pull the udpated values
+	syncEvent := &websocket.EventModel{
+		ReceiverId: request.UserId,
+		Type:       websocket.EVT_SYNC,
+		Payload:    nil,
 	}
+
+	s.ws.Send(notifEvent)
+	s.ws.Send(syncEvent)
 
 	return nil
 }
@@ -283,6 +294,11 @@ func (s *Service) RejectRequest(id, reason string) error {
 		return err
 	}
 
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(request.UserId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
 	event := &websocket.EventModel{
 		ReceiverId: request.UserId,
 		Type:       websocket.EVT_NOTIF,
@@ -290,11 +306,6 @@ func (s *Service) RejectRequest(id, reason string) error {
 	}
 
 	s.ws.Send(event)
-
-	oneSignal := notification_service.MustGetInstance()
-	if err := oneSignal.NewUrgentNotification(request.UserId, notificationHeading, notificationContent); err != nil {
-		fmt.Println(err.Error())
-	}
 
 	return nil
 }

@@ -120,6 +120,8 @@ func (s *Service) BanUser(userId string) error {
 		return err
 	}
 
+	// TODO: Notify user
+
 	return nil
 }
 
@@ -127,6 +129,8 @@ func (s *Service) UnbanUser(userId string) error {
 	if err := s.userStore.UnbanUser(userId); err != nil {
 		return err
 	}
+
+	// TODO: Notify user
 
 	return nil
 }
@@ -173,14 +177,6 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 		return err
 	}
 
-	event := &websocket.EventModel{
-		ReceiverId: userId,
-		Type:       websocket.EVT_NOTIF,
-		Payload:    notification,
-	}
-
-	s.ws.Send(event)
-
 	notificationHeading := "Account Restricted!"
 	notificationContent := "You commited a violation resulting to account restriction."
 
@@ -188,6 +184,21 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 	if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
 		fmt.Println(err.Error())
 	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: userId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	syncEvent := &websocket.EventModel{
+		ReceiverId: userId,
+		Type:       websocket.EVT_SYNC,
+		Payload:    nil,
+	}
+
+	s.ws.Send(notifEvent)
+	s.ws.Send(syncEvent)
 
 	return nil
 }
@@ -220,14 +231,6 @@ func (s *Service) UnrestrictUser(userId string) error {
 		return err
 	}
 
-	event := &websocket.EventModel{
-		ReceiverId: userId,
-		Type:       websocket.EVT_NOTIF,
-		Payload:    notification,
-	}
-
-	s.ws.Send(event)
-
 	notificationHeading := "Account Restriction Lifted!"
 	notificationContent := "Your account restriction has been lifted."
 
@@ -235,6 +238,21 @@ func (s *Service) UnrestrictUser(userId string) error {
 	if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
 		fmt.Println(err.Error())
 	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: userId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	syncEvent := &websocket.EventModel{
+		ReceiverId: userId,
+		Type:       websocket.EVT_SYNC,
+		Payload:    nil,
+	}
+
+	s.ws.Send(notifEvent)
+	s.ws.Send(syncEvent)
 
 	return nil
 }
