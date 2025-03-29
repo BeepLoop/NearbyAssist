@@ -5,14 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const (
-	NIL_INSTANCE_ERR = "Websocket instance is not initialized"
-)
-
-var (
-	Instance *Socket
-)
-
 type EventType string
 
 const (

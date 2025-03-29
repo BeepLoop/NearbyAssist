@@ -1,9 +1,11 @@
 package message_service
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	message_repo "nearbyassist/internal/repository/message"
 	"nearbyassist/internal/service/core"
+	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 )
@@ -58,6 +60,11 @@ func (s *Service) GetConversationList(bearerToken string) ([]*models.Conversatio
 func (s *Service) SendMessage(message *models.MessageModel) error {
 	if _, err := s.store.Create(message); err != nil {
 		return err
+	}
+
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewMessageNotification(message.Receiver); err != nil {
+		fmt.Println(err.Error())
 	}
 
 	event := &websocket.EventModel{

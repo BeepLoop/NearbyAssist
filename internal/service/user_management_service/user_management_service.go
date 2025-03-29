@@ -184,13 +184,9 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 	notificationHeading := "Account Restricted!"
 	notificationContent := "You commited a violation resulting to account restriction."
 
-	oneSignal := notification_service.OneSignalInstance
-	if oneSignal != nil {
-		if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
-			fmt.Println(err.Error())
-		}
-	} else {
-		fmt.Println("dum dum you forgot to initialize one signal")
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
 	}
 
 	return nil
@@ -235,13 +231,9 @@ func (s *Service) UnrestrictUser(userId string) error {
 	notificationHeading := "Account Restriction Lifted!"
 	notificationContent := "Your account restriction has been lifted."
 
-	oneSignal := notification_service.OneSignalInstance
-	if oneSignal != nil {
-		if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
-			fmt.Println(err.Error())
-		}
-	} else {
-		fmt.Println("dum dum you forgot to initialize one signal")
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
 	}
 
 	return nil

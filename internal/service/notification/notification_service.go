@@ -21,7 +21,7 @@ func NewService(store notification_repo.NotificationRepository, encrypt core.Enc
 	}
 }
 
-func (s *Service) GetNotifications(bearerToken string, status string) ([]*models.NotificationModel, error) {
+func (s *Service) GetUserNotifications(bearerToken string, status string) ([]*models.NotificationModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return nil, err
@@ -64,4 +64,8 @@ func (s *Service) GetNotifications(bearerToken string, status string) ([]*models
 
 func (s *Service) ReadNotification(notificationId string) error {
 	return s.store.UpdateRead(notificationId)
+}
+
+func (s *Service) SendNotification() {
+	return
 }

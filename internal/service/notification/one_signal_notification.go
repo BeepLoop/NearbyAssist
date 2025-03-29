@@ -10,30 +10,38 @@ import (
 )
 
 var (
-	OneSignalInstance *OneSignalNotification
+	instance *oneSignal
 )
 
-type OneSignalNotification struct {
+type oneSignal struct {
 	URL    string
 	AppID  string
 	ApiKey string
 }
 
-func NewOneSignal(appId, apiKey string) *OneSignalNotification {
-	if OneSignalInstance != nil {
-		return OneSignalInstance
+func NewOneSignal(appId, apiKey string) *oneSignal {
+	if instance != nil {
+		return instance
 	}
 
-	OneSignalInstance = &OneSignalNotification{
+	instance = &oneSignal{
 		URL:    "https://api.onesignal.com/notifications?c=push",
 		AppID:  appId,
 		ApiKey: apiKey,
 	}
 
-	return OneSignalInstance
+	return instance
 }
 
-func (n *OneSignalNotification) NewUrgentNotification(userId, heading, content string) error {
+func MustGetInstance() *oneSignal {
+	if instance == nil {
+		panic("one signal not instantiated")
+	}
+
+	return instance
+}
+
+func (n *oneSignal) NewUrgentNotification(userId, heading, content string) error {
 	body := MessagePayload{
 		AppID: n.AppID,
 		Headings: PayloadHeading{
@@ -59,7 +67,7 @@ func (n *OneSignalNotification) NewUrgentNotification(userId, heading, content s
 	return n.shipNotification(bytes.NewReader(payload))
 }
 
-func (n *OneSignalNotification) NewMessageNotification(userId string, notifyType NotificationType) error {
+func (n *oneSignal) NewMessageNotification(userId string) error {
 	body := MessagePayload{
 		AppID: n.AppID,
 		Headings: PayloadHeading{
@@ -74,7 +82,7 @@ func (n *OneSignalNotification) NewMessageNotification(userId string, notifyType
 			},
 		},
 		TargetChannel:    "push",
-		AndroidChannelID: NOTIF_CHANNEL_HIGH,
+		AndroidChannelID: NOTIF_CHANNEL_URGENT,
 	}
 
 	payload, err := json.Marshal(body)
@@ -85,7 +93,7 @@ func (n *OneSignalNotification) NewMessageNotification(userId string, notifyType
 	return n.shipNotification(bytes.NewReader(payload))
 }
 
-func (n *OneSignalNotification) shipNotification(payload io.Reader) error {
+func (n *oneSignal) shipNotification(payload io.Reader) error {
 	ctx := context.Background()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, n.URL, payload)
 	if err != nil {

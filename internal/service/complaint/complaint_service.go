@@ -256,13 +256,9 @@ func (s *Service) CloseUserReport(reportId, title, detail string) error {
 		return err
 	}
 
-	oneSignal := notification_service.OneSignalInstance
-	if oneSignal != nil {
-		if err := oneSignal.NewUrgentNotification(report.ReportedBy, notificationHeading, notificationContent); err != nil {
-			fmt.Println(err.Error())
-		}
-	} else {
-		fmt.Println("dum dum you forgot to initialize one signal")
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(report.ReportedBy, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
 	}
 
 	return nil

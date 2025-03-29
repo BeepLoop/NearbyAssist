@@ -26,7 +26,7 @@ func (h *notificationHandler) GetNotifications(c echo.Context) error {
 
 	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
 
-	notifications, err := h.service.GetNotifications(bearerToken, status)
+	notifications, err := h.service.GetUserNotifications(bearerToken, status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error retrieving notifications",

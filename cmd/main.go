@@ -4,7 +4,6 @@ import (
 	"log"
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
-	message_repo "nearbyassist/internal/repository/message"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
@@ -65,8 +64,7 @@ func main() {
 	}
 	defer mysql.Close()
 
-	chatStore := message_repo.NewMysqlChatRepository(mysql)
-	ws := websocket.NewWebsocket(chatStore)
+	ws := websocket.NewWebsocket()
 
 	notification_service.NewOneSignal(cfg.ONE_SIGNAL_APP_ID, cfg.ONE_SIGNAL_API_KEY)
 

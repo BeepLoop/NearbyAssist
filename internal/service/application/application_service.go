@@ -179,13 +179,9 @@ func (s *Service) AcceptRequest(applicationId string) error {
 		return err
 	}
 
-	oneSignal := notification_service.OneSignalInstance
-	if oneSignal != nil {
-		if err := oneSignal.NewUrgentNotification(application.ApplicantId, notificationHeading, notificationContent); err != nil {
-			fmt.Println(err.Error())
-		}
-	} else {
-		fmt.Println("dum dum you forgot to initialize one signal")
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(application.ApplicantId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
 	}
 
 	return nil
@@ -236,13 +232,9 @@ func (s *Service) RejectRequest(id, reason string) error {
 		return err
 	}
 
-	oneSignal := notification_service.OneSignalInstance
-	if oneSignal != nil {
-		if err := oneSignal.NewUrgentNotification(application.ApplicantId, notificationHeading, notificationContent); err != nil {
-			fmt.Println(err.Error())
-		}
-	} else {
-		fmt.Println("dum dum you forgot to initialize one signal")
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(application.ApplicantId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
 	}
 
 	return nil
