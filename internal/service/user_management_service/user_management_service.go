@@ -161,19 +161,14 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 		Content:   reason,
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: userId,
+		Type:      "generic",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 
@@ -215,19 +210,14 @@ func (s *Service) UnrestrictUser(userId string) error {
 		Content:   "The restriction to your account has been lifted by the administrator. Avoid committing violations to prevent future restrictions.",
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: userId,
+		Type:      "success",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 

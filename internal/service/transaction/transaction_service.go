@@ -71,19 +71,14 @@ func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string,
 		Content:   "You received a transaction request. View reqeust in your transaction dashboard.",
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return "", err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: transaction.VendorId,
+		Type:      "generic",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return "", err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return "", err
 	}
 
@@ -187,19 +182,14 @@ func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
 		Content:   "A client cancelled their reqeust for your service",
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: transaction.VendorId,
+		Type:      "fail",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 
@@ -256,19 +246,14 @@ func (s *Service) AcceptTransactionRequest(bearerToken, transactionId string) er
 		Content:   "Your transaction request has been accepted by the vendor",
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: transaction.VendorId,
+		Type:      "success",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 
@@ -325,19 +310,14 @@ func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) er
 		Content:   "Your transaction request was rejected by the vendor",
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: transaction.VendorId,
+		Type:      "fail",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 

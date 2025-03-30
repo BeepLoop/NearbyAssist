@@ -209,19 +209,14 @@ func (s *Service) AcceptRequest(id string) error {
 		Content:   "Congratulations! Your identity verification request has been accepted. Go to your settings and Sync Account to see the changes.",
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: request.UserId,
+		Type:      "success",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 
@@ -236,7 +231,6 @@ func (s *Service) AcceptRequest(id string) error {
 		Payload:    notification,
 	}
 
-	// send sync event to instruct client to pull the udpated values
 	syncEvent := &websocket.EventModel{
 		ReceiverId: request.UserId,
 		Type:       websocket.EVT_SYNC,
@@ -278,19 +272,14 @@ func (s *Service) RejectRequest(id, reason string) error {
 		Content:   "Your identity verification request is rejected. Reason of rejection: " + reason,
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: request.UserId,
+		Type:      "success",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 

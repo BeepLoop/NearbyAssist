@@ -175,19 +175,14 @@ func (s *Service) AcceptRequest(applicationId string) error {
 		Content:   "Congratulations! You successfully added expertise in: " + application.Expertise,
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: application.ApplicantId,
+		Type:      "success",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 
@@ -243,19 +238,14 @@ func (s *Service) RejectRequest(id, reason string) error {
 		Content:   fmt.Sprintf("We are sorry to inform you that your request to add expertise in %s is denied. Reason: %s", application.Expertise, reason),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: application.ApplicantId,
+		Type:      "fail",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 

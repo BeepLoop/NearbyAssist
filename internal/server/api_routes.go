@@ -297,7 +297,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
-		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, notifStore, s.FS, s.Encrypt, s.JWT)
+		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, notifStore, s.WS, s.FS, s.Encrypt, s.JWT)
 		handler := complaint.NewHandler(complaintService)
 
 		complaintRoute.POST("/system", handler.CreateBugReport)
@@ -358,8 +358,6 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 	websocketRoute := v1.Group("/ws")
 	{
-		// websocketRoute.Use(middleware.CheckAuth(s.JWT))
-
 		handler := websocket_handler.NewHandler(s.WS, s.JWT)
 
 		// NOTE: this route is separate because I have problems passing JWT from

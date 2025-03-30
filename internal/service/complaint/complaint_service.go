@@ -11,6 +11,7 @@ import (
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
+	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 	"strconv"
 )
@@ -19,16 +20,26 @@ type Service struct {
 	reportUserStore report_user_repo.ReportUserRepository
 	bugReportStore  bug_report_repo.BugReportRepository
 	notifStore      notification_repo.NotificationRepository
+	ws              websocket.Socket
 	fs              fs.FileStorage
 	encrypt         core.Encryption
 	jwt             core.Authenticator
 }
 
-func NewService(reportUserStore report_user_repo.ReportUserRepository, bugReportStore bug_report_repo.BugReportRepository, notifStore notification_repo.NotificationRepository, fs fs.FileStorage, encrypt core.Encryption, jwt core.Authenticator) *Service {
+func NewService(
+	reportUserStore report_user_repo.ReportUserRepository,
+	bugReportStore bug_report_repo.BugReportRepository,
+	notifStore notification_repo.NotificationRepository,
+	ws websocket.Socket,
+	fs fs.FileStorage,
+	encrypt core.Encryption,
+	jwt core.Authenticator,
+) *Service {
 	return &Service{
 		reportUserStore: reportUserStore,
 		bugReportStore:  bugReportStore,
 		notifStore:      notifStore,
+		ws:              ws,
 		fs:              fs,
 		encrypt:         encrypt,
 		jwt:             jwt,
@@ -240,19 +251,14 @@ func (s *Service) CloseUserReport(reportId, title, detail string) error {
 		Content:   detail,
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
-		return err
-	} else {
-		notification.Title = encrypted
+	encryptedNotification := &models.NotificationModel{
+		Recipient: report.ReportedBy,
+		Type:      "generic",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
-		return err
-	} else {
-		notification.Content = encrypted
-	}
-
-	if err := s.notifStore.Create(notification); err != nil {
+	if err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
 	}
 
@@ -260,6 +266,14 @@ func (s *Service) CloseUserReport(reportId, title, detail string) error {
 	if err := oneSignal.NewUrgentNotification(report.ReportedBy, notificationHeading, notificationContent); err != nil {
 		fmt.Println(err.Error())
 	}
+
+	event := &websocket.EventModel{
+		ReceiverId: report.ReportedBy,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(event)
 
 	return nil
 }
