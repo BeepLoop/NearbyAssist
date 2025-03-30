@@ -26,7 +26,7 @@ func NewHandler(userService *user_service.Service, userVerificationService *veri
 }
 
 func (h *userHandler) GetUser(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	user, err := h.userService.GetUser(bearerToken)
 	if err != nil {
@@ -64,7 +64,7 @@ func (h *userHandler) RequestIdentityVerification(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	lat, err := strconv.ParseFloat(latitude, 64)
 	if err != nil {
@@ -113,7 +113,7 @@ func (h *userHandler) RequestIdentityVerification(c echo.Context) error {
 }
 
 func (h *userHandler) GetUserVerification(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	isVerified, err := h.userService.IsVerified(bearerToken)
 	if err != nil {
@@ -144,7 +144,7 @@ func (h *userHandler) AddSocial(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.userService.AddSocial(bearerToken, req.Url); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
@@ -172,7 +172,7 @@ func (h *userHandler) DeleteSocial(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.userService.DeleteSocial(bearerToken, req.Url); err != nil {
 		if strings.Contains(err.Error(), "social not found") {

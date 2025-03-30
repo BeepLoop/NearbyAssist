@@ -27,7 +27,7 @@ func (h *messageHandler) GetMessages(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	messages, err := h.messageService.GetMessages(bearerToken, otherUserId)
 	if err != nil {
@@ -43,7 +43,7 @@ func (h *messageHandler) GetMessages(c echo.Context) error {
 }
 
 func (h *messageHandler) GetConversationList(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	conversations, err := h.messageService.GetConversationList(bearerToken)
 	if err != nil {

@@ -71,7 +71,7 @@ func (h *userAuthHandler) Refresh(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	accessToken, err := h.authService.Refresh(bearerToken, req.RefreshToken)
 	if err != nil {

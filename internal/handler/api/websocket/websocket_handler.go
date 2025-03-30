@@ -37,7 +37,7 @@ func (h *handler) Connect(c echo.Context) error {
 	// NOTE: Use bearer token when I successfully solved the problem of passing
 	// JWT from client Authorization header that works even on reconnect and JWT
 	// updates.
-	// bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	// bearerToken := utils.BearerTokenFromHeader(c)
 	token := c.QueryParam("token")
 	userId, err := utils.GetUserIdFromToken(token, h.jwt.GetClaims)
 	if err != nil {

@@ -24,7 +24,7 @@ func (h *notificationHandler) GetNotifications(c echo.Context) error {
 		status = statusParam
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	notifications, err := h.service.GetUserNotifications(bearerToken, status)
 	if err != nil {

@@ -35,7 +35,7 @@ func (h *e2eeHandler) SaveKeys(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.e2eeService.SaveKeys(bearerToken, req); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
@@ -48,7 +48,7 @@ func (h *e2eeHandler) SaveKeys(c echo.Context) error {
 }
 
 func (h *e2eeHandler) GetKeys(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	keys, err := h.e2eeService.GetKeys(bearerToken)
 	if err != nil {

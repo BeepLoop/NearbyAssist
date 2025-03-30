@@ -77,7 +77,7 @@ func (h *complaintHandler) ReportUser(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	reportId, err := h.complaintService.ReportUser(bearerToken, req, files)
 	if err != nil {

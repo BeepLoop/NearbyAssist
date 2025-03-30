@@ -86,7 +86,7 @@ func (h *transactionHandler) Cancel(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.transactionService.CancelTransaction(bearerToken, transactionId); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -107,7 +107,7 @@ func (h *transactionHandler) Accept(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.transactionService.AcceptTransactionRequest(bearerToken, transactionId); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -128,7 +128,7 @@ func (h *transactionHandler) Reject(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.transactionService.RejectTransactionRequest(bearerToken, transactionId); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -141,7 +141,7 @@ func (h *transactionHandler) Reject(c echo.Context) error {
 }
 
 func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 	filter := c.QueryParam("filter")
 
 	var transactions []*models.TransactionModel
@@ -180,7 +180,7 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 }
 
 func (h *transactionHandler) GetRecentTransactions(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	transactions, err := h.transactionService.GetRecentTransactions(bearerToken)
 	if err != nil {
@@ -196,7 +196,7 @@ func (h *transactionHandler) GetRecentTransactions(c echo.Context) error {
 }
 
 func (h *transactionHandler) GetConfirmedTransactions(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	transactions, err := h.transactionService.GetConfirmedTransactions(bearerToken)
 	if err != nil {
@@ -212,7 +212,7 @@ func (h *transactionHandler) GetConfirmedTransactions(c echo.Context) error {
 }
 
 func (h *transactionHandler) GetReviewableTransactions(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	reviewables, err := h.transactionService.GetReviewableTransactions(bearerToken)
 	if err != nil {
@@ -228,7 +228,7 @@ func (h *transactionHandler) GetReviewableTransactions(c echo.Context) error {
 }
 
 func (h *transactionHandler) GetTransactionHistory(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	transactions, err := h.transactionService.GetTransactionHistory(bearerToken)
 	if err != nil {
@@ -252,7 +252,7 @@ func (h *transactionHandler) CompleteTransaction(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.transactionService.CompleteTransaction(bearerToken, transactionId); err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {

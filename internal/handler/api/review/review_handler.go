@@ -34,7 +34,7 @@ func (h *reviewHandler) CreateReview(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	reviewId, err := h.reviewService.CreateReview(bearerToken, req)
 	if err != nil {

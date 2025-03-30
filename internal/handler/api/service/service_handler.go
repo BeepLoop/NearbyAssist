@@ -111,7 +111,7 @@ func (h *serviceHandler) UpdateService(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.service_service.UpdateService(bearerToken, serviceId, req); err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {
@@ -147,7 +147,7 @@ func (h *serviceHandler) AddImage(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	imageData, err := h.service_service.AddImage(bearerToken, serviceId, files)
 	if err != nil {
@@ -179,7 +179,7 @@ func (h *serviceHandler) DeleteImage(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.service_service.DeleteImage(bearerToken, imageId); err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {
@@ -214,7 +214,7 @@ func (h *serviceHandler) AddExtra(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	extraId, err := h.service_service.AddExtra(bearerToken, req)
 	if err != nil {
@@ -252,7 +252,7 @@ func (h *serviceHandler) EditExtra(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.service_service.EditExtra(bearerToken, req); err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {
@@ -280,7 +280,7 @@ func (h *serviceHandler) DeleteExtra(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.service_service.DeleteExtra(bearerToken, extraId); err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {
@@ -315,7 +315,7 @@ func (h *serviceHandler) SaveService(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.save_service.SaveService(bearerToken, req.ServiceId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
@@ -343,7 +343,7 @@ func (h *serviceHandler) UnsaveService(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.save_service.UnsaveService(bearerToken, req.ServiceId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
@@ -356,7 +356,7 @@ func (h *serviceHandler) UnsaveService(c echo.Context) error {
 }
 
 func (h *serviceHandler) GetSavedServices(c echo.Context) error {
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	services, err := h.save_service.GetSavedServices(bearerToken)
 	if err != nil {

@@ -37,7 +37,7 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 		})
 	}
 
-	bearerToken := c.Request().Header.Get("Authorization")[len("Bearer "):]
+	bearerToken := utils.BearerTokenFromHeader(c)
 
 	applicationId, err := h.applicationService.CreateApplication(bearerToken, expertiseId, files)
 	if err != nil {
