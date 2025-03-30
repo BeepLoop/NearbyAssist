@@ -202,7 +202,6 @@ func (s *Service) AcceptRequest(applicationId string) error {
 		Payload:    notification,
 	}
 
-	// send sync event to instruct client to pull the udpated values
 	syncEvent := &websocket.EventModel{
 		ReceiverId: application.ApplicantId,
 		Type:       websocket.EVT_SYNC,

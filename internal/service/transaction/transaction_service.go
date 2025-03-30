@@ -2,23 +2,37 @@ package transaction_service
 
 import (
 	"errors"
+	"fmt"
 	"nearbyassist/internal/models"
+	notification_repo "nearbyassist/internal/repository/notification"
 	transaction_repo "nearbyassist/internal/repository/transaction"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
+	notification_service "nearbyassist/internal/service/notification"
+	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
+	notifStore       notification_repo.NotificationRepository
 	transactionStore transaction_repo.TransactionRepository
+	ws               websocket.Socket
 	encrypt          core.Encryption
 	jwt              core.Authenticator
 }
 
-func NewService(transactionStore transaction_repo.TransactionRepository, encrypt core.Encryption, jwt core.Authenticator) *Service {
+func NewService(
+	notifStore notification_repo.NotificationRepository,
+	transactionStore transaction_repo.TransactionRepository,
+	ws websocket.Socket,
+	encrypt core.Encryption,
+	jwt core.Authenticator,
+) *Service {
 	return &Service{
+		notifStore:       notifStore,
 		transactionStore: transactionStore,
+		ws:               ws,
 		encrypt:          encrypt,
 		jwt:              jwt,
 	}
@@ -46,6 +60,45 @@ func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string,
 	if err != nil {
 		return "", err
 	}
+
+	notificationHeading := "New Request"
+	notificationContent := "1 new transaction request"
+
+	notification := &models.NotificationModel{
+		Recipient: transaction.VendorId,
+		Type:      "generic",
+		Title:     "New Request",
+		Content:   "You received a transaction request. View reqeust in your transaction dashboard.",
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return "", err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return "", err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return "", err
+	}
+
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(transaction.VendorId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: transaction.VendorId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(notifEvent)
 
 	return transactionId, nil
 }
@@ -124,6 +177,45 @@ func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
 		return err
 	}
 
+	notificationHeading := "Transaction Request Cancelled"
+	notificationContent := "A client cancelled their transaction request"
+
+	notification := &models.NotificationModel{
+		Recipient: transaction.VendorId,
+		Type:      "fail",
+		Title:     "Transaction Request Cancelled",
+		Content:   "A client cancelled their reqeust for your service",
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return err
+	}
+
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(transaction.VendorId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: transaction.VendorId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(notifEvent)
+
 	return nil
 }
 
@@ -154,6 +246,45 @@ func (s *Service) AcceptTransactionRequest(bearerToken, transactionId string) er
 		return err
 	}
 
+	notificationHeading := "Transaction Request Accepted"
+	notificationContent := "Your transaction request was accepted by the vendor"
+
+	notification := &models.NotificationModel{
+		Recipient: transaction.VendorId,
+		Type:      "success",
+		Title:     "Transaction Request Accepted",
+		Content:   "Your transaction request has been accepted by the vendor",
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return err
+	}
+
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(transaction.ClientId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: transaction.ClientId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(notifEvent)
+
 	return nil
 }
 
@@ -183,6 +314,45 @@ func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) er
 	if err := s.transactionStore.Reject(transactionId); err != nil {
 		return err
 	}
+
+	notificationHeading := "Transaction Request Rejected"
+	notificationContent := "Your transaction request was rejected by the vendor"
+
+	notification := &models.NotificationModel{
+		Recipient: transaction.VendorId,
+		Type:      "fail",
+		Title:     "Transaction Request Rejected",
+		Content:   "Your transaction request was rejected by the vendor",
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Title); err != nil {
+		return err
+	} else {
+		notification.Title = encrypted
+	}
+
+	if encrypted, err := s.encrypt.EncryptString(notification.Content); err != nil {
+		return err
+	} else {
+		notification.Content = encrypted
+	}
+
+	if err := s.notifStore.Create(notification); err != nil {
+		return err
+	}
+
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(transaction.ClientId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: transaction.ClientId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(notifEvent)
 
 	return nil
 }

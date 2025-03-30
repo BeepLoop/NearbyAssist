@@ -206,14 +206,18 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		transactionRoute.Use(middleware.CheckAuth(s.JWT))
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
-		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
-
 		transactionStore := transaction_repo.NewMysqlTransactionRepository(s.DB)
+		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+
+		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 		transactionService := transaction_service.NewService(
+			notifStore,
 			transactionStore,
+			s.WS,
 			s.Encrypt,
 			s.JWT,
 		)
+
 		handler := transaction.NewHandler(transactionService, userService)
 
 		transactionRoute.POST("", handler.CreateTransaction)
