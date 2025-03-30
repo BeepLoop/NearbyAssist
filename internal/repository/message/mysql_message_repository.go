@@ -23,9 +23,9 @@ func (s *MysqlMessageRepository) Create(data *models.MessageModel) (string, erro
 
 	query := `
         INSERT INTO
-            Message (id, sender, receiver, content)
+            Message (id, sender, receiver, content, createdAt)
         VALUES
-            (:id, :sender, :receiver, :content)
+            (:id, :sender, :receiver, :content, :createdAt)
     `
 
 	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {

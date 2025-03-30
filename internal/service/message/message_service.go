@@ -68,8 +68,9 @@ func (s *Service) SendMessage(message *models.MessageModel) error {
 	}
 
 	event := &websocket.EventModel{
-		Type:    websocket.EVT_MSSG,
-		Payload: message,
+		ReceiverId: message.Receiver,
+		Type:       websocket.EVT_MSSG,
+		Payload:    message,
 	}
 
 	s.ws.Send(event)
