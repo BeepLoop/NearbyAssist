@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/cache"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/user_management"
 	"net/http"
@@ -12,6 +13,8 @@ import (
 )
 
 func (h *userManagementHandler) ViewUserAccount(c echo.Context) error {
+	params := c.QueryParams()
+
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
@@ -25,10 +28,29 @@ func (h *userManagementHandler) ViewUserAccount(c echo.Context) error {
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	accountData, err := h.managementService.GetSingleUser(userId)
-	if err != nil {
-		page := pages.UserAccountDetail(*admin, models.UserAccountPageData{}, flash)
-		return page.Render(context.Background(), c.Response().Writer)
+	var accountData *models.UserAccountPageData
+
+	if params.Has("fresh") && params.Get("fresh") == "true" {
+		res, err := h.managementService.GetSingleUser(userId)
+		if err != nil {
+			page := pages.UserAccountDetail(*admin, models.UserAccountPageData{}, flash)
+			return page.Render(context.Background(), c.Response().Writer)
+		}
+
+		accountData = res
+	} else {
+		inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
+		if exists {
+			accountData = inCache.(*models.UserAccountPageData)
+		} else {
+			res, err := h.managementService.GetSingleUser(userId)
+			if err != nil {
+				page := pages.UserAccountDetail(*admin, models.UserAccountPageData{}, flash)
+				return page.Render(context.Background(), c.Response().Writer)
+			}
+
+			accountData = res
+		}
 	}
 
 	for _, service := range accountData.Services {

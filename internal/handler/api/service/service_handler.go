@@ -3,6 +3,8 @@ package service
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
+	"nearbyassist/internal/service/cache"
 	resource_service "nearbyassist/internal/service/resource"
 	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
@@ -57,6 +59,9 @@ func (h *serviceHandler) CreateService(c echo.Context) error {
 }
 
 func (h *serviceHandler) GetService(c echo.Context) error {
+	params := c.QueryParams()
+	requestURI := c.Request().RequestURI
+
 	serviceId := c.Param("serviceId")
 	if serviceId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -65,15 +70,36 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 		})
 	}
 
-	detail, err := h.service_service.NewGetService(serviceId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error while retrieving service information",
-			Error:   err.Error(),
-		})
+	var serviceDetail *response.DetailedServiceResponse
+
+	if params.Has("fresh") && params.Get("fresh") == "true" {
+		detail, err := h.service_service.NewGetService(serviceId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Error while retrieving service information",
+				Error:   err.Error(),
+			})
+		}
+
+		serviceDetail = detail
+	} else {
+		inCache, exists := cache.NewGoCache().Get(requestURI)
+		if exists {
+			serviceDetail = inCache.(*response.DetailedServiceResponse)
+		} else {
+			detail, err := h.service_service.NewGetService(serviceId)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+					Message: "Error while retrieving service information",
+					Error:   err.Error(),
+				})
+			}
+
+			serviceDetail = detail
+		}
 	}
 
-	for _, image := range detail.Service.Images {
+	for _, image := range serviceDetail.Service.Images {
 		signedURL, err := h.resourceService.SignURLWithDefaultDuration(image.Url)
 		if err != nil {
 			c.Logger().Warnf("Error generating service image url: %s\n", err.Error())
@@ -83,7 +109,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"detail": detail,
+		"detail": serviceDetail,
 	})
 }
 

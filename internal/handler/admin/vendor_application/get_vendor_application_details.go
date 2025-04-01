@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/cache"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/vendor_application"
 	"net/http"
@@ -13,6 +14,8 @@ import (
 )
 
 func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
+	params := c.QueryParams()
+
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
@@ -22,10 +25,29 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 
 	applicationId := c.Param("applicationId")
 
-	application, err := h.applicationService.GetApplicationDetail(applicationId)
-	if err != nil {
-		page := pages.VendorApplicationDetails(*admin, models.ApplicationModel{}, flash)
-		return page.Render(context.Background(), c.Response().Writer)
+	var application *models.ApplicationModel
+
+	if params.Has("fresh") && params.Get("fresh") == "true" {
+		res, err := h.applicationService.GetApplicationDetail(applicationId)
+		if err != nil {
+			page := pages.VendorApplicationDetails(*admin, models.ApplicationModel{}, flash)
+			return page.Render(context.Background(), c.Response().Writer)
+		}
+
+		application = res
+	} else {
+		inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
+		if exists {
+			application = inCache.(*models.ApplicationModel)
+		} else {
+			res, err := h.applicationService.GetApplicationDetail(applicationId)
+			if err != nil {
+				page := pages.VendorApplicationDetails(*admin, models.ApplicationModel{}, flash)
+				return page.Render(context.Background(), c.Response().Writer)
+			}
+
+			application = res
+		}
 	}
 
 	supportingDocumentImage, err := h.resourceService.SignURLWithDefaultDuration(application.SupportingDocumentUrl)

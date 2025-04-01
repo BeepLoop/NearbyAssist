@@ -3,6 +3,7 @@ package verification
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/cache"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/identity_verification"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 )
 
 func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) error {
+	params := c.QueryParams()
+
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
@@ -20,10 +23,29 @@ func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) err
 
 	requestId := c.Param("requestId")
 
-	request, err := h.verificationService.GetRequest(requestId)
-	if err != nil {
-		page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
-		return page.Render(context.Background(), c.Response().Writer)
+	var request *models.IdentityVerificationModel
+
+	if params.Has("fresh") && params.Get("fresh") == "true" {
+		res, err := h.verificationService.GetRequest(requestId)
+		if err != nil {
+			page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
+			return page.Render(context.Background(), c.Response().Writer)
+		}
+
+		request = res
+	} else {
+		inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
+		if exists {
+			request = inCache.(*models.IdentityVerificationModel)
+		} else {
+			res, err := h.verificationService.GetRequest(requestId)
+			if err != nil {
+				page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
+				return page.Render(context.Background(), c.Response().Writer)
+			}
+
+			request = res
+		}
 	}
 
 	fontIdImage, err := h.resourceService.SignURLWithDefaultDuration(request.FrontIdImageUrl)

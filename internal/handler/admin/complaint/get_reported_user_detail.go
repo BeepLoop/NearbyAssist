@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/cache"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/complaints"
 	"net/http"
@@ -12,6 +13,8 @@ import (
 )
 
 func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
+	params := c.QueryParams()
+
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
@@ -19,17 +22,39 @@ func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
 
 	reportId := c.Param("reportId")
 
-	detail, err := h.complaintService.GetReportedUserDetail(reportId)
-	if err != nil {
-		if err := utils.SetFlashMessage(c, "error", "report not found"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/complaints/users?error=user_not_found_error")
+	var reportedUser *models.ReportedUserModel
+
+	if params.Has("fresh") && params.Get("fresh") == "true" {
+		detail, err := h.complaintService.GetReportedUserDetail(reportId)
+		if err != nil {
+			if err := utils.SetFlashMessage(c, "error", "report not found"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/complaints/users?error=user_not_found_error")
+			}
+
+			return c.Redirect(http.StatusSeeOther, "/admin/complaints/users")
 		}
 
-		return c.Redirect(http.StatusSeeOther, "/admin/complaints/users")
+		reportedUser = detail
+	} else {
+		inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
+		if exists {
+			reportedUser = inCache.(*models.ReportedUserModel)
+		} else {
+			detail, err := h.complaintService.GetReportedUserDetail(reportId)
+			if err != nil {
+				if err := utils.SetFlashMessage(c, "error", "report not found"); err != nil {
+					return c.Redirect(http.StatusSeeOther, "/admin/complaints/users?error=user_not_found_error")
+				}
+
+				return c.Redirect(http.StatusSeeOther, "/admin/complaints/users")
+			}
+
+			reportedUser = detail
+		}
 	}
 
 	images := make([]string, 0)
-	for _, image := range detail.Images {
+	for _, image := range reportedUser.Images {
 		signedURL, err := h.resourceService.SignURLWithDefaultDuration(image)
 		if err != nil {
 			fmt.Println("Error generating signed url: ", err.Error())
@@ -41,15 +66,15 @@ func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
 
 	data := models.ReportedUserModel{
 		Model: models.Model{
-			Id:        detail.Id,
-			CreatedAt: utils.FormatDate(detail.CreatedAt),
+			Id:        reportedUser.Id,
+			CreatedAt: utils.FormatDate(reportedUser.CreatedAt),
 		},
-		ReportedBy: detail.ReportedBy,
-		UserId:     detail.UserId,
-		Reason:     detail.Reason,
-		Detail:     detail.Detail,
+		ReportedBy: reportedUser.ReportedBy,
+		UserId:     reportedUser.UserId,
+		Reason:     reportedUser.Reason,
+		Detail:     reportedUser.Detail,
 		Images:     images,
-		Name:       detail.Name,
+		Name:       reportedUser.Name,
 	}
 
 	page := pages.ViewReportedUserDetail(*admin, data)

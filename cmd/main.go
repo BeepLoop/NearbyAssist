@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/service/cache"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/mailer"
@@ -23,6 +24,9 @@ func main() {
 
 	// Init search history tracker
 	searchhistory.New()
+
+	// Init cache
+	cache.NewGoCache()
 
 	// Load encryption algorithm
 	encrypt := core.NewAES([]byte(cfg.ENCRYPTION_KEY))
