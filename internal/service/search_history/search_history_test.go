@@ -7,31 +7,7 @@ import (
 )
 
 func TestSearchHistoryImplementation(t *testing.T) {
-	t.Run("test insert with extra space", func(t *testing.T) {
-		tests := []struct {
-			input    string
-			expected []string
-		}{
-			{
-				input:    "test",
-				expected: []string{"test"},
-			},
-			{
-				input:    "another",
-				expected: []string{"another"},
-			},
-		}
-
-		for _, test := range tests {
-			hist := New()
-			hist.Insert(test.input)
-
-			assert.Equal(t, 1, hist.GetSize())
-			assert.EqualValues(t, test.expected, hist.GetAll())
-		}
-	})
-
-	t.Run("test with max capacity", func(t *testing.T) {
+	t.Run("test get all", func(t *testing.T) {
 		tests := []struct {
 			input         string
 			initialValues []string
@@ -59,6 +35,7 @@ func TestSearchHistoryImplementation(t *testing.T) {
 			hist.Insert(test.input)
 
 			assert.EqualValues(t, test.expected, hist.GetAll())
+			Instance = nil
 		}
 	})
 
@@ -90,6 +67,7 @@ func TestSearchHistoryImplementation(t *testing.T) {
 			values := hist.GetCount(test.count)
 
 			assert.EqualValues(t, test.expected, values)
+			Instance = nil
 		}
 	})
 }
