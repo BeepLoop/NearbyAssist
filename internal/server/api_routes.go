@@ -269,8 +269,11 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		reviewRoute.Use(middleware.CheckAuth(s.JWT))
 
+		transactionStore := transaction_repo.NewMysqlTransactionRepository(s.DB)
 		reviewStore := review_repo.NewMysqlReviewRepository(s.DB)
-		reviewService := review_service.NewService(reviewStore, s.Encrypt, s.JWT)
+
+		reviewService := review_service.NewService(transactionStore, reviewStore, s.Encrypt, s.JWT)
+
 		handler := review.NewHandler(reviewService)
 
 		reviewRoute.POST("", handler.CreateReview)

@@ -4,19 +4,31 @@ import (
 	"errors"
 	"nearbyassist/internal/models"
 	review_repo "nearbyassist/internal/repository/review"
+	transaction_repo "nearbyassist/internal/repository/transaction"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
-	store   review_repo.ReviewRepository
-	encrypt core.Encryption
-	jwt     core.Authenticator
+	transactionStore transaction_repo.TransactionRepository
+	reviewStore      review_repo.ReviewRepository
+	encrypt          core.Encryption
+	jwt              core.Authenticator
 }
 
-func NewService(store review_repo.ReviewRepository, encrypt core.Encryption, jwt core.Authenticator) *Service {
-	return &Service{store: store, encrypt: encrypt, jwt: jwt}
+func NewService(
+	transactionStore transaction_repo.TransactionRepository,
+	reviewStore review_repo.ReviewRepository,
+	encrypt core.Encryption,
+	jwt core.Authenticator,
+) *Service {
+	return &Service{
+		transactionStore: transactionStore,
+		reviewStore:      reviewStore,
+		encrypt:          encrypt,
+		jwt:              jwt,
+	}
 }
 
 func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload) (string, error) {
@@ -25,7 +37,15 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 		return "", err
 	}
 
-	if isReviewed, err := s.store.IsReviewed(req.ServiceId); err != nil {
+	if isReviewable, err := s.transactionStore.IsReviewable(req.TransactionId); err != nil {
+		return "", err
+	} else {
+		if !isReviewable {
+			return "", errors.New("transaction not reviewable")
+		}
+	}
+
+	if isReviewed, err := s.reviewStore.IsReviewed(req.ServiceId); err != nil {
 		return "", err
 	} else {
 		if isReviewed {
@@ -33,7 +53,7 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 		}
 	}
 
-	transaction, err := s.store.GetTransactionById(req.TransactionId)
+	transaction, err := s.reviewStore.GetTransactionById(req.TransactionId)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +69,7 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 		Text:          utils.Must(s.encrypt.EncryptString(req.Text)),
 	}
 
-	reviewId, err := s.store.Create(newReview)
+	reviewId, err := s.reviewStore.Create(newReview)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +78,7 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 }
 
 func (s *Service) GetReview(reviewId string) (*models.ReviewModel, error) {
-	review, err := s.store.FindById(reviewId)
+	review, err := s.reviewStore.FindById(reviewId)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +87,7 @@ func (s *Service) GetReview(reviewId string) (*models.ReviewModel, error) {
 }
 
 func (s *Service) GetServiceReviews(serviceId string) ([]*models.ReviewModel, error) {
-	reviews, err := s.store.GetReviewsByService(serviceId)
+	reviews, err := s.reviewStore.GetReviewsByService(serviceId)
 	if err != nil {
 		return nil, err
 	}

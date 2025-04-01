@@ -25,4 +25,6 @@ type TransactionRepository interface {
 	Accept(transactionId string) error
 	Reject(transactionId string) error
 	MarkComplete(transactionId string) error
+
+	IsReviewable(transactionId string) (bool, error)
 }

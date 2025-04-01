@@ -830,3 +830,27 @@ func (s *MysqlTransactionRepository) MarkComplete(transactionId string) error {
 
 	return nil
 }
+
+func (s *MysqlTransactionRepository) IsReviewable(transactionId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT CASE
+            WHEN (SELECT 1 FROM Transaction WHERE id = ? AND status = 'done')
+            THEN 1
+            ELSE 0
+        END AS is_reviewable
+    `
+
+	isReviewable := false
+	if err := s.db.GetContext(ctx, &isReviewable, query, transactionId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return isReviewable, nil
+}
