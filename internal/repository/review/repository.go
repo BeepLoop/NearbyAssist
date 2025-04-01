@@ -6,8 +6,7 @@ type ReviewRepository interface {
 	Create(data *models.ReviewModel) (string, error)
 	FindById(id string) (*models.ReviewModel, error)
 
-	// Returns nil if reviewable, else error
-	IsServiceReviewable(serviceId string) error
+	IsReviewed(serviceId string) (bool, error)
 
 	GetTransactionById(id string) (*models.TransactionModel, error)
 

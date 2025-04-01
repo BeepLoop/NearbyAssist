@@ -96,7 +96,6 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
             t.status,
             t.cost,
             t.isReviewed,
-            t.isReported,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -216,7 +215,6 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
             t.status,
             t.cost,
             t.isReviewed,
-            t.isReported,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -297,7 +295,6 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
             t.status,
             t.cost,
             t.isReviewed,
-            t.isReported,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -378,7 +375,6 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
             t.status,
             t.cost,
             t.isReviewed,
-            t.isReported,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -459,7 +455,6 @@ func (s *MysqlTransactionRepository) GetRecent(userId string) ([]*models.Transac
             t.status,
             t.cost,
             t.isReviewed,
-            t.isReported,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -542,7 +537,6 @@ func (s *MysqlTransactionRepository) GetConfirmed(id string) ([]*models.Transact
             t.status,
             t.cost,
             t.isReviewed,
-            t.isReported,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -624,7 +618,6 @@ func (s *MysqlTransactionRepository) GetHistory(id string) ([]*models.Transactio
             t.status,
             t.cost,
             t.isReviewed,
-            t.isReported,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -706,7 +699,6 @@ func (s *MysqlTransactionRepository) GetReviewableTransactions(userId string) ([
             t.status,
             t.cost,
             t.isReviewed,
-            t.isReported,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 

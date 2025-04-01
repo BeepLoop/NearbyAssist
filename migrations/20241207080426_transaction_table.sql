@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS Transaction (
     status Enum('pending', 'confirmed', 'rejected', 'done', 'cancelled') NOT NULL DEFAULT 'pending',
     cost DOUBLE NOT NULL,
     isReviewed BOOLEAN DEFAULT FALSE,
-    isReported BOOLEAN DEFAULT FALSE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),

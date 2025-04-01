@@ -19,7 +19,6 @@ type TransactionModel struct {
 	Cost       string                  `json:"cost" db:"cost" validate:"required"`
 	Status     TransactionStatusFilter `json:"status" db:"status"`
 	IsReviewed bool                    `json:"isReviewed" db:"isReviewed"`
-	IsReported bool                    `json:"isReported" db:"isReported"`
 
 	// Additional fields for joins
 	Service *ServiceModel `json:"service,omitempty"`
