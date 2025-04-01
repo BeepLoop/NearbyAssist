@@ -5,6 +5,7 @@ import (
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
+	searchhistory "nearbyassist/internal/service/search_history"
 	"nearbyassist/internal/utils"
 )
 
@@ -60,7 +61,7 @@ func (s *Service) GetRecommendations(limit, offset int) (*response.Recommendatio
 	}
 
 	recommendation := &response.Recommendation{
-		Searches: make([]string, 0),
+		Searches: searchhistory.Instance.GetAll(),
 		Services: recommendServices,
 	}
 

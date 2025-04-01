@@ -10,6 +10,7 @@ import (
 	"nearbyassist/internal/service/mailer"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/route_engine"
+	searchhistory "nearbyassist/internal/service/search_history"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
 
@@ -19,6 +20,9 @@ import (
 func main() {
 	// Load configuration file
 	cfg := config.GetConfig()
+
+	// Init search history tracker
+	searchhistory.New()
 
 	// Load encryption algorithm
 	encrypt := core.NewAES([]byte(cfg.ENCRYPTION_KEY))

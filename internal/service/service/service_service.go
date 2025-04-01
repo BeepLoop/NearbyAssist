@@ -13,8 +13,10 @@ import (
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/route_engine"
+	searchhistory "nearbyassist/internal/service/search_history"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/utils"
+	"strings"
 )
 
 type Service struct {
@@ -565,6 +567,16 @@ func (s *Service) DeleteExtra(bearerToken, extraId string) error {
 }
 
 func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSearchResult, error) {
+	// Update search history
+	if q, ok := params["q"]; ok {
+		tags := strings.Split(q, ",")
+
+		for _, tag := range tags {
+			cleaned := strings.ReplaceAll(tag, "_", " ")
+			searchhistory.Instance.Insert(cleaned)
+		}
+	}
+
 	services, err := s.serviceStore.GeoSpatialSearch(params)
 	if err != nil {
 		return nil, err
