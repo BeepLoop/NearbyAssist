@@ -9,6 +9,7 @@ import (
 	"nearbyassist/internal/handler/api/message"
 	"nearbyassist/internal/handler/api/notification"
 	"nearbyassist/internal/handler/api/qr"
+	recommendation_handler "nearbyassist/internal/handler/api/recommendation"
 	"nearbyassist/internal/handler/api/resource"
 	"nearbyassist/internal/handler/api/review"
 	"nearbyassist/internal/handler/api/service"
@@ -44,6 +45,7 @@ import (
 	message_service "nearbyassist/internal/service/message"
 	notification_service "nearbyassist/internal/service/notification"
 	qr_service "nearbyassist/internal/service/qr"
+	recommendation_service "nearbyassist/internal/service/recommendation"
 	resource_service "nearbyassist/internal/service/resource"
 	review_service "nearbyassist/internal/service/review"
 	"nearbyassist/internal/service/save_service"
@@ -364,5 +366,20 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		// client Authorization header and continuously pass updated token on
 		// reconnect. Hard skill issues
 		websocketRoute.GET("", handler.Connect)
+	}
+
+	recommendationRoute := v1.Group("/recommendations")
+	{
+		recommendationRoute.Use(middleware.CheckAuth(s.JWT))
+
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+
+		recommendationService := recommendation_service.NewService(serviceStore, vendorStore, s.Encrypt)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+
+		handler := recommendation_handler.NewHandler(recommendationService, resourceService)
+
+		recommendationRoute.GET("", handler.GetRecommendations)
 	}
 }

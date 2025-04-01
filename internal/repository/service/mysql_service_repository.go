@@ -104,7 +104,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
 	return data.Id, nil
 }
 
-func (s *MysqlServiceRepository) FindAll() ([]*models.ServiceModel, error) {
+func (s *MysqlServiceRepository) FindAll(limit, offset int) ([]*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -112,20 +112,56 @@ func (s *MysqlServiceRepository) FindAll() ([]*models.ServiceModel, error) {
         SELECT
             id,
             vendorId,
+            title,
             description,
-            rate,
+            FORMAT(rate, 2) AS rate,
             latitude,
-            longitude
+            longitude,
+            createdAt
         FROM 
             Service
-        LIMIT
-            10
+        ORDER BY
+            createdAt, updatedAt DESC
+        LIMIT ?
+        OFFSET ?
     `
 
 	services := make([]*models.ServiceModel, 0)
-	err := s.db.SelectContext(ctx, &services, query)
-	if err != nil {
+	if err := s.db.SelectContext(ctx, &services, query, limit, offset); err != nil {
 		return nil, err
+	}
+
+	extrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN ServiceExtra se ON se.extraId = e.id
+        WHERE
+            se.serviceId = ? AND e.deleted = 0
+    `
+
+	for _, service := range services {
+		extras := make([]*models.ExtraModel, 0)
+		if err := s.db.SelectContext(ctx, &extras, extrasQuery, service.Id); err != nil {
+			return nil, err
+		}
+		service.Extras = extras
+
+		if tags, err := s.GetTags(service.Id); err != nil {
+			return nil, err
+		} else {
+			service.Tags = tags
+		}
+
+		if images, err := s.GetPhotos(service.Id); err != nil {
+			return nil, err
+		} else {
+			service.Images = images
+		}
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
