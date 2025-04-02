@@ -831,20 +831,20 @@ func (s *MysqlTransactionRepository) MarkComplete(transactionId string) error {
 	return nil
 }
 
-func (s *MysqlTransactionRepository) IsReviewable(transactionId string) (bool, error) {
+func (s *MysqlTransactionRepository) IsReviewed(transactionId string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := `
         SELECT CASE
-            WHEN (SELECT 1 FROM Transaction WHERE id = ? AND status = 'done')
+            WHEN EXISTS (SELECT 1 FROM Review WHERE transactionId = ?)
             THEN 1
             ELSE 0
-        END AS is_reviewable
+        END AS is_reviewed
     `
 
-	isReviewable := false
-	if err := s.db.GetContext(ctx, &isReviewable, query, transactionId); err != nil {
+	isReviewed := false
+	if err := s.db.GetContext(ctx, &isReviewed, query, transactionId); err != nil {
 		return false, err
 	}
 
@@ -852,5 +852,5 @@ func (s *MysqlTransactionRepository) IsReviewable(transactionId string) (bool, e
 		return false, context.DeadlineExceeded
 	}
 
-	return isReviewable, nil
+	return isReviewed, nil
 }

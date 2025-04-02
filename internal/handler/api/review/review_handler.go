@@ -6,6 +6,7 @@ import (
 	review_service "nearbyassist/internal/service/review"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -38,6 +39,13 @@ func (h *reviewHandler) CreateReview(c echo.Context) error {
 
 	reviewId, err := h.reviewService.CreateReview(bearerToken, req)
 	if err != nil {
+		if strings.Contains(err.Error(), "forbidden") {
+			return echo.NewHTTPError(http.StatusForbidden, models.Error{
+				Message: "Posting review not allowed",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating review",
 			Error:   err.Error(),
@@ -68,27 +76,5 @@ func (h *reviewHandler) GetReview(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"review": review,
-	})
-}
-
-func (h *reviewHandler) GetServiceReviews(c echo.Context) error {
-	serviceId := c.Param("serviceId")
-	if serviceId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Service ID is required",
-			Error:   "Service ID is required",
-		})
-	}
-
-	reviews, err := h.reviewService.GetServiceReviews(serviceId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, models.Error{
-			Message: "Reviews not found",
-			Error:   err.Error(),
-		})
-	}
-
-	return c.JSON(http.StatusOK, utils.Mapper{
-		"reviews": reviews,
 	})
 }

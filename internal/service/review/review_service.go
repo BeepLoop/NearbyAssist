@@ -37,23 +37,7 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 		return "", err
 	}
 
-	if isReviewable, err := s.transactionStore.IsReviewable(req.TransactionId); err != nil {
-		return "", err
-	} else {
-		if !isReviewable {
-			return "", errors.New("transaction not reviewable")
-		}
-	}
-
-	if isReviewed, err := s.reviewStore.IsReviewed(req.ServiceId); err != nil {
-		return "", err
-	} else {
-		if isReviewed {
-			return "", errors.New("service already reviewed")
-		}
-	}
-
-	transaction, err := s.reviewStore.GetTransactionById(req.TransactionId)
+	transaction, err := s.transactionStore.FindById(req.TransactionId)
 	if err != nil {
 		return "", err
 	}
@@ -62,9 +46,20 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 		return "", err
 	}
 
+	if transaction.Status != models.TRANSACTION_STATUS_DONE {
+		return "", errors.New("forbidden")
+	}
+
+	if isReviewed, err := s.transactionStore.IsReviewed(req.TransactionId); err != nil {
+		return "", err
+	} else {
+		if isReviewed {
+			return "", errors.New("forbidden")
+		}
+	}
+
 	newReview := &models.ReviewModel{
 		TransactionId: req.TransactionId,
-		ServiceId:     req.ServiceId,
 		Rating:        req.Rating,
 		Text:          utils.Must(s.encrypt.EncryptString(req.Text)),
 	}
@@ -84,13 +79,4 @@ func (s *Service) GetReview(reviewId string) (*models.ReviewModel, error) {
 	}
 
 	return review, nil
-}
-
-func (s *Service) GetServiceReviews(serviceId string) ([]*models.ReviewModel, error) {
-	reviews, err := s.reviewStore.GetReviewsByService(serviceId)
-	if err != nil {
-		return nil, err
-	}
-
-	return reviews, nil
 }

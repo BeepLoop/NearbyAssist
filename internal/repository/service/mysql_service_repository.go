@@ -393,7 +393,9 @@ func (s *MysqlServiceRepository) GetReviews(serviceId string) ([]*models.ReviewM
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "SELECT id, serviceId, rating FROM Review WHERE serviceId = ?"
+	// TODO: Implement this, join on transaction and review table
+
+	query := ""
 
 	reviews := make([]*models.ReviewModel, 0)
 	if err := s.db.SelectContext(ctx, &reviews, query, serviceId); err != nil {

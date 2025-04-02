@@ -30,7 +30,7 @@ func (s *MysqlReviewRepository) Create(data *models.ReviewModel) (string, error)
 
 	data.Id = utils.GenerateId()
 
-	insertReview := "INSERT INTO Review (id, serviceId, rating, text) VALUES (:id, :serviceId, :rating, :text)"
+	insertReview := "INSERT INTO Review (id, transactionId, rating, text) VALUES (:id, :transactionId, :rating, :text)"
 	if _, err := tx.NamedExecContext(ctx, insertReview, data); err != nil {
 		return "", err
 	}
@@ -56,7 +56,7 @@ func (s *MysqlReviewRepository) FindById(id string) (*models.ReviewModel, error)
 	defer cancel()
 
 	review := new(models.ReviewModel)
-	query := "SELECT id, serviceId, rating FROM Review WHERE id = ?"
+	query := "SELECT id, transactionId, rating FROM Review WHERE id = ?"
 	if err := s.db.GetContext(ctx, review, query, id); err != nil {
 		return nil, err
 	}
@@ -64,31 +64,7 @@ func (s *MysqlReviewRepository) FindById(id string) (*models.ReviewModel, error)
 	return review, nil
 }
 
-func (s *MysqlReviewRepository) IsReviewed(serviceId string) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	query := `
-        SELECT CASE
-            WHEN EXISTS (SELECT 1 FROM Review WHERE serviceId = ?)
-            THEN 1
-            ELSE 0
-        END AS is_reviewed
-    `
-
-	isReviewed := false
-	if err := s.db.GetContext(ctx, &isReviewed, query, serviceId); err != nil {
-		return false, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return false, context.DeadlineExceeded
-	}
-
-	return isReviewed, nil
-}
-
-func (s *MysqlReviewRepository) GetTransactionById(id string) (*models.TransactionModel, error) {
+func (s *MysqlReviewRepository) FindByTransactionId(id string) (*models.TransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -103,18 +79,4 @@ func (s *MysqlReviewRepository) GetTransactionById(id string) (*models.Transacti
 	}
 
 	return transaction, nil
-}
-
-func (s *MysqlReviewRepository) GetReviewsByService(serviceId string) ([]*models.ReviewModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := "SELECT id, serviceId, rating FROM Review WHERE serviceId = ?"
-
-	reviews := make([]*models.ReviewModel, 0)
-	if err := s.db.SelectContext(ctx, &reviews, query, serviceId); err != nil {
-		return nil, err
-	}
-
-	return reviews, nil
 }
