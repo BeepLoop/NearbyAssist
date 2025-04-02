@@ -95,7 +95,6 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
             t.serviceId,
             t.status,
             t.cost,
-            t.isReviewed,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -110,6 +109,12 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
 	if err := s.db.GetContext(ctx, transaction, transactionQuery, id); err != nil {
 		fmt.Println("error get transaction: ", err.Error())
 		return nil, err
+	}
+
+	if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
+		return nil, err
+	} else {
+		transaction.IsReviewed = isReviewed
 	}
 
 	serviceQuery := "SELECT * FROM Service WHERE id = ?"
@@ -214,7 +219,6 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
             t.serviceId,
             t.status,
             t.cost,
-            t.isReviewed,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -262,6 +266,12 @@ func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.Tra
     `
 
 	for _, transaction := range transactions {
+		if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
+			return nil, err
+		} else {
+			transaction.IsReviewed = isReviewed
+		}
+
 		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
@@ -294,7 +304,6 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
             t.serviceId,
             t.status,
             t.cost,
-            t.isReviewed,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -342,6 +351,12 @@ func (s *MysqlTransactionRepository) GetTransactionSent(id string) ([]*models.Tr
     `
 
 	for _, transaction := range transactions {
+		if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
+			return nil, err
+		} else {
+			transaction.IsReviewed = isReviewed
+		}
+
 		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
@@ -374,7 +389,6 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
             t.serviceId,
             t.status,
             t.cost,
-            t.isReviewed,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -422,6 +436,12 @@ func (s *MysqlTransactionRepository) GetTransactionReceived(id string) ([]*model
     `
 
 	for _, transaction := range transactions {
+		if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
+			return nil, err
+		} else {
+			transaction.IsReviewed = isReviewed
+		}
+
 		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
@@ -454,7 +474,6 @@ func (s *MysqlTransactionRepository) GetRecent(userId string) ([]*models.Transac
             t.serviceId,
             t.status,
             t.cost,
-            t.isReviewed,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -504,6 +523,12 @@ func (s *MysqlTransactionRepository) GetRecent(userId string) ([]*models.Transac
     `
 
 	for _, transaction := range transactions {
+		if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
+			return nil, err
+		} else {
+			transaction.IsReviewed = isReviewed
+		}
+
 		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
@@ -536,7 +561,6 @@ func (s *MysqlTransactionRepository) GetConfirmed(id string) ([]*models.Transact
             t.serviceId,
             t.status,
             t.cost,
-            t.isReviewed,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -585,6 +609,12 @@ func (s *MysqlTransactionRepository) GetConfirmed(id string) ([]*models.Transact
     `
 
 	for _, transaction := range transactions {
+		if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
+			return nil, err
+		} else {
+			transaction.IsReviewed = isReviewed
+		}
+
 		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
@@ -617,7 +647,6 @@ func (s *MysqlTransactionRepository) GetHistory(id string) ([]*models.Transactio
             t.serviceId,
             t.status,
             t.cost,
-            t.isReviewed,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -666,6 +695,12 @@ func (s *MysqlTransactionRepository) GetHistory(id string) ([]*models.Transactio
     `
 
 	for _, transaction := range transactions {
+		if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
+			return nil, err
+		} else {
+			transaction.IsReviewed = isReviewed
+		}
+
 		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err
@@ -698,7 +733,6 @@ func (s *MysqlTransactionRepository) GetReviewableTransactions(userId string) ([
             t.serviceId,
             t.status,
             t.cost,
-            t.isReviewed,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -706,7 +740,9 @@ func (s *MysqlTransactionRepository) GetReviewableTransactions(userId string) ([
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            t.clientId = ? AND t.status = 'done' AND t.isReviewed = 0
+            t.clientId = ? AND t.status = 'done' AND NOT EXISTS (
+                SELECT 1 FROM Review r WHERE r.transactionId = t.id
+            )
         ORDER BY
             t.updatedAt DESC
     `
@@ -747,6 +783,12 @@ func (s *MysqlTransactionRepository) GetReviewableTransactions(userId string) ([
     `
 
 	for _, transaction := range transactions {
+		if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
+			return nil, err
+		} else {
+			transaction.IsReviewed = isReviewed
+		}
+
 		extras := make([]*models.ExtraModel, 0)
 		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
 			return nil, err

@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS Transaction (
     serviceId VARCHAR(255) NOT NULL,
     status Enum('pending', 'confirmed', 'rejected', 'done', 'cancelled') NOT NULL DEFAULT 'pending',
     cost DOUBLE NOT NULL,
-    isReviewed BOOLEAN DEFAULT FALSE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),

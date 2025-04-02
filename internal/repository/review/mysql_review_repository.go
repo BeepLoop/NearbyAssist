@@ -30,13 +30,13 @@ func (s *MysqlReviewRepository) Create(data *models.ReviewModel) (string, error)
 
 	data.Id = utils.GenerateId()
 
-	insertReview := "INSERT INTO Review (id, transactionId, rating, text) VALUES (:id, :transactionId, :rating, :text)"
+	insertReview := `
+        INSERT INTO
+            Review (id, transactionId, rating, text)
+        VALUES
+            (:id, :transactionId, :rating, :text)
+    `
 	if _, err := tx.NamedExecContext(ctx, insertReview, data); err != nil {
-		return "", err
-	}
-
-	updateReviewedFlag := "UPDATE Transaction SET isReviewed = 1 WHERE id = ?"
-	if _, err = tx.ExecContext(ctx, updateReviewedFlag, data.TransactionId); err != nil {
 		return "", err
 	}
 
