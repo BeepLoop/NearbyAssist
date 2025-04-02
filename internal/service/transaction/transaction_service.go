@@ -7,7 +7,6 @@ import (
 	notification_repo "nearbyassist/internal/repository/notification"
 	transaction_repo "nearbyassist/internal/repository/transaction"
 	"nearbyassist/internal/request"
-	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/websocket"
@@ -39,11 +38,17 @@ func NewService(
 }
 
 func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string, error) {
-	transaction := new(models.TransactionModel)
-	transaction.ClientId = req.ClientId
-	transaction.VendorId = req.VendorId
-	transaction.ServiceId = req.ServiceId
-	transaction.Cost = req.Cost
+	if err := utils.ValidateDate(req.ScheduledAt); err != nil {
+		return "", err
+	}
+
+	transaction := &models.TransactionModel{
+		ClientId:    req.ClientId,
+		VendorId:    req.VendorId,
+		ServiceId:   req.ServiceId,
+		Cost:        req.Cost,
+		ScheduledAt: utils.FormatDate(req.ScheduledAt),
+	}
 
 	extras := make([]*models.ExtraModel, 0)
 	for _, extra := range req.Extras {
@@ -53,8 +58,22 @@ func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string,
 			},
 		})
 	}
-
 	transaction.Extras = extras
+
+	/*
+	   NOTE: Business rule that restricts vendors to only ONE transaction
+	   scheduled per day. This is not final, I want to allow multiple
+	   scheduled per day because services may be simple enough and won't take
+	   a whole day.
+	*/
+	confirmedTransactions, err := s.transactionStore.GetConfirmedTransactionsOfVendor(req.VendorId)
+	if err != nil {
+		return "", err
+	}
+
+	if utils.HasScheduleOverlap(req.ScheduledAt, confirmedTransactions) {
+		return "", errors.New("schedule overlap")
+	}
 
 	transactionId, err := s.transactionStore.Create(transaction)
 	if err != nil {
@@ -104,54 +123,30 @@ func (s *Service) GetTransaction(transactionId string) (*models.TransactionModel
 		return nil, err
 	}
 
-	if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
-		return nil, err
-	} else {
-		transaction.Vendor = plain
-	}
+	transaction.Vendor = utils.Must(s.encrypt.DecryptString(transaction.Vendor))
+	transaction.Client = utils.Must(s.encrypt.DecryptString(transaction.Client))
+	transaction.Service.Title = utils.Must(s.encrypt.DecryptString(transaction.Service.Title))
+	transaction.Service.Description = utils.Must(s.encrypt.DecryptString(transaction.Service.Description))
 
-	if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
-		return nil, err
-	} else {
-		transaction.Client = plain
-	}
-
-	if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
-		return nil, err
-	} else {
-		transaction.Service.Title = plain
-	}
-
-	if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
-		return nil, err
-	} else {
-		transaction.Service.Description = plain
+	if transaction.Status == models.TRANSACTION_STATUS_CANCELLED {
+		transaction.CancelReason = utils.Must(s.encrypt.DecryptString(transaction.CancelReason))
 	}
 
 	for _, extra := range transaction.Extras {
-		if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
-			return nil, err
-		} else {
-			extra.Title = title
-		}
-
-		if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
-			return nil, err
-		} else {
-			extra.Description = description
-		}
+		extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+		extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 	}
 
 	return transaction, nil
 }
 
-func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
+func (s *Service) CancelTransaction(bearerToken string, req *request.CancelRequestPayload) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
 	}
 
-	transaction, err := s.transactionStore.FindById(transactionId)
+	transaction, err := s.transactionStore.FindById(req.TransactionId)
 	if err != nil {
 		return err
 	}
@@ -168,7 +163,9 @@ func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
 		return errors.New("Unauthorized cancel request")
 	}
 
-	if err := s.transactionStore.Cancel(transactionId); err != nil {
+	encryptedReason := utils.Must(s.encrypt.EncryptString(req.Reason))
+
+	if err := s.transactionStore.Cancel(req.TransactionId, encryptedReason); err != nil {
 		return err
 	}
 
@@ -179,7 +176,7 @@ func (s *Service) CancelTransaction(bearerToken, transactionId string) error {
 		Recipient: transaction.VendorId,
 		Type:      "fail",
 		Title:     "Transaction Request Cancelled",
-		Content:   "A client cancelled their reqeust for your service",
+		Content:   fmt.Sprintf("A client cancelled their request for your service. Rason: %s", req.Reason),
 	}
 
 	encryptedNotification := &models.NotificationModel{
@@ -337,73 +334,6 @@ func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) er
 	return nil
 }
 
-func (s *Service) GetTransactionSummary(transactionId string) (*response.TransactionSummary, error) {
-	transactionData, err := s.transactionStore.GetSummary(transactionId)
-	if err != nil {
-		return nil, err
-	}
-
-	if plain, err := s.encrypt.DecryptString(transactionData.Vendor); err != nil {
-		return nil, err
-	} else {
-		transactionData.Vendor = plain
-	}
-
-	if plain, err := s.encrypt.DecryptString(transactionData.Client); err != nil {
-		return nil, err
-	} else {
-		transactionData.Client = plain
-	}
-
-	if plain, err := s.encrypt.DecryptString(transactionData.ServiceTitle); err != nil {
-		return nil, err
-	} else {
-		transactionData.ServiceTitle = plain
-	}
-
-	if plain, err := s.encrypt.DecryptString(transactionData.VendorEmail); err != nil {
-		return nil, err
-	} else {
-		transactionData.VendorEmail = plain
-	}
-
-	if plain, err := s.encrypt.DecryptString(transactionData.ClientEmail); err != nil {
-		return nil, err
-	} else {
-		transactionData.ClientEmail = plain
-	}
-
-	return transactionData, nil
-}
-
-func (s *Service) GetUserTransactionList(bearerToken string) ([]*models.TransactionModel, error) {
-	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
-	if err != nil {
-		return nil, err
-	}
-
-	transactions, err := s.transactionStore.GetMyTransactions(userId)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, transaction := range transactions {
-		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
-			return nil, err
-		} else {
-			transaction.Vendor = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
-			return nil, err
-		} else {
-			transaction.Client = plain
-		}
-	}
-
-	return transactions, nil
-}
-
 func (s *Service) GetTransactionUserSent(bearerToken string) ([]*models.TransactionModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
@@ -416,42 +346,14 @@ func (s *Service) GetTransactionUserSent(bearerToken string) ([]*models.Transact
 	}
 
 	for _, transaction := range transactions {
-		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
-			return nil, err
-		} else {
-			transaction.Vendor = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
-			return nil, err
-		} else {
-			transaction.Client = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Title = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Description = plain
-		}
+		transaction.Vendor = utils.Must(s.encrypt.DecryptString(transaction.Vendor))
+		transaction.Client = utils.Must(s.encrypt.DecryptString(transaction.Client))
+		transaction.Service.Title = utils.Must(s.encrypt.DecryptString(transaction.Service.Title))
+		transaction.Service.Description = utils.Must(s.encrypt.DecryptString(transaction.Service.Description))
 
 		for _, extra := range transaction.Extras {
-			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = title
-			}
-
-			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = description
-			}
+			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
 	}
 
@@ -470,42 +372,14 @@ func (s *Service) GetTransactionUserReceived(bearerToken string) ([]*models.Tran
 	}
 
 	for _, transaction := range transactions {
-		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
-			return nil, err
-		} else {
-			transaction.Vendor = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
-			return nil, err
-		} else {
-			transaction.Client = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Title = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Description = plain
-		}
+		transaction.Vendor = utils.Must(s.encrypt.DecryptString(transaction.Vendor))
+		transaction.Client = utils.Must(s.encrypt.DecryptString(transaction.Client))
+		transaction.Service.Title = utils.Must(s.encrypt.DecryptString(transaction.Service.Title))
+		transaction.Service.Description = utils.Must(s.encrypt.DecryptString(transaction.Service.Description))
 
 		for _, extra := range transaction.Extras {
-			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = title
-			}
-
-			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = description
-			}
+			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
 	}
 
@@ -524,42 +398,14 @@ func (s *Service) GetRecentTransactions(bearerToken string) ([]*models.Transacti
 	}
 
 	for _, transaction := range transactions {
-		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
-			return nil, err
-		} else {
-			transaction.Vendor = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
-			return nil, err
-		} else {
-			transaction.Client = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Title = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Description = plain
-		}
+		transaction.Vendor = utils.Must(s.encrypt.DecryptString(transaction.Vendor))
+		transaction.Client = utils.Must(s.encrypt.DecryptString(transaction.Client))
+		transaction.Service.Title = utils.Must(s.encrypt.DecryptString(transaction.Service.Title))
+		transaction.Service.Description = utils.Must(s.encrypt.DecryptString(transaction.Service.Description))
 
 		for _, extra := range transaction.Extras {
-			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = title
-			}
-
-			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = description
-			}
+			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
 	}
 
@@ -578,42 +424,14 @@ func (s *Service) GetConfirmedTransactions(bearerToken string) ([]*models.Transa
 	}
 
 	for _, transaction := range transactions {
-		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
-			return nil, err
-		} else {
-			transaction.Vendor = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
-			return nil, err
-		} else {
-			transaction.Client = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Title = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Description = plain
-		}
+		transaction.Vendor = utils.Must(s.encrypt.DecryptString(transaction.Vendor))
+		transaction.Client = utils.Must(s.encrypt.DecryptString(transaction.Client))
+		transaction.Service.Title = utils.Must(s.encrypt.DecryptString(transaction.Service.Title))
+		transaction.Service.Description = utils.Must(s.encrypt.DecryptString(transaction.Service.Description))
 
 		for _, extra := range transaction.Extras {
-			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = title
-			}
-
-			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = description
-			}
+			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
 	}
 
@@ -632,42 +450,14 @@ func (s *Service) GetReviewableTransactions(bearerToken string) ([]*models.Trans
 	}
 
 	for _, reviewable := range reviewables {
-		if plain, err := s.encrypt.DecryptString(reviewable.Vendor); err != nil {
-			return nil, err
-		} else {
-			reviewable.Vendor = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(reviewable.Client); err != nil {
-			return nil, err
-		} else {
-			reviewable.Client = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(reviewable.Service.Title); err != nil {
-			return nil, err
-		} else {
-			reviewable.Service.Title = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(reviewable.Service.Description); err != nil {
-			return nil, err
-		} else {
-			reviewable.Service.Description = plain
-		}
+		reviewable.Vendor = utils.Must(s.encrypt.DecryptString(reviewable.Vendor))
+		reviewable.Client = utils.Must(s.encrypt.DecryptString(reviewable.Client))
+		reviewable.Service.Title = utils.Must(s.encrypt.DecryptString(reviewable.Service.Title))
+		reviewable.Service.Description = utils.Must(s.encrypt.DecryptString(reviewable.Service.Description))
 
 		for _, extra := range reviewable.Extras {
-			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = title
-			}
-
-			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = description
-			}
+			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
 	}
 
@@ -686,43 +476,14 @@ func (s *Service) GetTransactionHistory(bearerToken string) ([]*models.Transacti
 	}
 
 	for _, transaction := range transactions {
-		if plain, err := s.encrypt.DecryptString(transaction.Vendor); err != nil {
-			return nil, err
-		} else {
-			transaction.Vendor = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Client); err != nil {
-			return nil, err
-		} else {
-			transaction.Client = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Title); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Title = plain
-		}
-
-		if plain, err := s.encrypt.DecryptString(transaction.Service.Description); err != nil {
-			return nil, err
-		} else {
-			transaction.Service.Description = plain
-		}
+		transaction.Vendor = utils.Must(s.encrypt.DecryptString(transaction.Vendor))
+		transaction.Client = utils.Must(s.encrypt.DecryptString(transaction.Client))
+		transaction.Service.Title = utils.Must(s.encrypt.DecryptString(transaction.Service.Title))
+		transaction.Service.Description = utils.Must(s.encrypt.DecryptString(transaction.Service.Description))
 
 		for _, extra := range transaction.Extras {
-			if title, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = title
-			}
-
-			if description, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = description
-			}
-
+			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
 	}
 

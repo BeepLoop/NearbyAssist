@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/response"
 	"nearbyassist/internal/utils"
 	"time"
 
@@ -33,21 +32,36 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
 		return "", err
 	}
 
-	count := 0
-	checkDuplicate := "SELECT count(id) FROM Transaction WHERE (clientId = ? AND serviceId = ?) AND (status = 'confirmed' OR status = 'pending')"
-	if err := tx.GetContext(ctx, &count, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
+	checkDuplicate := `
+        SELECT CASE
+            WHEN EXISTS
+                (
+                    SELECT
+                        1
+                    FROM
+                        Transaction
+                    WHERE
+                        (clientId = ? AND serviceId = ?)
+                        AND (status = 'confirmed' OR status = 'pending')
+                )
+            THEN 1
+            ELSE 0
+        END AS exists
+    `
+	alreadyBooked := false
+	if err := tx.GetContext(ctx, &alreadyBooked, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
 		return "", err
 	}
 
-	if count > 0 {
+	if alreadyBooked {
 		return "", errors.New("You already have an confirmed or pending transaction for this service")
 	}
 
 	query := `
         INSERT INTO
-            Transaction (id, vendorId, clientId, serviceId, cost )
+            Transaction (id, vendorId, clientId, serviceId, cost, scheduledAt )
         VALUES
-            (:id, :vendorId, :clientId, :serviceId, :cost)
+            (:id, :vendorId, :clientId, :serviceId, :cost, :scheduledAt)
     `
 
 	if _, err := tx.NamedExecContext(ctx, query, data); err != nil {
@@ -95,6 +109,10 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
             t.serviceId,
             t.status,
             t.cost,
+            t.createdAt,
+            t.scheduledAt,
+            t.cancelReason,
+            t.updatedAt,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -153,42 +171,6 @@ func (s *MysqlTransactionRepository) FindById(id string) (*models.TransactionMod
 	return transaction, nil
 }
 
-func (s *MysqlTransactionRepository) GetSummary(transactionId string) (*response.TransactionSummary, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	summary := new(response.TransactionSummary)
-	query := `
-        SELECT
-            t.id,
-            t.createdAt,
-            vendor.Name AS vendor,
-            client.Name AS client,
-            s.title AS serviceTitle,
-            t.cost,
-            t.startDate,
-            t.endDate,
-            vendor.Email AS vendorEmail,
-            client.Email AS clientEmail
-        FROM
-            Transaction t
-            JOIN User client ON t.clientId = client.id
-            JOIN User vendor ON t.vendorId = vendor.id
-            JOIN Service s ON t.serviceId = s.id
-        WHERE
-            t.id = ?
-    `
-	if err := s.db.GetContext(ctx, summary, query, transactionId); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return summary, nil
-}
-
 func (s *MysqlTransactionRepository) GetAll() ([]*models.TransactionModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -207,82 +189,22 @@ func (s *MysqlTransactionRepository) GetAll() ([]*models.TransactionModel, error
 	return transactions, nil
 }
 
-func (s *MysqlTransactionRepository) GetMyTransactions(id string) ([]*models.TransactionModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+func (s *MysqlTransactionRepository) GetConfirmedTransactionsOfVendor(vendorId string) ([]*models.TransactionModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	transactionQuery := `
+	query := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            t.cost,
-            uVendor.name AS vendor,
-            uClient.name AS client
-        FROM 
-            Transaction t
-            JOIN User uVendor ON uVendor.id = t.vendorId
-            JOIN User uClient ON uClient.id = t.clientId
+            *
+        FROM
+            Transaction
         WHERE
-            t.clientId = ? OR t.vendorId = ?
-        ORDER BY
-            t.updatedAt DESC
+            vendorId = ? AND status = 'confirmed'
     `
 
 	transactions := make([]*models.TransactionModel, 0)
-	if err := s.db.SelectContext(ctx, &transactions, transactionQuery, id, id); err != nil {
+	if err := s.db.SelectContext(ctx, &transactions, query, vendorId); err != nil {
 		return nil, err
-	}
-
-	getService := `
-        SELECT
-            s.id,
-            s.vendorId,
-            s.title,
-            s.description,
-            s.rate
-        FROM
-            Service s
-            JOIN Transaction t ON s.id = t.serviceId
-        WHERE
-            t.id = ?
-        ORDER BY
-            t.updatedAt DESC
-    `
-
-	getExtras := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN TransactionExtra te ON e.id = te.extraId
-        WHERE
-            te.transactionId = ?
-    `
-
-	for _, transaction := range transactions {
-		if isReviewed, err := s.IsReviewed(transaction.Id); err != nil {
-			return nil, err
-		} else {
-			transaction.IsReviewed = isReviewed
-		}
-
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, getExtras, transaction.Id); err != nil {
-			return nil, err
-		}
-		transaction.Extras = extras
-
-		service := new(models.ServiceModel)
-		if err := s.db.GetContext(ctx, service, getService, transaction.Id); err != nil {
-			return nil, err
-		}
-		transaction.Service = service
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -809,12 +731,19 @@ func (s *MysqlTransactionRepository) GetReviewableTransactions(userId string) ([
 	return transactions, nil
 }
 
-func (s *MysqlTransactionRepository) Cancel(transactionId string) error {
+func (s *MysqlTransactionRepository) Cancel(transactionId, reason string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "UPDATE Transaction SET status = 'cancelled' WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, transactionId); err != nil {
+	query := `
+        UPDATE 
+            Transaction 
+        SET 
+            cancelReason = ?, status = 'cancelled'
+        WHERE 
+            id = ?
+    `
+	if _, err := s.db.ExecContext(ctx, query, reason, transactionId); err != nil {
 		return err
 	}
 

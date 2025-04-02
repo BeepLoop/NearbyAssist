@@ -78,17 +78,17 @@ func (h *transactionHandler) GetTransaction(c echo.Context) error {
 }
 
 func (h *transactionHandler) Cancel(c echo.Context) error {
-	transactionId := c.Param("transactionId")
-	if transactionId == "" {
+	req := new(request.CancelRequestPayload)
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Transaction ID is required",
-			Error:   "Transaction ID is required",
+			Message: "Error binding request body",
+			Error:   err.Error(),
 		})
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.transactionService.CancelTransaction(bearerToken, transactionId); err != nil {
+	if err := h.transactionService.CancelTransaction(bearerToken, req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error cancellation request",
 			Error:   err.Error(),
@@ -141,20 +141,12 @@ func (h *transactionHandler) Reject(c echo.Context) error {
 }
 
 func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
-	bearerToken := utils.BearerTokenFromHeader(c)
 	filter := c.QueryParam("filter")
+	bearerToken := utils.BearerTokenFromHeader(c)
 
-	var transactions []*models.TransactionModel
-	if filter == "" || filter == "all" {
-		if result, err := h.transactionService.GetUserTransactionList(bearerToken); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Error getting user transactions",
-				Error:   err.Error(),
-			})
-		} else {
-			transactions = result
-		}
-	} else if filter == "sent" {
+	transactions := make([]*models.TransactionModel, 0)
+	switch filter {
+	case "sent":
 		if result, err := h.transactionService.GetTransactionUserSent(bearerToken); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 				Message: "Error getting user transactions",
@@ -163,7 +155,7 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 		} else {
 			transactions = result
 		}
-	} else if filter == "received" {
+	case "received":
 		if result, err := h.transactionService.GetTransactionUserReceived(bearerToken); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 				Message: "Error getting user transactions",

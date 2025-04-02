@@ -3,7 +3,6 @@ package review_repo
 import (
 	"context"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/utils"
 	"time"
 
 	"github.com/jmoiron/sqlx"

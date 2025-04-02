@@ -36,3 +36,18 @@ func ValidateDateRange(start, end string) error {
 
 	return nil
 }
+
+func ValidateDate(date string) error {
+	now := time.Now().UTC()
+
+	input, err := time.Parse(time.RFC1123Z, date)
+	if err != nil {
+		return err
+	}
+
+	if input.Before(now) {
+		return errors.New(INVALID_DATE_ERR)
+	}
+
+	return nil
+}

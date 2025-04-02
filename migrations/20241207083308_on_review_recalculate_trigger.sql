@@ -9,16 +9,17 @@ BEGIN
     SET rating = (
         SELECT ROUND(AVG(rating), 1)
         FROM Review
-        WHERE serviceId = NEW.serviceId
+        WHERE transactionId = NEW.transactionId
     )
     WHERE vendorId = (
         SELECT vendorId 
-        FROM Service 
-        WHERE id = NEW.serviceId
+        FROM Transaction
+        WHERE id = NEW.transactionId
     );
 END;
 -- +goose StatementEnd
 
 -- +goose Down
+DROP TRIGGER IF EXISTS update_vendor_rating;
 -- +goose StatementBegin
 -- +goose StatementEnd
