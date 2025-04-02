@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS Review (
-    id VARCHAR(255) NOT NULL,
+    id CHAR(36) DEFAULT (UUID()),
     transactionId VARCHAR(255) NOT NULL,
     rating INT NOT NULL,
     text TEXT,
