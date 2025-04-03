@@ -35,6 +35,7 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 		}
 
 		application = res
+		cache.NewGoCache().Set(c.Request().RequestURI, res)
 	} else {
 		inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
 		if exists {
@@ -47,6 +48,7 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 			}
 
 			application = res
+			cache.NewGoCache().Set(c.Request().RequestURI, res)
 		}
 	}
 
