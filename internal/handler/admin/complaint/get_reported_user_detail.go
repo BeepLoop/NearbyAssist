@@ -35,6 +35,7 @@ func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
 		}
 
 		reportedUser = detail
+		cache.NewGoCache().Set(c.Request().RequestURI, detail)
 	} else {
 		inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
 		if exists {
@@ -50,6 +51,7 @@ func (h *complaintHandler) GetReportedUserDetail(c echo.Context) error {
 			}
 
 			reportedUser = detail
+			cache.NewGoCache().Set(c.Request().RequestURI, detail)
 		}
 	}
 

@@ -82,6 +82,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 		}
 
 		serviceDetail = detail
+		cache.NewGoCache().Set(c.Request().RequestURI, detail)
 	} else {
 		inCache, exists := cache.NewGoCache().Get(requestURI)
 		if exists {
@@ -96,6 +97,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 			}
 
 			serviceDetail = detail
+			cache.NewGoCache().Set(c.Request().RequestURI, detail)
 		}
 	}
 
