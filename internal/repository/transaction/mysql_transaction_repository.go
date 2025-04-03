@@ -46,7 +46,7 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
                 )
             THEN 1
             ELSE 0
-        END AS exists
+        END AS duplicate_booking
     `
 	alreadyBooked := false
 	if err := tx.GetContext(ctx, &alreadyBooked, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
@@ -59,9 +59,9 @@ func (s *MysqlTransactionRepository) Create(data *models.TransactionModel) (stri
 
 	query := `
         INSERT INTO
-            Transaction (id, vendorId, clientId, serviceId, cost, scheduledAt )
+            Transaction (id, vendorId, clientId, serviceId, cost)
         VALUES
-            (:id, :vendorId, :clientId, :serviceId, :cost, :scheduledAt)
+            (:id, :vendorId, :clientId, :serviceId, :cost)
     `
 
 	if _, err := tx.NamedExecContext(ctx, query, data); err != nil {
@@ -754,12 +754,19 @@ func (s *MysqlTransactionRepository) Cancel(transactionId, reason string) error 
 	return nil
 }
 
-func (s *MysqlTransactionRepository) Accept(transactionId string) error {
+func (s *MysqlTransactionRepository) Accept(transactionId, schedule string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "UPDATE Transaction SET status = 'confirmed' WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, transactionId); err != nil {
+	query := `
+        UPDATE
+            Transaction
+        SET
+            scheduledAt = ?, status = 'confirmed'
+        WHERE
+            id = ?
+    `
+	if _, err := s.db.ExecContext(ctx, query, schedule, transactionId); err != nil {
 		return err
 	}
 

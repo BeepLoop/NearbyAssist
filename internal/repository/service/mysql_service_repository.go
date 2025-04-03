@@ -394,8 +394,16 @@ func (s *MysqlServiceRepository) GetReviews(serviceId string) ([]*models.ReviewM
 	defer cancel()
 
 	// TODO: Implement this, join on transaction and review table
-
-	query := ""
+	query := `
+        SELECT
+            r.*
+        FROM
+            Review r
+            JOIN Transaction t ON t.id = r.transactionId
+            JOIN Service s ON s.id = t.serviceId
+        WHERE
+            s.id = ?
+    `
 
 	reviews := make([]*models.ReviewModel, 0)
 	if err := s.db.SelectContext(ctx, &reviews, query, serviceId); err != nil {

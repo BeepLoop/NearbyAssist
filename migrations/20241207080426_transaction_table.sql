@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS Transaction (
     status Enum('pending', 'confirmed', 'rejected', 'done', 'cancelled') NOT NULL DEFAULT 'pending',
     cost DOUBLE NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    scheduledAt TIMESTAMP NOT NULL,
+    scheduledAt TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     cancelReason TEXT,
     PRIMARY KEY(id),

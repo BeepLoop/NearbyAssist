@@ -21,7 +21,7 @@ type TransactionRepository interface {
 	GetReviewableTransactions(userId string) ([]*models.TransactionModel, error)
 
 	Cancel(transactionId, reason string) error
-	Accept(transactionId string) error
+	Accept(transactionId, schedule string) error
 	Reject(transactionId string) error
 	MarkComplete(transactionId string) error
 

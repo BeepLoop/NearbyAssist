@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"database/sql"
 	"nearbyassist/internal/models"
 	"testing"
 
@@ -16,21 +17,21 @@ func TestHasScheduleOverlap(t *testing.T) {
 		{
 			input: "2025-04-3",
 			schedules: []*models.TransactionModel{
-				{ScheduledAt: "2025-04-2"},
-				{ScheduledAt: "2025-04-3"},
-				{ScheduledAt: "2025-04-4"},
-				{ScheduledAt: "2025-04-5"},
-				{ScheduledAt: "2025-04-6"},
+				{ScheduledAt: sql.NullString{String: "2025-04-2", Valid: true}},
+				{ScheduledAt: sql.NullString{String: "2025-04-3", Valid: true}},
+				{ScheduledAt: sql.NullString{String: "2025-04-4", Valid: true}},
+				{ScheduledAt: sql.NullString{String: "2025-04-5", Valid: true}},
+				{ScheduledAt: sql.NullString{String: "2025-04-6", Valid: true}},
 			},
 			expected: true,
 		},
 		{
 			input: "2025-04-3",
 			schedules: []*models.TransactionModel{
-				{ScheduledAt: "2025-04-2"},
-				{ScheduledAt: "2025-04-4"},
-				{ScheduledAt: "2025-04-6"},
-				{ScheduledAt: "2025-04-8"},
+				{ScheduledAt: sql.NullString{String: "2025-04-2", Valid: true}},
+				{ScheduledAt: sql.NullString{String: "2025-04-4", Valid: true}},
+				{ScheduledAt: sql.NullString{String: "2025-04-5", Valid: true}},
+				{ScheduledAt: sql.NullString{String: "2025-04-6", Valid: true}},
 			},
 			expected: false,
 		},

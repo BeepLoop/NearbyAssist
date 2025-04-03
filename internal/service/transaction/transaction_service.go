@@ -38,16 +38,11 @@ func NewService(
 }
 
 func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string, error) {
-	if err := utils.ValidateDate(req.ScheduledAt); err != nil {
-		return "", err
-	}
-
 	transaction := &models.TransactionModel{
-		ClientId:    req.ClientId,
-		VendorId:    req.VendorId,
-		ServiceId:   req.ServiceId,
-		Cost:        req.Cost,
-		ScheduledAt: utils.FormatDate(req.ScheduledAt),
+		ClientId:  req.ClientId,
+		VendorId:  req.VendorId,
+		ServiceId: req.ServiceId,
+		Cost:      req.Cost,
 	}
 
 	extras := make([]*models.ExtraModel, 0)
@@ -59,21 +54,6 @@ func (s *Service) CreateTransaction(req *request.NewTransactionPayload) (string,
 		})
 	}
 	transaction.Extras = extras
-
-	/*
-	   NOTE: Business rule that restricts vendors to only ONE transaction
-	   scheduled per day. This is not final, I want to allow multiple
-	   scheduled per day because services may be simple enough and won't take
-	   a whole day.
-	*/
-	confirmedTransactions, err := s.transactionStore.GetConfirmedTransactionsOfVendor(req.VendorId)
-	if err != nil {
-		return "", err
-	}
-
-	if utils.HasScheduleOverlap(req.ScheduledAt, confirmedTransactions) {
-		return "", errors.New("schedule overlap")
-	}
 
 	transactionId, err := s.transactionStore.Create(transaction)
 	if err != nil {
@@ -129,7 +109,8 @@ func (s *Service) GetTransaction(transactionId string) (*models.TransactionModel
 	transaction.Service.Description = utils.Must(s.encrypt.DecryptString(transaction.Service.Description))
 
 	if transaction.Status == models.TRANSACTION_STATUS_CANCELLED {
-		transaction.CancelReason = utils.Must(s.encrypt.DecryptString(transaction.CancelReason))
+		transaction.CancelReason.String = utils.Must(s.encrypt.DecryptString(transaction.CancelReason.String))
+		transaction.CancelReason.Valid = true
 	}
 
 	for _, extra := range transaction.Extras {
@@ -206,13 +187,13 @@ func (s *Service) CancelTransaction(bearerToken string, req *request.CancelReque
 	return nil
 }
 
-func (s *Service) AcceptTransactionRequest(bearerToken, transactionId string) error {
+func (s *Service) AcceptTransactionRequest(bearerToken string, req *request.AcceptTransactionPayload) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
 	}
 
-	transaction, err := s.transactionStore.FindById(transactionId)
+	transaction, err := s.transactionStore.FindById(req.TransactionId)
 	if err != nil {
 		return err
 	}
@@ -229,7 +210,8 @@ func (s *Service) AcceptTransactionRequest(bearerToken, transactionId string) er
 		return errors.New("Unauthorized accept request")
 	}
 
-	if err := s.transactionStore.Accept(transactionId); err != nil {
+	schedule := utils.FormatDate(req.Schedule)
+	if err := s.transactionStore.Accept(req.TransactionId, schedule); err != nil {
 		return err
 	}
 

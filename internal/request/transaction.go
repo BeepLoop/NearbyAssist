@@ -1,12 +1,11 @@
 package request
 
 type NewTransactionPayload struct {
-	VendorId    string  `json:"vendorId" validate:"required"`
-	ClientId    string  `json:"clientId" validate:"required"`
-	ServiceId   string  `json:"serviceId" validate:"required"`
-	Cost        string  `json:"cost" validate:"required"`
-	Extras      []Extra `json:"extras" validate:"required"`
-	ScheduledAt string  `json:"scheduledAt" validate:"required"`
+	VendorId  string  `json:"vendorId" validate:"required"`
+	ClientId  string  `json:"clientId" validate:"required"`
+	ServiceId string  `json:"serviceId" validate:"required"`
+	Cost      string  `json:"cost" validate:"required"`
+	Extras    []Extra `json:"extras" validate:"required"`
 }
 
 type Extra struct {

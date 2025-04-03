@@ -1,5 +1,7 @@
 package models
 
+import "database/sql"
+
 type TransactionStatus string
 
 const (
@@ -19,8 +21,8 @@ type TransactionModel struct {
 	Cost         string            `json:"cost" db:"cost" validate:"required"`
 	Status       TransactionStatus `json:"status" db:"status"`
 	IsReviewed   bool              `json:"isReviewed" db:"isReviewed"`
-	ScheduledAt  string            `json:"scheduledAt" db:"scheduledAt"`
-	CancelReason string            `json:"cancelReason" db:"cancelReason"`
+	ScheduledAt  sql.NullString    `json:"scheduledAt" db:"scheduledAt"`
+	CancelReason sql.NullString    `json:"cancelReason" db:"cancelReason"`
 
 	// Additional fields for joins
 	Service *ServiceModel `json:"service,omitempty"`

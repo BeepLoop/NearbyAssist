@@ -1,12 +1,20 @@
 package utils
 
-import "nearbyassist/internal/models"
+import (
+	"fmt"
+	"nearbyassist/internal/models"
+)
 
 func HasScheduleOverlap(schedule string, transactions []*models.TransactionModel) bool {
 	sched := FormatDate(schedule)
 
 	for _, transaction := range transactions {
-		if sched == FormatDate(transaction.ScheduledAt) {
+		fmt.Println(transaction.ScheduledAt)
+		if !transaction.ScheduledAt.Valid {
+			continue
+		}
+
+		if sched == FormatDate(transaction.ScheduledAt.String) {
 			return true
 		}
 	}

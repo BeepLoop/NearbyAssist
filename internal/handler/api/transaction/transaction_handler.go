@@ -99,17 +99,17 @@ func (h *transactionHandler) Cancel(c echo.Context) error {
 }
 
 func (h *transactionHandler) Accept(c echo.Context) error {
-	transactionId := c.Param("transactionId")
-	if transactionId == "" {
+	req := new(request.AcceptTransactionPayload)
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Transaction ID is required",
-			Error:   "Transaction ID is required",
+			Message: "Error binding request body",
+			Error:   err.Error(),
 		})
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.transactionService.AcceptTransactionRequest(bearerToken, transactionId); err != nil {
+	if err := h.transactionService.AcceptTransactionRequest(bearerToken, req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error accepting transaction request",
 			Error:   err.Error(),

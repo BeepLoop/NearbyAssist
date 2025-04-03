@@ -1,6 +1,6 @@
 package request
 
 type CancelRequestPayload struct {
-	TransactionId string `json:"transactionId"`
-	Reason        string `json:"reason"`
+	TransactionId string `json:"transactionId" validate:"required"`
+	Reason        string `json:"reason" validate:"required"`
 }

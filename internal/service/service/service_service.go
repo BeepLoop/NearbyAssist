@@ -1,7 +1,6 @@
 package service_service
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -107,41 +106,27 @@ func (s *Service) CreateService(req *request.NewServicePayload) (string, error) 
 	return serviceId, nil
 }
 
-func (s *Service) NewGetService(serviceId string) (*response.DetailedServiceResponse, error) {
+func (s *Service) GetService(serviceId string) (*response.DetailedServiceResponse, error) {
 	service, err := s.serviceStore.FindById(serviceId)
 	if err != nil {
 		return nil, err
 	}
 
-	if cipher, err := s.encrypt.DecryptString(service.Title); err != nil {
-		return nil, err
-	} else {
-		service.Title = cipher
-	}
-
-	if cipher, err := s.encrypt.DecryptString(service.Description); err != nil {
-		return nil, err
-	} else {
-		service.Description = cipher
-	}
+	service.Title = utils.Must(s.encrypt.DecryptString(service.Title))
+	service.Description = utils.Must(s.encrypt.DecryptString(service.Description))
 
 	for _, extra := range service.Extras {
-		if cipher, err := s.encrypt.DecryptString(extra.Title); err != nil {
-			return nil, err
-		} else {
-			extra.Title = cipher
-		}
-
-		if cipher, err := s.encrypt.DecryptString(extra.Description); err != nil {
-			return nil, err
-		} else {
-			extra.Description = cipher
-		}
+		extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+		extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 	}
 
 	reviews, err := s.serviceStore.GetReviews(serviceId)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, review := range reviews {
+		review.Text = utils.Must(s.encrypt.DecryptString(review.Text))
 	}
 
 	countPerRating := response.NewCountPerRating()
@@ -165,24 +150,10 @@ func (s *Service) NewGetService(serviceId string) (*response.DetailedServiceResp
 		return nil, err
 	}
 
-	if decrypted, err := s.encrypt.DecryptString(vendor.Name); err != nil {
-		return nil, err
-	} else {
-		vendor.Name = decrypted
-	}
-
-	if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
-		return nil, err
-	} else {
-		vendor.Email = decrypted
-	}
-
+	vendor.Name = utils.Must(s.encrypt.DecryptString(vendor.Name))
+	vendor.Email = utils.Must(s.encrypt.DecryptString(vendor.Email))
 	if vendor.Phone.Valid {
-		if decrypted, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
-			return nil, err
-		} else {
-			vendor.PhoneString = decrypted
-		}
+		vendor.PhoneString = utils.Must(s.encrypt.DecryptString(vendor.Phone.String))
 	}
 
 	response := &response.DetailedServiceResponse{
@@ -192,134 +163,6 @@ func (s *Service) NewGetService(serviceId string) (*response.DetailedServiceResp
 	}
 
 	return response, nil
-}
-
-// NOTE: Deprecated
-func (s *Service) GetService(serviceId string) (map[string]interface{}, error) {
-	service, err := s.serviceStore.FindById(serviceId)
-	if err != nil {
-		return nil, err
-	}
-
-	if cipher, err := s.encrypt.DecryptString(service.Title); err != nil {
-		return nil, err
-	} else {
-		service.Title = cipher
-	}
-
-	if cipher, err := s.encrypt.DecryptString(service.Description); err != nil {
-		return nil, err
-	} else {
-		service.Description = cipher
-	}
-
-	extras := make([]*models.ExtraModel, 0)
-	for _, extra := range service.Extras {
-		decryptedTitle, err := s.encrypt.DecryptString(extra.Title)
-		if err != nil {
-			return nil, err
-		}
-
-		decryptedDescription, err := s.encrypt.DecryptString(extra.Description)
-		if err != nil {
-			return nil, err
-		}
-
-		extras = append(extras, &models.ExtraModel{
-			Model:           extra.Model,
-			UpdateableModel: extra.UpdateableModel,
-			Title:           decryptedTitle,
-			Description:     decryptedDescription,
-			Price:           extra.Price,
-		})
-	}
-	service.Extras = extras
-
-	if tags, err := s.serviceStore.GetTags(serviceId); err != nil {
-		return nil, err
-	} else {
-		service.Tags = tags
-	}
-
-	reviews, err := s.serviceStore.GetReviews(serviceId)
-	if err != nil {
-		return nil, err
-	}
-
-	countPerRating := response.NewCountPerRating()
-	for _, review := range reviews {
-		switch review.Rating {
-		case 5:
-			countPerRating["five"]++
-		case 4:
-			countPerRating["four"]++
-		case 3:
-			countPerRating["three"]++
-		case 2:
-			countPerRating["two"]++
-		case 1:
-			countPerRating["one"]++
-		}
-	}
-
-	photos, err := s.serviceStore.GetPhotos(serviceId)
-	if err != nil {
-		return nil, err
-	}
-
-	vendor, err := s.serviceStore.GetVendorInfo(service.VendorId)
-	if err != nil {
-		return nil, err
-	}
-
-	if decrypted, err := s.encrypt.DecryptString(vendor.Name); err != nil {
-		return nil, err
-	} else {
-		vendor.Name = decrypted
-	}
-
-	if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
-		return nil, err
-	} else {
-		vendor.Email = decrypted
-	}
-
-	if vendor.Phone.Valid {
-		if decrypted, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
-			return nil, err
-		} else {
-			vendor.Phone = sql.NullString{String: decrypted, Valid: true}
-		}
-	}
-
-	vendorData := struct {
-		Id           string   `json:"id"`
-		Name         string   `json:"name"`
-		Email        string   `json:"email"`
-		Phone        string   `json:"phone"`
-		ImageUrl     string   `json:"imageUrl"`
-		Rating       string   `json:"rating"`
-		IsRestricted bool     `json:"isRestricted"`
-		Expertise    []string `json:"expertise"`
-	}{
-		Id:           vendor.VendorId,
-		Name:         vendor.Name,
-		Email:        vendor.Email,
-		Phone:        vendor.Phone.String,
-		ImageUrl:     vendor.ImageUrl,
-		Rating:       vendor.Rating,
-		IsRestricted: vendor.Restricted,
-		Expertise:    vendor.Expertise,
-	}
-
-	data := map[string]interface{}{
-		"serviceInfo":    service,
-		"vendorInfo":     vendorData,
-		"serviceImages":  photos,
-		"countPerRating": countPerRating,
-	}
-
-	return data, nil
 }
 
 func (s *Service) UpdateService(bearerToken, serviceId string, req *request.UpdateServicePayload) error {

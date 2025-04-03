@@ -225,7 +225,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		transactionRoute.POST("", handler.CreateTransaction)
 		transactionRoute.GET("/:transactionId", handler.GetTransaction)
 		transactionRoute.PUT("/cancel", handler.Cancel)
-		transactionRoute.PUT("/accept/:transactionId", handler.Accept)
+		transactionRoute.PUT("/accept", handler.Accept)
 		transactionRoute.PUT("/reject/:transactionId", handler.Reject)
 		transactionRoute.GET("/mine", handler.GetUserTransactionList)
 		transactionRoute.GET("/recent", handler.GetRecentTransactions)

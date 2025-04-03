@@ -73,7 +73,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 	var serviceDetail *response.DetailedServiceResponse
 
 	if params.Has("fresh") && params.Get("fresh") == "true" {
-		detail, err := h.service_service.NewGetService(serviceId)
+		detail, err := h.service_service.GetService(serviceId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 				Message: "Error while retrieving service information",
@@ -87,7 +87,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 		if exists {
 			serviceDetail = inCache.(*response.DetailedServiceResponse)
 		} else {
-			detail, err := h.service_service.NewGetService(serviceId)
+			detail, err := h.service_service.GetService(serviceId)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 					Message: "Error while retrieving service information",
