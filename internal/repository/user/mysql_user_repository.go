@@ -379,7 +379,7 @@ func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.Use
 	return accountData, nil
 }
 
-func (s *MysqlUserRepository) GetSentTransactionCount(userId string) (*models.SentStat, error) {
+func (s *MysqlUserRepository) GetSentBookingCount(userId string) (*models.SentStat, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -400,7 +400,7 @@ func (s *MysqlUserRepository) GetSentTransactionCount(userId string) (*models.Se
                     ELSE 0 
                 END) AS lastMonth
         FROM 
-            Transaction
+            Booking
         WHERE 
             clientId = ?
     `
@@ -415,7 +415,7 @@ func (s *MysqlUserRepository) GetSentTransactionCount(userId string) (*models.Se
 	return stat, nil
 }
 
-func (s *MysqlUserRepository) GetReceivedTransactionCount(userId string) (*models.ReceivedStat, error) {
+func (s *MysqlUserRepository) GetReceivedBookingCount(userId string) (*models.ReceivedStat, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -436,7 +436,7 @@ func (s *MysqlUserRepository) GetReceivedTransactionCount(userId string) (*model
                     ELSE 0 
                 END) AS lastMonth
         FROM 
-            Transaction
+            Booking
         WHERE 
             vendorId = ?
     `

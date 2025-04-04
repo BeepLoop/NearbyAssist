@@ -5,5 +5,5 @@ import "nearbyassist/internal/models"
 type ReviewRepository interface {
 	Create(data *models.ReviewModel) (string, error)
 	FindById(id string) (*models.ReviewModel, error)
-	FindByTransactionId(id string) (*models.TransactionModel, error)
+	FindByBookingId(id string) (*models.BookingModel, error)
 }

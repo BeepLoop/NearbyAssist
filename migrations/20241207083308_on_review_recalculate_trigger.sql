@@ -9,12 +9,12 @@ BEGIN
     SET rating = (
         SELECT ROUND(AVG(rating), 1)
         FROM Review
-        WHERE transactionId = NEW.transactionId
+        WHERE bookingId = NEW.bookingId
     )
     WHERE vendorId = (
         SELECT vendorId 
-        FROM Transaction
-        WHERE id = NEW.transactionId
+        FROM Booking
+        WHERE id = NEW.bookingId
     );
 END;
 -- +goose StatementEnd

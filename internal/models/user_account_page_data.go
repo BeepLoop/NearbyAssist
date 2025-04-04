@@ -17,10 +17,10 @@ type UserAccountPageData struct {
 	Expertise []string
 	Services  []*ServiceModel
 
-	Stat UserTransactionStats
+	Stat UserBookingStats
 }
 
-type UserTransactionStats struct {
+type UserBookingStats struct {
 	Sent     SentStat
 	Received ReceivedStat
 }

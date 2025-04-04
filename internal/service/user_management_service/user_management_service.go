@@ -48,13 +48,13 @@ func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, err
 		}
 	}
 
-	if stat, err := s.userStore.GetSentTransactionCount(userId); err != nil {
+	if stat, err := s.userStore.GetSentBookingCount(userId); err != nil {
 		accountData.Stat.Sent = models.SentStat{}
 	} else {
 		accountData.Stat.Sent = *stat
 	}
 
-	if stat, err := s.userStore.GetReceivedTransactionCount(userId); err != nil {
+	if stat, err := s.userStore.GetReceivedBookingCount(userId); err != nil {
 		accountData.Stat.Received = models.ReceivedStat{}
 	} else {
 		accountData.Stat.Received = *stat

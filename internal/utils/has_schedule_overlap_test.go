@@ -11,12 +11,12 @@ import (
 func TestHasScheduleOverlap(t *testing.T) {
 	tests := []struct {
 		input     string
-		schedules []*models.TransactionModel
+		schedules []*models.BookingModel
 		expected  bool
 	}{
 		{
 			input: "2025-04-3",
-			schedules: []*models.TransactionModel{
+			schedules: []*models.BookingModel{
 				{ScheduledAt: sql.NullString{String: "2025-04-2", Valid: true}},
 				{ScheduledAt: sql.NullString{String: "2025-04-3", Valid: true}},
 				{ScheduledAt: sql.NullString{String: "2025-04-4", Valid: true}},
@@ -27,7 +27,7 @@ func TestHasScheduleOverlap(t *testing.T) {
 		},
 		{
 			input: "2025-04-3",
-			schedules: []*models.TransactionModel{
+			schedules: []*models.BookingModel{
 				{ScheduledAt: sql.NullString{String: "2025-04-2", Valid: true}},
 				{ScheduledAt: sql.NullString{String: "2025-04-4", Valid: true}},
 				{ScheduledAt: sql.NullString{String: "2025-04-5", Valid: true}},

@@ -1,6 +1,6 @@
-(function transactionChart() {
-  const transactionData = JSON.parse(
-    document.getElementById("transactionData").textContent,
+(function bookingChart() {
+  const bookingData = JSON.parse(
+    document.getElementById("bookingData").textContent,
   );
 
   const months = [
@@ -18,12 +18,12 @@
     "December",
   ];
 
-  const labels = transactionData.daily.map((day) => {
+  const labels = bookingData.daily.map((day) => {
     const date = new Date(day.date);
     return `${months[date.getMonth()]} ${date.getDate()}`;
   });
 
-  const values = transactionData.daily.map((day) => day.count);
+  const values = bookingData.daily.map((day) => day.count);
 
   const DEFAULT_MAX_RANGE = 10;
   const max = Math.max(...values);
@@ -68,5 +68,5 @@
     responsive: true,
   };
 
-  Plotly.newPlot("transactionChart", data, layout, options);
+  Plotly.newPlot("bookingChart", data, layout, options);
 })();

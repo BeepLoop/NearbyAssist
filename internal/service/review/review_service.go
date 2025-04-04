@@ -3,31 +3,31 @@ package review_service
 import (
 	"errors"
 	"nearbyassist/internal/models"
+	booking_repo "nearbyassist/internal/repository/booking"
 	review_repo "nearbyassist/internal/repository/review"
-	transaction_repo "nearbyassist/internal/repository/transaction"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
 )
 
 type Service struct {
-	transactionStore transaction_repo.TransactionRepository
-	reviewStore      review_repo.ReviewRepository
-	encrypt          core.Encryption
-	jwt              core.Authenticator
+	bookingStore booking_repo.BookingRepository
+	reviewStore  review_repo.ReviewRepository
+	encrypt      core.Encryption
+	jwt          core.Authenticator
 }
 
 func NewService(
-	transactionStore transaction_repo.TransactionRepository,
+	bookingStore booking_repo.BookingRepository,
 	reviewStore review_repo.ReviewRepository,
 	encrypt core.Encryption,
 	jwt core.Authenticator,
 ) *Service {
 	return &Service{
-		transactionStore: transactionStore,
-		reviewStore:      reviewStore,
-		encrypt:          encrypt,
-		jwt:              jwt,
+		bookingStore: bookingStore,
+		reviewStore:  reviewStore,
+		encrypt:      encrypt,
+		jwt:          jwt,
 	}
 }
 
@@ -37,20 +37,20 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 		return "", err
 	}
 
-	transaction, err := s.transactionStore.FindById(req.TransactionId)
+	booking, err := s.bookingStore.FindById(req.BookingId)
 	if err != nil {
 		return "", err
 	}
 
-	if transaction.ClientId != userId {
+	if booking.ClientId != userId {
 		return "", err
 	}
 
-	if transaction.Status != models.TRANSACTION_STATUS_DONE {
+	if booking.Status != models.BOOKING_STATUS_DONE {
 		return "", errors.New("forbidden")
 	}
 
-	if isReviewed, err := s.transactionStore.IsReviewed(req.TransactionId); err != nil {
+	if isReviewed, err := s.bookingStore.IsReviewed(req.BookingId); err != nil {
 		return "", err
 	} else {
 		if isReviewed {
@@ -59,9 +59,9 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 	}
 
 	newReview := &models.ReviewModel{
-		TransactionId: req.TransactionId,
-		Rating:        req.Rating,
-		Text:          utils.Must(s.encrypt.EncryptString(req.Text)),
+		BookingId: req.BookingId,
+		Rating:    req.Rating,
+		Text:      utils.Must(s.encrypt.EncryptString(req.Text)),
 	}
 
 	reviewId, err := s.reviewStore.Create(newReview)

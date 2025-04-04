@@ -11,22 +11,22 @@ func TestWeightedScoring(t *testing.T) {
 	t.Run("Test GetTopScore", func(t *testing.T) {
 		testData := []*models.GeoSpatialSearchResult{
 			{
-				Rate:                  100,
-				Rating:                2.2,
-				Distance:              100,
-				CompletedTransactions: 100,
+				Rate:              100,
+				Rating:            2.2,
+				Distance:          100,
+				CompletedBookings: 100,
 			},
 			{
-				Rate:                  100,
-				Rating:                2.3,
-				Distance:              110,
-				CompletedTransactions: 100,
+				Rate:              100,
+				Rating:            2.3,
+				Distance:          110,
+				CompletedBookings: 100,
 			},
 			{
-				Rate:                  10,
-				Rating:                2.3,
-				Distance:              99.9,
-				CompletedTransactions: 101,
+				Rate:              10,
+				Rating:            2.3,
+				Distance:          99.9,
+				CompletedBookings: 101,
 			},
 		}
 
@@ -37,7 +37,7 @@ func TestWeightedScoring(t *testing.T) {
 			lowestPrice:      10,
 			highestRating:    2.3,
 			shortestDistance: 99.9,
-			mostTransactions: 101,
+			mostBookings:     101,
 		}
 
 		assert.Equal(t, expected, w.score)

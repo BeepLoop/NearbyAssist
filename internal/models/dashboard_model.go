@@ -1,10 +1,10 @@
 package models
 
 type DashboardModel struct {
-	UserData        UserData
-	TransactionData WeeklyTransactionData
-	ReportData      ReportData
-	RequestData     RequestData
+	UserData    UserData
+	BookingData WeeklyBookingData
+	ReportData  ReportData
+	RequestData RequestData
 }
 
 // User data
@@ -57,14 +57,14 @@ type DailyVendorReportData struct {
 	Count int    `json:"count" db:"count"`
 }
 
-// Transaction Data
-type WeeklyTransactionData struct {
-	Total      int                    `json:"total"`
-	Daily      []DailyTransactionData `json:"daily"`
-	Difference int                    `json:"difference"` // Difference compared to last week
+// Booking Data
+type WeeklyBookingData struct {
+	Total      int                `json:"total"`
+	Daily      []DailyBookingData `json:"daily"`
+	Difference int                `json:"difference"` // Difference compared to last week
 }
 
-type DailyTransactionData struct {
+type DailyBookingData struct {
 	Date  string `json:"date" db:"date"`
 	Count int    `json:"count" db:"count"`
 }

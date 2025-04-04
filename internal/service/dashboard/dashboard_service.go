@@ -39,14 +39,14 @@ func (s *Service) GetAnalytics() (*models.DashboardModel, error) {
 		return nil, err
 	}
 
-	transactionData, err := s.store.GetTransactionData()
+	bookingData, err := s.store.GetBookingData()
 	if err != nil {
 		return nil, err
 	}
 
 	dashboardData := &models.DashboardModel{
-		UserData:        *userData,
-		TransactionData: *transactionData,
+		UserData:    *userData,
+		BookingData: *bookingData,
 		ReportData: models.ReportData{
 			WeeklyBugReport:    *bugReportData,
 			WeeklyVendorReport: *vendorReportData,

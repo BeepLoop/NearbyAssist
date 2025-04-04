@@ -26,5 +26,5 @@ type DashboardRepository interface {
 	GetVendorReportData() (*models.WeeklyVendorReportData, error)
 	GetIdentityVerificationRequestsData() (*models.IdentityVerificationRequestData, error)
 	GetVendorApplicationRequestsData() (*models.VendorApplicationRequestData, error)
-	GetTransactionData() (*models.WeeklyTransactionData, error)
+	GetBookingData() (*models.WeeklyBookingData, error)
 }

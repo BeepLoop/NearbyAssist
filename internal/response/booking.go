@@ -1,6 +1,6 @@
 package response
 
-type Transaction struct {
+type Booking struct {
 	Id           string          `json:"id"`
 	Vendor       User            `json:"vendor"`
 	Client       User            `json:"client"`

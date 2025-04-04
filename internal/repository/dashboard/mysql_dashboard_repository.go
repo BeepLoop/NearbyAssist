@@ -306,11 +306,11 @@ func (s *MysqlDashboardRepository) GetVendorApplicationRequestsData() (*models.V
 	return data, nil
 }
 
-func (s *MysqlDashboardRepository) GetTransactionData() (*models.WeeklyTransactionData, error) {
+func (s *MysqlDashboardRepository) GetBookingData() (*models.WeeklyBookingData, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	transactionCountThisWeekQuery := `
+	bookingCountThisWeekQuery := `
         WITH date_series AS (
             SELECT CURDATE() - INTERVAL n DAY AS reportDate
             FROM (
@@ -329,7 +329,7 @@ func (s *MysqlDashboardRepository) GetTransactionData() (*models.WeeklyTransacti
         FROM 
             date_series d
         LEFT JOIN 
-            Transaction t
+            Booking t
         ON 
             DATE(t.createdAt) = d.reportDate
         GROUP BY 
@@ -338,12 +338,12 @@ func (s *MysqlDashboardRepository) GetTransactionData() (*models.WeeklyTransacti
             d.reportDate;
     `
 
-	transactionCountThisWeek := make([]models.DailyTransactionData, 0)
-	if err := s.db.SelectContext(ctx, &transactionCountThisWeek, transactionCountThisWeekQuery); err != nil {
+	bookingCountThisWeek := make([]models.DailyBookingData, 0)
+	if err := s.db.SelectContext(ctx, &bookingCountThisWeek, bookingCountThisWeekQuery); err != nil {
 		return nil, err
 	}
 
-	transactionCountLastWeekQuery := `
+	bookingCountLastWeekQuery := `
         WITH date_series AS (
             SELECT CURDATE() - INTERVAL n DAY AS reportDate
             FROM (
@@ -362,7 +362,7 @@ func (s *MysqlDashboardRepository) GetTransactionData() (*models.WeeklyTransacti
         FROM 
             date_series d
         LEFT JOIN 
-            Transaction t
+            Booking t
         ON 
             DATE(t.createdAt) = d.reportDate
         GROUP BY 
@@ -371,18 +371,18 @@ func (s *MysqlDashboardRepository) GetTransactionData() (*models.WeeklyTransacti
             d.reportDate;
     `
 
-	transactionCountLastWeek := make([]models.DailyTransactionData, 0)
-	if err := s.db.SelectContext(ctx, &transactionCountLastWeek, transactionCountLastWeekQuery); err != nil {
+	bookingCountLastWeek := make([]models.DailyBookingData, 0)
+	if err := s.db.SelectContext(ctx, &bookingCountLastWeek, bookingCountLastWeekQuery); err != nil {
 		return nil, err
 	}
 
 	totalThisWeek := 0
-	for _, t := range transactionCountThisWeek {
+	for _, t := range bookingCountThisWeek {
 		totalThisWeek += t.Count
 	}
 
 	totalLastWeek := 0
-	for _, t := range transactionCountLastWeek {
+	for _, t := range bookingCountLastWeek {
 		totalLastWeek += t.Count
 	}
 
@@ -391,9 +391,9 @@ func (s *MysqlDashboardRepository) GetTransactionData() (*models.WeeklyTransacti
 	// Negative difference = good
 	difference := totalThisWeek - totalLastWeek
 
-	data := &models.WeeklyTransactionData{
+	data := &models.WeeklyBookingData{
 		Total:      totalThisWeek,
-		Daily:      transactionCountThisWeek,
+		Daily:      bookingCountThisWeek,
 		Difference: difference,
 	}
 

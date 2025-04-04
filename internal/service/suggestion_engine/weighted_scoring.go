@@ -7,17 +7,17 @@ import (
 )
 
 type criteria struct {
-	priceWeight        float32
-	ratingWeight       float32
-	distanceWeight     float32
-	transactionsWeight float32
+	priceWeight    float32
+	ratingWeight   float32
+	distanceWeight float32
+	bookingsWeight float32
 }
 
 type score struct {
 	lowestPrice      float32
 	highestRating    float32
 	shortestDistance float32
-	mostTransactions float32
+	mostBookings     float32
 }
 
 type weightedScoring struct {
@@ -28,10 +28,10 @@ type weightedScoring struct {
 func NewWeightedScoring() *weightedScoring {
 	return &weightedScoring{
 		criteria: criteria{
-			priceWeight:        0.4,
-			ratingWeight:       0.3,
-			distanceWeight:     0.2,
-			transactionsWeight: 0.1,
+			priceWeight:    0.4,
+			ratingWeight:   0.3,
+			distanceWeight: 0.2,
+			bookingsWeight: 0.1,
 		},
 	}
 }
@@ -48,15 +48,15 @@ func (w *weightedScoring) GenerateSuggestions(services []*models.GeoSpatialSearc
 		}
 
 		scores = append(scores, &response.ServiceSearchResult{
-			Id:                    service.Id,
-			VendorName:            service.VendorName,
-			SuggestionScore:       score,
-			Rate:                  service.Rate,
-			Rating:                service.Rating,
-			Latitude:              service.Latitude,
-			Longitude:             service.Longitude,
-			CompletedTransactions: service.CompletedTransactions,
-			Distance:              service.Distance,
+			Id:                service.Id,
+			VendorName:        service.VendorName,
+			SuggestionScore:   score,
+			Rate:              service.Rate,
+			Rating:            service.Rating,
+			Latitude:          service.Latitude,
+			Longitude:         service.Longitude,
+			CompletedBookings: service.CompletedBookings,
+			Distance:          service.Distance,
 		})
 	}
 
@@ -67,9 +67,9 @@ func (w *weightedScoring) calculateScore(service *models.GeoSpatialSearchResult)
 	priceScore := w.minimize(service.Rate, w.lowestPrice)
 	ratingScore := w.maximize(service.Rating, w.highestRating)
 	distanceScore := w.minimize(service.Distance, w.shortestDistance)
-	transactionsScore := w.maximize(service.CompletedTransactions, w.mostTransactions)
+	bookingsScore := w.maximize(service.CompletedBookings, w.mostBookings)
 
-	score := (w.priceWeight * priceScore) + (w.ratingWeight * ratingScore) + (w.distanceWeight * distanceScore) + (w.transactionsWeight * transactionsScore)
+	score := (w.priceWeight * priceScore) + (w.ratingWeight * ratingScore) + (w.distanceWeight * distanceScore) + (w.bookingsWeight * bookingsScore)
 	return score, nil
 }
 
@@ -77,7 +77,7 @@ func (w *weightedScoring) getTopScores(services []*models.GeoSpatialSearchResult
 	var lowestPrice float32 = math.MaxFloat32
 	var highestRating float32 = 1.0
 	var shortestDistance float32 = math.MaxFloat32
-	var mostTransactions float32 = 1.0
+	var mostBookings float32 = 1.0
 
 	for _, service := range services {
 		if service.Rate < lowestPrice {
@@ -92,15 +92,15 @@ func (w *weightedScoring) getTopScores(services []*models.GeoSpatialSearchResult
 			shortestDistance = service.Distance
 		}
 
-		if service.CompletedTransactions > mostTransactions {
-			mostTransactions = service.CompletedTransactions
+		if service.CompletedBookings > mostBookings {
+			mostBookings = service.CompletedBookings
 		}
 	}
 
 	w.lowestPrice = lowestPrice
 	w.highestRating = highestRating
 	w.shortestDistance = shortestDistance
-	w.mostTransactions = mostTransactions
+	w.mostBookings = mostBookings
 }
 
 func (w *weightedScoring) maximize(score, maxScore float32) float32 {

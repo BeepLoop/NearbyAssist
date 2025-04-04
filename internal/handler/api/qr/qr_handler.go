@@ -18,7 +18,7 @@ func NewHandler(service *qr_service.Service) *qrHandler {
 	return &qrHandler{service: service}
 }
 
-func (h *qrHandler) SignTransaction(c echo.Context) error {
+func (h *qrHandler) SignBooking(c echo.Context) error {
 	req := new(request.QRSignatureInput)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{

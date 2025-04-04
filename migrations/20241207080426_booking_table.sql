@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE IF NOT EXISTS Transaction (
+CREATE TABLE IF NOT EXISTS Booking (
     id VARCHAR(255) NOT NULL,
     vendorId VARCHAR(255) NOT NULL,
     clientId VARCHAR(255) NOT NULL,
@@ -21,7 +21,7 @@ SELECT 'up SQL query';
 -- +goose StatementEnd
 
 -- +goose Down
-DROP TABLE IF EXISTS Transaction;
+DROP TABLE IF EXISTS Booking;
 -- +goose StatementBegin
 SELECT 'down SQL query';
 -- +goose StatementEnd

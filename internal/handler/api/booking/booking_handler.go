@@ -1,12 +1,12 @@
-package transaction
+package booking
 
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
+	booking_service "nearbyassist/internal/service/booking"
 	"nearbyassist/internal/service/cache"
 	service_service "nearbyassist/internal/service/service"
-	transaction_service "nearbyassist/internal/service/transaction"
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -16,22 +16,22 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type transactionHandler struct {
-	transactionService *transaction_service.Service
-	serviceService     *service_service.Service
-	userService        *user_service.Service
+type bookingHandler struct {
+	bookingService *booking_service.Service
+	serviceService *service_service.Service
+	userService    *user_service.Service
 }
 
-func NewHandler(transactionService *transaction_service.Service, serviceService *service_service.Service, useService *user_service.Service) *transactionHandler {
-	return &transactionHandler{
-		transactionService: transactionService,
-		serviceService:     serviceService,
-		userService:        useService,
+func NewHandler(bookingService *booking_service.Service, serviceService *service_service.Service, useService *user_service.Service) *bookingHandler {
+	return &bookingHandler{
+		bookingService: bookingService,
+		serviceService: serviceService,
+		userService:    useService,
 	}
 }
 
-func (h *transactionHandler) CreateTransaction(c echo.Context) error {
-	req := new(request.NewTransactionPayload)
+func (h *bookingHandler) CreateBooking(c echo.Context) error {
+	req := new(request.NewBookingPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error binding request body",
@@ -46,71 +46,71 @@ func (h *transactionHandler) CreateTransaction(c echo.Context) error {
 		})
 	}
 
-	transactionId, err := h.transactionService.CreateTransaction(req)
+	bookingId, err := h.bookingService.CreateBooking(req)
 	if err != nil {
-		if strings.Contains(err.Error(), "You already have an confirmed or pending transaction for this service") {
+		if strings.Contains(err.Error(), "You already have an confirmed or pending booking for this service") {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-				Message: "You already have an confirmed or pending transaction for this service",
+				Message: "You already have an confirmed or pending booking for this service",
 				Error:   err.Error(),
 			})
 		}
 
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error creating transaction",
+			Message: "Error creating booking",
 			Error:   err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transaction": transactionId,
+		"booking": bookingId,
 	})
 }
 
-func (h *transactionHandler) GetTransaction(c echo.Context) error {
-	transactionId := c.Param("transactionId")
-	if transactionId == "" {
+func (h *bookingHandler) GetBooking(c echo.Context) error {
+	bookingId := c.Param("bookingId")
+	if bookingId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Transaction ID is required",
-			Error:   "Transaction ID is required",
+			Message: "Booking ID is required",
+			Error:   "Booking ID is required",
 		})
 	}
 
-	var transaction *models.TransactionModel
+	var booking *models.BookingModel
 	inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
 	if exists {
-		transaction = inCache.(*models.TransactionModel)
+		booking = inCache.(*models.BookingModel)
 	} else {
-		res, err := h.transactionService.GetTransaction(transactionId)
+		res, err := h.bookingService.GetBooking(bookingId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Error getting transaction",
+				Message: "Error getting booking",
 				Error:   err.Error(),
 			})
 		}
 
-		transaction = res
+		booking = res
 	}
 
-	service, err := h.serviceService.GetService(transaction.ServiceId)
+	service, err := h.serviceService.GetService(booking.ServiceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Could not get service information of transaction",
+			Message: "Could not get service information of booking",
 			Error:   err.Error(),
 		})
 	}
 
-	response := response.Transaction{
-		Id: transaction.Id,
+	response := response.Booking{
+		Id: booking.Id,
 		Vendor: response.User{
-			Id:   transaction.VendorId,
-			Name: transaction.Vendor,
+			Id:   booking.VendorId,
+			Name: booking.Vendor,
 		},
 		Client: response.User{
-			Id:   transaction.ClientId,
-			Name: transaction.Client,
+			Id:   booking.ClientId,
+			Name: booking.Client,
 		},
-		Cost: transaction.Cost,
-		Extras: slices.Collect(utils.Map(transaction.Extras, func(x *models.ExtraModel) response.Extra {
+		Cost: booking.Cost,
+		Extras: slices.Collect(utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
 			return response.Extra{
 				Id:          x.Id,
 				Title:       x.Title,
@@ -119,8 +119,8 @@ func (h *transactionHandler) GetTransaction(c echo.Context) error {
 			}
 		})),
 		Service: response.ServiceBareInfo{
-			Id:          transaction.ServiceId,
-			VendorId:    transaction.VendorId,
+			Id:          booking.ServiceId,
+			VendorId:    booking.VendorId,
 			Title:       service.Service.Title,
 			Description: service.Service.Description,
 			Rate:        service.Service.Rate,
@@ -137,17 +137,17 @@ func (h *transactionHandler) GetTransaction(c echo.Context) error {
 				Longitude: service.Service.Longitude,
 			},
 		},
-		Status:       string(transaction.Status),
-		CreatedAt:    transaction.CreatedAt,
-		UpdatedAt:    transaction.UpdatedAt,
-		ScheduledAt:  transaction.ScheduledAt.String,
-		CancelReason: transaction.CancelReason.String,
+		Status:       string(booking.Status),
+		CreatedAt:    booking.CreatedAt,
+		UpdatedAt:    booking.UpdatedAt,
+		ScheduledAt:  booking.ScheduledAt.String,
+		CancelReason: booking.CancelReason.String,
 	}
 
 	return c.JSON(http.StatusOK, response)
 }
 
-func (h *transactionHandler) Cancel(c echo.Context) error {
+func (h *bookingHandler) Cancel(c echo.Context) error {
 	req := new(request.CancelRequestPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -158,7 +158,7 @@ func (h *transactionHandler) Cancel(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.transactionService.CancelTransaction(bearerToken, req); err != nil {
+	if err := h.bookingService.CancelBooking(bearerToken, req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error cancellation request",
 			Error:   err.Error(),
@@ -168,8 +168,8 @@ func (h *transactionHandler) Cancel(c echo.Context) error {
 	return c.JSON(http.StatusNoContent, nil)
 }
 
-func (h *transactionHandler) Accept(c echo.Context) error {
-	req := new(request.AcceptTransactionPayload)
+func (h *bookingHandler) Accept(c echo.Context) error {
+	req := new(request.AcceptBookingPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error binding request body",
@@ -179,9 +179,9 @@ func (h *transactionHandler) Accept(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.transactionService.AcceptTransactionRequest(bearerToken, req); err != nil {
+	if err := h.bookingService.AcceptBookingRequest(bearerToken, req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Error accepting transaction request",
+			Message: "Error accepting booking request",
 			Error:   err.Error(),
 		})
 	}
@@ -189,7 +189,7 @@ func (h *transactionHandler) Accept(c echo.Context) error {
 	return c.JSON(http.StatusNoContent, nil)
 }
 
-func (h *transactionHandler) Reject(c echo.Context) error {
+func (h *bookingHandler) Reject(c echo.Context) error {
 	req := new(request.RejectRequestPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -199,9 +199,9 @@ func (h *transactionHandler) Reject(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-	if err := h.transactionService.RejectTransactionRequest(bearerToken, req); err != nil {
+	if err := h.bookingService.RejectBookingRequest(bearerToken, req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Error rejecting transaction request",
+			Message: "Error rejecting booking request",
 			Error:   err.Error(),
 		})
 	}
@@ -209,43 +209,43 @@ func (h *transactionHandler) Reject(c echo.Context) error {
 	return c.JSON(http.StatusNoContent, nil)
 }
 
-func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
+func (h *bookingHandler) GetUserBookingList(c echo.Context) error {
 	filter := c.QueryParam("filter")
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	transactions := make([]*models.TransactionModel, 0)
+	bookings := make([]*models.BookingModel, 0)
 	switch filter {
 	case "sent":
-		if result, err := h.transactionService.GetTransactionUserSent(bearerToken); err != nil {
+		if result, err := h.bookingService.GetBookingUserSent(bearerToken); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Error getting user transactions",
+				Message: "Error getting user bookings",
 				Error:   err.Error(),
 			})
 		} else {
-			transactions = result
+			bookings = result
 		}
 	case "received":
-		if result, err := h.transactionService.GetTransactionUserReceived(bearerToken); err != nil {
+		if result, err := h.bookingService.GetBookingUserReceived(bearerToken); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Error getting user transactions",
+				Message: "Error getting user bookings",
 				Error:   err.Error(),
 			})
 		} else {
-			transactions = result
+			bookings = result
 		}
 	}
 
-	resp := make([]response.Transaction, 0)
-	for _, t := range transactions {
+	resp := make([]response.Booking, 0)
+	for _, t := range bookings {
 		service, err := h.serviceService.GetService(t.ServiceId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of transaction",
+				Message: "Could not get service information of booking",
 				Error:   err.Error(),
 			})
 		}
 
-		resp = append(resp, response.Transaction{
+		resp = append(resp, response.Booking{
 			Id: t.Id,
 			Vendor: response.User{
 				Id:   t.VendorId,
@@ -292,14 +292,14 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactions": resp,
+		"bookings": resp,
 	})
 }
 
-func (h *transactionHandler) GetRecentTransactions(c echo.Context) error {
+func (h *bookingHandler) GetRecentBookings(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	transactions, err := h.transactionService.GetRecentTransactions(bearerToken)
+	bookings, err := h.bookingService.GetRecentBookings(bearerToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error retrieving recents",
@@ -307,17 +307,17 @@ func (h *transactionHandler) GetRecentTransactions(c echo.Context) error {
 		})
 	}
 
-	resp := make([]response.Transaction, 0)
-	for _, t := range transactions {
+	resp := make([]response.Booking, 0)
+	for _, t := range bookings {
 		service, err := h.serviceService.GetService(t.ServiceId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of transaction",
+				Message: "Could not get service information of booking",
 				Error:   err.Error(),
 			})
 		}
 
-		resp = append(resp, response.Transaction{
+		resp = append(resp, response.Booking{
 			Id: t.Id,
 			Vendor: response.User{
 				Id:   t.VendorId,
@@ -364,32 +364,32 @@ func (h *transactionHandler) GetRecentTransactions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactions": resp,
+		"bookings": resp,
 	})
 }
 
-func (h *transactionHandler) GetConfirmedTransactions(c echo.Context) error {
+func (h *bookingHandler) GetConfirmedBookings(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	transactions, err := h.transactionService.GetConfirmedTransactions(bearerToken)
+	bookings, err := h.bookingService.GetConfirmedBookings(bearerToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error getting confirmed transactions",
+			Message: "Error getting confirmed bookings",
 			Error:   err.Error(),
 		})
 	}
 
-	resp := make([]response.Transaction, 0)
-	for _, t := range transactions {
+	resp := make([]response.Booking, 0)
+	for _, t := range bookings {
 		service, err := h.serviceService.GetService(t.ServiceId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of transaction",
+				Message: "Could not get service information of booking",
 				Error:   err.Error(),
 			})
 		}
 
-		resp = append(resp, response.Transaction{
+		resp = append(resp, response.Booking{
 			Id: t.Id,
 			Vendor: response.User{
 				Id:   t.VendorId,
@@ -436,32 +436,32 @@ func (h *transactionHandler) GetConfirmedTransactions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactions": resp,
+		"bookings": resp,
 	})
 }
 
-func (h *transactionHandler) GetReviewableTransactions(c echo.Context) error {
+func (h *bookingHandler) GetReviewableBookings(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	reviewables, err := h.transactionService.GetReviewableTransactions(bearerToken)
+	reviewables, err := h.bookingService.GetReviewableBookings(bearerToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error getting confirmed transactions",
+			Message: "Error getting confirmed bookings",
 			Error:   err.Error(),
 		})
 	}
 
-	resp := make([]response.Transaction, 0)
+	resp := make([]response.Booking, 0)
 	for _, t := range reviewables {
 		service, err := h.serviceService.GetService(t.ServiceId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of transaction",
+				Message: "Could not get service information of booking",
 				Error:   err.Error(),
 			})
 		}
 
-		resp = append(resp, response.Transaction{
+		resp = append(resp, response.Booking{
 			Id: t.Id,
 			Vendor: response.User{
 				Id:   t.VendorId,
@@ -512,28 +512,28 @@ func (h *transactionHandler) GetReviewableTransactions(c echo.Context) error {
 	})
 }
 
-func (h *transactionHandler) GetTransactionHistory(c echo.Context) error {
+func (h *bookingHandler) GetBookingHistory(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	transactions, err := h.transactionService.GetTransactionHistory(bearerToken)
+	bookings, err := h.bookingService.GetBookingHistory(bearerToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error getting transaction history",
+			Message: "Error getting booking history",
 			Error:   err.Error(),
 		})
 	}
 
-	resp := make([]response.Transaction, 0)
-	for _, t := range transactions {
+	resp := make([]response.Booking, 0)
+	for _, t := range bookings {
 		service, err := h.serviceService.GetService(t.ServiceId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of transaction",
+				Message: "Could not get service information of booking",
 				Error:   err.Error(),
 			})
 		}
 
-		resp = append(resp, response.Transaction{
+		resp = append(resp, response.Booking{
 			Id: t.Id,
 			Vendor: response.User{
 				Id:   t.VendorId,
@@ -584,27 +584,27 @@ func (h *transactionHandler) GetTransactionHistory(c echo.Context) error {
 	})
 }
 
-func (h *transactionHandler) CompleteTransaction(c echo.Context) error {
-	transactionId := c.Param("transactionId")
-	if transactionId == "" {
+func (h *bookingHandler) CompleteBooking(c echo.Context) error {
+	bookingId := c.Param("bookingId")
+	if bookingId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Transaction ID is required",
-			Error:   "Transaction ID is required",
+			Message: "Booking ID is required",
+			Error:   "Booking ID is required",
 		})
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.transactionService.CompleteTransaction(bearerToken, transactionId); err != nil {
+	if err := h.bookingService.CompleteBooking(bearerToken, bookingId); err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
-				Message: "You are not authorized to complete this transaction",
+				Message: "You are not authorized to complete this booking",
 				Error:   err.Error(),
 			})
 		}
 
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error marking transaction as complete",
+			Message: "Error marking booking as complete",
 			Error:   err.Error(),
 		})
 	}

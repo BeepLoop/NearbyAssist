@@ -2,6 +2,7 @@ package server
 
 import (
 	"nearbyassist/internal/handler/api/application"
+	"nearbyassist/internal/handler/api/booking"
 	"nearbyassist/internal/handler/api/complaint"
 	"nearbyassist/internal/handler/api/e2ee"
 	"nearbyassist/internal/handler/api/expertise"
@@ -14,13 +15,13 @@ import (
 	"nearbyassist/internal/handler/api/review"
 	"nearbyassist/internal/handler/api/service"
 	"nearbyassist/internal/handler/api/tag"
-	"nearbyassist/internal/handler/api/transaction"
 	"nearbyassist/internal/handler/api/user"
 	userauth_handler "nearbyassist/internal/handler/api/user_auth"
 	"nearbyassist/internal/handler/api/vendor"
 	websocket_handler "nearbyassist/internal/handler/api/websocket"
 	"nearbyassist/internal/middleware"
 	application_repo "nearbyassist/internal/repository/application"
+	booking_repo "nearbyassist/internal/repository/booking"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
 	expertise_repo "nearbyassist/internal/repository/expertise"
@@ -33,11 +34,11 @@ import (
 	service_repo "nearbyassist/internal/repository/service"
 	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
 	tag_repo "nearbyassist/internal/repository/tag"
-	transaction_repo "nearbyassist/internal/repository/transaction"
 	user_repo "nearbyassist/internal/repository/user"
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	verification_repo "nearbyassist/internal/repository/verification"
 	application_service "nearbyassist/internal/service/application"
+	booking_service "nearbyassist/internal/service/booking"
 	complaint_service "nearbyassist/internal/service/complaint"
 	e2ee_service "nearbyassist/internal/service/e2ee"
 	expertise_service "nearbyassist/internal/service/expertise"
@@ -51,7 +52,6 @@ import (
 	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
 	tag_service "nearbyassist/internal/service/tag"
-	transaction_service "nearbyassist/internal/service/transaction"
 	user_service "nearbyassist/internal/service/user"
 	userauth_service "nearbyassist/internal/service/user_auth"
 	vendor_service "nearbyassist/internal/service/vendor"
@@ -202,13 +202,13 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		serviceRoute.GET("/route/:serviceId", handler.FindServiceRoute)
 	}
 
-	// ===== TRANSACTIONS =======
-	transactionRoute := v1.Group("/transactions")
+	// ===== BOOKINGS =======
+	bookingRoute := v1.Group("/bookings")
 	{
-		transactionRoute.Use(middleware.CheckAuth(s.JWT))
+		bookingRoute.Use(middleware.CheckAuth(s.JWT))
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
-		transactionStore := transaction_repo.NewMysqlTransactionRepository(s.DB)
+		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
@@ -224,27 +224,27 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.RouteEngine,
 			s.FS,
 		)
-		transactionService := transaction_service.NewService(
+		bookingService := booking_service.NewService(
 			notifStore,
-			transactionStore,
+			bookingStore,
 			s.WS,
 			s.Encrypt,
 			s.JWT,
 		)
 
-		handler := transaction.NewHandler(transactionService, serviceService, userService)
+		handler := booking.NewHandler(bookingService, serviceService, userService)
 
-		transactionRoute.POST("", handler.CreateTransaction)
-		transactionRoute.GET("/:transactionId", handler.GetTransaction)
-		transactionRoute.PUT("/cancel", handler.Cancel)
-		transactionRoute.PUT("/accept", handler.Accept)
-		transactionRoute.PUT("/reject", handler.Reject)
-		transactionRoute.GET("/mine", handler.GetUserTransactionList)
-		transactionRoute.GET("/recent", handler.GetRecentTransactions)
-		transactionRoute.GET("/confirmed", handler.GetConfirmedTransactions)
-		transactionRoute.GET("/toReview", handler.GetReviewableTransactions)
-		transactionRoute.GET("/history", handler.GetTransactionHistory)
-		transactionRoute.POST("/complete/:transactionId", handler.CompleteTransaction)
+		bookingRoute.POST("", handler.CreateBooking)
+		bookingRoute.GET("/:bookingId", handler.GetBooking)
+		bookingRoute.PUT("/cancel", handler.Cancel)
+		bookingRoute.PUT("/accept", handler.Accept)
+		bookingRoute.PUT("/reject", handler.Reject)
+		bookingRoute.GET("/mine", handler.GetUserBookingList)
+		bookingRoute.GET("/recent", handler.GetRecentBookings)
+		bookingRoute.GET("/confirmed", handler.GetConfirmedBookings)
+		bookingRoute.GET("/toReview", handler.GetReviewableBookings)
+		bookingRoute.GET("/history", handler.GetBookingHistory)
+		bookingRoute.POST("/complete/:bookingId", handler.CompleteBooking)
 	}
 
 	// ===== APPLICATION =======
@@ -281,10 +281,10 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		reviewRoute.Use(middleware.CheckAuth(s.JWT))
 
-		transactionStore := transaction_repo.NewMysqlTransactionRepository(s.DB)
+		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
 		reviewStore := review_repo.NewMysqlReviewRepository(s.DB)
 
-		reviewService := review_service.NewService(transactionStore, reviewStore, s.Encrypt, s.JWT)
+		reviewService := review_service.NewService(bookingStore, reviewStore, s.Encrypt, s.JWT)
 
 		handler := review.NewHandler(reviewService)
 
@@ -347,7 +347,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		qrService := qr_service.NewService(key)
 		handler := qr.NewHandler(qrService)
 
-		qrRoute.POST("/generateSignature", handler.SignTransaction)
+		qrRoute.POST("/generateSignature", handler.SignBooking)
 		qrRoute.POST("/verifySignature", handler.VerifySignature)
 	}
 

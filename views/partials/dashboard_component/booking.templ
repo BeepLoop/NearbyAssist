@@ -6,15 +6,15 @@ import (
 	"strconv"
 )
 
-var loadTransactionChart = templ.NewOnceHandle()
+var loadBookingChart = templ.NewOnceHandle()
 
-templ Transaction(data models.WeeklyTransactionData) {
+templ Booking(data models.WeeklyBookingData) {
 	<card class="w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary">
-		@templ.JSONScript("transactionData", data)
+		@templ.JSONScript("bookingData", data)
 		<div class="p-2">
 			<!-- Title -->
 			<span class="mb-2 flex justify-between">
-				<p class="text-xs font-medium text-neutral-gray">Transactions</p>
+				<p class="text-xs font-medium text-neutral-gray">Bookings</p>
 				<p class="text-xs font-medium text-neutral-gray">(last 7 days)</p>
 			</span>
 			<!-- Count -->
@@ -30,9 +30,9 @@ templ Transaction(data models.WeeklyTransactionData) {
 		</div>
 		<div class="p-2">
 			<!-- Chart -->
-			<div id="transactionChart"></div>
-			@loadTransactionChart.Once() {
-				<script src="/static/script/transactionChart.js"></script>
+			<div id="bookingChart"></div>
+			@loadBookingChart.Once() {
+				<script src="/static/script/bookingChart.js"></script>
 			}
 		</div>
 	</card>

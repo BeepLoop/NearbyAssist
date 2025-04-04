@@ -14,9 +14,9 @@ import (
 	"strconv"
 )
 
-var loadTransactionChart = templ.NewOnceHandle()
+var loadBookingChart = templ.NewOnceHandle()
 
-func Transaction(data models.WeeklyTransactionData) templ.Component {
+func Booking(data models.WeeklyBookingData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -41,11 +41,11 @@ func Transaction(data models.WeeklyTransactionData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.JSONScript("transactionData", data).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.JSONScript("bookingData", data).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-2\"><!-- Title --><span class=\"mb-2 flex justify-between\"><p class=\"text-xs font-medium text-neutral-gray\">Transactions</p><p class=\"text-xs font-medium text-neutral-gray\">(last 7 days)</p></span><!-- Count --><div class=\"flex items-baseline gap-2\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-2\"><!-- Title --><span class=\"mb-2 flex justify-between\"><p class=\"text-xs font-medium text-neutral-gray\">Bookings</p><p class=\"text-xs font-medium text-neutral-gray\">(last 7 days)</p></span><!-- Count --><div class=\"flex items-baseline gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,13 +67,13 @@ func Transaction(data models.WeeklyTransactionData) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.Total))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/transaction.templ`, Line: 27, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 27, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-xs font-semibold text-neutral-gray\">total</p></div></div><div class=\"p-2\"><!-- Chart --><div id=\"transactionChart\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-xs font-semibold text-neutral-gray\">total</p></div></div><div class=\"p-2\"><!-- Chart --><div id=\"bookingChart\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -89,13 +89,13 @@ func Transaction(data models.WeeklyTransactionData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"/static/script/transactionChart.js\"></script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"/static/script/bookingChart.js\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = loadTransactionChart.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = loadBookingChart.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

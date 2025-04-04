@@ -5,16 +5,16 @@ import (
 	"nearbyassist/internal/models"
 )
 
-func HasScheduleOverlap(schedule string, transactions []*models.TransactionModel) bool {
+func HasScheduleOverlap(schedule string, bookings []*models.BookingModel) bool {
 	sched := FormatDate(schedule)
 
-	for _, transaction := range transactions {
-		fmt.Println(transaction.ScheduledAt)
-		if !transaction.ScheduledAt.Valid {
+	for _, booking := range bookings {
+		fmt.Println(booking.ScheduledAt)
+		if !booking.ScheduledAt.Valid {
 			continue
 		}
 
-		if sched == FormatDate(transaction.ScheduledAt.String) {
+		if sched == FormatDate(booking.ScheduledAt.String) {
 			return true
 		}
 	}

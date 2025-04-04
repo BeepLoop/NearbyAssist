@@ -37,9 +37,9 @@ func (s *Service) VerifySignature(input *request.QRSignatureVerifyInput) bool {
 	receivedSignature := input.Signature
 
 	data := &request.QRSignatureInput{
-		ClientID:      input.ClientID,
-		VendorID:      input.VendorID,
-		TransactionID: input.TransactionID,
+		ClientID:  input.ClientID,
+		VendorID:  input.VendorID,
+		BookingID: input.BookingID,
 	}
 
 	expectedSignature, err := s.SignData(data)

@@ -393,13 +393,13 @@ func (s *MysqlServiceRepository) GetReviews(serviceId string) ([]*models.ReviewM
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	// TODO: Implement this, join on transaction and review table
+	// TODO: Implement this, join on booking and review table
 	query := `
         SELECT
             r.*
         FROM
             Review r
-            JOIN Transaction t ON t.id = r.transactionId
+            JOIN Booking t ON t.id = r.bookingId
             JOIN Service s ON s.id = t.serviceId
         WHERE
             s.id = ?
@@ -453,29 +453,29 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	// Start transaction
+	// Start booking
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	checkIfHasActiveTransactionsQuery := `
+	checkIfHasActiveBookingsQuery := `
         SELECT
             t.id,
             t.vendorId,
             t.clientId,
             t.cost
         FROM
-            Transaction t
+            Booking t
         WHERE
             t.id = ? AND (t.status = 'pending' OR t.status = 'confirmed')
     `
-	activeTransactions := make([]*models.TransactionModel, 0)
-	if err := tx.SelectContext(ctx, &activeTransactions, checkIfHasActiveTransactionsQuery, updatedService.Id); err != nil {
+	activeBookings := make([]*models.BookingModel, 0)
+	if err := tx.SelectContext(ctx, &activeBookings, checkIfHasActiveBookingsQuery, updatedService.Id); err != nil {
 		return err
 	}
 
-	if len(activeTransactions) != 0 {
+	if len(activeBookings) != 0 {
 		return errors.New("This service is actively in use")
 	}
 
@@ -549,7 +549,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 		}
 	}
 
-	// Commit transaction
+	// Commit booking
 	if err := tx.Commit(); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
@@ -672,21 +672,21 @@ func (s *MysqlServiceRepository) EditExtra(data *models.ExtraModel) error {
 		return err
 	}
 
-	transactionsWithThisExtraQuery := `
+	bookingsWithThisExtraQuery := `
         SELECT
             t.id,
             t.vendorId,
             t.clientId,
             t.cost
         FROM
-            TransactionExtra te
-            JOIN Transaction t ON t.id = te.transactionId
+            BookingExtra te
+            JOIN Booking t ON t.id = te.bookingId
         WHERE
             te.extraId = ? AND (t.status = 'pending' OR t.status = 'confirmed')
     `
 
-	transactionsWithThisExtra := make([]*models.TransactionModel, 0)
-	if err := tx.SelectContext(ctx, &transactionsWithThisExtra, transactionsWithThisExtraQuery, data.Id); err != nil {
+	bookingsWithThisExtra := make([]*models.BookingModel, 0)
+	if err := tx.SelectContext(ctx, &bookingsWithThisExtra, bookingsWithThisExtraQuery, data.Id); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
@@ -694,7 +694,7 @@ func (s *MysqlServiceRepository) EditExtra(data *models.ExtraModel) error {
 		return err
 	}
 
-	if len(transactionsWithThisExtra) != 0 {
+	if len(bookingsWithThisExtra) != 0 {
 		return errors.New("This service extra is actively in use")
 	}
 
@@ -741,21 +741,21 @@ func (s *MysqlServiceRepository) DeleteExtra(extraId string) error {
 		return err
 	}
 
-	transactionsWithThisExtraQuery := `
+	bookingsWithThisExtraQuery := `
         SELECT
             t.id,
             t.vendorId,
             t.clientId,
             t.cost
         FROM
-            TransactionExtra te
-            JOIN Transaction t ON t.id = te.transactionId
+            BookingExtra te
+            JOIN Booking t ON t.id = te.bookingId
         WHERE
             te.extraId = ? AND (t.status = 'pending' OR t.status = 'confirmed')
     `
 
-	transactionsWithThisExtra := make([]*models.TransactionModel, 0)
-	if err := tx.SelectContext(ctx, &transactionsWithThisExtra, transactionsWithThisExtraQuery, extraId); err != nil {
+	bookingsWithThisExtra := make([]*models.BookingModel, 0)
+	if err := tx.SelectContext(ctx, &bookingsWithThisExtra, bookingsWithThisExtraQuery, extraId); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
@@ -763,7 +763,7 @@ func (s *MysqlServiceRepository) DeleteExtra(extraId string) error {
 		return err
 	}
 
-	if len(transactionsWithThisExtra) != 0 {
+	if len(bookingsWithThisExtra) != 0 {
 		return errors.New("This service extra is actively in use")
 	}
 
@@ -873,9 +873,9 @@ func (s *MysqlServiceRepository) GeoSpatialSearch(params map[string]string) ([]*
             ) AS rating,
             (
                 SELECT COUNT(id)
-                FROM Transaction t
+                FROM Booking t
                 WHERE t.vendorId = s.vendorId AND t.status = 'done' AND t.serviceId = s.id
-            ) AS transactions
+            ) AS bookings
         FROM 
             ServiceTag st
             JOIN Service s ON s.id = st.serviceId
