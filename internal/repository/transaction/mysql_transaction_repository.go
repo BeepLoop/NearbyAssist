@@ -777,12 +777,20 @@ func (s *MysqlTransactionRepository) Accept(transactionId, schedule string) erro
 	return nil
 }
 
-func (s *MysqlTransactionRepository) Reject(transactionId string) error {
+func (s *MysqlTransactionRepository) Reject(transactionId, reason string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "UPDATE Transaction SET status = 'rejected' WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, transactionId); err != nil {
+	query := `
+        UPDATE
+            Transaction
+        SET
+            cancelReason = ?,
+            status = 'rejected'
+        WHERE 
+            id = ?
+    `
+	if _, err := s.db.ExecContext(ctx, query, reason, transactionId); err != nil {
 		return err
 	}
 

@@ -22,7 +22,7 @@ type TransactionRepository interface {
 
 	Cancel(transactionId, reason string) error
 	Accept(transactionId, schedule string) error
-	Reject(transactionId string) error
+	Reject(transactionId, reason string) error
 	MarkComplete(transactionId string) error
 
 	IsReviewed(transactionId string) (bool, error)

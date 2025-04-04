@@ -252,13 +252,13 @@ func (s *Service) AcceptTransactionRequest(bearerToken string, req *request.Acce
 	return nil
 }
 
-func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) error {
+func (s *Service) RejectTransactionRequest(bearerToken string, req *request.RejectRequestPayload) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
 	}
 
-	transaction, err := s.transactionStore.FindById(transactionId)
+	transaction, err := s.transactionStore.FindById(req.TransactionId)
 	if err != nil {
 		return err
 	}
@@ -275,7 +275,8 @@ func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) er
 		return errors.New("Unauthorized accept request")
 	}
 
-	if err := s.transactionStore.Reject(transactionId); err != nil {
+	encryptedReason := utils.Must(s.encrypt.EncryptString(req.Reason))
+	if err := s.transactionStore.Reject(req.TransactionId, encryptedReason); err != nil {
 		return err
 	}
 
@@ -286,7 +287,7 @@ func (s *Service) RejectTransactionRequest(bearerToken, transactionId string) er
 		Recipient: transaction.VendorId,
 		Type:      "fail",
 		Title:     "Transaction Request Rejected",
-		Content:   "Your transaction request was rejected by the vendor",
+		Content:   fmt.Sprintf("Your transaction request was rejected by the vendor. Reason: %s", req.Reason),
 	}
 
 	encryptedNotification := &models.NotificationModel{

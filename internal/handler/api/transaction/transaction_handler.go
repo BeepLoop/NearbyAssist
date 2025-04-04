@@ -3,10 +3,14 @@ package transaction
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
+	"nearbyassist/internal/service/cache"
+	service_service "nearbyassist/internal/service/service"
 	transaction_service "nearbyassist/internal/service/transaction"
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -14,11 +18,16 @@ import (
 
 type transactionHandler struct {
 	transactionService *transaction_service.Service
+	serviceService     *service_service.Service
 	userService        *user_service.Service
 }
 
-func NewHandler(transactionService *transaction_service.Service, useService *user_service.Service) *transactionHandler {
-	return &transactionHandler{transactionService: transactionService, userService: useService}
+func NewHandler(transactionService *transaction_service.Service, serviceService *service_service.Service, useService *user_service.Service) *transactionHandler {
+	return &transactionHandler{
+		transactionService: transactionService,
+		serviceService:     serviceService,
+		userService:        useService,
+	}
 }
 
 func (h *transactionHandler) CreateTransaction(c echo.Context) error {
@@ -66,15 +75,76 @@ func (h *transactionHandler) GetTransaction(c echo.Context) error {
 		})
 	}
 
-	transaction, err := h.transactionService.GetTransaction(transactionId)
+	var transaction *models.TransactionModel
+	inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
+	if exists {
+		transaction = inCache.(*models.TransactionModel)
+	} else {
+		res, err := h.transactionService.GetTransaction(transactionId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Error getting transaction",
+				Error:   err.Error(),
+			})
+		}
+
+		transaction = res
+	}
+
+	service, err := h.serviceService.GetService(transaction.ServiceId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error getting transaction",
+			Message: "Could not get service information of transaction",
 			Error:   err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, transaction)
+	response := response.Transaction{
+		Id: transaction.Id,
+		Vendor: response.User{
+			Id:   transaction.VendorId,
+			Name: transaction.Vendor,
+		},
+		Client: response.User{
+			Id:   transaction.ClientId,
+			Name: transaction.Client,
+		},
+		Cost: transaction.Cost,
+		Extras: slices.Collect(utils.Map(transaction.Extras, func(x *models.ExtraModel) response.Extra {
+			return response.Extra{
+				Id:          x.Id,
+				Title:       x.Title,
+				Description: x.Description,
+				Price:       x.Price,
+			}
+		})),
+		Service: response.ServiceBareInfo{
+			Id:          transaction.ServiceId,
+			VendorId:    transaction.VendorId,
+			Title:       service.Service.Title,
+			Description: service.Service.Description,
+			Rate:        service.Service.Rate,
+			Tags: slices.Collect(
+				utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
+					return response.Tag{
+						Id:    t.Id,
+						Title: t.Title,
+					}
+				}),
+			),
+			Location: response.Location{
+				Latitude:  service.Service.Latitude,
+				Longitude: service.Service.Longitude,
+			},
+		},
+		Status:       string(transaction.Status),
+		CreatedAt:    transaction.CreatedAt,
+		UpdatedAt:    transaction.UpdatedAt,
+		ScheduledAt:  transaction.ScheduledAt.String,
+		CancelReason: transaction.CancelReason.String,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func (h *transactionHandler) Cancel(c echo.Context) error {
@@ -120,17 +190,16 @@ func (h *transactionHandler) Accept(c echo.Context) error {
 }
 
 func (h *transactionHandler) Reject(c echo.Context) error {
-	transactionId := c.Param("transactionId")
-	if transactionId == "" {
+	req := new(request.RejectRequestPayload)
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Transaction ID is required",
-			Error:   "Transaction ID is required",
+			Message: "Error binding request body",
+			Error:   err.Error(),
 		})
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
-	if err := h.transactionService.RejectTransactionRequest(bearerToken, transactionId); err != nil {
+	if err := h.transactionService.RejectTransactionRequest(bearerToken, req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error rejecting transaction request",
 			Error:   err.Error(),
@@ -166,8 +235,64 @@ func (h *transactionHandler) GetUserTransactionList(c echo.Context) error {
 		}
 	}
 
+	resp := make([]response.Transaction, 0)
+	for _, t := range transactions {
+		service, err := h.serviceService.GetService(t.ServiceId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Could not get service information of transaction",
+				Error:   err.Error(),
+			})
+		}
+
+		resp = append(resp, response.Transaction{
+			Id: t.Id,
+			Vendor: response.User{
+				Id:   t.VendorId,
+				Name: t.Vendor,
+			},
+			Client: response.User{
+				Id:   t.ClientId,
+				Name: t.Client,
+			},
+			Cost: t.Cost,
+			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+				return response.Extra{
+					Id:          x.Id,
+					Title:       x.Title,
+					Description: x.Description,
+					Price:       x.Price,
+				}
+			})),
+			Service: response.ServiceBareInfo{
+				Id:          t.ServiceId,
+				VendorId:    t.VendorId,
+				Title:       service.Service.Title,
+				Description: service.Service.Description,
+				Rate:        service.Service.Rate,
+				Tags: slices.Collect(
+					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
+						return response.Tag{
+							Id:    t.Id,
+							Title: t.Title,
+						}
+					}),
+				),
+				Location: response.Location{
+					Latitude:  service.Service.Latitude,
+					Longitude: service.Service.Longitude,
+				},
+			},
+			Status:       string(t.Status),
+			CreatedAt:    t.CreatedAt,
+			UpdatedAt:    t.UpdatedAt,
+			ScheduledAt:  t.ScheduledAt.String,
+			CancelReason: t.CancelReason.String,
+		})
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactions": transactions,
+		"transactions": resp,
 	})
 }
 
@@ -182,8 +307,64 @@ func (h *transactionHandler) GetRecentTransactions(c echo.Context) error {
 		})
 	}
 
+	resp := make([]response.Transaction, 0)
+	for _, t := range transactions {
+		service, err := h.serviceService.GetService(t.ServiceId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Could not get service information of transaction",
+				Error:   err.Error(),
+			})
+		}
+
+		resp = append(resp, response.Transaction{
+			Id: t.Id,
+			Vendor: response.User{
+				Id:   t.VendorId,
+				Name: t.Vendor,
+			},
+			Client: response.User{
+				Id:   t.ClientId,
+				Name: t.Client,
+			},
+			Cost: t.Cost,
+			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+				return response.Extra{
+					Id:          x.Id,
+					Title:       x.Title,
+					Description: x.Description,
+					Price:       x.Price,
+				}
+			})),
+			Service: response.ServiceBareInfo{
+				Id:          t.ServiceId,
+				VendorId:    t.VendorId,
+				Title:       service.Service.Title,
+				Description: service.Service.Description,
+				Rate:        service.Service.Rate,
+				Tags: slices.Collect(
+					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
+						return response.Tag{
+							Id:    t.Id,
+							Title: t.Title,
+						}
+					}),
+				),
+				Location: response.Location{
+					Latitude:  service.Service.Latitude,
+					Longitude: service.Service.Longitude,
+				},
+			},
+			Status:       string(t.Status),
+			CreatedAt:    t.CreatedAt,
+			UpdatedAt:    t.UpdatedAt,
+			ScheduledAt:  t.ScheduledAt.String,
+			CancelReason: t.CancelReason.String,
+		})
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactions": transactions,
+		"transactions": resp,
 	})
 }
 
@@ -198,8 +379,64 @@ func (h *transactionHandler) GetConfirmedTransactions(c echo.Context) error {
 		})
 	}
 
+	resp := make([]response.Transaction, 0)
+	for _, t := range transactions {
+		service, err := h.serviceService.GetService(t.ServiceId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Could not get service information of transaction",
+				Error:   err.Error(),
+			})
+		}
+
+		resp = append(resp, response.Transaction{
+			Id: t.Id,
+			Vendor: response.User{
+				Id:   t.VendorId,
+				Name: t.Vendor,
+			},
+			Client: response.User{
+				Id:   t.ClientId,
+				Name: t.Client,
+			},
+			Cost: t.Cost,
+			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+				return response.Extra{
+					Id:          x.Id,
+					Title:       x.Title,
+					Description: x.Description,
+					Price:       x.Price,
+				}
+			})),
+			Service: response.ServiceBareInfo{
+				Id:          t.ServiceId,
+				VendorId:    t.VendorId,
+				Title:       service.Service.Title,
+				Description: service.Service.Description,
+				Rate:        service.Service.Rate,
+				Tags: slices.Collect(
+					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
+						return response.Tag{
+							Id:    t.Id,
+							Title: t.Title,
+						}
+					}),
+				),
+				Location: response.Location{
+					Latitude:  service.Service.Latitude,
+					Longitude: service.Service.Longitude,
+				},
+			},
+			Status:       string(t.Status),
+			CreatedAt:    t.CreatedAt,
+			UpdatedAt:    t.UpdatedAt,
+			ScheduledAt:  t.ScheduledAt.String,
+			CancelReason: t.CancelReason.String,
+		})
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"transactions": transactions,
+		"transactions": resp,
 	})
 }
 
@@ -214,8 +451,64 @@ func (h *transactionHandler) GetReviewableTransactions(c echo.Context) error {
 		})
 	}
 
+	resp := make([]response.Transaction, 0)
+	for _, t := range reviewables {
+		service, err := h.serviceService.GetService(t.ServiceId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Could not get service information of transaction",
+				Error:   err.Error(),
+			})
+		}
+
+		resp = append(resp, response.Transaction{
+			Id: t.Id,
+			Vendor: response.User{
+				Id:   t.VendorId,
+				Name: t.Vendor,
+			},
+			Client: response.User{
+				Id:   t.ClientId,
+				Name: t.Client,
+			},
+			Cost: t.Cost,
+			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+				return response.Extra{
+					Id:          x.Id,
+					Title:       x.Title,
+					Description: x.Description,
+					Price:       x.Price,
+				}
+			})),
+			Service: response.ServiceBareInfo{
+				Id:          t.ServiceId,
+				VendorId:    t.VendorId,
+				Title:       service.Service.Title,
+				Description: service.Service.Description,
+				Rate:        service.Service.Rate,
+				Tags: slices.Collect(
+					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
+						return response.Tag{
+							Id:    t.Id,
+							Title: t.Title,
+						}
+					}),
+				),
+				Location: response.Location{
+					Latitude:  service.Service.Latitude,
+					Longitude: service.Service.Longitude,
+				},
+			},
+			Status:       string(t.Status),
+			CreatedAt:    t.CreatedAt,
+			UpdatedAt:    t.UpdatedAt,
+			ScheduledAt:  t.ScheduledAt.String,
+			CancelReason: t.CancelReason.String,
+		})
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"reviewables": reviewables,
+		"reviewables": resp,
 	})
 }
 
@@ -230,8 +523,64 @@ func (h *transactionHandler) GetTransactionHistory(c echo.Context) error {
 		})
 	}
 
+	resp := make([]response.Transaction, 0)
+	for _, t := range transactions {
+		service, err := h.serviceService.GetService(t.ServiceId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+				Message: "Could not get service information of transaction",
+				Error:   err.Error(),
+			})
+		}
+
+		resp = append(resp, response.Transaction{
+			Id: t.Id,
+			Vendor: response.User{
+				Id:   t.VendorId,
+				Name: t.Vendor,
+			},
+			Client: response.User{
+				Id:   t.ClientId,
+				Name: t.Client,
+			},
+			Cost: t.Cost,
+			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+				return response.Extra{
+					Id:          x.Id,
+					Title:       x.Title,
+					Description: x.Description,
+					Price:       x.Price,
+				}
+			})),
+			Service: response.ServiceBareInfo{
+				Id:          t.ServiceId,
+				VendorId:    t.VendorId,
+				Title:       service.Service.Title,
+				Description: service.Service.Description,
+				Rate:        service.Service.Rate,
+				Tags: slices.Collect(
+					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
+						return response.Tag{
+							Id:    t.Id,
+							Title: t.Title,
+						}
+					}),
+				),
+				Location: response.Location{
+					Latitude:  service.Service.Latitude,
+					Longitude: service.Service.Longitude,
+				},
+			},
+			Status:       string(t.Status),
+			CreatedAt:    t.CreatedAt,
+			UpdatedAt:    t.UpdatedAt,
+			ScheduledAt:  t.ScheduledAt.String,
+			CancelReason: t.CancelReason.String,
+		})
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"history": transactions,
+		"history": resp,
 	})
 }
 

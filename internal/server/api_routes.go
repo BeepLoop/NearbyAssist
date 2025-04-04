@@ -210,8 +210,20 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		transactionStore := transaction_repo.NewMysqlTransactionRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
+		serviceService := service_service.NewService(
+			serviceStore,
+			vendorStore,
+			s.Encrypt,
+			s.Hash,
+			s.JWT,
+			s.SuggestionEngine,
+			s.RouteEngine,
+			s.FS,
+		)
 		transactionService := transaction_service.NewService(
 			notifStore,
 			transactionStore,
@@ -220,13 +232,13 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.JWT,
 		)
 
-		handler := transaction.NewHandler(transactionService, userService)
+		handler := transaction.NewHandler(transactionService, serviceService, userService)
 
 		transactionRoute.POST("", handler.CreateTransaction)
 		transactionRoute.GET("/:transactionId", handler.GetTransaction)
 		transactionRoute.PUT("/cancel", handler.Cancel)
 		transactionRoute.PUT("/accept", handler.Accept)
-		transactionRoute.PUT("/reject/:transactionId", handler.Reject)
+		transactionRoute.PUT("/reject", handler.Reject)
 		transactionRoute.GET("/mine", handler.GetUserTransactionList)
 		transactionRoute.GET("/recent", handler.GetRecentTransactions)
 		transactionRoute.GET("/confirmed", handler.GetConfirmedTransactions)
