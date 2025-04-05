@@ -123,14 +123,6 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 }
 
 func (h *serviceHandler) UpdateService(c echo.Context) error {
-	serviceId := c.Param("serviceId")
-	if serviceId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Service ID must be a number",
-			Error:   "Service ID must be a number",
-		})
-	}
-
 	req := new(request.UpdateServicePayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -148,7 +140,7 @@ func (h *serviceHandler) UpdateService(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.service_service.UpdateService(bearerToken, serviceId, req); err != nil {
+	if err := h.service_service.UpdateService(bearerToken, req); err != nil {
 		if strings.Contains(err.Error(), "unauthorized") {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not allowed to perform this action",

@@ -192,46 +192,37 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 	return response, nil
 }
 
-func (s *Service) UpdateService(bearerToken, serviceId string, req *request.UpdateServicePayload) error {
+func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePayload) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
 	}
 
-	if vendor, err := s.serviceStore.GetVendorInfo(userId); err != nil {
+	// Validate that vendor of service is the current user
+	vendor, err := s.vendorStore.FindById(userId)
+	if err != nil {
 		return err
-	} else {
-		if vendor.VendorId != req.VendorId {
-			return errors.New("unauthorized")
-		}
 	}
-
-	updatedService := new(models.ServiceModel)
-	updatedService.Id = req.Id
-	updatedService.VendorId = req.VendorId
-	updatedService.Rate = req.Rate
-	updatedService.TagsAsString = req.Tags
-	updatedService.Latitude = req.Latitude
-	updatedService.Longitude = req.Longitude
-
-	if cipher, err := s.encrypt.EncryptString(req.Title); err != nil {
-		return err
-	} else {
-		updatedService.Title = cipher
-	}
-
-	if cipher, err := s.encrypt.EncryptString(req.Description); err != nil {
-		return err
-	} else {
-		updatedService.Description = cipher
+	if vendor.VendorId != req.VendorId {
+		return errors.New("unauthorized")
 	}
 
 	// Recompute signature
-	toSign := fmt.Sprintf("%s_%s_%s_%f_%f", req.VendorId, req.Title, req.Description, req.Latitude, req.Longitude)
-	if signature, err := s.hash.Generate([]byte(toSign)); err != nil {
-		return err
-	} else {
-		updatedService.Signature = signature
+	rawStr := fmt.Sprintf("%s_%s_%s_%f_%f", req.VendorId, req.Title, req.Description, req.Location.Latitude, req.Location.Longitude)
+	signature := utils.Must(s.hash.Generate([]byte(rawStr)))
+
+	updatedService := &models.ServiceModel{
+		Model:        models.Model{Id: req.Id},
+		VendorId:     req.VendorId,
+		Title:        utils.Must(s.encrypt.EncryptString(req.Title)),
+		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
+		Rate:         req.Rate,
+		TagsAsString: req.Tags,
+		GeoSpatialModel: models.GeoSpatialModel{
+			Latitude:  req.Location.Latitude,
+			Longitude: req.Location.Longitude,
+		},
+		Signature: signature,
 	}
 
 	if err := s.serviceStore.Update(updatedService); err != nil {

@@ -18,8 +18,6 @@ type ServiceRepository interface {
 	// Return nil if vendorId is found in vendor, else error
 	IsVendor(vendorId string) error
 
-	GetVendorInfo(vendorId string) (*models.VendorModel, error)
-
 	GetTags(serviceId string) ([]*models.TagModel, error)
 
 	GetReviews(serviceId string) ([]*models.ReviewModel, error)

@@ -306,62 +306,6 @@ func (s *MysqlServiceRepository) IsVendor(vendorId string) error {
 	return nil
 }
 
-func (s *MysqlServiceRepository) GetVendorInfo(vendorId string) (*models.VendorModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	vendor := new(models.VendorModel)
-	query := `
-        SELECT  
-            v.vendorId,
-            v.rating,
-            u.name AS vendor,
-            u.email AS email,
-            u.phone AS phone,
-            u.imageUrl AS imageUrl
-        FROM 
-            Vendor  v
-            JOIN User u ON u.id = v.vendorId
-        WHERE 
-            vendorId = ?
-    `
-	if err := s.db.GetContext(ctx, vendor, query, vendorId); err != nil {
-		return nil, err
-	}
-
-	if vendor.VendorId == "" {
-		return nil, errors.New("not found")
-	}
-
-	if restricted, err := s.IsVendorRestricted(vendor.VendorId); err != nil {
-		return nil, err
-	} else {
-		vendor.Restricted = restricted
-	}
-
-	expertiseQuery := `
-        SELECT
-            e.title
-        FROM
-            Expertise e
-            JOIN UserExpertise ve ON ve.expertiseId = e.id
-        WHERE
-            ve.userId = ?
-    `
-
-	expertise := make([]string, 0)
-	if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, vendorId); err != nil {
-		return nil, err
-	}
-	vendor.Expertise = expertise
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return vendor, nil
-}
-
 func (s *MysqlServiceRepository) GetTags(serviceId string) ([]*models.TagModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
