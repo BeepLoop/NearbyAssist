@@ -54,16 +54,15 @@ func (h *userManagementHandler) GetVendorList(c echo.Context) error {
 	data := make([]models.VendorModel, 0)
 	for _, account := range results {
 		data = append(data, models.VendorModel{
-			VendorId:    account.VendorId,
-			Rating:      account.Rating,
-			JoinedAt:    utils.FormatDate(account.JoinedAt),
-			Restricted:  account.Restricted,
-			Name:        account.Name,
-			Email:       account.Email,
-			PhoneString: account.PhoneString,
-			ImageUrl:    account.ImageUrl,
-			Socials:     account.Socials,
-			Expertise:   account.Expertise,
+			VendorId:   account.VendorId,
+			Rating:     account.Rating,
+			JoinedAt:   utils.FormatDate(account.JoinedAt),
+			Restricted: account.Restricted,
+			Name:       account.Name,
+			Email:      account.Email,
+			ImageUrl:   account.ImageUrl,
+			Socials:    account.Socials,
+			Expertise:  account.Expertise,
 		})
 	}
 

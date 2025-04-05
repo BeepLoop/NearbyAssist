@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
+	"slices"
 )
 
 type Service struct {
@@ -75,30 +76,12 @@ func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServ
 			return nil, err
 		}
 
-		if cipher, err := s.encrypt.DecryptString(service.Title); err != nil {
-			return nil, err
-		} else {
-			service.Title = cipher
-		}
-
-		if cipher, err := s.encrypt.DecryptString(service.Description); err != nil {
-			return nil, err
-		} else {
-			service.Description = cipher
-		}
+		service.Title = utils.Must(s.encrypt.DecryptString(service.Title))
+		service.Description = utils.Must(s.encrypt.DecryptString(service.Description))
 
 		for _, extra := range service.Extras {
-			if cipher, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = cipher
-			}
-
-			if cipher, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = cipher
-			}
+			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
 
 		reviews, err := s.serviceStore.GetReviews(saved.ServiceId)
@@ -127,33 +110,59 @@ func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServ
 			return nil, err
 		}
 
-		if decrypted, err := s.encrypt.DecryptString(vendor.Name); err != nil {
-			return nil, err
-		} else {
-			vendor.Name = decrypted
-		}
-
-		if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
-			return nil, err
-		} else {
-			vendor.Email = decrypted
-		}
-
+		vendor.Name = utils.Must(s.encrypt.DecryptString(vendor.Name))
+		vendor.Email = utils.Must(s.encrypt.DecryptString(vendor.Email))
 		if vendor.Phone.Valid {
-			if decrypted, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
-				return nil, err
-			} else {
-				vendor.PhoneString = decrypted
-			}
+			vendor.Phone.String = utils.Must(s.encrypt.DecryptString(vendor.Phone.String))
 		}
 
-		detailedService := &response.DetailedServiceResponse{
-			Service:        service,
-			Vendor:         vendor,
+		savedServices = append(savedServices, &response.DetailedServiceResponse{
+			Service: response.Service{
+				Id:          service.Id,
+				VendorId:    service.VendorId,
+				Title:       service.Title,
+				Description: service.Description,
+				Rate:        service.Rate,
+				Tags: slices.AppendSeq(
+					make([]response.Tag, 0),
+					utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
+						return response.Tag{Id: t.Id, Title: t.Title}
+					}),
+				),
+				Extras: slices.AppendSeq(
+					make([]response.Extra, 0),
+					utils.Map(service.Extras, func(x *models.ExtraModel) response.Extra {
+						return response.Extra{
+							Id:          x.Id,
+							Title:       x.Title,
+							Description: x.Description,
+							Price:       x.Price,
+						}
+					}),
+				),
+				Images: slices.AppendSeq(
+					make([]response.Image, 0),
+					utils.Map(service.Images, func(i *models.ServicePhotoModel) response.Image {
+						return response.Image{Id: i.Id, Url: i.Url}
+					}),
+				),
+				Location: response.Location{
+					Latitude:  service.Latitude,
+					Longitude: service.Longitude,
+				},
+			},
+			Vendor: response.Vendor{
+				Id:        vendor.VendorId,
+				Name:      vendor.Name,
+				Email:     vendor.Email,
+				ImageUrl:  vendor.ImageUrl,
+				Phone:     vendor.Phone.String,
+				Rating:    vendor.Rating,
+				Socials:   vendor.Socials,
+				Expertise: vendor.Expertise,
+			},
 			CountPerRating: countPerRating,
-		}
-
-		savedServices = append(savedServices, detailedService)
+		})
 	}
 
 	return savedServices, nil

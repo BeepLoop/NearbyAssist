@@ -5,8 +5,8 @@ import (
 	"nearbyassist/internal/models"
 	service_repo "nearbyassist/internal/repository/service"
 	"nearbyassist/internal/repository/vendor"
-	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
+	"nearbyassist/internal/utils"
 )
 
 type Service struct {
@@ -42,10 +42,6 @@ func (s *Service) GetAll(limit, offset int) ([]*models.VendorModel, error) {
 			return nil, err
 		} else {
 			account.Email = decrypted
-		}
-
-		if account.Phone.Valid {
-			account.PhoneString = account.Phone.String
 		}
 	}
 
@@ -103,24 +99,10 @@ func (s *Service) FindById(id string) (*models.VendorModel, error) {
 		return nil, err
 	}
 
-	if plainText, err := s.encrypt.DecryptString(vendor.Name); err != nil {
-		return nil, err
-	} else {
-		vendor.Name = plainText
-	}
-
-	if plainText, err := s.encrypt.DecryptString(vendor.Email); err != nil {
-		return nil, err
-	} else {
-		vendor.Email = plainText
-	}
-
+	vendor.Name = utils.Must(s.encrypt.DecryptString(vendor.Name))
+	vendor.Email = utils.Must(s.encrypt.DecryptString(vendor.Email))
 	if vendor.Phone.Valid {
-		if plainText, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
-			return nil, err
-		} else {
-			vendor.Phone = sql.NullString{String: plainText, Valid: true}
-		}
+		vendor.Phone.String = utils.Must(s.encrypt.DecryptString(vendor.Phone.String))
 	}
 
 	decryptedSocials := make([]string, 0)
@@ -137,32 +119,7 @@ func (s *Service) FindById(id string) (*models.VendorModel, error) {
 	return vendor, nil
 }
 
-func (s *Service) GetVendorServicesList(vendorId string) (*response.DetailVendorResponse, error) {
-	vendor, err := s.vendorStore.FindById(vendorId)
-	if err != nil {
-		return nil, err
-	}
-
-	if decrypted, err := s.encrypt.DecryptString(vendor.Name); err != nil {
-		return nil, err
-	} else {
-		vendor.Name = decrypted
-	}
-
-	if decrypted, err := s.encrypt.DecryptString(vendor.Email); err != nil {
-		return nil, err
-	} else {
-		vendor.Email = decrypted
-	}
-
-	if vendor.Phone.Valid {
-		if decrypted, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
-			return nil, err
-		} else {
-			vendor.PhoneString = decrypted
-		}
-	}
-
+func (s *Service) GetVendorServicesList(vendorId string) ([]*models.ServiceModel, error) {
 	services, err := s.vendorStore.GetVendorServiceList(vendorId)
 	if err != nil {
 		return nil, err
@@ -175,37 +132,14 @@ func (s *Service) GetVendorServicesList(vendorId string) (*response.DetailVendor
 			service.Images = images
 		}
 
-		if cipher, err := s.encrypt.DecryptString(service.Title); err != nil {
-			return nil, err
-		} else {
-			service.Title = cipher
-		}
-
-		if cipher, err := s.encrypt.DecryptString(service.Description); err != nil {
-			return nil, err
-		} else {
-			service.Description = cipher
-		}
+		service.Title = utils.Must(s.encrypt.DecryptString(service.Title))
+		service.Description = utils.Must(s.encrypt.DecryptString(service.Description))
 
 		for _, extra := range service.Extras {
-			if cipher, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = cipher
-			}
-
-			if cipher, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = cipher
-			}
+			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
+			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
 	}
 
-	detailedVendor := &response.DetailVendorResponse{
-		Vendor:   vendor,
-		Services: services,
-	}
-
-	return detailedVendor, nil
+	return services, nil
 }

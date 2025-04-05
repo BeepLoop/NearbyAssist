@@ -2,9 +2,12 @@ package vendor
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	resource_service "nearbyassist/internal/service/resource"
 	vendor_service "nearbyassist/internal/service/vendor"
+	"nearbyassist/internal/utils"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -58,7 +61,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		})
 	}
 
-	_, err := h.vendorService.FindById(vendorId)
+	vendor, err := h.vendorService.FindById(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error retrieving vendor information",
@@ -66,7 +69,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		})
 	}
 
-	detail, err := h.vendorService.GetVendorServicesList(vendorId)
+	services, err := h.vendorService.GetVendorServicesList(vendorId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error retrieving vendor services",
@@ -74,18 +77,63 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		})
 	}
 
-	for _, service := range detail.Services {
+	for _, service := range services {
 		for _, image := range service.Images {
-			signedURL, err := h.resourceService.SignURLWithDefaultDuration(image.Url)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-					Message: "Error retrieving vendor services",
-					Error:   err.Error(),
-				})
-			}
-			image.Url = signedURL
+			image.Url = utils.Must(h.resourceService.SignURLWithDefaultDuration(image.Url))
 		}
 	}
 
-	return c.JSON(http.StatusOK, detail)
+	response := response.VendorServices{
+		Vendor: response.Vendor{
+			Id:        vendor.VendorId,
+			Name:      vendor.Name,
+			Email:     vendor.Email,
+			ImageUrl:  vendor.ImageUrl,
+			Phone:     vendor.Phone.String,
+			Rating:    vendor.Rating,
+			Socials:   vendor.Socials,
+			Expertise: vendor.Expertise,
+		},
+		Servics: slices.AppendSeq(
+			make([]response.Service, 0),
+			utils.Map(services, func(s *models.ServiceModel) response.Service {
+				return response.Service{
+					Id:          s.Id,
+					VendorId:    s.VendorId,
+					Title:       s.Title,
+					Description: s.Description,
+					Rate:        s.Rate,
+					Tags: slices.AppendSeq(
+						make([]response.Tag, 0),
+						utils.Map(s.Tags, func(t *models.TagModel) response.Tag {
+							return response.Tag{Id: t.Id, Title: t.Title}
+						}),
+					),
+					Extras: slices.AppendSeq(
+						make([]response.Extra, 0),
+						utils.Map(s.Extras, func(x *models.ExtraModel) response.Extra {
+							return response.Extra{
+								Id:          x.Id,
+								Title:       x.Title,
+								Description: x.Description,
+								Price:       x.Price,
+							}
+						}),
+					),
+					Images: slices.AppendSeq(
+						make([]response.Image, 0),
+						utils.Map(s.Images, func(i *models.ServicePhotoModel) response.Image {
+							return response.Image{Id: i.Id, Url: i.Url}
+						}),
+					),
+					Location: response.Location{
+						Latitude:  s.Latitude,
+						Longitude: s.Longitude,
+					},
+				}
+			}),
+		),
+	}
+
+	return c.JSON(http.StatusOK, response)
 }

@@ -15,6 +15,7 @@ import (
 	searchhistory "nearbyassist/internal/service/search_history"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/utils"
+	"slices"
 	"strings"
 )
 
@@ -42,61 +43,45 @@ func NewService(serviceStore service_repo.ServiceRepository, vendorStore vendor_
 	}
 }
 
-func (s *Service) CreateService(req *request.NewServicePayload) (string, error) {
+func (s *Service) CreateService(req *request.AddServicePayload) (string, error) {
 	if err := s.serviceStore.IsVendor(req.VendorId); err != nil {
 		return "", err
 	}
 
-	encryptedTitle, err := s.encrypt.EncryptString(req.Title)
-	if err != nil {
-		return "", err
-	}
-
-	encryptedDesc, err := s.encrypt.EncryptString(req.Description)
-	if err != nil {
-		return "", err
-	}
-
 	// Compute signature
-	toSign := fmt.Sprintf("%s_%s_%f_%f", req.VendorId, req.Description, req.Latitude, req.Longitude)
-	signature, err := s.hash.Generate([]byte(toSign))
-	if err != nil {
+	rawStr := fmt.Sprintf("%s_%s_%f_%f", req.VendorId, req.Description, req.Location.Latitude, req.Location.Longitude)
+	signature := utils.Must(s.hash.Generate([]byte(rawStr)))
+
+	service, err := s.serviceStore.FindBySignature(signature)
+	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
 		return "", err
 	}
-
-	if service, err := s.serviceStore.FindBySignature(signature); err == nil && service != nil {
-		return "", err
+	if service != nil {
+		return "", errors.New("duplicate service")
 	}
 
-	extras := make([]*models.ExtraModel, 0)
-	for _, extra := range req.Extras {
-		titleCipher, err := s.encrypt.EncryptString(extra.Title)
-		if err != nil {
-			return "", err
-		}
-
-		descCipher, err := s.encrypt.EncryptString(extra.Description)
-		if err != nil {
-			return "", err
-		}
-
-		extras = append(extras, &models.ExtraModel{
-			Title:       titleCipher,
-			Description: descCipher,
-			Price:       extra.Price,
-		})
+	newService := &models.ServiceModel{
+		VendorId:     req.VendorId,
+		Title:        utils.Must(s.encrypt.EncryptString(req.Title)),
+		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
+		Rate:         req.Rate,
+		TagsAsString: req.Tags,
+		GeoSpatialModel: models.GeoSpatialModel{
+			Latitude:  req.Location.Latitude,
+			Longitude: req.Location.Longitude,
+		},
+		Extras: slices.AppendSeq(
+			make([]*models.ExtraModel, 0),
+			utils.Map(req.Extras, func(x request.NewExtra) *models.ExtraModel {
+				return &models.ExtraModel{
+					Title:       utils.Must(s.encrypt.EncryptString(x.Title)),
+					Description: utils.Must(s.encrypt.EncryptString(x.Description)),
+					Price:       x.Price,
+				}
+			}),
+		),
+		Signature: signature,
 	}
-
-	newService := new(models.ServiceModel)
-	newService.VendorId = req.VendorId
-	newService.Title = encryptedTitle
-	newService.Description = encryptedDesc
-	newService.Rate = req.Rate
-	newService.TagsAsString = req.Tags
-	newService.Latitude = req.Latitude
-	newService.Longitude = req.Longitude
-	newService.Signature = signature
-	newService.Extras = extras
 
 	serviceId, err := s.serviceStore.Create(newService)
 	if err != nil {
@@ -153,12 +138,54 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 	vendor.Name = utils.Must(s.encrypt.DecryptString(vendor.Name))
 	vendor.Email = utils.Must(s.encrypt.DecryptString(vendor.Email))
 	if vendor.Phone.Valid {
-		vendor.PhoneString = utils.Must(s.encrypt.DecryptString(vendor.Phone.String))
+		vendor.Phone.String = utils.Must(s.encrypt.DecryptString(vendor.Phone.String))
 	}
 
 	response := &response.DetailedServiceResponse{
-		Service:        service,
-		Vendor:         vendor,
+		Service: response.Service{
+			Id:          service.Id,
+			VendorId:    service.VendorId,
+			Title:       service.Title,
+			Description: service.Description,
+			Rate:        service.Rate,
+			Tags: slices.AppendSeq(
+				make([]response.Tag, 0),
+				utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
+					return response.Tag{Id: t.Id, Title: t.Title}
+				}),
+			),
+			Extras: slices.AppendSeq(
+				make([]response.Extra, 0),
+				utils.Map(service.Extras, func(x *models.ExtraModel) response.Extra {
+					return response.Extra{
+						Id:          x.Id,
+						Title:       x.Title,
+						Description: x.Description,
+						Price:       x.Price,
+					}
+				}),
+			),
+			Images: slices.AppendSeq(
+				make([]response.Image, 0),
+				utils.Map(service.Images, func(i *models.ServicePhotoModel) response.Image {
+					return response.Image{Id: i.Id, Url: i.Url}
+				}),
+			),
+			Location: response.Location{
+				Latitude:  service.Latitude,
+				Longitude: service.Longitude,
+			},
+		},
+		Vendor: response.Vendor{
+			Id:        vendor.VendorId,
+			Name:      vendor.Name,
+			Email:     vendor.Email,
+			ImageUrl:  vendor.ImageUrl,
+			Phone:     vendor.Phone.String,
+			Rating:    vendor.Rating,
+			Socials:   vendor.Socials,
+			Expertise: vendor.Expertise,
+		},
 		CountPerRating: countPerRating,
 	}
 

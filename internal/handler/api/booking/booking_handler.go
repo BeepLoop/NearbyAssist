@@ -110,32 +110,25 @@ func (h *bookingHandler) GetBooking(c echo.Context) error {
 			Name: booking.Client,
 		},
 		Cost: booking.Cost,
-		Extras: slices.Collect(utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
-			return response.Extra{
-				Id:          x.Id,
-				Title:       x.Title,
-				Description: x.Description,
-				Price:       x.Price,
-			}
-		})),
+		Extras: slices.AppendSeq(
+			make([]response.Extra, 0),
+			utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
+				return response.Extra{
+					Id:          x.Id,
+					Title:       x.Title,
+					Description: x.Description,
+					Price:       x.Price,
+				}
+			}),
+		),
 		Service: response.ServiceBareInfo{
 			Id:          booking.ServiceId,
 			VendorId:    booking.VendorId,
 			Title:       service.Service.Title,
 			Description: service.Service.Description,
 			Rate:        service.Service.Rate,
-			Tags: slices.Collect(
-				utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
-					return response.Tag{
-						Id:    t.Id,
-						Title: t.Title,
-					}
-				}),
-			),
-			Location: response.Location{
-				Latitude:  service.Service.Latitude,
-				Longitude: service.Service.Longitude,
-			},
+			Tags:        service.Service.Tags,
+			Location:    service.Service.Location,
 		},
 		Status:       string(booking.Status),
 		CreatedAt:    booking.CreatedAt,
@@ -256,32 +249,25 @@ func (h *bookingHandler) GetUserBookingList(c echo.Context) error {
 				Name: t.Client,
 			},
 			Cost: t.Cost,
-			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
-				return response.Extra{
-					Id:          x.Id,
-					Title:       x.Title,
-					Description: x.Description,
-					Price:       x.Price,
-				}
-			})),
+			Extras: slices.AppendSeq(
+				make([]response.Extra, 0),
+				utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+					return response.Extra{
+						Id:          x.Id,
+						Title:       x.Title,
+						Description: x.Description,
+						Price:       x.Price,
+					}
+				}),
+			),
 			Service: response.ServiceBareInfo{
 				Id:          t.ServiceId,
 				VendorId:    t.VendorId,
 				Title:       service.Service.Title,
 				Description: service.Service.Description,
 				Rate:        service.Service.Rate,
-				Tags: slices.Collect(
-					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
-						return response.Tag{
-							Id:    t.Id,
-							Title: t.Title,
-						}
-					}),
-				),
-				Location: response.Location{
-					Latitude:  service.Service.Latitude,
-					Longitude: service.Service.Longitude,
-				},
+				Tags:        service.Service.Tags,
+				Location:    service.Service.Location,
 			},
 			Status:       string(t.Status),
 			CreatedAt:    t.CreatedAt,
@@ -328,32 +314,25 @@ func (h *bookingHandler) GetRecentBookings(c echo.Context) error {
 				Name: t.Client,
 			},
 			Cost: t.Cost,
-			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
-				return response.Extra{
-					Id:          x.Id,
-					Title:       x.Title,
-					Description: x.Description,
-					Price:       x.Price,
-				}
-			})),
+			Extras: slices.AppendSeq(
+				make([]response.Extra, 0),
+				utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+					return response.Extra{
+						Id:          x.Id,
+						Title:       x.Title,
+						Description: x.Description,
+						Price:       x.Price,
+					}
+				}),
+			),
 			Service: response.ServiceBareInfo{
 				Id:          t.ServiceId,
 				VendorId:    t.VendorId,
 				Title:       service.Service.Title,
 				Description: service.Service.Description,
 				Rate:        service.Service.Rate,
-				Tags: slices.Collect(
-					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
-						return response.Tag{
-							Id:    t.Id,
-							Title: t.Title,
-						}
-					}),
-				),
-				Location: response.Location{
-					Latitude:  service.Service.Latitude,
-					Longitude: service.Service.Longitude,
-				},
+				Tags:        service.Service.Tags,
+				Location:    service.Service.Location,
 			},
 			Status:       string(t.Status),
 			CreatedAt:    t.CreatedAt,
@@ -400,32 +379,25 @@ func (h *bookingHandler) GetConfirmedBookings(c echo.Context) error {
 				Name: t.Client,
 			},
 			Cost: t.Cost,
-			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
-				return response.Extra{
-					Id:          x.Id,
-					Title:       x.Title,
-					Description: x.Description,
-					Price:       x.Price,
-				}
-			})),
+			Extras: slices.AppendSeq(
+				make([]response.Extra, 0),
+				utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+					return response.Extra{
+						Id:          x.Id,
+						Title:       x.Title,
+						Description: x.Description,
+						Price:       x.Price,
+					}
+				}),
+			),
 			Service: response.ServiceBareInfo{
 				Id:          t.ServiceId,
 				VendorId:    t.VendorId,
 				Title:       service.Service.Title,
 				Description: service.Service.Description,
 				Rate:        service.Service.Rate,
-				Tags: slices.Collect(
-					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
-						return response.Tag{
-							Id:    t.Id,
-							Title: t.Title,
-						}
-					}),
-				),
-				Location: response.Location{
-					Latitude:  service.Service.Latitude,
-					Longitude: service.Service.Longitude,
-				},
+				Tags:        service.Service.Tags,
+				Location:    service.Service.Location,
 			},
 			Status:       string(t.Status),
 			CreatedAt:    t.CreatedAt,
@@ -472,32 +444,25 @@ func (h *bookingHandler) GetReviewableBookings(c echo.Context) error {
 				Name: t.Client,
 			},
 			Cost: t.Cost,
-			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
-				return response.Extra{
-					Id:          x.Id,
-					Title:       x.Title,
-					Description: x.Description,
-					Price:       x.Price,
-				}
-			})),
+			Extras: slices.AppendSeq(
+				make([]response.Extra, 0),
+				utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+					return response.Extra{
+						Id:          x.Id,
+						Title:       x.Title,
+						Description: x.Description,
+						Price:       x.Price,
+					}
+				}),
+			),
 			Service: response.ServiceBareInfo{
 				Id:          t.ServiceId,
 				VendorId:    t.VendorId,
 				Title:       service.Service.Title,
 				Description: service.Service.Description,
 				Rate:        service.Service.Rate,
-				Tags: slices.Collect(
-					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
-						return response.Tag{
-							Id:    t.Id,
-							Title: t.Title,
-						}
-					}),
-				),
-				Location: response.Location{
-					Latitude:  service.Service.Latitude,
-					Longitude: service.Service.Longitude,
-				},
+				Tags:        service.Service.Tags,
+				Location:    service.Service.Location,
 			},
 			Status:       string(t.Status),
 			CreatedAt:    t.CreatedAt,
@@ -544,32 +509,25 @@ func (h *bookingHandler) GetBookingHistory(c echo.Context) error {
 				Name: t.Client,
 			},
 			Cost: t.Cost,
-			Extras: slices.Collect(utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
-				return response.Extra{
-					Id:          x.Id,
-					Title:       x.Title,
-					Description: x.Description,
-					Price:       x.Price,
-				}
-			})),
+			Extras: slices.AppendSeq(
+				make([]response.Extra, 0),
+				utils.Map(t.Extras, func(x *models.ExtraModel) response.Extra {
+					return response.Extra{
+						Id:          x.Id,
+						Title:       x.Title,
+						Description: x.Description,
+						Price:       x.Price,
+					}
+				}),
+			),
 			Service: response.ServiceBareInfo{
 				Id:          t.ServiceId,
 				VendorId:    t.VendorId,
 				Title:       service.Service.Title,
 				Description: service.Service.Description,
 				Rate:        service.Service.Rate,
-				Tags: slices.Collect(
-					utils.Map(service.Service.Tags, func(t *models.TagModel) response.Tag {
-						return response.Tag{
-							Id:    t.Id,
-							Title: t.Title,
-						}
-					}),
-				),
-				Location: response.Location{
-					Latitude:  service.Service.Latitude,
-					Longitude: service.Service.Longitude,
-				},
+				Tags:        service.Service.Tags,
+				Location:    service.Service.Location,
 			},
 			Status:       string(t.Status),
 			CreatedAt:    t.CreatedAt,

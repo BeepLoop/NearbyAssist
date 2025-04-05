@@ -30,7 +30,7 @@ func NewHandler(service *service_service.Service, save_service *save_service.Ser
 }
 
 func (h *serviceHandler) CreateService(c echo.Context) error {
-	req := new(request.NewServicePayload)
+	req := new(request.AddServicePayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error binding request body",
@@ -40,13 +40,20 @@ func (h *serviceHandler) CreateService(c echo.Context) error {
 
 	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Error validating request body",
+			Message: "Missing required parameters",
 			Error:   err.Error(),
 		})
 	}
 
 	serviceId, err := h.service_service.CreateService(req)
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate service") {
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
+				Message: "Duplicate service listing",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error creating service",
 			Error:   err.Error(),

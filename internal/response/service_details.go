@@ -1,7 +1,5 @@
 package response
 
-import "nearbyassist/internal/models"
-
 type CountPerRating map[string]int
 
 func NewCountPerRating() CountPerRating {
@@ -16,7 +14,7 @@ func NewCountPerRating() CountPerRating {
 }
 
 type DetailedServiceResponse struct {
-	Vendor         *models.VendorModel  `json:"vendor"`
-	Service        *models.ServiceModel `json:"service"`
-	CountPerRating CountPerRating       `json:"countPerRating"`
+	Vendor         Vendor         `json:"vendor"`
+	Service        Service        `json:"service"`
+	CountPerRating CountPerRating `json:"countPerRating"`
 }
