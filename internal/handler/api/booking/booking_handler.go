@@ -64,8 +64,67 @@ func (h *bookingHandler) CreateBooking(c echo.Context) error {
 		})
 	}
 
+	booking, err := h.bookingService.GetBooking(bookingId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Failed to retrieve booking information",
+			Error:   err.Error(),
+		})
+	}
+
+	service, err := h.serviceService.GetService(booking.ServiceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Could not get service information of booking",
+			Error:   err.Error(),
+		})
+	}
+
+	response := response.Booking{
+		Id: booking.Id,
+		Vendor: response.User{
+			Id:   booking.VendorId,
+			Name: booking.Vendor,
+		},
+		Client: response.User{
+			Id:   booking.ClientId,
+			Name: booking.Client,
+		},
+		Cost: booking.Cost,
+		Extras: slices.AppendSeq(
+			make([]response.Extra, 0),
+			utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
+				return response.Extra{
+					Id:          x.Id,
+					Title:       x.Title,
+					Description: x.Description,
+					Price:       x.Price,
+				}
+			}),
+		),
+		Service: response.ServiceBareInfo{
+			Id:          booking.ServiceId,
+			VendorId:    booking.VendorId,
+			Title:       service.Service.Title,
+			Description: service.Service.Description,
+			Rate:        service.Service.Rate,
+			Tags:        service.Service.Tags,
+			Location:    service.Service.Location,
+		},
+		Status:       string(booking.Status),
+		CreatedAt:    booking.CreatedAt,
+		UpdatedAt:    booking.UpdatedAt,
+		ScheduledAt:  booking.ScheduledAt.String,
+		CancelReason: booking.CancelReason.String,
+		QRSignature: utils.Must(h.qrService.SignData(&request.QRSignatureInput{
+			ClientID:  booking.ClientId,
+			VendorID:  booking.VendorId,
+			BookingID: booking.Id,
+		})),
+	}
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"booking": bookingId,
+		"booking": response,
 	})
 }
 
