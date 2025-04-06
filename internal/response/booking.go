@@ -12,6 +12,7 @@ type Booking struct {
 	UpdatedAt    string          `json:"updatedAt"`
 	ScheduledAt  string          `json:"scheduledAt"`
 	CancelReason string          `json:"cancelReason"`
+	QRSignature  string          `json:"qrSignature"`
 }
 
 type User struct {

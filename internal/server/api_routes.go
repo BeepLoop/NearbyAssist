@@ -56,6 +56,7 @@ import (
 	userauth_service "nearbyassist/internal/service/user_auth"
 	vendor_service "nearbyassist/internal/service/vendor"
 	verification_service "nearbyassist/internal/service/verification"
+	"nearbyassist/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -231,8 +232,9 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.Encrypt,
 			s.JWT,
 		)
+		qrService := qr_service.NewService(utils.Must((s.Encrypt.GetKey())))
 
-		handler := booking.NewHandler(bookingService, serviceService, userService)
+		handler := booking.NewHandler(bookingService, serviceService, userService, qrService)
 
 		bookingRoute.POST("", handler.CreateBooking)
 		bookingRoute.GET("/:bookingId", handler.GetBooking)
@@ -338,13 +340,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		qrRoute.Use(middleware.CheckAuth(s.JWT))
 
-		key, err := s.Encrypt.GetKey()
-		if err != nil {
-			// NOTE: This should not happen unless encryption key is not properly set
-			panic(err.Error())
-		}
-
-		qrService := qr_service.NewService(key)
+		qrService := qr_service.NewService(utils.Must(s.Encrypt.GetKey()))
 		handler := qr.NewHandler(qrService)
 
 		qrRoute.POST("/generateSignature", handler.SignBooking)

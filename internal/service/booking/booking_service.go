@@ -395,13 +395,13 @@ func (s *Service) GetRecentBookings(bearerToken string) ([]*models.BookingModel,
 	return bookings, nil
 }
 
-func (s *Service) GetConfirmedBookings(bearerToken string) ([]*models.BookingModel, error) {
+func (s *Service) GetConfirmedBookings(bearerToken, filter string) ([]*models.BookingModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return nil, err
 	}
 
-	bookings, err := s.bookingStore.GetConfirmed(userId)
+	bookings, err := s.bookingStore.GetConfirmed(userId, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -447,13 +447,13 @@ func (s *Service) GetReviewableBookings(bearerToken string) ([]*models.BookingMo
 	return reviewables, nil
 }
 
-func (s *Service) GetBookingHistory(bearerToken string) ([]*models.BookingModel, error) {
+func (s *Service) GetBookingHistory(bearerToken, filter string) ([]*models.BookingModel, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return nil, err
 	}
 
-	bookings, err := s.bookingStore.GetHistory(userId)
+	bookings, err := s.bookingStore.GetHistory(userId, filter)
 	if err != nil {
 		return nil, err
 	}

@@ -15,9 +15,9 @@ type BookingRepository interface {
 	GetBookingReceived(id string) ([]*models.BookingModel, error)
 
 	GetRecent(id string) ([]*models.BookingModel, error)
-	GetConfirmed(id string) ([]*models.BookingModel, error)
+	GetConfirmed(id, filter string) ([]*models.BookingModel, error)
 
-	GetHistory(id string) ([]*models.BookingModel, error)
+	GetHistory(id, filter string) ([]*models.BookingModel, error)
 	GetReviewableBookings(userId string) ([]*models.BookingModel, error)
 
 	Cancel(bookingId, reason string) error

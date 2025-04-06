@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
+	"slices"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -471,11 +472,16 @@ func (s *MysqlBookingRepository) GetRecent(userId string) ([]*models.BookingMode
 	return bookings, nil
 }
 
-func (s *MysqlBookingRepository) GetConfirmed(id string) ([]*models.BookingModel, error) {
+func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.BookingModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	bookingQuery := `
+	allowedFilters := []string{"vendor", "client"}
+	if !slices.Contains(allowedFilters, filter) {
+		return nil, errors.New("invalid filter")
+	}
+
+	queryForVendor := `
         SELECT
             t.id,
             t.vendorId,
@@ -495,10 +501,38 @@ func (s *MysqlBookingRepository) GetConfirmed(id string) ([]*models.BookingModel
             t.updatedAt DESC
     `
 
+	queryForClient := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
+            Booking t
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            t.clientId = ? AND t.status = 'confirmed'
+        ORDER BY
+            t.updatedAt DESC
+    `
+
 	bookings := make([]*models.BookingModel, 0)
-	err := s.db.SelectContext(ctx, &bookings, bookingQuery, id)
-	if err != nil {
-		return nil, err
+	switch filter {
+	case "vendor":
+		err := s.db.SelectContext(ctx, &bookings, queryForVendor, id)
+		if err != nil {
+			return nil, err
+		}
+	case "client":
+		err := s.db.SelectContext(ctx, &bookings, queryForClient, id)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	getService := `
@@ -557,11 +591,16 @@ func (s *MysqlBookingRepository) GetConfirmed(id string) ([]*models.BookingModel
 	return bookings, nil
 }
 
-func (s *MysqlBookingRepository) GetHistory(id string) ([]*models.BookingModel, error) {
+func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.BookingModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	bookingQuery := `
+	allowedFilters := []string{"vendor", "client"}
+	if !slices.Contains(allowedFilters, filter) {
+		return nil, errors.New("invalid filter")
+	}
+
+	queryForVendor := `
         SELECT
             t.id,
             t.vendorId,
@@ -576,15 +615,43 @@ func (s *MysqlBookingRepository) GetHistory(id string) ([]*models.BookingModel, 
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            (t.vendorId = ? OR t.clientId = ?) AND (t.status = 'done' OR t.status = 'cancelled')
+            t.vendorId = ? AND (t.status = 'done' OR t.status = 'cancelled')
+        ORDER BY
+            t.updatedAt DESC
+    `
+
+	queryForClient := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            t.cost,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
+            Booking t
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            t.clientId = ? AND (t.status = 'done' OR t.status = 'cancelled')
         ORDER BY
             t.updatedAt DESC
     `
 
 	bookings := make([]*models.BookingModel, 0)
-	err := s.db.SelectContext(ctx, &bookings, bookingQuery, id, id)
-	if err != nil {
-		return nil, err
+	switch filter {
+	case "vendor":
+		err := s.db.SelectContext(ctx, &bookings, queryForVendor, id)
+		if err != nil {
+			return nil, err
+		}
+	case "client":
+		err := s.db.SelectContext(ctx, &bookings, queryForClient, id)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	getService := `
