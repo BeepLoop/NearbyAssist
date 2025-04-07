@@ -108,15 +108,6 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 		}
 	}
 
-	for _, image := range serviceDetail.Service.Images {
-		signedURL, err := h.resourceService.SignURLWithDefaultDuration(image.Url)
-		if err != nil {
-			c.Logger().Warnf("Error generating service image url: %s\n", err.Error())
-			continue
-		}
-		image.Url = signedURL
-	}
-
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"detail": serviceDetail,
 	})

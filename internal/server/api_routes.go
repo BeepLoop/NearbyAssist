@@ -361,11 +361,11 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 	resourceRoute := v1.Group("/resource")
 	{
-		// NOTE: This is public
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		handler := resource.NewHandler(resourceService)
 
 		resourceRoute.GET("/:path", handler.GetPrivateFile)
+		resourceRoute.GET("/public/:path", handler.GetPublicFile)
 	}
 
 	websocketRoute := v1.Group("/ws")

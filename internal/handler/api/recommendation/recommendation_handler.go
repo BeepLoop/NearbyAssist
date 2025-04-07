@@ -4,7 +4,6 @@ import (
 	"nearbyassist/internal/models"
 	recommendation_service "nearbyassist/internal/service/recommendation"
 	resource_service "nearbyassist/internal/service/resource"
-	"nearbyassist/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -57,15 +56,6 @@ func (h *handler) GetRecommendations(c echo.Context) error {
 			Message: "Error retrieving recommendations",
 			Error:   err.Error(),
 		})
-	}
-
-	for _, service := range recommendation.Services {
-		if service.Thumbnail == "" {
-			continue
-		}
-
-		signedURL := utils.Must(h.resourceService.SignURLWithDefaultDuration(service.Thumbnail))
-		service.Thumbnail = signedURL
 	}
 
 	return c.JSON(http.StatusOK, recommendation)

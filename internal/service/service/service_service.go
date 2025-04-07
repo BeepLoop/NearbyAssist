@@ -253,13 +253,8 @@ func (s *Service) AddImage(bearerToken, serviceId string, files []*multipart.Fil
 		return nil, err
 	}
 
-	cipher, err := s.encrypt.EncryptFile(bytes)
-	if err != nil {
-		return nil, err
-	}
-
 	fileData := fs.File{
-		Data:     cipher,
+		Data:     bytes,
 		Category: fs.SERVICE_PHOTO_DIR,
 	}
 	url, err := s.fs.SaveFile(fileData)

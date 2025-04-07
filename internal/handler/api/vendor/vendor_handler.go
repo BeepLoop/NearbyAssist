@@ -77,12 +77,6 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		})
 	}
 
-	for _, service := range services {
-		for _, image := range service.Images {
-			image.Url = utils.Must(h.resourceService.SignURLWithDefaultDuration(image.Url))
-		}
-	}
-
 	response := response.VendorServices{
 		Vendor: response.Vendor{
 			Id:        vendor.VendorId,

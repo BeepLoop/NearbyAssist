@@ -19,6 +19,25 @@ func NewHandler(service *resource_service.Service) *resourceHandler {
 	}
 }
 
+func (h *resourceHandler) GetPublicFile(c echo.Context) error {
+	path := c.Param("path")
+
+	file, err := h.resourceService.GetRawFile(path)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error occurred retrieving the requested file",
+			Error:   err.Error(),
+		})
+	}
+
+	contentType, err := h.resourceService.GetPathContentType(path)
+	if err != nil || contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
+	return c.Blob(http.StatusOK, contentType, file)
+}
+
 func (h *resourceHandler) GetPrivateFile(c echo.Context) error {
 	params := c.QueryParams()
 	if !params.Has("path") || !params.Has("expiry") || !params.Has("signature") {
