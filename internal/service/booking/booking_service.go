@@ -464,6 +464,11 @@ func (s *Service) GetBookingHistory(bearerToken, filter string) ([]*models.Booki
 		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
+		if booking.Status == models.BOOKING_STATUS_CANCELLED {
+			booking.CancelReason.String = utils.Must(s.encrypt.DecryptString(booking.CancelReason.String))
+			booking.CancelReason.Valid = true
+		}
+
 		for _, extra := range booking.Extras {
 			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
 			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))

@@ -227,6 +227,9 @@ func (s *MysqlBookingRepository) GetBookingSent(id string) ([]*models.BookingMod
             t.serviceId,
             t.status,
             t.cost,
+            t.createdAt,
+            t.updatedAt,
+            t.scheduledAt,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -312,6 +315,9 @@ func (s *MysqlBookingRepository) GetBookingReceived(id string) ([]*models.Bookin
             t.serviceId,
             t.status,
             t.cost,
+            t.createdAt,
+            t.updatedAt,
+            t.scheduledAt,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -489,6 +495,9 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
             t.serviceId,
             t.status,
             t.cost,
+            t.createdAt,
+            t.updatedAt,
+            t.scheduledAt,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -509,6 +518,9 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
             t.serviceId,
             t.status,
             t.cost,
+            t.createdAt,
+            t.updatedAt,
+            t.scheduledAt,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -608,6 +620,10 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.serviceId,
             t.status,
             t.cost,
+            t.createdAt,
+            t.updatedAt,
+            t.scheduledAt,
+            t.cancelReason,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -628,6 +644,10 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.serviceId,
             t.status,
             t.cost,
+            t.createdAt,
+            t.updatedAt,
+            t.scheduledAt,
+            t.cancelReason,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -722,6 +742,9 @@ func (s *MysqlBookingRepository) GetReviewableBookings(userId string) ([]*models
             t.serviceId,
             t.status,
             t.cost,
+            t.createdAt,
+            t.updatedAt,
+            t.scheduledAt,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
