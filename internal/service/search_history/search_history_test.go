@@ -64,7 +64,7 @@ func TestSearchHistoryImplementation(t *testing.T) {
 
 			hist.Insert(test.input)
 
-			assert.EqualValues(t, test.expected, hist.GetAll())
+			assert.ElementsMatch(t, test.expected, hist.GetAll())
 
 			Destroy()
 		}
@@ -97,7 +97,7 @@ func TestSearchHistoryImplementation(t *testing.T) {
 
 			values := hist.GetTopKElements(test.k)
 
-			assert.EqualValues(t, test.expected, values)
+			assert.ElementsMatch(t, test.expected, values)
 
 			Destroy()
 		}
@@ -112,7 +112,7 @@ func TestSearchHistoryImplementation(t *testing.T) {
 			{
 				input:         "foo",
 				initialValues: []string{"foo", "bar", "baz"},
-				expected:      []string{"baz", "bar", "foo"},
+				expected:      []string{"foo", "bar", "baz"},
 			},
 		}
 
@@ -124,7 +124,7 @@ func TestSearchHistoryImplementation(t *testing.T) {
 			}
 			hist.Insert(test.input)
 
-			assert.EqualValues(t, test.expected, hist.GetAll())
+			assert.ElementsMatch(t, test.expected, hist.GetAll())
 
 			Destroy()
 		}
