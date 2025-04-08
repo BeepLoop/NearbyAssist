@@ -17,7 +17,7 @@ func NewMysqlNotificationRepository(db *sqlx.DB) *MysqlNotificationRepository {
 	return &MysqlNotificationRepository{db: db}
 }
 
-func (s *MysqlNotificationRepository) Create(data *models.NotificationModel) error {
+func (s *MysqlNotificationRepository) Create(data *models.NotificationModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -30,14 +30,14 @@ func (s *MysqlNotificationRepository) Create(data *models.NotificationModel) err
             (:id, :recipient, :type, :title, :content)
     `
 	if _, err := s.db.NamedExecContext(ctx, insertQuery, data); err != nil {
-		return err
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return nil
+	return data.Id, nil
 }
 
 func (s *MysqlNotificationRepository) FindById(id string) (*models.NotificationModel, error) {

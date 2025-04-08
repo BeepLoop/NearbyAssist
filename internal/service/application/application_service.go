@@ -182,8 +182,10 @@ func (s *Service) AcceptRequest(applicationId string) error {
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if err := s.notifStore.Create(encryptedNotification); err != nil {
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
+	} else {
+		notification.Id = notifId
 	}
 
 	oneSignal := notification_service.MustGetInstance()
@@ -245,8 +247,10 @@ func (s *Service) RejectRequest(id, reason string) error {
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if err := s.notifStore.Create(encryptedNotification); err != nil {
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
+	} else {
+		notification.Id = notifId
 	}
 
 	oneSignal := notification_service.MustGetInstance()

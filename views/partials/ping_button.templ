@@ -1,0 +1,12 @@
+package partials
+
+import "fmt"
+
+templ PingButton(userId string) {
+	<form action={ templ.URL(fmt.Sprintf("/dev/ping/%s", userId)) } method="get">
+		<button
+			type="submit"
+			class="bg-primary text-xs text-white p-2 rounded-sm cursor-pointer hover:opacity-75"
+		>Ping</button>
+	</form>
+}

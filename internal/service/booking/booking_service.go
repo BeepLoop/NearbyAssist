@@ -77,8 +77,10 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if err := s.notifStore.Create(encryptedNotification); err != nil {
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
 		return "", err
+	} else {
+		notification.Id = notifId
 	}
 
 	oneSignal := notification_service.MustGetInstance()
@@ -167,8 +169,10 @@ func (s *Service) CancelBooking(bearerToken string, req *request.CancelRequestPa
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if err := s.notifStore.Create(encryptedNotification); err != nil {
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
+	} else {
+		notification.Id = notifId
 	}
 
 	oneSignal := notification_service.MustGetInstance()
@@ -232,8 +236,10 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if err := s.notifStore.Create(encryptedNotification); err != nil {
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
+	} else {
+		notification.Id = notifId
 	}
 
 	oneSignal := notification_service.MustGetInstance()
@@ -297,8 +303,10 @@ func (s *Service) RejectBookingRequest(bearerToken string, req *request.RejectRe
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if err := s.notifStore.Create(encryptedNotification); err != nil {
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
+	} else {
+		notification.Id = notifId
 	}
 
 	oneSignal := notification_service.MustGetInstance()

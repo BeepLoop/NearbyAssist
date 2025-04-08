@@ -168,8 +168,10 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if err := s.notifStore.Create(encryptedNotification); err != nil {
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
+	} else {
+		notification.Id = notifId
 	}
 
 	notificationHeading := "Account Restricted!"
@@ -217,8 +219,10 @@ func (s *Service) UnrestrictUser(userId string) error {
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
 
-	if err := s.notifStore.Create(encryptedNotification); err != nil {
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
 		return err
+	} else {
+		notification.Id = notifId
 	}
 
 	notificationHeading := "Account Restriction Lifted!"
