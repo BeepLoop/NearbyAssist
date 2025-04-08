@@ -1,7 +1,9 @@
 package searchhistory
 
+import "slices"
+
 var (
-	Instance *searchHistory
+	instance *searchHistory
 )
 
 const (
@@ -13,29 +15,39 @@ type searchHistory struct {
 	items    []string
 }
 
+/*
+Returns an instance of this. If instance is nil, creates an instance
+then return it.
+*/
 func New() *searchHistory {
-	if Instance != nil {
-		return Instance
+	if instance != nil {
+		return instance
 	}
 
-	Instance = &searchHistory{
+	instance = &searchHistory{
 		capacity: DEFAULT_CAPACITY,
 		items:    make([]string, 0),
 	}
 
-	return Instance
+	return instance
+}
+
+func Destroy() {
+	if instance != nil {
+		instance = nil
+	}
 }
 
 func (h *searchHistory) GetAll() []string {
 	return h.items
 }
 
-func (h *searchHistory) GetCount(count int) []string {
-	if count > len(h.items) {
-		count = len(h.items)
+func (h *searchHistory) GetTopKElements(k int) []string {
+	if k > len(h.items) {
+		k = len(h.items)
 	}
 
-	return h.items[:count]
+	return h.items[:k]
 }
 
 func (h *searchHistory) GetSize() int {
@@ -43,6 +55,10 @@ func (h *searchHistory) GetSize() int {
 }
 
 func (h *searchHistory) Insert(item string) {
+	if slices.Contains(h.items, item) {
+		return
+	}
+
 	size := len(h.items)
 
 	if size >= h.capacity {
