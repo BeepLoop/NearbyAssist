@@ -429,7 +429,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 
 		for _, tag := range tags {
 			cleaned := strings.ReplaceAll(tag, "_", " ")
-			searchhistory.Instance.Insert(cleaned)
+			searchhistory.New().Insert(cleaned)
 		}
 	}
 

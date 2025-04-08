@@ -61,7 +61,7 @@ func (s *Service) GetRecommendations(limit, offset int) (*response.Recommendatio
 	}
 
 	recommendation := &response.Recommendation{
-		Searches: searchhistory.Instance.GetAll(),
+		Searches: searchhistory.New().GetAll(),
 		Services: recommendServices,
 	}
 

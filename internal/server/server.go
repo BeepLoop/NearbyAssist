@@ -7,6 +7,7 @@ import (
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/service/mailer"
 	"nearbyassist/internal/service/route_engine"
+	searchhistory "nearbyassist/internal/service/search_history"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
@@ -86,6 +87,7 @@ func (s *Server) Start() error {
 	if err := s.Echo.Start(":" + s.Port); err != nil {
 		s.LOG_FILE.Close()
 		s.WS.Stop()
+		searchhistory.Destroy()
 		return err
 	}
 
