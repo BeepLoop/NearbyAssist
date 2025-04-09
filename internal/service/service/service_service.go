@@ -97,36 +97,24 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 		return nil, err
 	}
 
-	service.Title = utils.Must(s.encrypt.DecryptString(service.Title))
-	service.Description = utils.Must(s.encrypt.DecryptString(service.Description))
-
-	for _, extra := range service.Extras {
-		extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-		extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
-	}
-
 	reviews, err := s.serviceStore.GetReviews(serviceId)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, review := range reviews {
-		review.Text = utils.Must(s.encrypt.DecryptString(review.Text))
-	}
-
-	countPerRating := response.NewCountPerRating()
+	ratings := make([]int, 5)
 	for _, review := range reviews {
 		switch review.Rating {
 		case 5:
-			countPerRating["five"]++
+			ratings[4]++
 		case 4:
-			countPerRating["four"]++
+			ratings[3]++
 		case 3:
-			countPerRating["three"]++
+			ratings[2]++
 		case 2:
-			countPerRating["two"]++
+			ratings[1]++
 		case 1:
-			countPerRating["one"]++
+			ratings[0]++
 		}
 	}
 
@@ -135,8 +123,6 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 		return nil, err
 	}
 
-	vendor.Name = utils.Must(s.encrypt.DecryptString(vendor.Name))
-	vendor.Email = utils.Must(s.encrypt.DecryptString(vendor.Email))
 	if vendor.Phone.Valid {
 		vendor.Phone.String = utils.Must(s.encrypt.DecryptString(vendor.Phone.String))
 	}
@@ -145,8 +131,8 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 		Service: response.Service{
 			Id:          service.Id,
 			VendorId:    service.VendorId,
-			Title:       service.Title,
-			Description: service.Description,
+			Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
+			Description: utils.Must(s.encrypt.DecryptString(service.Description)),
 			Rate:        service.Rate,
 			Tags: slices.AppendSeq(
 				make([]response.Tag, 0),
@@ -159,8 +145,8 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 				utils.Map(service.Extras, func(x *models.ExtraModel) response.Extra {
 					return response.Extra{
 						Id:          x.Id,
-						Title:       x.Title,
-						Description: x.Description,
+						Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
+						Description: utils.Must(s.encrypt.DecryptString(x.Description)),
 						Price:       x.Price,
 					}
 				}),
@@ -178,15 +164,29 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 		},
 		Vendor: response.Vendor{
 			Id:        vendor.VendorId,
-			Name:      vendor.Name,
-			Email:     vendor.Email,
+			Name:      utils.Must(s.encrypt.DecryptString(vendor.Name)),
+			Email:     utils.Must(s.encrypt.DecryptString(vendor.Email)),
 			ImageUrl:  vendor.ImageUrl,
 			Phone:     vendor.Phone.String,
 			Rating:    vendor.Rating,
 			Socials:   vendor.Socials,
 			Expertise: vendor.Expertise,
 		},
-		CountPerRating: countPerRating,
+		Reviews: slices.AppendSeq(
+			make([]response.Review, 0),
+			utils.Map(reviews, func(review *models.ReviewModel) response.Review {
+				return response.Review{
+					Id:               review.Id,
+					BookingId:        review.BookingId,
+					Rating:           review.Rating,
+					Text:             utils.Must(s.encrypt.DecryptString(review.Text)),
+					CreatedAt:        review.CreatedAt,
+					RevieweeName:     utils.Must(s.encrypt.DecryptString(review.Reviewee.Name)),
+					RevieweeImageUrl: review.Reviewee.ImageUrl,
+				}
+			}),
+		),
+		Ratings: ratings,
 	}
 
 	return response, nil

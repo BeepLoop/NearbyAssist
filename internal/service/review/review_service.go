@@ -59,9 +59,10 @@ func (s *Service) CreateReview(bearerToken string, req *request.NewReviewPayload
 	}
 
 	newReview := &models.ReviewModel{
-		BookingId: req.BookingId,
-		Rating:    req.Rating,
-		Text:      utils.Must(s.encrypt.EncryptString(req.Text)),
+		RevieweeId: userId,
+		BookingId:  req.BookingId,
+		Rating:     req.Rating,
+		Text:       utils.Must(s.encrypt.EncryptString(req.Text)),
 	}
 
 	reviewId, err := s.reviewStore.Create(newReview)
