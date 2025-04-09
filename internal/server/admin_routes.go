@@ -14,6 +14,7 @@ import (
 	"nearbyassist/internal/middleware"
 	admin_repo "nearbyassist/internal/repository/admin"
 	application_repo "nearbyassist/internal/repository/application"
+	booking_repo "nearbyassist/internal/repository/booking"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
 	expertise_repo "nearbyassist/internal/repository/expertise"
@@ -192,8 +193,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
 
-		managementService := user_management_service.NewService(userStore, notifStore, s.WS, s.Encrypt, s.Hash)
+		managementService := user_management_service.NewService(userStore, vendorStore, notifStore, bookingStore, serviceStore, s.WS, s.Encrypt, s.Hash)
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 		vendorService := vendor_service.NewService(vendorStore, serviceStore, s.Encrypt, s.Hash)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
@@ -201,9 +203,9 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		managementHandler := userManagement.NewHandler(managementService, userService, vendorService, resourceService)
 
 		userManagementRoute.GET("/users", managementHandler.GetUserList)
-		userManagementRoute.GET("/users/:userId", managementHandler.ViewUserAccount)
+		userManagementRoute.GET("/users/:userId", managementHandler.GetUser)
 		userManagementRoute.GET("/vendors", managementHandler.GetVendorList)
-		userManagementRoute.GET("/vendors/:userId", managementHandler.ViewVendorAccount)
+		userManagementRoute.GET("/vendors/:userId", managementHandler.GetVendor)
 		userManagementRoute.POST("/ban/:userId", managementHandler.BanUser)
 		userManagementRoute.POST("/unban/:userId", managementHandler.UnbanUser)
 		userManagementRoute.POST("/restrict/:userId", managementHandler.RestrictUser)

@@ -220,7 +220,9 @@ func (s *MysqlServiceRepository) FindById(serviceId string) (*models.ServiceMode
             description,
             format(rate, 2) as rate,
             latitude, 
-            longitude
+            longitude,
+            createdAt,
+            updatedAt
         FROM 
             Service
         WHERE

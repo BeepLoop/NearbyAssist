@@ -3,6 +3,10 @@ package utils
 import "time"
 
 func FormatDate(date string) string {
+	if date == "" {
+		return ""
+	}
+
 	layout := "2006-01-02T15:04:05Z"
 	t, err := time.Parse(layout, date)
 	if err != nil {

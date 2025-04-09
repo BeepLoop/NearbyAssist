@@ -2,13 +2,13 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ UserAccountDetail(user models.AdminModel, data models.UserAccountPageData, flash string) {
+templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flash string) {
 	@layout.Layout(user) {
 		<!-- toasy component -->
 		@templ.JSONScript("flash", flash)
@@ -21,42 +21,36 @@ templ UserAccountDetail(user models.AdminModel, data models.UserAccountPageData,
 			<div class="flex justify-between">
 				<div class="flex gap-4">
 					<img
-						src={ data.ProfileURL }
+						src={ data.User.ImageURL }
 						alt="profile"
 						class="w-48 h-48 aspect-square outline-1 outline-pale-gray"
 					/>
 					<div class="grid gap-2">
 						<!-- name & email -->
 						<div>
-							<h1 class="text-xl font-medium text-neutral-dark">{ data.Name }</h1>
-							<h2 class="text-neutral-gray">{ data.Email }</h2>
+							<h1 class="text-xl font-medium text-neutral-dark">{ data.User.Name }</h1>
+							<h2 class="text-neutral-gray">{ data.User.Email }</h2>
 						</div>
 						<!-- id & created at -->
 						<div>
 							<span class="flex gap-2">
 								<p class="font-medium text-neutral-dark">User ID: </p>
-								<p class="text-neutral-gray">{ data.Id }</p>
+								<p class="text-neutral-gray">{ data.User.Id }</p>
 							</span>
 							<span class="flex gap-2">
 								<p class="font-medium text-neutral-dark">User Since: </p>
-								<p class="text-neutral-gray">{ data.CreatedAt }</p>
+								<p class="text-neutral-gray">{ data.User.CreatedAt }</p>
 							</span>
 							<span class="flex gap-2">
 								<p class="font-medium text-neutral-dark">Date Verified: </p>
-								<p class="text-neutral-gray">
-									if data.VerifiedAt == "" {
-										-
-									} else {
-										{ data.VerifiedAt }
-									}
-								</p>
+								<p class="text-neutral-gray">{ data.User.DateVerified }</p>
 							</span>
 						</div>
 						<!-- account status -->
 						<div class="mt-3">
 							<p class="font-medium text-xs">Account Status</p>
 							<div class="mt-2 flex gap-2">
-								if data.Verified {
+								if data.User.DateVerified != "" {
 									@partials.SoftBadgeSuccess("Verified")
 								} else {
 									@partials.SoftBadgeDanger("Unverified")
@@ -66,25 +60,17 @@ templ UserAccountDetail(user models.AdminModel, data models.UserAccountPageData,
 					</div>
 				</div>
 				<div class="flex gap-2">
-					@actions(data)
+					@actions(data.User)
 				</div>
 			</div>
 			<!-- stats -->
-			<div class="mt-8 grid grid-cols-4 gap-4">
-				<div class="outline-1 outline-pale-gray rounded-sm p-2">
-					<!-- Sent Requests -->
-					if data.Stat.Sent.CurrentMonth >= data.Stat.Sent.LastMonth {
-						@partials.Increasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageIncrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
-					} else {
-						@partials.Decreasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageDecrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
-					}
-				</div>
-			</div>
+			<div class="mt-8 grid grid-cols-4 gap-4"></div>
+			@partials.PrintJSON(data)
 		</div>
 	}
 }
 
-templ actions(data models.UserAccountPageData) {
+templ actions(user dto.User) {
 	<!-- Dropdown Container -->
 	<div
 		x-data="{ userActionsOpen: false }"
@@ -136,15 +122,15 @@ templ actions(data models.UserAccountPageData) {
 				class="outline-1 outline-pale-gray rounded-sm shadow-xl"
 			>
 				<div class="p-1.5 grid gap-1.5">
-					if data.Banned {
-						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", data.Id), data.Banned)
+					if user.IsBanned {
+						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", user.Id), user.IsBanned)
 					} else {
-						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/user-management/ban/%s", data.Id), data.Banned)
+						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/user-management/ban/%s", user.Id), user.IsBanned)
 					}
-					if data.Restricted {
-						@partials.UnrestrictUser(fmt.Sprintf("/admin/user-management/unrestrict/%s", data.Id))
+					if user.IsRestricted {
+						@partials.UnrestrictUser(fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id))
 					} else {
-						@partials.RestrictUser(fmt.Sprintf("/admin/user-management/restrict/%s", data.Id))
+						@partials.RestrictUser(fmt.Sprintf("/admin/user-management/restrict/%s", user.Id))
 					}
 				</div>
 			</div>

@@ -2,7 +2,9 @@ package vendor_repo
 
 import (
 	"context"
+	"database/sql"
 	"nearbyassist/internal/models"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -179,10 +181,22 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 		return nil, err
 	}
 
+	if _, date, err := s.IsVerified(id); err != nil {
+		return nil, err
+	} else {
+		vendor.VerifiedAt = date
+	}
+
 	if restricted, err := s.IsRestricted(vendor.VendorId); err != nil {
 		return nil, err
 	} else {
 		vendor.Restricted = restricted
+	}
+
+	if banned, err := s.IsBanned(vendor.VendorId); err != nil {
+		return nil, err
+	} else {
+		vendor.Banned = banned
 	}
 
 	expertiseQuery := `
@@ -216,6 +230,19 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	}
 	vendor.Socials = socials
 
+	getAddressQuery := `
+        SELECT
+            u.address
+        FROM
+            User u
+            JOIN Vendor v ON u.id = v.vendorId
+        WHERE
+            v.vendorId = ?
+    `
+	if err := s.db.GetContext(ctx, &vendor.Address, getAddressQuery, id); err != nil {
+		return nil, err
+	}
+
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
@@ -235,7 +262,9 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
             description,
             format(rate, 2) as rate,
             latitude, 
-            longitude
+            longitude,
+            createdAt,
+            updatedAt
         FROM 
             Service
         WHERE
@@ -308,6 +337,31 @@ func (s *MysqlVendorRepository) GetTags(serviceId string) ([]*models.TagModel, e
 	return tags, nil
 }
 
+func (s *MysqlVendorRepository) IsVerified(userId string) (bool, string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT updatedAt FROM IdentityVerification WHERE userId = ? AND status = 'approved' LIMIT 1"
+	var updatedAt sql.NullString
+	if err := s.db.GetContext(ctx, &updatedAt, query, userId); err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return false, "", nil
+		}
+
+		return false, "", err
+	}
+
+	if !updatedAt.Valid {
+		return false, "", nil
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, "", context.DeadlineExceeded
+	}
+
+	return true, updatedAt.String, nil
+}
+
 func (s *MysqlVendorRepository) IsRestricted(userId string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -331,6 +385,31 @@ func (s *MysqlVendorRepository) IsRestricted(userId string) (bool, error) {
 	}
 
 	return isRestricted, nil
+}
+
+func (s *MysqlVendorRepository) IsBanned(userId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            CASE
+                WHEN EXISTS (SELECT 1 FROM Ban WHERE userId = ?)
+                THEN 1
+                ELSE 0
+            END AS user_exists;
+    `
+
+	isBanned := false
+	if err := s.db.GetContext(ctx, &isBanned, query, userId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return isBanned, nil
 }
 
 func (s *MysqlVendorRepository) AddExpertise(userId, expertiseId, supportingImageId string) error {

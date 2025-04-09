@@ -102,6 +102,10 @@ func (e *AES) Decrypt(source []byte) ([]byte, error) {
 }
 
 func (e *AES) EncryptString(plaintext string) (string, error) {
+	if plaintext == "" {
+		return "", errors.New("INVALID_INPUT")
+	}
+
 	bytes := []byte(plaintext)
 
 	encrypted, err := e.Encrypt(bytes)
@@ -113,6 +117,10 @@ func (e *AES) EncryptString(plaintext string) (string, error) {
 }
 
 func (e *AES) DecryptString(encrypted string) (string, error) {
+	if encrypted == "" {
+		return "", errors.New("INVALID_INPUT")
+	}
+
 	bytes, err := hex.DecodeString(encrypted)
 	if err != nil {
 		return "", err

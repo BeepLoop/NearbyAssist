@@ -2,13 +2,14 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ VendorAccountDetail(user models.AdminModel, data models.UserAccountPageData, flash string) {
+templ VendorAccountDetail(user models.AdminModel, data dto.VendorAccountDetail, flash string) {
 	@layout.Layout(user) {
 		<!-- toasy component -->
 		@templ.JSONScript("flash", flash)
@@ -21,42 +22,36 @@ templ VendorAccountDetail(user models.AdminModel, data models.UserAccountPageDat
 			<div class="flex justify-between">
 				<div class="flex gap-4">
 					<img
-						src={ data.ProfileURL }
+						src={ data.Vendor.ImageURL }
 						alt="profile"
 						class="aspect-square h-48 w-48 outline-1 outline-pale-gray"
 					/>
 					<div class="grid gap-2">
 						<!-- name & email -->
 						<div>
-							<h1 class="text-xl font-medium text-neutral-dark">{ data.Name }</h1>
-							<h2 class="text-neutral-gray">{ data.Email }</h2>
+							<h1 class="text-xl font-medium text-neutral-dark">{ data.Vendor.Name }</h1>
+							<h2 class="text-neutral-gray">{ data.Vendor.Email }</h2>
 						</div>
 						<!-- id & created at -->
 						<div>
 							<span class="flex gap-2">
 								<p class="font-medium text-neutral-dark">User ID: </p>
-								<p class="text-neutral-gray">{ data.Id }</p>
+								<p class="text-neutral-gray">{ data.Vendor.Id }</p>
 							</span>
 							<span class="flex gap-2">
 								<p class="font-medium text-neutral-dark">User Since: </p>
-								<p class="text-neutral-gray">{ data.CreatedAt }</p>
+								<p class="text-neutral-gray">{ data.Vendor.JoinedAt }</p>
 							</span>
 							<span class="flex gap-2">
 								<p class="font-medium text-neutral-dark">Date Verified: </p>
-								<p class="text-neutral-gray">
-									if data.VerifiedAt == "" {
-										-
-									} else {
-										{ data.VerifiedAt }
-									}
-								</p>
+								<p class="text-neutral-gray">{ data.Vendor.DateVerified } </p>
 							</span>
 						</div>
 						<!-- expertise -->
 						<div class="mt-3">
 							<p class="text-xs font-medium">Expertise</p>
 							<div class="mt-2 flex gap-2">
-								for _, expertise := range data.Expertise {
+								for _, expertise := range data.Vendor.Expertise {
 									@partials.DefaultBadgeSuccess(expertise)
 								}
 							</div>
@@ -64,35 +59,19 @@ templ VendorAccountDetail(user models.AdminModel, data models.UserAccountPageDat
 					</div>
 				</div>
 				<div class="flex gap-2">
-					@actions(data)
+					<!-- @actions(data) -->
 				</div>
 			</div>
 			<!-- stats -->
-			<div class="mt-8 grid grid-cols-4 gap-4">
-				<div class="rounded-sm p-2 outline-1 outline-pale-gray">
-					<!-- Sent Requests -->
-					if data.Stat.Sent.CurrentMonth >= data.Stat.Sent.LastMonth {
-						@partials.Increasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageIncrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
-					} else {
-						@partials.Decreasing("Sent Requests", data.Stat.Sent.CurrentMonth, utils.PercentageDecrease(data.Stat.Sent.CurrentMonth, data.Stat.Sent.LastMonth))
-					}
-				</div>
-				<div class="rounded-sm p-2 outline-1 outline-pale-gray">
-					<!-- Received Requests -->
-					if data.Stat.Received.CurrentMonth >= data.Stat.Received.LastMonth {
-						@partials.Increasing("Received Requests", data.Stat.Received.CurrentMonth, utils.PercentageIncrease(data.Stat.Received.CurrentMonth, data.Stat.Received.LastMonth))
-					} else {
-						@partials.Decreasing("Received Requests", data.Stat.Received.CurrentMonth, utils.PercentageDecrease(data.Stat.Received.CurrentMonth, data.Stat.Received.LastMonth))
-					}
-				</div>
-			</div>
+			<div class="mt-8 grid grid-cols-4 gap-4"></div>
 			<!-- services -->
 			@userServices(data.Services)
+			@partials.PrintJSON(data)
 		</div>
 	}
 }
 
-templ userServices(services []*models.ServiceModel) {
+templ userServices(services []dto.Service) {
 	<div class="mt-8">
 		<h2 class="mb-2 font-medium">Services</h2>
 		<div class="w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300">
@@ -113,7 +92,7 @@ templ userServices(services []*models.ServiceModel) {
 						for _, service := range services {
 							<tr class="relative text-xs text-neutral-dark outline-1 outline-pale-gray">
 								<td class="px-6 py-4">{ service.Title }</td>
-								<td class="px-6 py-4">added on { utils.FormatDate(service.CreatedAt) }</td>
+								<td class="px-6 py-4">added on { service.CreatedAt }</td>
 								<td class="px-6 py-4">
 									@viewService(service)
 								</td>
@@ -126,7 +105,7 @@ templ userServices(services []*models.ServiceModel) {
 	</div>
 }
 
-templ viewService(service *models.ServiceModel) {
+templ viewService(service dto.Service) {
 	<div x-data="{serviceDetailOpen: false}">
 		<!-- offCanvas Button -->
 		<button
@@ -187,13 +166,13 @@ templ viewService(service *models.ServiceModel) {
 				</div>
 				<!-- Content -->
 				<div class="mt-4">
-					@carousel(service.Images)
+					<!-- @carousel(service.Images) -->
 					<div class="mt-2 text-neutral-gray">
 						<!-- Detail -->
 						<div class="mt-4 grid gap-1">
 							<h3 class="text-md font-medium">{ service.Title }</h3>
 							<p class="text-sm text-neutral-gray">{ service.Description }</p>
-							<h4 class="text-xl font-medium">₱ { service.Rate }</h4>
+							<h4 class="text-xl font-medium">₱ { utils.FloatToString(service.Rate) }</h4>
 						</div>
 						<div class="mt-4">
 							<!-- Note -->
@@ -205,7 +184,7 @@ templ viewService(service *models.ServiceModel) {
 							</div>
 							<!-- Tags -->
 							<div class="my-2 flex flex-wrap gap-2">
-								for _, tag := range service.TagsAsString {
+								for _, tag := range service.Tags {
 									<a
 										href={ templ.SafeURL(fmt.Sprintf("/admin/map?query=%s", tag)) }
 										class="mt-2"
