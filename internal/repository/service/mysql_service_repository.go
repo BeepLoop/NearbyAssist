@@ -337,7 +337,6 @@ func (s *MysqlServiceRepository) GetReviews(serviceId string) ([]*models.ReviewM
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	// TODO: Implement this, join on booking and review table
 	query := `
         SELECT
             r.*
@@ -347,11 +346,33 @@ func (s *MysqlServiceRepository) GetReviews(serviceId string) ([]*models.ReviewM
             JOIN Service s ON s.id = t.serviceId
         WHERE
             s.id = ?
+        ORDER BY
+            r.createdAt DESC
     `
 
 	reviews := make([]*models.ReviewModel, 0)
 	if err := s.db.SelectContext(ctx, &reviews, query, serviceId); err != nil {
 		return nil, err
+	}
+
+	getRevieweeQuery := `
+        SELECT
+            u.id,
+            u.name,
+            u.email,
+            u.imageUrl
+        FROM
+            Review r
+            JOIN User u ON r.revieweeId = u.id
+        WHERE
+            r.id = ?
+    `
+	for _, review := range reviews {
+		user := new(models.UserModel)
+		if err := s.db.GetContext(ctx, user, getRevieweeQuery, review.Id); err != nil {
+			return nil, err
+		}
+		review.Reviewee = user
 	}
 
 	return reviews, nil
