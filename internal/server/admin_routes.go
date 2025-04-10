@@ -104,16 +104,17 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		complaintRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		complaintService := complaint_service.NewService(reportUserStore, bugReportStore, notifStore, s.WS, s.FS, s.Encrypt, s.JWT)
+		complaintService := complaint_service.NewService(reportUserStore, userStore, bugReportStore, notifStore, s.WS, s.FS, s.Encrypt, s.JWT)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		complaintHandler := complaint.NewHandler(complaintService, resourceService)
 
 		complaintRoute.GET("/users", complaintHandler.GetReportedUsers)
-		complaintRoute.GET("/users/:reportId", complaintHandler.GetReportedUserDetail)
+		complaintRoute.GET("/users/:reportId", complaintHandler.GetReport)
 		complaintRoute.POST("/users/close", complaintHandler.CloseUserReport)
 
 		complaintRoute.GET("/bugs", complaintHandler.GetBugReports, middleware.EnsureAdmin)

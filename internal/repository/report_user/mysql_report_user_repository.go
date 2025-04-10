@@ -114,7 +114,7 @@ func (s *MysqlReportUserRepository) FindById(id string) (*models.ReportedUserMod
             ru.reason,
             ru.detail,
             ru.createdAt,
-            u.name AS name
+            ru.completedAt
         FROM
             ReportedUser ru
             JOIN User u ON u.id = ru.userId
@@ -122,56 +122,94 @@ func (s *MysqlReportUserRepository) FindById(id string) (*models.ReportedUserMod
             ru.id = ?
     `
 
-	reportedUser := new(models.ReportedUserModel)
-	if err := s.db.GetContext(ctx, reportedUser, getUserQuery, id); err != nil {
+	report := new(models.ReportedUserModel)
+	if err := s.db.GetContext(ctx, report, getUserQuery, id); err != nil {
 		return nil, err
 	}
 
-	if reportedUser.Id == "" {
+	if report.Id == "" {
 		return nil, errors.New("not found")
 	}
 
-	getImagesQuery := "SELECT url FROM ReportedUserImage WHERE reportId = ?"
-	images := make([]string, 0)
-	if err := s.db.SelectContext(ctx, &images, getImagesQuery, reportedUser.Id); err != nil {
+	if res, err := s.GetImages(report.Id); err != nil {
 		return nil, err
+	} else {
+		report.Images = res
 	}
-	reportedUser.Images = images
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
 
-	return reportedUser, nil
+	return report, nil
 }
 
-func (s *MysqlReportUserRepository) FindByUserId(userId string) (*models.ReportedUserModel, error) {
+func (s *MysqlReportUserRepository) FindAllWithUserId(userId string) ([]*models.ReportedUserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getUserQuery := "SELECT * FROM ReportedUser WHERE userId = ?"
+	getReportsQuery := `
+        SELECT
+            ru.id,
+            ru.reportedBy,
+            ru.userId,
+            ru.reason,
+            ru.detail,
+            ru.createdAt,
+            ru.completedAt
+        FROM
+            ReportedUser ru
+        WHERE
+            ru.userId = ?
+        ORDER BY
+            ru.createdAt DESC
+    `
 
-	reportedUser := new(models.ReportedUserModel)
-	if err := s.db.GetContext(ctx, &reportedUser, getUserQuery, userId); err != nil {
+	reports := make([]*models.ReportedUserModel, 0)
+	if err := s.db.SelectContext(ctx, &reports, getReportsQuery, userId); err != nil {
 		return nil, err
 	}
 
-	if reportedUser.Id == "" {
-		return nil, errors.New("not found")
-	}
+	for _, report := range reports {
+		report.Images = make([]string, 0)
 
-	getImagesQuery := "SELECT url FROM ReportedUserImage WHERE reportId = ?"
-	images := make([]string, 0)
-	if err := s.db.SelectContext(ctx, &images, getImagesQuery, reportedUser.Id); err != nil {
-		return nil, err
+		if res, err := s.GetImages(report.Id); err != nil {
+			return nil, err
+		} else {
+			report.Images = res
+		}
 	}
-	reportedUser.Images = images
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
 
-	return reportedUser, nil
+	return reports, nil
+}
+
+func (s *MysqlReportUserRepository) GetImages(reportId string) ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            url
+        FROM
+            ReportedUserImage
+        WHERE
+            reportId = ?
+    `
+
+	images := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &images, query, reportId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return images, nil
 }
 
 func (s *MysqlReportUserRepository) CloseReport(reportId string) error {

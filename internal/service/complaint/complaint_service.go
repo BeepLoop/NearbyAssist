@@ -3,10 +3,12 @@ package complaint_service
 import (
 	"fmt"
 	"mime/multipart"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	notification_repo "nearbyassist/internal/repository/notification"
 	report_user_repo "nearbyassist/internal/repository/report_user"
+	user_repo "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
@@ -18,6 +20,7 @@ import (
 
 type Service struct {
 	reportUserStore report_user_repo.ReportUserRepository
+	userStore       user_repo.UserRepository
 	bugReportStore  bug_report_repo.BugReportRepository
 	notifStore      notification_repo.NotificationRepository
 	ws              websocket.Socket
@@ -28,6 +31,7 @@ type Service struct {
 
 func NewService(
 	reportUserStore report_user_repo.ReportUserRepository,
+	userStore user_repo.UserRepository,
 	bugReportStore bug_report_repo.BugReportRepository,
 	notifStore notification_repo.NotificationRepository,
 	ws websocket.Socket,
@@ -37,6 +41,7 @@ func NewService(
 ) *Service {
 	return &Service{
 		reportUserStore: reportUserStore,
+		userStore:       userStore,
 		bugReportStore:  bugReportStore,
 		notifStore:      notifStore,
 		ws:              ws,
@@ -76,17 +81,8 @@ func (s *Service) CreateBugReport(req *request.BugReportPayload, files []*multip
 		reportData.Images = append(reportData.Images, url)
 	}
 
-	if cipher, err := s.encrypt.EncryptString(req.Title); err != nil {
-		return err
-	} else {
-		reportData.Title = cipher
-	}
-
-	if cipher, err := s.encrypt.EncryptString(req.Detail); err != nil {
-		return err
-	} else {
-		reportData.Detail = cipher
-	}
+	reportData.Title = utils.Must(s.encrypt.EncryptString(req.Title))
+	reportData.Detail = utils.Must(s.encrypt.EncryptString(req.Detail))
 
 	if err := s.bugReportStore.Create(reportData); err != nil {
 		return err
@@ -102,17 +98,8 @@ func (s *Service) GetBugReports(limit, offset int) ([]*models.BugReportModel, er
 	}
 
 	for _, complaint := range complaints {
-		if cipher, err := s.encrypt.DecryptString(complaint.Title); err != nil {
-			return nil, err
-		} else {
-			complaint.Title = cipher
-		}
-
-		if cipher, err := s.encrypt.DecryptString(complaint.Detail); err != nil {
-			return nil, err
-		} else {
-			complaint.Detail = cipher
-		}
+		complaint.Title = utils.Must(s.encrypt.DecryptString(complaint.Title))
+		complaint.Detail = utils.Must(s.encrypt.DecryptString(complaint.Detail))
 	}
 
 	return complaints, nil
@@ -133,21 +120,11 @@ func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload,
 		return "", err
 	}
 
-	reason, err := s.encrypt.EncryptString(req.Reason)
-	if err != nil {
-		return "", err
-	}
-
-	detail, err := s.encrypt.EncryptString(req.Detail)
-	if err != nil {
-		return "", err
-	}
-
 	reportData := &models.ReportedUserModel{
 		ReportedBy: reporterId,
 		UserId:     req.UserId,
-		Reason:     reason,
-		Detail:     detail,
+		Reason:     utils.Must(s.encrypt.EncryptString(req.Reason)),
+		Detail:     utils.Must(s.encrypt.EncryptString(req.Detail)),
 		Images:     make([]string, 0),
 	}
 
@@ -156,13 +133,8 @@ func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload,
 		if err != nil {
 		}
 
-		cipher, err := s.encrypt.EncryptFile(bytes)
-		if err != nil {
-			return "", err
-		}
-
 		fileData := fs.File{
-			Data:     cipher,
+			Data:     utils.Must(s.encrypt.EncryptFile(bytes)),
 			Category: fs.REPORT_USER_DIR,
 		}
 		url, err := s.fs.SaveFile(fileData)
@@ -188,47 +160,70 @@ func (s *Service) GetReportedUsers(limit, offset int) ([]*models.ReportedUserMod
 	}
 
 	for _, user := range users {
-		if decrypted, err := s.encrypt.DecryptString(user.Reason); err != nil {
-			return nil, err
-		} else {
-			user.Reason = decrypted
-		}
-
-		if decrypted, err := s.encrypt.DecryptString(user.Detail); err != nil {
-			return nil, err
-		} else {
-			user.Detail = decrypted
-		}
+		user.Reason = utils.Must(s.encrypt.DecryptString(user.Reason))
+		user.Detail = utils.Must(s.encrypt.DecryptString(user.Detail))
 	}
 
 	return users, nil
 }
 
-func (s *Service) GetReportedUserDetail(reportId string) (*models.ReportedUserModel, error) {
+func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReport, error) {
 	report, err := s.reportUserStore.FindById(reportId)
 	if err != nil {
 		return nil, err
 	}
 
-	if decrypted, err := s.encrypt.DecryptString(report.Name); err != nil {
+	reporter, err := s.userStore.FindById(report.ReportedBy)
+	if err != nil {
 		return nil, err
-	} else {
-		report.Name = decrypted
 	}
 
-	if decrypted, err := s.encrypt.DecryptString(report.Reason); err != nil {
+	reported, err := s.userStore.FindById(report.UserId)
+	if err != nil {
 		return nil, err
-	} else {
-		report.Reason = decrypted
 	}
 
-	if decrypted, err := s.encrypt.DecryptString(report.Detail); err != nil {
-		return nil, err
-	} else {
-		report.Detail = decrypted
+	data := &dto.UserReport{
+		Reporter: dto.User{
+			Id:           reporter.Id,
+			Name:         utils.Must(s.encrypt.DecryptString(reporter.Name)),
+			Email:        utils.Must(s.encrypt.DecryptString(reporter.Email)),
+			ImageURL:     reporter.ImageUrl,
+			Address:      utils.Try(s.encrypt.DecryptString(reporter.Address.String)),
+			Phone:        utils.Try(s.encrypt.DecryptString(reporter.Phone.String)),
+			Socials:      reporter.Socials,
+			CreatedAt:    utils.FormatDate(reporter.CreatedAt),
+			DateVerified: utils.FormatDate(reporter.VerifiedAt),
+			IsRestricted: reporter.Restricted,
+			IsBanned:     reporter.Banned,
+		},
+		Reported: dto.User{
+			Id:           reported.Id,
+			Name:         utils.Must(s.encrypt.DecryptString(reported.Name)),
+			Email:        utils.Must(s.encrypt.DecryptString(reported.Email)),
+			ImageURL:     reported.ImageUrl,
+			Address:      utils.Try(s.encrypt.DecryptString(reported.Address.String)),
+			Phone:        utils.Try(s.encrypt.DecryptString(reported.Phone.String)),
+			Socials:      reported.Socials,
+			CreatedAt:    utils.FormatDate(reported.CreatedAt),
+			DateVerified: utils.FormatDate(reported.VerifiedAt),
+			IsRestricted: reported.Restricted,
+			IsBanned:     reported.Banned,
+		},
+		Report: dto.Report{
+			Id:               report.Id,
+			ReportedByUserId: report.ReportedBy,
+			ReportedUserId:   report.UserId,
+			Reason:           utils.Must(s.encrypt.DecryptString(report.Reason)),
+			Detail:           utils.Must(s.encrypt.DecryptString(report.Detail)),
+			Images:           report.Images,
+			Status:           "",
+			CreatedAt:        utils.FormatDate(report.CreatedAt),
+			CompletedAt:      utils.FormatDate(report.CompletedAt.String),
+		},
 	}
 
-	return report, nil
+	return data, nil
 }
 
 func (s *Service) CloseUserReport(reportId, title, detail string) error {

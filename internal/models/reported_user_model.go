@@ -11,5 +11,4 @@ type ReportedUserModel struct {
 	CompletedAt sql.NullString `json:"completedAt" db:"completedAt"`
 
 	Images []string `json:"images,omitempty"`
-	Name   string   `json:"name" db:"name"`
 }
