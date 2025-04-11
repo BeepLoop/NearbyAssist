@@ -8,7 +8,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReport) {
+templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) {
 	@layout.Layout(user) {
 		<div class="mx-auto max-w-3xl">
 			@partials.PrintJSON(data)
@@ -16,7 +16,7 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReport) {
 	}
 }
 
-templ oldContent(data models.ReportedUserModel) {
+templ oldContent(data models.UserReportModel) {
 	<!-- Actions -->
 	<div class="flex justify-between">
 		@partials.BackButton()
@@ -29,7 +29,7 @@ templ oldContent(data models.ReportedUserModel) {
 			<span class="inline-flex items-center gap-2">
 				<p class="text-lg text-neutral-gray">{ "" } </p>
 				<a
-					href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/users/%s", data.UserId)) }
+					href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/users/%s", data.ReportedUserId)) }
 					class="cursor-pointer rounded-sm bg-neutral-gray/25 px-2 py-1 hover:opacity-75"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -40,7 +40,7 @@ templ oldContent(data models.ReportedUserModel) {
 		</div>
 		<div class="mt-2">
 			<h3 class="font-bold text-neutral-dark">User ID:</h3>
-			<p class="text-sm text-neutral-gray">{ data.UserId } </p>
+			<p class="text-sm text-neutral-gray">{ data.ReportedUserId } </p>
 		</div>
 	</div>
 	<!-- Reason -->
@@ -65,7 +65,7 @@ templ oldContent(data models.ReportedUserModel) {
 	</div>
 }
 
-templ addressReport(data models.ReportedUserModel) {
+templ addressReport(data models.UserReportModel) {
 	<div x-data="{offCanvasOpen: false}">
 		<!-- offCanvas Button -->
 		<button

@@ -113,9 +113,10 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		complaintHandler := complaint.NewHandler(complaintService, resourceService)
 
-		complaintRoute.GET("/users", complaintHandler.GetReportedUsers)
+		complaintRoute.GET("/users", complaintHandler.GetUserReports)
 		complaintRoute.GET("/users/:reportId", complaintHandler.GetReport)
-		complaintRoute.POST("/users/close", complaintHandler.CloseUserReport)
+		complaintRoute.POST("/users/dismiss", complaintHandler.Dismiss)
+		complaintRoute.POST("/users/resolve", complaintHandler.Resolve)
 
 		complaintRoute.GET("/bugs", complaintHandler.GetBugReports, middleware.EnsureAdmin)
 		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug, middleware.EnsureAdmin)

@@ -1,6 +1,7 @@
 package complaint_service
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/dto"
@@ -15,6 +16,7 @@ import (
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
+	"slices"
 	"strconv"
 )
 
@@ -120,12 +122,14 @@ func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload,
 		return "", err
 	}
 
-	reportData := &models.ReportedUserModel{
-		ReportedBy: reporterId,
-		UserId:     req.UserId,
-		Reason:     utils.Must(s.encrypt.EncryptString(req.Reason)),
-		Detail:     utils.Must(s.encrypt.EncryptString(req.Detail)),
-		Images:     make([]string, 0),
+	reportData := &models.UserReportModel{
+		ReporterUserId: reporterId,
+		ReportedUserId: req.UserId,
+		Category:       models.UserReportCategory(req.Category),
+		BookingIdInput: req.BookingId,
+		Reason:         utils.Must(s.encrypt.EncryptString(req.Reason)),
+		Detail:         utils.Must(s.encrypt.EncryptString(req.Detail)),
+		Images:         make([]string, 0),
 	}
 
 	for _, file := range files {
@@ -153,37 +157,44 @@ func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload,
 	return reportId, nil
 }
 
-func (s *Service) GetReportedUsers(limit, offset int) ([]*models.ReportedUserModel, error) {
-	users, err := s.reportUserStore.GetAll(limit, offset)
+func (s *Service) GetReportedUsers(limit, offset int) ([]dto.UserReport, error) {
+	reports, err := s.reportUserStore.GetAllWithStatus("pending", limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, user := range users {
-		user.Reason = utils.Must(s.encrypt.DecryptString(user.Reason))
-		user.Detail = utils.Must(s.encrypt.DecryptString(user.Detail))
-	}
+	data := slices.AppendSeq(
+		make([]dto.UserReport, 0),
+		utils.Map(reports, func(report *models.UserReportModel) dto.UserReport {
+			return dto.UserReport{
+				Id:               report.Id,
+				ReportedUserId:   report.ReportedUserId,
+				ReportedByUserId: report.ReporterUserId,
+				CreatedAt:        report.CreatedAt,
+			}
+		}),
+	)
 
-	return users, nil
+	return data, nil
 }
 
-func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReport, error) {
+func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail, error) {
 	report, err := s.reportUserStore.FindById(reportId)
 	if err != nil {
 		return nil, err
 	}
 
-	reporter, err := s.userStore.FindById(report.ReportedBy)
+	reporter, err := s.userStore.FindById(report.ReporterUserId)
 	if err != nil {
 		return nil, err
 	}
 
-	reported, err := s.userStore.FindById(report.UserId)
+	reported, err := s.userStore.FindById(report.ReportedUserId)
 	if err != nil {
 		return nil, err
 	}
 
-	data := &dto.UserReport{
+	data := &dto.UserReportDetail{
 		Reporter: dto.User{
 			Id:           reporter.Id,
 			Name:         utils.Must(s.encrypt.DecryptString(reporter.Name)),
@@ -212,27 +223,36 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReport, error
 		},
 		Report: dto.Report{
 			Id:               report.Id,
-			ReportedByUserId: report.ReportedBy,
-			ReportedUserId:   report.UserId,
+			ReportedByUserId: report.ReporterUserId,
+			ReportedUserId:   report.ReportedUserId,
+			Category:         string(report.Category),
+			BookingId:        report.BookingId.String,
 			Reason:           utils.Must(s.encrypt.DecryptString(report.Reason)),
 			Detail:           utils.Must(s.encrypt.DecryptString(report.Detail)),
 			Images:           report.Images,
 			Status:           "",
 			CreatedAt:        utils.FormatDate(report.CreatedAt),
-			CompletedAt:      utils.FormatDate(report.CompletedAt.String),
+			CompletedAt:      utils.FormatDate(report.UpdatedAt),
 		},
 	}
 
 	return data, nil
 }
 
-func (s *Service) CloseUserReport(reportId, title, detail string) error {
+// actions = "resolved" | "dismissed"
+func (s *Service) ActOnReport(reportId, title, detail, action string) error {
+	allowedActions := []string{"resolved", "dismissed"}
+	if !slices.Contains(allowedActions, action) {
+		return errors.New("invalid_action")
+	}
+
 	report, err := s.reportUserStore.FindById(reportId)
 	if err != nil {
 		return err
 	}
 
-	if err := s.reportUserStore.CloseReport(reportId); err != nil {
+	// NOTE: action will serve as status. Refer to statuses, SHOULD MATCH
+	if err := s.reportUserStore.UpdateStatus(reportId, action); err != nil {
 		return err
 	}
 
@@ -240,14 +260,14 @@ func (s *Service) CloseUserReport(reportId, title, detail string) error {
 	notificationContent := "Your recent user report submission has been viewed and addressed!"
 
 	notification := &models.NotificationModel{
-		Recipient: report.ReportedBy,
+		Recipient: report.ReporterUserId,
 		Type:      "generic",
 		Title:     title,
 		Content:   detail,
 	}
 
 	encryptedNotification := &models.NotificationModel{
-		Recipient: report.ReportedBy,
+		Recipient: report.ReporterUserId,
 		Type:      "generic",
 		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
@@ -260,12 +280,12 @@ func (s *Service) CloseUserReport(reportId, title, detail string) error {
 	}
 
 	oneSignal := notification_service.MustGetInstance()
-	if err := oneSignal.NewUrgentNotification(report.ReportedBy, notificationHeading, notificationContent); err != nil {
+	if err := oneSignal.NewUrgentNotification(report.ReporterUserId, notificationHeading, notificationContent); err != nil {
 		fmt.Println(err.Error())
 	}
 
 	event := &websocket.EventModel{
-		ReceiverId: report.ReportedBy,
+		ReceiverId: report.ReporterUserId,
 		Type:       websocket.EVT_NOTIF,
 		Payload:    notification,
 	}

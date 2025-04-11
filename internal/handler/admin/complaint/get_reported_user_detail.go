@@ -20,7 +20,7 @@ func (h *complaintHandler) GetReport(c echo.Context) error {
 
 	data, err := h.complaintService.GetReportedUserDetail(reportId)
 	if err != nil {
-		page := pages.ViewReportedUserDetail(*admin, dto.UserReport{})
+		page := pages.ViewReportedUserDetail(*admin, dto.UserReportDetail{})
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 

@@ -177,7 +177,7 @@ func (s *MysqlDashboardRepository) GetVendorReportData() (*models.WeeklyVendorRe
         FROM 
             date_series d
         LEFT JOIN 
-            ReportedUser ru
+            UserReport ru
         ON 
             DATE(ru.createdAt) = d.reportDate
         GROUP BY 
@@ -209,7 +209,7 @@ func (s *MysqlDashboardRepository) GetVendorReportData() (*models.WeeklyVendorRe
         FROM 
             date_series d
         LEFT JOIN 
-            ReportedUser ru
+            UserReport ru
         ON 
             DATE(ru.createdAt) = d.reportDate
         GROUP BY 

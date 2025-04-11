@@ -2,12 +2,13 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ ReportedUsers(user models.AdminModel, users []models.ReportedUserModel, flash string) {
+templ ReportedUsers(user models.AdminModel, users []dto.UserReport, flash string) {
 	@layout.Layout(user) {
 		<!-- toasy component -->
 		@templ.JSONScript("flash", flash)
@@ -18,7 +19,7 @@ templ ReportedUsers(user models.AdminModel, users []models.ReportedUserModel, fl
 	}
 }
 
-templ reportedUsersTable(users []models.ReportedUserModel) {
+templ reportedUsersTable(users []dto.UserReport) {
 	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="text-white text-sm font-semibold bg-primary-greener">
