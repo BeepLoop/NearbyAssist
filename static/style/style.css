@@ -1314,6 +1314,9 @@
   .text-left {
     text-align: left;
   }
+  .align-middle {
+    vertical-align: middle;
+  }
   .font-roboto {
     font-family: var(--font-roboto);
   }

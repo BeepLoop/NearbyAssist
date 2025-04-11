@@ -316,6 +316,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
@@ -324,6 +325,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			userStore,
 			vendorStore,
 			bookingStore,
+			serviceStore,
 			bugReportStore,
 			notifStore,
 			s.WS,

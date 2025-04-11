@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 	"strconv"
@@ -75,238 +76,329 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) 
 				<!-- tab contents button -->
 				<div class="px-2 py-4 text-neutral-dark dark:text-neutral-dark">
 					<!-- overview content -->
-					<div
-						x-cloak
-						x-show="selectedTab === 'overview'"
-						id="tabpanelOverview"
-						role="tabpanel"
-						aria-label="overview"
-					>
-						<div>
-							<div class="mt-2 flex gap-2">
-								<span class="font-medium text-neutral-dark">Report ID:</span>
-								<p class="text-neutral-gray">{ data.Report.Id }</p>
-							</div>
-							<div class="mt-2 flex gap-2">
-								<span class="font-medium text-neutral-dark">Category:</span>
-								<p class="text-neutral-gray">{ data.Report.Category }</p>
-							</div>
-							if data.Report.Category == "booking_related" {
-								<div class="mt-2 flex gap-2">
-									<span class="font-medium text-neutral-dark">Booking ID:</span>
-									<p class="text-neutral-gray">{ data.Report.BookingId }</p>
-								</div>
-							}
-							<div class="mt-2">
-								<span class="font-medium text-neutral-dark">Reason:</span>
-								<p class="text-neutral-gray">{ data.Report.Reason }</p>
-							</div>
-							<div class="mt-2">
-								<span class="font-medium text-neutral-dark">Detail:</span>
-								<p class="text-neutral-gray">{ data.Report.Detail }</p>
-							</div>
-							<!-- Images -->
-							<div class="mt-4">
-								<h4 class="font-bold text-neutral-dark">Images</h4>
-								<div class="mt-2 grid grid-cols-3 gap-2">
-									for _, image := range data.Report.Images {
-										@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", image))
-									}
-								</div>
-							</div>
-						</div>
+					<div x-cloak x-show="selectedTab === 'overview'" id="tabpanelOverview" role="tabpanel" aria-label="overview">
+						@overview(data)
 					</div>
 					<!-- booking content -->
 					if data.Report.Category == "booking_related" {
-						<div
-							x-cloak
-							x-show="selectedTab === 'booking'"
-							id="tabpanelBooking"
-							role="tabpanel"
-							aria-label="booking"
-						>
-							<div>
-								@partials.PrintJSON(data)
-							</div>
+						<div x-cloak x-show="selectedTab === 'booking'" id="tabpanelBooking" role="tabpanel" aria-label="booking">
+							@booking(data)
 						</div>
 					}
 					<!-- reported content -->
-					<div
-						x-cloak
-						x-show="selectedTab === 'reported'"
-						id="tabpanelReported"
-						role="tabpanel"
-						aria-label="reported"
-					>
-						<!-- Information -->
-						<div class="mt-4">
-							<h1 class="text-xl font-medium">Information</h1>
-							<!-- Divider -->
-							<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
-							<div>
-								<div class="flex justify-between mt-2">
-									<img
-										src={ data.Reported.ImageURL }
-										alt="User Profile Image"
-										class="aspect-square h-44 w-44 outline-1 outline-pale-gray"
-									/>
-									<div>
-										<a
-											href={ templ.URL(fmt.Sprintf("/admin/user-management/vendors/%s", data.Reported.Id)) }
-											class="bg-primary text-white rounded-sm px-3 py-1.5 cursor-pointer hover:opacity-75"
-										>View Profile</a>
-									</div>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Name:</span>
-									<p class="text-neutral-gray">{ data.Reported.Name }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Email:</span>
-									<p class="text-neutral-gray">{ data.Reported.Email }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Address:</span>
-									<p class="text-neutral-gray">{ data.Reported.Address }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Phone:</span>
-									<p class="text-neutral-gray">{ data.Reported.Phone }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Account Created At:</span>
-									<p class="text-neutral-gray">{ data.Reported.CreatedAt }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Account Verified At:</span>
-									<p class="text-neutral-gray">{ data.Reported.DateVerified }</p>
-								</div>
-							</div>
-						</div>
-						<!-- History -->
-						<div class="mt-4">
-							<h1 class="text-xl font-medium">History</h1>
-							<!-- Divider -->
-							<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
-							<div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Total Bookings:</span>
-									<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.Bookings) }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Completed Bookings:</span>
-									<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.CompletedBookings) }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Rejected Bookings:</span>
-									<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.RejectedBookings) }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Active Bookings:</span>
-									<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.ActiveBookings) }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Previous Reports:</span>
-									<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.PreviousReports) }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Account Created At:</span>
-									<p class="text-neutral-gray">{ data.ReportedUserHistory.AccountCreatedAt }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Account Created At:</span>
-									<p class="text-neutral-gray">{ data.ReportedUserHistory.JoinedVendorAt }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Vendor Rating:</span>
-									<span class="flex gap-2 text-warning">
-										<p class="font-medium">{ data.ReportedUserHistory.Rating }</p>
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-											<path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"></path>
-										</svg>
-									</span>
-								</div>
-							</div>
-						</div>
+					<div x-cloak x-show="selectedTab === 'reported'" id="tabpanelReported" role="tabpanel" aria-label="reported">
+						@reported(data)
 					</div>
 					<!-- reporter content -->
-					<div
-						x-cloak
-						x-show="selectedTab === 'reporter'"
-						id="tabpanelReporter"
-						role="tabpanel"
-						aria-label="reporter"
-					>
-						<!-- Information -->
-						<div class="mt-4">
-							<h1 class="font-medium text-xl">Information</h1>
-							<!-- Divider -->
-							<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
-							<div>
-								<div class="flex justify-between mt-2">
-									<img
-										src={ data.Reporter.ImageURL }
-										alt="User Profile Image"
-										class="aspect-square h-44 w-44 outline-1 outline-pale-gray"
-									/>
-									<div>
-										<a
-											href={ templ.URL(fmt.Sprintf("/admin/user-management/users/%s", data.Reporter.Id)) }
-											class="bg-primary text-white rounded-sm px-3 py-1.5 cursor-pointer hover:opacity-75"
-										>View Profile</a>
-									</div>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Name:</span>
-									<p class="text-neutral-gray">{ data.Reporter.Name }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Email:</span>
-									<p class="text-neutral-gray">{ data.Reporter.Email }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Address:</span>
-									<p class="text-neutral-gray">{ data.Reporter.Address }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Phone:</span>
-									<p class="text-neutral-gray">{ data.Reporter.Phone }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Account Created At:</span>
-									<p class="text-neutral-gray">{ data.Reporter.CreatedAt }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="font-medium text-neutral-dark">Date Verified:</span>
-									<p class="text-neutral-gray">{ data.Reporter.DateVerified }</p>
-								</div>
-							</div>
-						</div>
-						<!-- History -->
-						<div class="mt-4">
-							<h1 class="text-xl font-medium">History</h1>
-							<!-- Divider -->
-							<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
-							<div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Reports Filed:</span>
-									<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.ReportsFiled) }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">False Reports:</span>
-									<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.FalseReports) }</p>
-								</div>
-								<div class="flex gap-2 mt-2">
-									<span class="text-neutral-dark font-medium">Cancelled Bookings:</span>
-									<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.CancelledBookings) }</p>
-								</div>
-							</div>
-						</div>
+					<div x-cloak x-show="selectedTab === 'reporter'" id="tabpanelReporter" role="tabpanel" aria-label="reporter">
+						@reporter(data)
 					</div>
 				</div>
 			</div>
 		</div>
 	}
+}
+
+templ overview(data dto.UserReportDetail) {
+	<div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Report ID:</span>
+			<p class="text-neutral-gray">{ data.Report.Id }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Category:</span>
+			<p class="text-neutral-gray">{ data.Report.Category }</p>
+		</div>
+		if data.Report.Category == "booking_related" {
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Booking ID:</span>
+				<p class="text-neutral-gray">{ data.Report.BookingId }</p>
+			</div>
+		}
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Reason:</span>
+			<p class="text-neutral-gray">{ data.Report.Reason }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Detail:</span>
+			<p class="text-neutral-gray">{ data.Report.Detail }</p>
+		</div>
+		<!-- Images -->
+		<div class="mt-4">
+			<h4 class="font-bold text-neutral-dark">Images</h4>
+			<div class="mt-2 grid grid-cols-3 gap-2">
+				for _, image := range data.Report.Images {
+					@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", image))
+				}
+			</div>
+		</div>
+	</div>
+}
+
+templ booking(data dto.UserReportDetail) {
+	<div class="">
+		<h1 class="text-xl font-medium">Booking</h1>
+		<!-- Divider -->
+		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">ID:</span>
+			<p class="text-neutral-gray">{ data.Booking.Id }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Total:</span>
+			<p class="text-neutral-gray">₱ { utils.FloatToString(data.Booking.Cost) }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Status:</span>
+			<p class="text-neutral-gray">{ data.Booking.Status }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Date Booked:</span>
+			<p class="text-neutral-gray">{ data.Booking.CreatedAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Date Scheduled:</span>
+			<p class="text-neutral-gray">{ data.Booking.ScheduledAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			if data.Booking.Status == "cancelled" {
+				<span class="font-medium text-neutral-dark">Cancel Reason:</span>
+			} else if data.Booking.Status == "rejected" {
+				<span class="font-medium text-neutral-dark">Reject Reason:</span>
+			}
+			<p class="text-neutral-gray">{ data.Booking.CancelReason }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			if data.Booking.Status == "cancelled" {
+				<span class="font-medium text-neutral-dark">Date Cancelled:</span>
+			} else if data.Booking.Status == "rejected" {
+				<span class="font-medium text-neutral-dark">Date Rejected:</span>
+			} else if data.Booking.Status == "confirmed" {
+				<span class="font-medium text-neutral-dark">Date Confirmed:</span>
+			} else if data.Booking.Status == "done" {
+				<span class="font-medium text-neutral-dark">Date Completed:</span>
+			}
+			<p class="text-neutral-gray">{ data.Booking.UpdatedAt }</p>
+		</div>
+	</div>
+	<!-- Service -->
+	<div class="mt-4">
+		<h1 class="text-xl font-medium">Service</h1>
+		<!-- Divider -->
+		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Title:</span>
+			<p class="text-neutral-gray">{ data.Booking.Service.Title }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Description:</span>
+			<p class="text-neutral-gray">{ data.Booking.Service.Description }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Tags:</span>
+			<div class="flex gap-2 mt-1.5">
+				for _, tag := range data.Booking.Service.Tags {
+					@partials.DefaultBadgeSuccess(tag)
+				}
+			</div>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Rate:</span>
+			<p class="text-neutral-gray">₱ { utils.FloatToString(data.Booking.Service.Rate) }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Created At:</span>
+			<p class="text-neutral-gray">{ data.Booking.Service.CreatedAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Last Modified:</span>
+			<p class="text-neutral-gray">{ data.Booking.Service.UpdatedAt }</p>
+		</div>
+	</div>
+	<!-- Extras -->
+	<div class="mt-4">
+		<h1 class="text-xl font-medium">Included Extras</h1>
+		<!-- Divider -->
+		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		<div>
+			<table>
+				<tbody>
+					for _, extra := range data.Booking.Extras {
+						<tr>
+							<td>{ extra.Title }</td>
+							<td>{ extra.Description }</td>
+							<td>{ utils.FloatToString(extra.Price) }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+templ reported(data dto.UserReportDetail) {
+	<!-- Information -->
+	<div class="">
+		<h1 class="text-xl font-medium">Information</h1>
+		<!-- Divider -->
+		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		<div>
+			<div class="mt-2 flex justify-between">
+				<img
+					src={ data.Reported.ImageURL }
+					alt="User Profile Image"
+					class="aspect-square h-44 w-44 outline-1 outline-pale-gray"
+				/>
+				<div>
+					<a
+						href={ templ.URL(fmt.Sprintf("/admin/user-management/vendors/%s", data.Reported.Id)) }
+						class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 text-white hover:opacity-75"
+					>View Profile</a>
+				</div>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Name:</span>
+				<p class="text-neutral-gray">{ data.Reported.Name }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Email:</span>
+				<p class="text-neutral-gray">{ data.Reported.Email }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Address:</span>
+				<p class="text-neutral-gray">{ data.Reported.Address }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Phone:</span>
+				<p class="text-neutral-gray">{ data.Reported.Phone }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Account Created At:</span>
+				<p class="text-neutral-gray">{ data.Reported.CreatedAt }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Account Verified At:</span>
+				<p class="text-neutral-gray">{ data.Reported.DateVerified }</p>
+			</div>
+		</div>
+	</div>
+	<!-- History -->
+	<div class="mt-4">
+		<h1 class="text-xl font-medium">History</h1>
+		<!-- Divider -->
+		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		<div>
+			<div class="mt-2 flex gap-2 align-middle">
+				<span class="font-medium text-neutral-dark">Vendor Rating:</span>
+				<span class="flex gap-2 text-warning">
+					<p class="font-medium">{ data.ReportedUserHistory.Rating }</p>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+						<path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"></path>
+					</svg>
+				</span>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Previous Reports:</span>
+				<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.PreviousReports) }</p>
+			</div>
+			<div class="mt-2 grid grid-cols-2 text-left">
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Total Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.Bookings) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Active Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.ActiveBookings) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Completed Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.CompletedBookings) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Rejected Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.RejectedBookings) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Account Created At:</span>
+					<p class="text-neutral-gray">{ data.ReportedUserHistory.AccountCreatedAt }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Account Created At:</span>
+					<p class="text-neutral-gray">{ data.ReportedUserHistory.JoinedVendorAt }</p>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ reporter(data dto.UserReportDetail) {
+	<!-- Information -->
+	<div class="">
+		<h1 class="text-xl font-medium">Information</h1>
+		<!-- Divider -->
+		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		<div>
+			<div class="mt-2 flex justify-between">
+				<img
+					src={ data.Reporter.ImageURL }
+					alt="User Profile Image"
+					class="aspect-square h-44 w-44 outline-1 outline-pale-gray"
+				/>
+				<div>
+					<a
+						href={ templ.URL(fmt.Sprintf("/admin/user-management/users/%s", data.Reporter.Id)) }
+						class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 text-white hover:opacity-75"
+					>View Profile</a>
+				</div>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Name:</span>
+				<p class="text-neutral-gray">{ data.Reporter.Name }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Email:</span>
+				<p class="text-neutral-gray">{ data.Reporter.Email }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Address:</span>
+				<p class="text-neutral-gray">{ data.Reporter.Address }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Phone:</span>
+				<p class="text-neutral-gray">{ data.Reporter.Phone }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Account Created At:</span>
+				<p class="text-neutral-gray">{ data.Reporter.CreatedAt }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Date Verified:</span>
+				<p class="text-neutral-gray">{ data.Reporter.DateVerified }</p>
+			</div>
+		</div>
+	</div>
+	<!-- History -->
+	<div class="mt-4">
+		<h1 class="text-xl font-medium">History</h1>
+		<!-- Divider -->
+		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		<div>
+			<div class="mt-2 grid grid-cols-2 text-left">
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Reports Filed:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.ReportsFiled) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">False Reports:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.FalseReports) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Cancelled Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.CancelledBookings) }</p>
+				</div>
+			</div>
+		</div>
+	</div>
 }
 
 templ addressReport(data models.UserReportModel) {

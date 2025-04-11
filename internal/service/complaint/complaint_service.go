@@ -10,6 +10,7 @@ import (
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	notification_repo "nearbyassist/internal/repository/notification"
 	report_user_repo "nearbyassist/internal/repository/report_user"
+	service_repo "nearbyassist/internal/repository/service"
 	user_repo "nearbyassist/internal/repository/user"
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/request"
@@ -27,6 +28,7 @@ type Service struct {
 	userStore       user_repo.UserRepository
 	vendorStore     vendor_repo.VendorRepository
 	bookingStore    booking_repo.BookingRepository
+	serviceStore    service_repo.ServiceRepository
 	bugReportStore  bug_report_repo.BugReportRepository
 	notifStore      notification_repo.NotificationRepository
 	ws              websocket.Socket
@@ -40,6 +42,7 @@ func NewService(
 	userStore user_repo.UserRepository,
 	vendorStore vendor_repo.VendorRepository,
 	bookingStore booking_repo.BookingRepository,
+	serviceStore service_repo.ServiceRepository,
 	bugReportStore bug_report_repo.BugReportRepository,
 	notifStore notification_repo.NotificationRepository,
 	ws websocket.Socket,
@@ -52,6 +55,7 @@ func NewService(
 		userStore:       userStore,
 		vendorStore:     vendorStore,
 		bookingStore:    bookingStore,
+		serviceStore:    serviceStore,
 		bugReportStore:  bugReportStore,
 		notifStore:      notifStore,
 		ws:              ws,
@@ -229,81 +233,66 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 
 	booking := dto.Booking{}
 	if report.Category == models.CATEGORY_BOOKING_RELATED {
-		if res, err := s.bookingStore.FindById(report.BookingId.String); err != nil {
+		res, err := s.bookingStore.FindById(report.BookingId.String)
+		if err != nil {
 			return nil, err
-		} else {
-			booking = dto.Booking{
-				Id: res.Id,
-				Client: dto.User{
-					Id:       reporter.Id,
-					Name:     utils.Must(s.encrypt.DecryptString(reporter.Name)),
-					Email:    utils.Must(s.encrypt.DecryptString(reporter.Email)),
-					ImageURL: reporter.ImageUrl,
-					Address:  utils.Try(s.encrypt.DecryptString(reporter.Address.String)),
-					Phone:    utils.Try(s.encrypt.DecryptString(reporter.Phone.String)),
-					Socials: slices.AppendSeq(
-						make([]string, 0),
-						utils.Map(reporter.Socials, func(social string) string {
-							return utils.Must(s.encrypt.DecryptString(social))
-						}),
-					),
-					CreatedAt:    utils.FormatDate(reporter.CreatedAt),
-					DateVerified: utils.FormatDate(reporter.VerifiedAt),
-					IsRestricted: reporter.Restricted,
-					IsBanned:     reporter.Banned,
-				},
-				Vendor: dto.Vendor{
-					Id:       vendor.VendorId,
-					Name:     utils.Must(s.encrypt.DecryptString(vendor.Name)),
-					Email:    utils.Must(s.encrypt.DecryptString(vendor.Email)),
-					ImageURL: vendor.ImageUrl,
-					Address:  utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
-					Phone:    utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
-					Socials: slices.AppendSeq(
-						make([]string, 0),
-						utils.Map(vendor.Socials, func(social string) string {
-							return utils.Must(s.encrypt.DecryptString(social))
-						}),
-					),
-					Rating:       vendor.Rating,
-					JoinedAt:     utils.FormatDate(vendor.JoinedAt),
-					DateVerified: utils.FormatDate(vendor.VerifiedAt),
-					Expertise:    vendor.Expertise,
-				},
-				Service: dto.Service{
-					Id:          res.Service.Id,
-					Title:       utils.Must(s.encrypt.DecryptString(res.Service.Title)),
-					Description: utils.Must(s.encrypt.DecryptString(res.Service.Description)),
-					Rate:        utils.StringToFloatElseZero(res.Service.Rate),
-					Tags: slices.AppendSeq(
-						make([]string, 0),
-						utils.Map(res.Service.Tags, func(t *models.TagModel) string { return t.Title }),
-					),
-					Extras: slices.AppendSeq(
-						make([]dto.Extra, 0),
-						utils.Map(res.Service.Extras, func(x *models.ExtraModel) dto.Extra {
-							return dto.Extra{
-								Id:          x.Id,
-								Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
-								Description: utils.Must(s.encrypt.DecryptString(x.Description)),
-								Price:       x.Price,
-							}
-						}),
-					),
-					Images: slices.AppendSeq(
-						make([]dto.Image, 0),
-						utils.Map(res.Service.Images, func(img *models.ServicePhotoModel) dto.Image {
-							return dto.Image{Id: img.Id, URL: img.Url}
-						}),
-					),
-					CreatedAt: utils.FormatDate(res.Service.CreatedAt),
-					UpdatedAt: utils.FormatDate(res.Service.UpdatedAt),
-				},
-				Cost:   utils.StringToFloatElseZero(res.Cost),
-				Status: string(res.Status),
+		}
+
+		service, err := s.serviceStore.FindById(res.ServiceId)
+		if err != nil {
+			return nil, err
+		}
+
+		booking = dto.Booking{
+			Id: res.Id,
+			Client: dto.User{
+				Id:       reporter.Id,
+				Name:     utils.Must(s.encrypt.DecryptString(reporter.Name)),
+				Email:    utils.Must(s.encrypt.DecryptString(reporter.Email)),
+				ImageURL: reporter.ImageUrl,
+				Address:  utils.Try(s.encrypt.DecryptString(reporter.Address.String)),
+				Phone:    utils.Try(s.encrypt.DecryptString(reporter.Phone.String)),
+				Socials: slices.AppendSeq(
+					make([]string, 0),
+					utils.Map(reporter.Socials, func(social string) string {
+						return utils.Must(s.encrypt.DecryptString(social))
+					}),
+				),
+				CreatedAt:    utils.FormatDate(reporter.CreatedAt),
+				DateVerified: utils.FormatDate(reporter.VerifiedAt),
+				IsRestricted: reporter.Restricted,
+				IsBanned:     reporter.Banned,
+			},
+			Vendor: dto.Vendor{
+				Id:       vendor.VendorId,
+				Name:     utils.Must(s.encrypt.DecryptString(vendor.Name)),
+				Email:    utils.Must(s.encrypt.DecryptString(vendor.Email)),
+				ImageURL: vendor.ImageUrl,
+				Address:  utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
+				Phone:    utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
+				Socials: slices.AppendSeq(
+					make([]string, 0),
+					utils.Map(vendor.Socials, func(social string) string {
+						return utils.Must(s.encrypt.DecryptString(social))
+					}),
+				),
+				Rating:       vendor.Rating,
+				JoinedAt:     utils.FormatDate(vendor.JoinedAt),
+				DateVerified: utils.FormatDate(vendor.VerifiedAt),
+				Expertise:    vendor.Expertise,
+			},
+			Service: dto.Service{
+				Id:          service.Id,
+				Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
+				Description: utils.Must(s.encrypt.DecryptString(service.Description)),
+				Rate:        utils.StringToFloatElseZero(service.Rate),
+				Tags: slices.AppendSeq(
+					make([]string, 0),
+					utils.Map(service.Tags, func(t *models.TagModel) string { return t.Title }),
+				),
 				Extras: slices.AppendSeq(
 					make([]dto.Extra, 0),
-					utils.Map(res.Extras, func(x *models.ExtraModel) dto.Extra {
+					utils.Map(service.Extras, func(x *models.ExtraModel) dto.Extra {
 						return dto.Extra{
 							Id:          x.Id,
 							Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
@@ -312,11 +301,32 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 						}
 					}),
 				),
-				CreatedAt:    utils.FormatDate(res.CreatedAt),
-				ScheduledAt:  utils.FormatDate(res.ScheduledAt.String),
-				UpdatedAt:    utils.FormatDate(res.UpdatedAt),
-				CancelReason: utils.Try(s.encrypt.DecryptString(res.CancelReason.String)),
-			}
+				Images: slices.AppendSeq(
+					make([]dto.Image, 0),
+					utils.Map(service.Images, func(img *models.ServicePhotoModel) dto.Image {
+						return dto.Image{Id: img.Id, URL: img.Url}
+					}),
+				),
+				CreatedAt: utils.FormatDate(service.CreatedAt),
+				UpdatedAt: utils.FormatDate(service.UpdatedAt),
+			},
+			Cost:   utils.StringToFloatElseZero(res.Cost),
+			Status: string(res.Status),
+			Extras: slices.AppendSeq(
+				make([]dto.Extra, 0),
+				utils.Map(res.Extras, func(x *models.ExtraModel) dto.Extra {
+					return dto.Extra{
+						Id:          x.Id,
+						Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
+						Description: utils.Must(s.encrypt.DecryptString(x.Description)),
+						Price:       x.Price,
+					}
+				}),
+			),
+			CreatedAt:    utils.FormatDate(res.CreatedAt),
+			ScheduledAt:  utils.FormatDate(res.ScheduledAt.String),
+			UpdatedAt:    utils.FormatDate(res.UpdatedAt),
+			CancelReason: utils.Try(s.encrypt.DecryptString(res.CancelReason.String)),
 		}
 	}
 
