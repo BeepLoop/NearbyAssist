@@ -105,10 +105,23 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
-		complaintService := complaint_service.NewService(reportUserStore, userStore, bugReportStore, notifStore, s.WS, s.FS, s.Encrypt, s.JWT)
+		complaintService := complaint_service.NewService(
+			reportUserStore,
+			userStore,
+			vendorStore,
+			bookingStore,
+			bugReportStore,
+			notifStore,
+			s.WS,
+			s.FS,
+			s.Encrypt,
+			s.JWT,
+		)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		complaintHandler := complaint.NewHandler(complaintService, resourceService)

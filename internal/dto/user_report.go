@@ -8,9 +8,29 @@ type UserReport struct {
 }
 
 type UserReportDetail struct {
-	Reporter User
-	Reported User
-	Report   Report
+	Reporter            User
+	Reported            User
+	ReporterHistory     ReporterHistory
+	ReportedUserHistory ReportedUserHistory
+	Report              Report
+}
+
+type ReportedUserHistory struct {
+	Bookings          int
+	CompletedBookings int
+	RejectedBookings  int
+	ActiveBookings    int
+	PreviousReports   int
+	AccountCreatedAt  string
+	JoinedVendorAt    string
+	Rating            string
+}
+
+type ReporterHistory struct {
+	ReportsFiled      int
+	FalseReports      int
+	CancelledBookings int
+	AccountCreatedAt  string
 }
 
 type Report struct {

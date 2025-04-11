@@ -3,7 +3,10 @@ package vendor_repo
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"nearbyassist/internal/models"
+	"slices"
 	"strings"
 	"time"
 
@@ -432,4 +435,38 @@ func (s *MysqlVendorRepository) AddExpertise(userId, expertiseId, supportingImag
 	}
 
 	return nil
+}
+
+func (s *MysqlVendorRepository) GetBookingsWithStatus(vendorId, status string) ([]*models.BookingModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	allowedStatus := []string{"all", "pending", "confirmed", "done", "rejected", "cancelled"}
+	if !slices.Contains(allowedStatus, status) {
+		return nil, errors.New("invalid_status")
+	}
+
+	query := `
+        SELECT
+            b.*
+        FROM
+            Booking b
+            JOIN Vendor v ON v.vendorId = b.vendorId
+        WHERE
+            b.vendorId = ?
+    `
+	if status != "all" {
+		query += fmt.Sprintf(" AND b.status = '%s'", status)
+	}
+
+	bookings := make([]*models.BookingModel, 0)
+	if err := s.db.SelectContext(ctx, &bookings, query, vendorId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return bookings, nil
 }

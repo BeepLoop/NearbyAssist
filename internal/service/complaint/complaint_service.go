@@ -6,10 +6,12 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
+	booking_repo "nearbyassist/internal/repository/booking"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	notification_repo "nearbyassist/internal/repository/notification"
 	report_user_repo "nearbyassist/internal/repository/report_user"
 	user_repo "nearbyassist/internal/repository/user"
+	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
@@ -23,6 +25,8 @@ import (
 type Service struct {
 	reportUserStore report_user_repo.ReportUserRepository
 	userStore       user_repo.UserRepository
+	vendorStore     vendor_repo.VendorRepository
+	bookingStore    booking_repo.BookingRepository
 	bugReportStore  bug_report_repo.BugReportRepository
 	notifStore      notification_repo.NotificationRepository
 	ws              websocket.Socket
@@ -34,6 +38,8 @@ type Service struct {
 func NewService(
 	reportUserStore report_user_repo.ReportUserRepository,
 	userStore user_repo.UserRepository,
+	vendorStore vendor_repo.VendorRepository,
+	bookingStore booking_repo.BookingRepository,
 	bugReportStore bug_report_repo.BugReportRepository,
 	notifStore notification_repo.NotificationRepository,
 	ws websocket.Socket,
@@ -44,6 +50,8 @@ func NewService(
 	return &Service{
 		reportUserStore: reportUserStore,
 		userStore:       userStore,
+		vendorStore:     vendorStore,
+		bookingStore:    bookingStore,
 		bugReportStore:  bugReportStore,
 		notifStore:      notifStore,
 		ws:              ws,
@@ -194,6 +202,31 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 		return nil, err
 	}
 
+	reporterCancelledBooking, err := s.bookingStore.GetHistory(reporter.Id, "client")
+	if err != nil {
+		return nil, err
+	}
+
+	vendor, err := s.vendorStore.FindById(reported.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	vendorBookings, err := s.vendorStore.GetBookingsWithStatus(vendor.VendorId, "all")
+	if err != nil {
+		return nil, err
+	}
+
+	reportedUserPreviousReports, err := s.reportUserStore.GetAllReportedIs(reported.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	reporterReportsFiled, err := s.reportUserStore.GetAllReportedBy(reporter.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	data := &dto.UserReportDetail{
 		Reporter: dto.User{
 			Id:           reporter.Id,
@@ -221,6 +254,46 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 			IsRestricted: reported.Restricted,
 			IsBanned:     reported.Banned,
 		},
+		ReporterHistory: dto.ReporterHistory{
+			ReportsFiled: len(reporterReportsFiled),
+			FalseReports: len(
+				slices.Collect(
+					utils.Filter(reporterReportsFiled, func(r *models.UserReportModel) bool {
+						return r.Status == models.REPORT_STATUS_DISMISSED
+					}),
+				),
+			),
+			CancelledBookings: len(reporterCancelledBooking),
+			AccountCreatedAt:  utils.FormatDate(reporter.CreatedAt),
+		},
+		ReportedUserHistory: dto.ReportedUserHistory{
+			Bookings: len(vendorBookings),
+			CompletedBookings: len(
+				slices.Collect(
+					utils.Filter(vendorBookings, func(b *models.BookingModel) bool {
+						return b.Status == models.BOOKING_STATUS_DONE
+					}),
+				),
+			),
+			RejectedBookings: len(
+				slices.Collect(
+					utils.Filter(vendorBookings, func(b *models.BookingModel) bool {
+						return b.Status == models.BOOKING_STATUS_REJECTED
+					}),
+				),
+			),
+			ActiveBookings: len(
+				slices.Collect(
+					utils.Filter(vendorBookings, func(b *models.BookingModel) bool {
+						return b.Status == models.BOOKING_STATUS_CONFIRMED
+					}),
+				),
+			),
+			PreviousReports:  len(reportedUserPreviousReports),
+			AccountCreatedAt: utils.FormatDate(reported.CreatedAt),
+			JoinedVendorAt:   utils.FormatDate(vendor.JoinedAt),
+			Rating:           vendor.Rating,
+		},
 		Report: dto.Report{
 			Id:               report.Id,
 			ReportedByUserId: report.ReporterUserId,
@@ -230,7 +303,7 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 			Reason:           utils.Must(s.encrypt.DecryptString(report.Reason)),
 			Detail:           utils.Must(s.encrypt.DecryptString(report.Detail)),
 			Images:           report.Images,
-			Status:           "",
+			Status:           string(report.Status),
 			CreatedAt:        utils.FormatDate(report.CreatedAt),
 			CompletedAt:      utils.FormatDate(report.UpdatedAt),
 		},

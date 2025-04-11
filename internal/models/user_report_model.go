@@ -6,8 +6,12 @@ type UserReportCategory string
 type UserReportStatus string
 
 var (
-	category_misconduct      UserReportCategory = "misconduct"
-	category_booking_related UserReportCategory = "booking_related"
+	CATEGORY_MISCONDUCT      UserReportCategory = "misconduct"
+	CATEGORY_BOOKING_RELATED UserReportCategory = "booking_related"
+
+	REPORT_STATUS_PENDING   UserReportStatus = "pending"
+	REPORT_STATUS_RESOLVED  UserReportStatus = "resolved"
+	REPORT_STATUS_DISMISSED UserReportStatus = "dismissed"
 )
 
 type UserReportModel struct {
@@ -19,7 +23,7 @@ type UserReportModel struct {
 	BookingId      sql.NullString     `db:"bookingId"`
 	Reason         string             `db:"reason"`
 	Detail         string             `db:"detail"`
-	Status         string             `db:"status"`
+	Status         UserReportStatus   `db:"status"`
 
 	Images         []string
 	BookingIdInput string
