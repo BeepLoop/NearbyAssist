@@ -68,13 +68,18 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 
 	data := &dto.UserAccountDetail{
 		User: dto.User{
-			Id:           user.Id,
-			Name:         utils.Must(s.encrypt.DecryptString(user.Name)),
-			Email:        utils.Must(s.encrypt.DecryptString(user.Email)),
-			ImageURL:     user.ImageUrl,
-			Address:      utils.Try(s.encrypt.DecryptString(user.Address.String)),
-			Phone:        utils.Try(s.encrypt.DecryptString(user.Phone.String)),
-			Socials:      user.Socials,
+			Id:       user.Id,
+			Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
+			Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
+			ImageURL: user.ImageUrl,
+			Address:  utils.Try(s.encrypt.DecryptString(user.Address.String)),
+			Phone:    utils.Try(s.encrypt.DecryptString(user.Phone.String)),
+			Socials: slices.AppendSeq(
+				make([]string, 0),
+				utils.Map(user.Socials, func(social string) string {
+					return utils.Must(s.encrypt.DecryptString(social))
+				}),
+			),
 			CreatedAt:    utils.FormatDate(user.CreatedAt),
 			DateVerified: utils.FormatDate(user.VerifiedAt),
 			IsRestricted: user.Restricted,
@@ -89,26 +94,36 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 				return dto.Booking{
 					Id: booking.Id,
 					Client: dto.User{
-						Id:           user.Id,
-						Name:         utils.Must(s.encrypt.DecryptString(user.Name)),
-						Email:        utils.Must(s.encrypt.DecryptString(user.Email)),
-						ImageURL:     user.ImageUrl,
-						Address:      utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
-						Phone:        utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
-						Socials:      user.Socials,
+						Id:       user.Id,
+						Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
+						Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
+						ImageURL: user.ImageUrl,
+						Address:  utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
+						Phone:    utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
+						Socials: slices.AppendSeq(
+							make([]string, 0),
+							utils.Map(vendor.Socials, func(social string) string {
+								return utils.Must(s.encrypt.DecryptString(social))
+							}),
+						),
 						CreatedAt:    utils.FormatDate(user.CreatedAt),
 						DateVerified: utils.FormatDate(user.VerifiedAt),
 						IsRestricted: user.Restricted,
 						IsBanned:     user.Banned,
 					},
 					Vendor: dto.Vendor{
-						Id:           vendor.VendorId,
-						Name:         utils.Must(s.encrypt.DecryptString(vendor.Name)),
-						Email:        utils.Must(s.encrypt.DecryptString(vendor.Email)),
-						ImageURL:     vendor.ImageUrl,
-						Address:      utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
-						Phone:        utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
-						Socials:      vendor.Socials,
+						Id:       vendor.VendorId,
+						Name:     utils.Must(s.encrypt.DecryptString(vendor.Name)),
+						Email:    utils.Must(s.encrypt.DecryptString(vendor.Email)),
+						ImageURL: vendor.ImageUrl,
+						Address:  utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
+						Phone:    utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
+						Socials: slices.AppendSeq(
+							make([]string, 0),
+							utils.Map(vendor.Socials, func(social string) string {
+								return utils.Must(s.encrypt.DecryptString(social))
+							}),
+						),
 						Rating:       vendor.Rating,
 						JoinedAt:     utils.FormatDate(vendor.JoinedAt),
 						DateVerified: utils.FormatDate(vendor.VerifiedAt),
@@ -172,26 +187,36 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 				return dto.Booking{
 					Id: h.Id,
 					Client: dto.User{
-						Id:           user.Id,
-						Name:         utils.Must(s.encrypt.DecryptString(user.Name)),
-						Email:        utils.Must(s.encrypt.DecryptString(user.Email)),
-						ImageURL:     user.ImageUrl,
-						Address:      utils.Try(s.encrypt.DecryptString(user.Address.String)),
-						Phone:        utils.Try(s.encrypt.DecryptString(user.Phone.String)),
-						Socials:      user.Socials,
+						Id:       user.Id,
+						Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
+						Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
+						ImageURL: user.ImageUrl,
+						Address:  utils.Try(s.encrypt.DecryptString(user.Address.String)),
+						Phone:    utils.Try(s.encrypt.DecryptString(user.Phone.String)),
+						Socials: slices.AppendSeq(
+							make([]string, 0),
+							utils.Map(user.Socials, func(social string) string {
+								return utils.Must(s.encrypt.DecryptString(social))
+							}),
+						),
 						CreatedAt:    utils.FormatDate(user.CreatedAt),
 						DateVerified: utils.FormatDate(user.VerifiedAt),
 						IsRestricted: user.Restricted,
 						IsBanned:     user.Banned,
 					},
 					Vendor: dto.Vendor{
-						Id:           vendor.VendorId,
-						Name:         utils.Must(s.encrypt.DecryptString(vendor.Name)),
-						Email:        utils.Must(s.encrypt.DecryptString(vendor.Email)),
-						ImageURL:     vendor.ImageUrl,
-						Address:      utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
-						Phone:        utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
-						Socials:      vendor.Socials,
+						Id:       vendor.VendorId,
+						Name:     utils.Must(s.encrypt.DecryptString(vendor.Name)),
+						Email:    utils.Must(s.encrypt.DecryptString(vendor.Email)),
+						ImageURL: vendor.ImageUrl,
+						Address:  utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
+						Phone:    utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
+						Socials: slices.AppendSeq(
+							make([]string, 0),
+							utils.Map(vendor.Socials, func(social string) string {
+								return utils.Must(s.encrypt.DecryptString(social))
+							}),
+						),
 						Rating:       vendor.Rating,
 						JoinedAt:     utils.FormatDate(vendor.JoinedAt),
 						DateVerified: utils.FormatDate(vendor.VerifiedAt),
@@ -274,13 +299,18 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 
 	data := &dto.VendorAccountDetail{
 		Vendor: dto.Vendor{
-			Id:           account.VendorId,
-			Name:         utils.Must(s.encrypt.DecryptString(account.Name)),
-			Email:        utils.Must(s.encrypt.DecryptString(account.Email)),
-			ImageURL:     account.ImageUrl,
-			Address:      utils.Try(s.encrypt.DecryptString(account.Address.String)),
-			Phone:        utils.Try(s.encrypt.DecryptString(account.Phone.String)),
-			Socials:      account.Socials,
+			Id:       account.VendorId,
+			Name:     utils.Must(s.encrypt.DecryptString(account.Name)),
+			Email:    utils.Must(s.encrypt.DecryptString(account.Email)),
+			ImageURL: account.ImageUrl,
+			Address:  utils.Try(s.encrypt.DecryptString(account.Address.String)),
+			Phone:    utils.Try(s.encrypt.DecryptString(account.Phone.String)),
+			Socials: slices.AppendSeq(
+				make([]string, 0),
+				utils.Map(account.Socials, func(social string) string {
+					return utils.Must(s.encrypt.DecryptString(social))
+				}),
+			),
 			Rating:       account.Rating,
 			Expertise:    account.Expertise,
 			JoinedAt:     utils.FormatDate(account.JoinedAt),
@@ -333,26 +363,36 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 				return dto.Booking{
 					Id: booking.Id,
 					Client: dto.User{
-						Id:           client.Id,
-						Name:         utils.Must(s.encrypt.DecryptString(client.Name)),
-						Email:        utils.Must(s.encrypt.DecryptString(client.Email)),
-						ImageURL:     client.ImageUrl,
-						Address:      utils.Try(s.encrypt.DecryptString(client.Address.String)),
-						Phone:        utils.Try(s.encrypt.DecryptString(client.Phone.String)),
-						Socials:      client.Socials,
+						Id:       client.Id,
+						Name:     utils.Must(s.encrypt.DecryptString(client.Name)),
+						Email:    utils.Must(s.encrypt.DecryptString(client.Email)),
+						ImageURL: client.ImageUrl,
+						Address:  utils.Try(s.encrypt.DecryptString(client.Address.String)),
+						Phone:    utils.Try(s.encrypt.DecryptString(client.Phone.String)),
+						Socials: slices.AppendSeq(
+							make([]string, 0),
+							utils.Map(client.Socials, func(social string) string {
+								return utils.Must(s.encrypt.DecryptString(social))
+							}),
+						),
 						CreatedAt:    utils.FormatDate(client.CreatedAt),
 						DateVerified: utils.FormatDate(client.VerifiedAt),
 						IsRestricted: client.Restricted,
 						IsBanned:     client.Banned,
 					},
 					Vendor: dto.Vendor{
-						Id:           account.VendorId,
-						Name:         utils.Must(s.encrypt.DecryptString(account.Name)),
-						Email:        utils.Must(s.encrypt.DecryptString(account.Email)),
-						ImageURL:     account.ImageUrl,
-						Address:      utils.Try(s.encrypt.DecryptString(account.Address.String)),
-						Phone:        utils.Try(s.encrypt.DecryptString(account.Phone.String)),
-						Socials:      account.Socials,
+						Id:       account.VendorId,
+						Name:     utils.Must(s.encrypt.DecryptString(account.Name)),
+						Email:    utils.Must(s.encrypt.DecryptString(account.Email)),
+						ImageURL: account.ImageUrl,
+						Address:  utils.Try(s.encrypt.DecryptString(account.Address.String)),
+						Phone:    utils.Try(s.encrypt.DecryptString(account.Phone.String)),
+						Socials: slices.AppendSeq(
+							make([]string, 0),
+							utils.Map(account.Socials, func(social string) string {
+								return utils.Must(s.encrypt.DecryptString(social))
+							}),
+						),
 						Rating:       account.Rating,
 						Expertise:    account.Expertise,
 						JoinedAt:     utils.FormatDate(account.JoinedAt),
@@ -418,26 +458,36 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 				return dto.Booking{
 					Id: h.Id,
 					Client: dto.User{
-						Id:           client.Id,
-						Name:         utils.Must(s.encrypt.DecryptString(client.Name)),
-						Email:        utils.Must(s.encrypt.DecryptString(client.Email)),
-						ImageURL:     client.ImageUrl,
-						Address:      client.Address.String,
-						Phone:        client.Phone.String,
-						Socials:      client.Socials,
+						Id:       client.Id,
+						Name:     utils.Must(s.encrypt.DecryptString(client.Name)),
+						Email:    utils.Must(s.encrypt.DecryptString(client.Email)),
+						ImageURL: client.ImageUrl,
+						Address:  client.Address.String,
+						Phone:    client.Phone.String,
+						Socials: slices.AppendSeq(
+							make([]string, 0),
+							utils.Map(client.Socials, func(social string) string {
+								return utils.Must(s.encrypt.DecryptString(social))
+							}),
+						),
 						CreatedAt:    utils.FormatDate(client.CreatedAt),
 						DateVerified: utils.FormatDate(client.VerifiedAt),
 						IsRestricted: client.Restricted,
 						IsBanned:     client.Banned,
 					},
 					Vendor: dto.Vendor{
-						Id:           account.VendorId,
-						Name:         utils.Must(s.encrypt.DecryptString(account.Name)),
-						Email:        utils.Must(s.encrypt.DecryptString(account.Email)),
-						ImageURL:     account.ImageUrl,
-						Address:      utils.Try(s.encrypt.DecryptString(account.Address.String)),
-						Phone:        utils.Try(s.encrypt.DecryptString(account.Phone.String)),
-						Socials:      account.Socials,
+						Id:       account.VendorId,
+						Name:     utils.Must(s.encrypt.DecryptString(account.Name)),
+						Email:    utils.Must(s.encrypt.DecryptString(account.Email)),
+						ImageURL: account.ImageUrl,
+						Address:  utils.Try(s.encrypt.DecryptString(account.Address.String)),
+						Phone:    utils.Try(s.encrypt.DecryptString(account.Phone.String)),
+						Socials: slices.AppendSeq(
+							make([]string, 0),
+							utils.Map(account.Socials, func(social string) string {
+								return utils.Must(s.encrypt.DecryptString(social))
+							}),
+						),
 						Rating:       account.Rating,
 						Expertise:    account.Expertise,
 						JoinedAt:     utils.FormatDate(account.JoinedAt),

@@ -13,6 +13,7 @@ type UserReportDetail struct {
 	ReporterHistory     ReporterHistory
 	ReportedUserHistory ReportedUserHistory
 	Report              Report
+	Booking             Booking
 }
 
 type ReportedUserHistory struct {

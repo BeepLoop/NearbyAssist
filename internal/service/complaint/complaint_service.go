@@ -227,6 +227,99 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 		return nil, err
 	}
 
+	booking := dto.Booking{}
+	if report.Category == models.CATEGORY_BOOKING_RELATED {
+		if res, err := s.bookingStore.FindById(report.BookingId.String); err != nil {
+			return nil, err
+		} else {
+			booking = dto.Booking{
+				Id: res.Id,
+				Client: dto.User{
+					Id:       reporter.Id,
+					Name:     utils.Must(s.encrypt.DecryptString(reporter.Name)),
+					Email:    utils.Must(s.encrypt.DecryptString(reporter.Email)),
+					ImageURL: reporter.ImageUrl,
+					Address:  utils.Try(s.encrypt.DecryptString(reporter.Address.String)),
+					Phone:    utils.Try(s.encrypt.DecryptString(reporter.Phone.String)),
+					Socials: slices.AppendSeq(
+						make([]string, 0),
+						utils.Map(reporter.Socials, func(social string) string {
+							return utils.Must(s.encrypt.DecryptString(social))
+						}),
+					),
+					CreatedAt:    utils.FormatDate(reporter.CreatedAt),
+					DateVerified: utils.FormatDate(reporter.VerifiedAt),
+					IsRestricted: reporter.Restricted,
+					IsBanned:     reporter.Banned,
+				},
+				Vendor: dto.Vendor{
+					Id:       vendor.VendorId,
+					Name:     utils.Must(s.encrypt.DecryptString(vendor.Name)),
+					Email:    utils.Must(s.encrypt.DecryptString(vendor.Email)),
+					ImageURL: vendor.ImageUrl,
+					Address:  utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
+					Phone:    utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
+					Socials: slices.AppendSeq(
+						make([]string, 0),
+						utils.Map(vendor.Socials, func(social string) string {
+							return utils.Must(s.encrypt.DecryptString(social))
+						}),
+					),
+					Rating:       vendor.Rating,
+					JoinedAt:     utils.FormatDate(vendor.JoinedAt),
+					DateVerified: utils.FormatDate(vendor.VerifiedAt),
+					Expertise:    vendor.Expertise,
+				},
+				Service: dto.Service{
+					Id:          res.Service.Id,
+					Title:       utils.Must(s.encrypt.DecryptString(res.Service.Title)),
+					Description: utils.Must(s.encrypt.DecryptString(res.Service.Description)),
+					Rate:        utils.StringToFloatElseZero(res.Service.Rate),
+					Tags: slices.AppendSeq(
+						make([]string, 0),
+						utils.Map(res.Service.Tags, func(t *models.TagModel) string { return t.Title }),
+					),
+					Extras: slices.AppendSeq(
+						make([]dto.Extra, 0),
+						utils.Map(res.Service.Extras, func(x *models.ExtraModel) dto.Extra {
+							return dto.Extra{
+								Id:          x.Id,
+								Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
+								Description: utils.Must(s.encrypt.DecryptString(x.Description)),
+								Price:       x.Price,
+							}
+						}),
+					),
+					Images: slices.AppendSeq(
+						make([]dto.Image, 0),
+						utils.Map(res.Service.Images, func(img *models.ServicePhotoModel) dto.Image {
+							return dto.Image{Id: img.Id, URL: img.Url}
+						}),
+					),
+					CreatedAt: utils.FormatDate(res.Service.CreatedAt),
+					UpdatedAt: utils.FormatDate(res.Service.UpdatedAt),
+				},
+				Cost:   utils.StringToFloatElseZero(res.Cost),
+				Status: string(res.Status),
+				Extras: slices.AppendSeq(
+					make([]dto.Extra, 0),
+					utils.Map(res.Extras, func(x *models.ExtraModel) dto.Extra {
+						return dto.Extra{
+							Id:          x.Id,
+							Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
+							Description: utils.Must(s.encrypt.DecryptString(x.Description)),
+							Price:       x.Price,
+						}
+					}),
+				),
+				CreatedAt:    utils.FormatDate(res.CreatedAt),
+				ScheduledAt:  utils.FormatDate(res.ScheduledAt.String),
+				UpdatedAt:    utils.FormatDate(res.UpdatedAt),
+				CancelReason: utils.Try(s.encrypt.DecryptString(res.CancelReason.String)),
+			}
+		}
+	}
+
 	data := &dto.UserReportDetail{
 		Reporter: dto.User{
 			Id:       reporter.Id,
@@ -317,6 +410,7 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 			CreatedAt:        utils.FormatDate(report.CreatedAt),
 			CompletedAt:      utils.FormatDate(report.UpdatedAt),
 		},
+		Booking: booking,
 	}
 
 	return data, nil
