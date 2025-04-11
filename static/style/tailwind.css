@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -18,7 +18,7 @@
     --color-danger: var(--color-red-500);
     --color-danger-light: var(--color-red-400);
 
-    --font-roboto: "Roboto", sans-serif;
+    --font-roboto: "Inter", sans-serif;
 }
 
 [x-cloak] {
