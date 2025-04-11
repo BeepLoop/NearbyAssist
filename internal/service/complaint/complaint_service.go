@@ -229,26 +229,36 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 
 	data := &dto.UserReportDetail{
 		Reporter: dto.User{
-			Id:           reporter.Id,
-			Name:         utils.Must(s.encrypt.DecryptString(reporter.Name)),
-			Email:        utils.Must(s.encrypt.DecryptString(reporter.Email)),
-			ImageURL:     reporter.ImageUrl,
-			Address:      utils.Try(s.encrypt.DecryptString(reporter.Address.String)),
-			Phone:        utils.Try(s.encrypt.DecryptString(reporter.Phone.String)),
-			Socials:      reporter.Socials,
+			Id:       reporter.Id,
+			Name:     utils.Must(s.encrypt.DecryptString(reporter.Name)),
+			Email:    utils.Must(s.encrypt.DecryptString(reporter.Email)),
+			ImageURL: reporter.ImageUrl,
+			Address:  utils.Try(s.encrypt.DecryptString(reporter.Address.String)),
+			Phone:    utils.Try(s.encrypt.DecryptString(reporter.Phone.String)),
+			Socials: slices.AppendSeq(
+				make([]string, 0),
+				utils.Map(reported.Socials, func(social string) string {
+					return utils.Must(s.encrypt.DecryptString(social))
+				}),
+			),
 			CreatedAt:    utils.FormatDate(reporter.CreatedAt),
 			DateVerified: utils.FormatDate(reporter.VerifiedAt),
 			IsRestricted: reporter.Restricted,
 			IsBanned:     reporter.Banned,
 		},
 		Reported: dto.User{
-			Id:           reported.Id,
-			Name:         utils.Must(s.encrypt.DecryptString(reported.Name)),
-			Email:        utils.Must(s.encrypt.DecryptString(reported.Email)),
-			ImageURL:     reported.ImageUrl,
-			Address:      utils.Try(s.encrypt.DecryptString(reported.Address.String)),
-			Phone:        utils.Try(s.encrypt.DecryptString(reported.Phone.String)),
-			Socials:      reported.Socials,
+			Id:       reported.Id,
+			Name:     utils.Must(s.encrypt.DecryptString(reported.Name)),
+			Email:    utils.Must(s.encrypt.DecryptString(reported.Email)),
+			ImageURL: reported.ImageUrl,
+			Address:  utils.Try(s.encrypt.DecryptString(reported.Address.String)),
+			Phone:    utils.Try(s.encrypt.DecryptString(reported.Phone.String)),
+			Socials: slices.AppendSeq(
+				make([]string, 0),
+				utils.Map(reported.Socials, func(social string) string {
+					return utils.Must(s.encrypt.DecryptString(social))
+				}),
+			),
 			CreatedAt:    utils.FormatDate(reported.CreatedAt),
 			DateVerified: utils.FormatDate(reported.VerifiedAt),
 			IsRestricted: reported.Restricted,

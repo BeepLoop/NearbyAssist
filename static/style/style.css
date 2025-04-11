@@ -773,6 +773,9 @@
   .h-12 {
     height: calc(var(--spacing) * 12);
   }
+  .h-44 {
+    height: calc(var(--spacing) * 44);
+  }
   .h-48 {
     height: calc(var(--spacing) * 48);
   }
@@ -781,6 +784,9 @@
   }
   .h-full {
     height: 100%;
+  }
+  .h-min {
+    height: min-content;
   }
   .h-screen {
     height: 100vh;
@@ -1061,6 +1067,14 @@
     border-top-style: var(--tw-border-style);
     border-top-width: 2px;
   }
+  .border-b {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 1px;
+  }
+  .border-b-2 {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 2px;
+  }
   .border-l {
     border-left-style: var(--tw-border-style);
     border-left-width: 1px;
@@ -1077,6 +1091,9 @@
   }
   .border-pale-gray {
     border-color: var(--color-pale-gray);
+  }
+  .border-primary {
+    border-color: var(--color-primary);
   }
   .border-primary\/50 {
     border-color: color-mix(in oklab, var(--color-primary) 50%, transparent);
@@ -1597,6 +1614,21 @@
       color: var(--color-neutral-gray-lighter);
     }
   }
+  .hover\:border-b-2 {
+    &:hover {
+      @media (hover: hover) {
+        border-bottom-style: var(--tw-border-style);
+        border-bottom-width: 2px;
+      }
+    }
+  }
+  .hover\:border-b-primary {
+    &:hover {
+      @media (hover: hover) {
+        border-bottom-color: var(--color-primary);
+      }
+    }
+  }
   .hover\:bg-blue-700 {
     &:hover {
       @media (hover: hover) {
@@ -1671,6 +1703,13 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-green-800);
+      }
+    }
+  }
+  .hover\:text-neutral-dark {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-neutral-dark);
       }
     }
   }
@@ -1938,6 +1977,11 @@
     &:where(:dir(rtl), [dir="rtl"], [dir="rtl"] *) {
       --tw-translate-x: calc(var(--spacing) * 12);
       translate: var(--tw-translate-x) var(--tw-translate-y);
+    }
+  }
+  .dark\:text-neutral-dark {
+    @media (prefers-color-scheme: dark) {
+      color: var(--color-neutral-dark);
     }
   }
 }
