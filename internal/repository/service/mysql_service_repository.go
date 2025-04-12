@@ -731,7 +731,7 @@ func (s *MysqlServiceRepository) DeleteExtra(extraId string) error {
 	}
 
 	if len(bookingsWithThisExtra) != 0 {
-		return errors.New("This service extra is actively in use")
+		return errors.New("extra_actively_used")
 	}
 
 	markExtraAsDeletedQuery := "UPDATE Extra set deleted = 1 WHERE id = ?"

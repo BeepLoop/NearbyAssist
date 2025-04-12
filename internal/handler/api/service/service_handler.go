@@ -308,6 +308,13 @@ func (h *serviceHandler) DeleteExtra(c echo.Context) error {
 			})
 		}
 
+		if strings.Contains(err.Error(), "extra_actively_used") {
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+				Message: "Extra actively being used",
+				Error:   err.Error(),
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "could not delete service extra",
 			Error:   err.Error(),
