@@ -452,7 +452,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 		History: slices.AppendSeq(
 			make([]dto.Booking, 0),
 			utils.Map(history, func(h *models.BookingModel) dto.Booking {
-				client, _ := s.userStore.FindById(h.VendorId)
+				client, _ := s.userStore.FindById(h.ClientId)
 				service, _ := s.serviceStore.FindById(h.ServiceId)
 
 				return dto.Booking{
