@@ -17,6 +17,11 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) 
 			@partials.BackButton()
 		</div>
 		<div class="mx-auto max-w-3xl">
+			<div class="flex justify-end">
+				@closeReport() {
+					@addressReportContent(data.Report.Id)
+				}
+			</div>
 			<div x-data="{ selectedTab: 'overview' }" class="w-full">
 				<!-- tab buttons button -->
 				<div
@@ -291,7 +296,7 @@ templ reported(data dto.UserReportDetail) {
 		<h1 class="text-xl font-medium">History</h1>
 		@partials.Divider()
 		<div>
-			<div class="mt-2 flex gap-2 items-center">
+			<div class="mt-2 flex items-center gap-2">
 				<span class="font-medium text-neutral-dark">Vendor Rating:</span>
 				<span class="flex gap-2 text-warning">
 					<p class="font-medium">{ data.ReportedUserHistory.Rating }</p>
@@ -402,14 +407,165 @@ templ reporter(data dto.UserReportDetail) {
 	</div>
 }
 
-templ addressReport(data models.UserReportModel) {
+templ addressReportContent(reportId string) {
+	<div class="mt-4 text-xs">
+		<form
+			action="/admin/complaints/users/close"
+			method="POST"
+		>
+			<input
+				type="text"
+				hidden
+				name="reportId"
+				value={ reportId }
+			/>
+			<div class="mt-2">
+				<div
+					x-data="combobox({
+                        options: [
+                            {
+                                'label': 'Resolve', 
+                                'value': 'resolved'
+                            },
+                            {
+                                'label': 'Dismis',
+                                'value': 'dismissed'
+                            }
+                        ],
+                    })"
+					class="flex w-full max-w-xs flex-col gap-1"
+					x-on:keydown="highlightFirstMatchingOption($event.key)"
+					x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
+				>
+					<label for="action" class="w-fit pl-0.5 font-medium text-neutral-dark">Action</label>
+					<div class="relative">
+						<!-- trigger button  -->
+						<button
+							type="button"
+							role="combobox"
+							class="capitalize inline-flex w-full items-center justify-between gap-2 rounded-sm border border-neutral-gray-lighter px-4 py-2 font-medium tracking-wide whitespace-nowrap text-neutral-dark transition hover:opacity-75 focus:border-primary focus:outline-none"
+							aria-haspopup="listbox"
+							aria-controls="actionsList"
+							x-on:click="isOpen = ! isOpen"
+							x-on:keydown.down.prevent="openedWithKeyboard = true"
+							x-on:keydown.enter.prevent="openedWithKeyboard = true"
+							x-on:keydown.space.prevent="openedWithKeyboard = true"
+							x-bind:aria-label="selectedOption ? selectedOption.value : 'Please Select'"
+							x-bind:aria-expanded="isOpen || openedWithKeyboard"
+						>
+							<span class="font-normal text-neutral-gray" x-text="selectedOption ? selectedOption.value : 'Select action'"></span>
+							<!-- Chevron  -->
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+								<path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+							</svg>
+						</button>
+						<!-- hidden input to grab the selected value  -->
+						<input id="action" name="action" type="text" x-ref="hiddenTextField" hidden required/>
+						<ul
+							x-cloak
+							x-show="isOpen || openedWithKeyboard"
+							id="actionsList"
+							class="absolute top-11 left-0 z-10 flex max-h-44 w-full flex-col overflow-hidden overflow-y-auto rounded-sm  border border-pale-gray bg-neutral-50 py-1.5"
+							role="listbox"
+							aria-label="actions list"
+							x-on:click.outside="isOpen = false, openedWithKeyboard = false"
+							x-on:keydown.down.prevent="$focus.wrap().next()"
+							x-on:keydown.up.prevent="$focus.wrap().previous()"
+							x-transition
+							x-trap="openedWithKeyboard"
+						>
+							<template x-for="(item, index) in options" x-bind:key="item.value">
+								<li
+									class="combobox-option inline-flex justify-between gap-6 px-4 py-2 text-sm text-neutral-dark cursor-pointer hover:text-neutral-gray"
+									role="option"
+									x-on:click="setSelectedOption(item)"
+									x-on:keydown.enter="setSelectedOption(item)"
+									x-bind:id="'option-' + index"
+									tabindex="0"
+								>
+									<!-- Label  -->
+									<span x-bind:class="selectedOption == item ? 'font-bold' : null" x-text="item.label"></span>
+									<!-- Screen reader 'selected' indicator  -->
+									<span class="sr-only" x-text="selectedOption == item ? 'selected' : null"></span>
+									<!-- Checkmark  -->
+									<svg x-cloak x-show="selectedOption == item" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" class="size-4" aria-hidden="true">
+										<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"></path>
+									</svg>
+								</li>
+							</template>
+						</ul>
+					</div>
+				</div>
+				<script>
+                    (function() {
+                        document.addEventListener('alpine:init', () => {
+                            Alpine.data('combobox', (comboboxData = {
+                                options: [],
+                            },) => ({
+                                options: comboboxData.options,
+                                isOpen: false,
+                                openedWithKeyboard: false,
+                                selectedOption: null,
+                                setSelectedOption(option) {
+                                    this.selectedOption = option
+                                    this.isOpen = false
+                                    this.openedWithKeyboard = false
+                                    this.$refs.hiddenTextField.value = option.value
+                                },
+                                highlightFirstMatchingOption(pressedKey) {
+                                    const option = this.options.find((item) =>
+                                        item.label.toLowerCase().startsWith(pressedKey.toLowerCase()),
+                                    )
+                                    if (option) {
+                                        const index = this.options.indexOf(option)
+                                        const allOptions = document.querySelectorAll('.combobox-option')
+                                        if (allOptions[index]) {
+                                            allOptions[index].focus()
+                                        }
+                                    }
+                                },
+                            }))
+                        })
+                     })();
+            </script>
+			</div>
+			<div class="mt-4">
+				<label for="note" class="font-medium text-neutral-dark">Note</label>
+				<textarea
+					name="note"
+					id="note"
+					rows="6"
+					required
+					placeholder="notes or actions taken on this report"
+					autocomplete="off"
+					class="border-neutral-gray-lighter mt-1.5 w-full rounded-sm border p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none"
+				></textarea>
+			</div>
+			<div class="mt-4 flex justify-end">
+				<button
+					type="submit"
+					class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 font-medium text-white hover:opacity-75"
+				>Submit</button>
+			</div>
+		</form>
+	</div>
+}
+
+templ closeReport() {
 	<div x-data="{offCanvasOpen: false}">
 		<!-- offCanvas Button -->
 		<button
-			x-on:click="offCanvasOpen = !offCanvasOpen"
 			type="button"
-			class="cursor-pointer rounded-sm bg-primary p-2 text-sm font-medium text-white hover:opacity-75"
-		>Address</button>
+			class="w-min cursor-pointer rounded-sm bg-primary p-1 pr-2 font-semibold whitespace-nowrap text-white outline-1 outline-primary hover:opacity-75"
+			x-on:click="offCanvasOpen = true"
+		>
+			<span class="flex items-center gap-1">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+				</svg>
+				<p>Close</p>
+			</span>
+		</button>
 		<!-- offCanvas Backdrop -->
 		<div
 			x-cloak
@@ -417,7 +573,7 @@ templ addressReport(data models.UserReportModel) {
 			x-on:keydown.esc.window="offCanvasOpen = false"
 			x-on:click.self="offCanvasOpen = false"
 			role="dialog"
-			class="fixed inset-0 bg-neutral-gray/50"
+			class="fixed inset-0 z-90 bg-neutral-gray/50"
 		>
 			<!-- offCanvas Sidebar -->
 			<div
@@ -430,70 +586,10 @@ templ addressReport(data models.UserReportModel) {
 				x-transition:leave-start="translate-x-0"
 				x-transition:leave-end="translate-x-full"
 				role="document"
-				class="fixed top-0 right-0 flex h-full w-md flex-col bg-white p-4 outline-1 outline-pale-gray"
+				class="fixed top-0 right-0 flex h-full w-lg flex-col overflow-y-scroll bg-white px-4 pt-4 pb-14 outline-1 outline-pale-gray"
 			>
-				<!-- Header -->
-				<div class="flex justify-end">
-					<button
-						x-on:click="offCanvasOpen = false"
-						type="button"
-						class="flex cursor-pointer items-center rounded-sm px-3 py-1.5 hover:bg-neutral-gray/25 hover:opacity-75"
-					>
-						<svg
-							class="hi-solid hi-x -mx-1 inline-block size-4"
-							fill="currentColor"
-							viewBox="0 0 20 20"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								fill-rule="evenodd"
-								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-								clip-rule="evenodd"
-							></path>
-						</svg>
-					</button>
-				</div>
 				<!-- Content -->
-				<div class="mt-4">
-					<form
-						action="/admin/complaints/users/close"
-						method="POST"
-					>
-						<input
-							type="text"
-							hidden
-							name="reportId"
-							value={ data.Id }
-						/>
-						<div class="mt-2">
-							<label for="title" class="font-medium">Title</label>
-							<input
-								type="text"
-								name="title"
-								id="title"
-								placeholder="title"
-								class="mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 focus:border-primary focus:outline-none"
-							/>
-						</div>
-						<div class="mt-2">
-							<label for="detail" class="font-medium">Detail</label>
-							<textarea
-								name="detail"
-								id="detail"
-								rows="6"
-								placeholder="more details..."
-								autocomplete="off"
-								class="mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none"
-							></textarea>
-						</div>
-						<div class="mt-4 flex justify-end">
-							<button
-								type="submit"
-								class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 font-medium text-white hover:opacity-75"
-							>Okay</button>
-						</div>
-					</form>
-				</div>
+				{ children... }
 			</div>
 		</div>
 	</div>

@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	resource_service "nearbyassist/internal/service/resource"
 	"net/http"
@@ -49,6 +50,7 @@ func (h *resourceHandler) GetPrivateFile(c echo.Context) error {
 
 	file, err := h.resourceService.GetPrivateFile(params.Get("path"), params.Get("signature"), params.Get("expiry"))
 	if err != nil {
+		fmt.Println(err.Error())
 		if strings.Contains(err.Error(), "invalid resource URL") {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 				Message: "Invalid resource URL",

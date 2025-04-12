@@ -261,3 +261,26 @@ func (s *MysqlReportUserRepository) UpdateStatus(reportId, status string) error 
 
 	return nil
 }
+
+func (s *MysqlReportUserRepository) Close(reportId, action, adminId, note string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        UPDATE
+            UserReport
+        SET
+            status = ?, adminId = ?, adminNote = ?
+        WHERE
+            id = ?
+    `
+	if _, err := s.db.ExecContext(ctx, query, action, adminId, note, reportId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}

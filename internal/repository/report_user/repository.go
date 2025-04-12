@@ -10,4 +10,5 @@ type ReportUserRepository interface {
 	GetAllReportedBy(userId string) ([]*models.UserReportModel, error)
 	GetImages(reportId string) ([]string, error)
 	UpdateStatus(reportId, status string) error
+	Close(reportId, action, adminId, note string) error
 }

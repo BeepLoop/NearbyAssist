@@ -111,6 +111,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		complaintService := complaint_service.NewService(
 			reportUserStore,
 			userStore,
@@ -119,19 +120,18 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 			serviceStore,
 			bugReportStore,
 			notifStore,
+			resourceService,
 			s.WS,
 			s.FS,
 			s.Encrypt,
 			s.JWT,
 		)
-		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		complaintHandler := complaint.NewHandler(complaintService, resourceService)
 
 		complaintRoute.GET("/users", complaintHandler.GetUserReports)
 		complaintRoute.GET("/users/:reportId", complaintHandler.GetReport)
-		complaintRoute.POST("/users/dismiss", complaintHandler.Dismiss)
-		complaintRoute.POST("/users/resolve", complaintHandler.Resolve)
+		complaintRoute.POST("/users/close", complaintHandler.Close)
 
 		complaintRoute.GET("/bugs", complaintHandler.GetBugReports, middleware.EnsureAdmin)
 		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug, middleware.EnsureAdmin)

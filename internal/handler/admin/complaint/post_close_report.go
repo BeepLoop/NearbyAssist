@@ -7,12 +7,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *complaintHandler) Resolve(c echo.Context) error {
+func (h *complaintHandler) Close(c echo.Context) error {
 	reportId := c.FormValue("reportId")
-	title := c.FormValue("title")
-	detail := c.FormValue("detail")
+	action := c.FormValue("action")
+	note := c.FormValue("note")
 
-	if err := h.complaintService.ActOnReport(reportId, title, detail, "resolved"); err != nil {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
+	if err := h.complaintService.ActOnReport(reportId, action, admin.Id, note); err != nil {
 		if err := utils.SetFlashMessage(c, "error", "failed to resolve report: "+reportId); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/complaints/users?error=resolve_error")
 		}

@@ -786,6 +786,9 @@
   .h-screen {
     height: 100vh;
   }
+  .max-h-44 {
+    max-height: calc(var(--spacing) * 44);
+  }
   .max-h-\[80vh\] {
     max-height: 80vh;
   }
@@ -991,6 +994,9 @@
   .gap-4 {
     gap: calc(var(--spacing) * 4);
   }
+  .gap-6 {
+    gap: calc(var(--spacing) * 6);
+  }
   .space-y-16 {
     :where(& > :not(:last-child)) {
       --tw-space-y-reverse: 0;
@@ -1039,6 +1045,9 @@
   }
   .overflow-x-auto {
     overflow-x: auto;
+  }
+  .overflow-y-auto {
+    overflow-y: auto;
   }
   .overflow-y-hidden {
     overflow-y: hidden;
@@ -1379,6 +1388,10 @@
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
   }
+  .font-normal {
+    --tw-font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-normal);
+  }
   .font-semibold {
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
@@ -1462,6 +1475,9 @@
   }
   .text-white {
     color: var(--color-white);
+  }
+  .capitalize {
+    text-transform: capitalize;
   }
   .lowercase {
     text-transform: lowercase;
@@ -1729,6 +1745,13 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-neutral-dark);
+      }
+    }
+  }
+  .hover\:text-neutral-gray {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-neutral-gray);
       }
     }
   }

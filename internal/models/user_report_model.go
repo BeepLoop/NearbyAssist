@@ -24,6 +24,8 @@ type UserReportModel struct {
 	Reason         string             `db:"reason"`
 	Detail         string             `db:"detail"`
 	Status         UserReportStatus   `db:"status"`
+	AdminId        sql.NullString     `db:"adminId"`
+	AdminNote      sql.NullString     `db:"adminNote"`
 
 	Images         []string
 	BookingIdInput string

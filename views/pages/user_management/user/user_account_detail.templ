@@ -156,7 +156,7 @@ templ activeBookings(data dto.UserAccountDetail) {
 							<p class="text-neutral-gray">{ booking.ScheduledAt }</p>
 						</td>
 						<td class="p-2">
-							@partials.OpenOffCanvas() {
+							@partials.OffCanvas() {
 								@offCanvasBookingData(booking)
 							}
 						</td>
@@ -202,7 +202,7 @@ templ previousBookings(data dto.UserAccountDetail) {
 							<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 						</td>
 						<td class="p-2">
-							@partials.OpenOffCanvas() {
+							@partials.OffCanvas() {
 								@offCanvasBookingData(booking)
 							}
 						</td>

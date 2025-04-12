@@ -2,7 +2,6 @@ package complaint_service
 
 import (
 	"errors"
-	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
@@ -16,7 +15,7 @@ import (
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
-	notification_service "nearbyassist/internal/service/notification"
+	resource_service "nearbyassist/internal/service/resource"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 	"slices"
@@ -31,6 +30,7 @@ type Service struct {
 	serviceStore    service_repo.ServiceRepository
 	bugReportStore  bug_report_repo.BugReportRepository
 	notifStore      notification_repo.NotificationRepository
+	resourceService *resource_service.Service
 	ws              websocket.Socket
 	fs              fs.FileStorage
 	encrypt         core.Encryption
@@ -45,6 +45,7 @@ func NewService(
 	serviceStore service_repo.ServiceRepository,
 	bugReportStore bug_report_repo.BugReportRepository,
 	notifStore notification_repo.NotificationRepository,
+	resourceService *resource_service.Service,
 	ws websocket.Socket,
 	fs fs.FileStorage,
 	encrypt core.Encryption,
@@ -58,6 +59,7 @@ func NewService(
 		serviceStore:    serviceStore,
 		bugReportStore:  bugReportStore,
 		notifStore:      notifStore,
+		resourceService: resourceService,
 		ws:              ws,
 		fs:              fs,
 		encrypt:         encrypt,
@@ -415,10 +417,15 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 			BookingId:        report.BookingId.String,
 			Reason:           utils.Must(s.encrypt.DecryptString(report.Reason)),
 			Detail:           utils.Must(s.encrypt.DecryptString(report.Detail)),
-			Images:           report.Images,
-			Status:           string(report.Status),
-			CreatedAt:        utils.FormatDate(report.CreatedAt),
-			CompletedAt:      utils.FormatDate(report.UpdatedAt),
+			Images: slices.AppendSeq(
+				make([]string, 0),
+				utils.Map(report.Images, func(image string) string {
+					return utils.Must(s.resourceService.SignURLWithDefaultDuration(image))
+				}),
+			),
+			Status:      string(report.Status),
+			CreatedAt:   utils.FormatDate(report.CreatedAt),
+			CompletedAt: utils.FormatDate(report.UpdatedAt),
 		},
 		Booking: booking,
 	}
@@ -427,57 +434,18 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 }
 
 // actions = "resolved" | "dismissed"
-func (s *Service) ActOnReport(reportId, title, detail, action string) error {
+func (s *Service) ActOnReport(reportId, action, adminId, note string) error {
 	allowedActions := []string{"resolved", "dismissed"}
 	if !slices.Contains(allowedActions, action) {
 		return errors.New("invalid_action")
 	}
 
-	report, err := s.reportUserStore.FindById(reportId)
-	if err != nil {
-		return err
-	}
+	encryptedNote := utils.Must(s.encrypt.EncryptString(note))
 
 	// NOTE: action will serve as status. Refer to statuses, SHOULD MATCH
-	if err := s.reportUserStore.UpdateStatus(reportId, action); err != nil {
+	if err := s.reportUserStore.Close(reportId, action, adminId, encryptedNote); err != nil {
 		return err
 	}
-
-	notificationHeading := "User report has been addressed!"
-	notificationContent := "Your recent user report submission has been viewed and addressed!"
-
-	notification := &models.NotificationModel{
-		Recipient: report.ReporterUserId,
-		Type:      "generic",
-		Title:     title,
-		Content:   detail,
-	}
-
-	encryptedNotification := &models.NotificationModel{
-		Recipient: report.ReporterUserId,
-		Type:      "generic",
-		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
-		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
-	}
-
-	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
-		return err
-	} else {
-		notification.Id = notifId
-	}
-
-	oneSignal := notification_service.MustGetInstance()
-	if err := oneSignal.NewUrgentNotification(report.ReporterUserId, notificationHeading, notificationContent); err != nil {
-		fmt.Println(err.Error())
-	}
-
-	event := &websocket.EventModel{
-		ReceiverId: report.ReporterUserId,
-		Type:       websocket.EVT_NOTIF,
-		Payload:    notification,
-	}
-
-	s.ws.Send(event)
 
 	return nil
 }

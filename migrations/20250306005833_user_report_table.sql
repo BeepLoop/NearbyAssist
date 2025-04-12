@@ -8,12 +8,15 @@ CREATE TABLE IF NOT EXISTS UserReport (
     reason VARCHAR(255) NOT NULL,
     detail TEXT,
     status ENUM('pending', 'resolved', 'dismissed') DEFAULT 'pending',
+    adminId VARCHAR(255),
+    adminNote TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(reporterUserId) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY(reportedUserId) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY(bookingId) REFERENCES Booking(id),
+    FOREIGN KEY(adminId) REFERENCES Admin(id),
     INDEX(id, reportedUserId)
 );
 

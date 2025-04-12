@@ -320,6 +320,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		bugReportStore := bug_report_repo.NewMysqlBugReportRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		complaintService := complaint_service.NewService(
 			reportUserStore,
 			userStore,
@@ -328,6 +329,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			serviceStore,
 			bugReportStore,
 			notifStore,
+			resourceService,
 			s.WS,
 			s.FS,
 			s.Encrypt,
