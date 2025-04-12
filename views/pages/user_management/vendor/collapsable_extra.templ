@@ -1,0 +1,51 @@
+package pages
+
+import (
+	"nearbyassist/internal/dto"
+	"nearbyassist/internal/utils"
+)
+
+templ collapsableExtra(extra dto.Extra) {
+	<div x-data="{ isExpanded: false }">
+		<button
+			id="controlsAccordionItemOne"
+			type="button"
+			class="flex w-full items-center justify-between gap-4 text-left underline-offset-2 px-2 cursor-pointer outline-1 outline-pale-gray hover:bg-neutral-gray-lighter/50 focus-visible:bg-neutral-gray-lighter/50 focus-visible:underline focus-visible:outline-hidden"
+			aria-controls="accordionItemOne"
+			x-on:click="isExpanded = ! isExpanded"
+			x-bind:class="isExpanded ? 'text-neutral-dark'  : 'text-neutral-dark font-medium'"
+			x-bind:aria-expanded="isExpanded ? 'true' : 'false'"
+		>
+			<div class="flex flex-1 items-center justify-between gap-2">
+				<p class="text-neutral-gray">{ extra.Title }</p>
+				<p class="p-2 font-medium text-neutral-dark">₱ { utils.FloatToString(extra.Price) }</p>
+			</div>
+			<div>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke-width="2"
+					stroke="currentColor"
+					class="size-5 shrink-0 transition"
+					aria-hidden="true"
+					x-bind:class="isExpanded  ?  'rotate-180'  :  ''"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+				</svg>
+			</div>
+		</button>
+		<div
+			x-cloak
+			x-show="isExpanded"
+			id="accordionItemOne"
+			role="region"
+			aria-labelledby="controlsAccordionItemOne"
+			x-collapse
+		>
+			<div class="p-2 text-xs text-pretty bg-neutral-gray-lighter/40">
+				<p>{ extra.Description }</p>
+			</div>
+		</div>
+	</div>
+}

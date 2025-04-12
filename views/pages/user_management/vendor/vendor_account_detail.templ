@@ -18,29 +18,8 @@ templ VendorAccountDetail(user models.AdminModel, data dto.VendorAccountDetail, 
 		@partials.BackButton()
 		<!-- main content -->
 		<div class="mx-auto max-w-4xl">
-			@userInfo(data)
-			@partials.Divider()
-			<!-- Socials and Expertise -->
-			<div class="mt-4">
-				<div class="mt-4">
-					<span class="font-medium text-neutral-dark">Socials:</span>
-					<div class="mt-1.5">
-						for _, social := range data.Vendor.Socials {
-							<li class="text-neutral-gray">{ social } </li>
-						}
-					</div>
-				</div>
-				<div class="mt-4">
-					<span class="font-medium text-neutral-dark">Expertise:</span>
-					<div class="mt-1.5 flex gap-2">
-						for _, expertise := range data.Vendor.Expertise {
-							@partials.DefaultBadgeSuccess(expertise)
-						}
-					</div>
-				</div>
-			</div>
 			<!-- Tabbed -->
-			<div x-data="{ selectedTab: 'services' }" class="mt-4 w-full">
+			<div x-data="{ selectedTab: 'profile' }" class="w-full">
 				<!-- tab buttons button -->
 				<div
 					x-on:keydown.right.prevent="$focus.wrap().next()"
@@ -49,6 +28,17 @@ templ VendorAccountDetail(user models.AdminModel, data dto.VendorAccountDetail, 
 					role="tablist"
 					aria-label="tab options"
 				>
+					<!-- profile button -->
+					<button
+						x-on:click="selectedTab = 'profile'"
+						x-bind:aria-selected="selectedTab === 'profile'"
+						x-bind:tabindex="selectedTab === 'profile' ? '0' : '-1'"
+						x-bind:class="selectedTab === 'profile' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
+						class="h-min px-4 py-2 text-sm"
+						type="button"
+						role="tab"
+						aria-controls="tabpanelProfile"
+					>Profile</button>
 					<!-- services button -->
 					<button
 						x-on:click="selectedTab = 'services'"
@@ -85,6 +75,10 @@ templ VendorAccountDetail(user models.AdminModel, data dto.VendorAccountDetail, 
 				</div>
 				<!-- tab contents button -->
 				<div class="px-2 py-4 text-neutral-dark dark:text-neutral-dark">
+					<!-- profile content -->
+					<div x-cloak x-show="selectedTab === 'profile'" id="tabpanelProfile" role="tabpanel" aria-label="profile">
+						@profile(data)
+					</div>
 					<!-- services content -->
 					<div x-cloak x-show="selectedTab === 'services'" id="tabpanelServices" role="tabpanel" aria-label="services">
 						@services(data)
@@ -103,7 +97,7 @@ templ VendorAccountDetail(user models.AdminModel, data dto.VendorAccountDetail, 
 	}
 }
 
-templ userInfo(data dto.VendorAccountDetail) {
+templ profile(data dto.VendorAccountDetail) {
 	<div class="flex gap-4">
 		<img
 			src={ data.Vendor.ImageURL }
@@ -119,6 +113,15 @@ templ userInfo(data dto.VendorAccountDetail) {
 			</div>
 			<!-- id & created at -->
 			<div class="mt-2">
+				<div class="mt-1.5 flex items-center gap-2">
+					<span class="font-medium text-neutral-dark">Rating: </span>
+					<span class="flex gap-2 text-warning">
+						<p class="font-medium">{ data.Vendor.Rating }</p>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+							<path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"></path>
+						</svg>
+					</span>
+				</div>
 				<div class="mt-1.5 flex gap-2">
 					<span class="font-medium text-neutral-dark">User ID: </span>
 					<p class="text-neutral-gray">{ data.Vendor.Id }</p>
@@ -131,6 +134,25 @@ templ userInfo(data dto.VendorAccountDetail) {
 					<span class="font-medium text-neutral-dark">Date Verified: </span>
 					<p class="text-neutral-gray">{ data.Vendor.DateVerified } </p>
 				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Socials and Expertise -->
+	<div class="mt-4">
+		<div class="mt-4">
+			<span class="font-medium text-neutral-dark">Socials:</span>
+			<div class="mt-1.5">
+				for _, social := range data.Vendor.Socials {
+					<li class="text-neutral-gray">{ social } </li>
+				}
+			</div>
+		</div>
+		<div class="mt-4">
+			<span class="font-medium text-neutral-dark">Expertise:</span>
+			<div class="mt-1.5 flex gap-2">
+				for _, expertise := range data.Vendor.Expertise {
+					@partials.DefaultBadgeSuccess(expertise)
+				}
 			</div>
 		</div>
 	</div>
@@ -188,16 +210,9 @@ templ services(data dto.VendorAccountDetail) {
 										<div class="mt-4">
 											<h1 class="text-lg font-medium text-neutral-dark">Extras</h1>
 											<div>
-												<table class="w-full border-collapse text-left text-xs">
-													<tbody class="divide-y divide-neutral-gray-lighter">
-														for _, extra := range service.Extras {
-															<tr>
-																<td>{ extra.Title }</td>
-																<td>₱ { utils.FloatToString(extra.Price) }</td>
-															</tr>
-														}
-													</tbody>
-												</table>
+												for _, extra := range service.Extras {
+													@collapsableExtra(extra)
+												}
 											</div>
 										</div>
 									</div>
@@ -218,17 +233,19 @@ templ activeBookings(data dto.VendorAccountDetail) {
 				for _, booking := range  data.ActiveBookings {
 					<tr class="">
 						<td class="p-2">
-							<div class="flex w-max items-center gap-2">
-								<img
-									class="size-8 rounded-full object-cover"
-									src={ booking.Client.ImageURL }
-									alt="user avatar"
-								/>
-								<div class="flex flex-col">
-									<span class="font-medium text-neutral-900">{ booking.Client.Name }</span>
-									<span class="text-neutral-600 opacity-85">{ booking.Client.Email }</span>
+							<a href={ templ.URL(fmt.Sprintf("/admin/user-management/users/%s", booking.Client.Id)) }>
+								<div class="flex w-max items-center gap-2">
+									<img
+										class="size-8 rounded-full object-cover"
+										src={ booking.Client.ImageURL }
+										alt="user avatar"
+									/>
+									<div class="flex flex-col">
+										<span class="font-medium text-neutral-900">{ booking.Client.Name }</span>
+										<span class="text-neutral-600 opacity-85">{ booking.Client.Email }</span>
+									</div>
 								</div>
-							</div>
+							</a>
 						</td>
 						<td class="p-2">
 							<span class="font-medium text-neutral-dark">Booked on:</span>
@@ -240,9 +257,7 @@ templ activeBookings(data dto.VendorAccountDetail) {
 						</td>
 						<td class="p-2">
 							@partials.OpenOffCanvas() {
-								<div>
-									<h1>{ booking.Id }</h1>
-								</div>
+								@offCanvasBookingData(booking)
 							}
 						</td>
 					</tr>
@@ -318,6 +333,10 @@ templ offCanvasBookingData(booking dto.Booking) {
 				@partials.DefaultBadgeDanger("cancelled")
 			} else if booking.Status == "rejected" {
 				@partials.DefaultBadgeDanger("rejected")
+			} else if booking.Status == "pending" {
+				@partials.DefaultBadgeWarning("pending")
+			} else if booking.Status == "confirmed" {
+				@partials.DefaultBadgeProcessing("confirmed")
 			}
 		</div>
 		if booking.Status != "done" {
@@ -389,17 +408,9 @@ templ offCanvasBookingData(booking dto.Booking) {
 		<h1 class="text-xl font-medium">Included Extras</h1>
 		@partials.Divider()
 		<div>
-			<table>
-				<tbody>
-					for _, extra := range booking.Extras {
-						<tr>
-							<td>{ extra.Title }</td>
-							<td>{ extra.Description }</td>
-							<td>{ utils.FloatToString(extra.Price) }</td>
-						</tr>
-					}
-				</tbody>
-			</table>
+			for _, extra := range booking.Extras {
+				@collapsableExtra(extra)
+			}
 		</div>
 	</div>
 }

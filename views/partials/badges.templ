@@ -4,6 +4,11 @@ templ DefaultBadge(text string) {
 	<span class="rounded-sm w-fit border border-pale-gray bg-neutral-50 px-2 py-1 text-xs font-medium text-neutral-600">{ text }</span>
 }
 
+templ DefaultBadgeProcessing(text string) {
+	<!-- success Badge -->
+	<span class="rounded-sm w-fit border border-ongoing bg-ongoing px-2 py-1 text-xs font-medium text-white">{ text }</span>
+}
+
 templ DefaultBadgeSuccess(text string) {
 	<!-- success Badge -->
 	<span class="rounded-sm w-fit border border-success bg-success px-2 py-1 text-xs font-medium text-white">{ text }</span>
@@ -17,6 +22,13 @@ templ DefaultBadgeWarning(text string) {
 templ DefaultBadgeDanger(text string) {
 	<!-- danger Badge -->
 	<span class="rounded-sm w-fit border border-danger bg-danger px-2 py-1 text-xs font-medium text-white">{ text }</span>
+}
+
+templ SoftBadgeProcessing(text string) {
+	<!-- success Badge -->
+	<span class="w-fit inline-flex overflow-hidden rounded-sm border border-ongoing bg-surface text-xs font-medium text-ongoing">
+		<span class="px-2 py-1 bg-ongoing/10">{ text }</span>
+	</span>
 }
 
 templ SoftBadgeSuccess(text string) {

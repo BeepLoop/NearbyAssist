@@ -386,6 +386,7 @@
     --color-neutral-gray: var(--color-neutral-600);
     --color-neutral-gray-lighter: var(--color-neutral-400);
     --color-good: var(--color-blue-500);
+    --color-ongoing: var(--color-teal-600);
     --color-success: var(--color-green-700);
     --color-warning: var(--color-amber-600);
     --color-warning-light: var(--color-yellow-500);
@@ -1086,6 +1087,9 @@
   .border-neutral-gray-lighter {
     border-color: var(--color-neutral-gray-lighter);
   }
+  .border-ongoing {
+    border-color: var(--color-ongoing);
+  }
   .border-pale-gray {
     border-color: var(--color-pale-gray);
   }
@@ -1128,11 +1132,20 @@
   .bg-neutral-50 {
     background-color: var(--color-neutral-50);
   }
+  .bg-neutral-gray-lighter\/40 {
+    background-color: color-mix(in oklab, var(--color-neutral-gray-lighter) 40%, transparent);
+  }
   .bg-neutral-gray\/25 {
     background-color: color-mix(in oklab, var(--color-neutral-gray) 25%, transparent);
   }
   .bg-neutral-gray\/50 {
     background-color: color-mix(in oklab, var(--color-neutral-gray) 50%, transparent);
+  }
+  .bg-ongoing {
+    background-color: var(--color-ongoing);
+  }
+  .bg-ongoing\/10 {
+    background-color: color-mix(in oklab, var(--color-ongoing) 10%, transparent);
   }
   .bg-primary {
     background-color: var(--color-primary);
@@ -1311,9 +1324,6 @@
   .text-left {
     text-align: left;
   }
-  .align-middle {
-    vertical-align: middle;
-  }
   .font-roboto {
     font-family: var(--font-roboto);
   }
@@ -1381,6 +1391,9 @@
     --tw-tracking: var(--tracking-wider);
     letter-spacing: var(--tracking-wider);
   }
+  .text-pretty {
+    text-wrap: pretty;
+  }
   .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -1428,6 +1441,9 @@
   }
   .text-neutral-gray {
     color: var(--color-neutral-gray);
+  }
+  .text-ongoing {
+    color: var(--color-ongoing);
   }
   .text-primary {
     color: var(--color-primary);
@@ -1660,6 +1676,13 @@
       }
     }
   }
+  .hover\:bg-neutral-gray-lighter\/50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, var(--color-neutral-gray-lighter) 50%, transparent);
+      }
+    }
+  }
   .hover\:bg-neutral-gray\/25 {
     &:hover {
       @media (hover: hover) {
@@ -1761,6 +1784,25 @@
     &:focus {
       --tw-outline-style: none;
       outline-style: none;
+    }
+  }
+  .focus-visible\:bg-neutral-gray-lighter\/50 {
+    &:focus-visible {
+      background-color: color-mix(in oklab, var(--color-neutral-gray-lighter) 50%, transparent);
+    }
+  }
+  .focus-visible\:underline {
+    &:focus-visible {
+      text-decoration-line: underline;
+    }
+  }
+  .focus-visible\:outline-hidden {
+    &:focus-visible {
+      outline-style: none;
+      @media (forced-colors: active) {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+      }
     }
   }
   .focus-visible\:outline-2 {

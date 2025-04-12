@@ -18,21 +18,8 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 		@partials.BackButton()
 		<!-- main content -->
 		<div class="max-w-4xl mx-auto">
-			<!-- user profile -->
-			@userInfo(data)
-			<!-- Socials and Expertise -->
-			<div class="mt-4">
-				<div class="mt-4">
-					<span class="font-medium text-neutral-dark">Socials:</span>
-					<div class="mt-1.5">
-						for _, social := range data.User.Socials {
-							<li class="text-neutral-gray">{ social } </li>
-						}
-					</div>
-				</div>
-			</div>
 			<!-- Tabbed -->
-			<div x-data="{ selectedTab: 'activeBookings' }" class="mt-4 w-full">
+			<div x-data="{ selectedTab: 'profile' }" class="w-full">
 				<!-- tab buttons button -->
 				<div
 					x-on:keydown.right.prevent="$focus.wrap().next()"
@@ -41,6 +28,17 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 					role="tablist"
 					aria-label="tab options"
 				>
+					<!-- profile button -->
+					<button
+						x-on:click="selectedTab = 'profile'"
+						x-bind:aria-selected="selectedTab === 'profile'"
+						x-bind:tabindex="selectedTab === 'profile' ? '0' : '-1'"
+						x-bind:class="selectedTab === 'profile' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
+						class="h-min px-4 py-2 text-sm"
+						type="button"
+						role="tab"
+						aria-controls="tabpanelProfile"
+					>Profile</button>
 					<!-- active bookings button -->
 					<button
 						x-on:click="selectedTab = 'activeBookings'"
@@ -66,6 +64,10 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 				</div>
 				<!-- tab contents button -->
 				<div class="px-2 py-4 text-neutral-dark dark:text-neutral-dark">
+					<!-- profile content -->
+					<div x-cloak x-show="selectedTab === 'profile'" id="tabpanelProfile" role="tabpanel" aria-label="profile">
+						@profile(data)
+					</div>
 					<!-- active bookings content -->
 					<div x-cloak x-show="selectedTab === 'activeBookings'" id="tabpanelActiveBookings" role="tabpanel" aria-label="activeBookings">
 						@activeBookings(data)
@@ -80,7 +82,7 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 	}
 }
 
-templ userInfo(data dto.UserAccountDetail) {
+templ profile(data dto.UserAccountDetail) {
 	<div class="flex gap-4">
 		<img
 			src={ data.User.ImageURL }
@@ -111,6 +113,17 @@ templ userInfo(data dto.UserAccountDetail) {
 			</div>
 		</div>
 	</div>
+	<!-- Socials -->
+	<div class="mt-4">
+		<div class="mt-4">
+			<span class="font-medium text-neutral-dark">Socials:</span>
+			<div class="mt-1.5">
+				for _, social := range data.User.Socials {
+					<li class="text-neutral-gray">{ social } </li>
+				}
+			</div>
+		</div>
+	</div>
 }
 
 templ activeBookings(data dto.UserAccountDetail) {
@@ -120,17 +133,19 @@ templ activeBookings(data dto.UserAccountDetail) {
 				for _, booking := range  data.ActiveBookings {
 					<tr class="">
 						<td class="p-2">
-							<div class="flex w-max items-center gap-2">
-								<img
-									class="size-8 rounded-full object-cover"
-									src={ booking.Client.ImageURL }
-									alt="user avatar"
-								/>
-								<div class="flex flex-col">
-									<span class="font-medium text-neutral-900">{ booking.Client.Name }</span>
-									<span class="text-neutral-600 opacity-85">{ booking.Client.Email }</span>
+							<a href={ templ.URL(fmt.Sprintf("/admin/user-management/vendors/%s", booking.Vendor.Id)) }>
+								<div class="flex w-max items-center gap-2">
+									<img
+										class="size-8 rounded-full object-cover"
+										src={ booking.Vendor.ImageURL }
+										alt="user avatar"
+									/>
+									<div class="flex flex-col">
+										<span class="font-medium text-neutral-900">{ booking.Vendor.Name }</span>
+										<span class="text-neutral-600 opacity-85">{ booking.Vendor.Email }</span>
+									</div>
 								</div>
-							</div>
+							</a>
 						</td>
 						<td class="p-2">
 							<span class="font-medium text-neutral-dark">Booked on:</span>
@@ -142,9 +157,7 @@ templ activeBookings(data dto.UserAccountDetail) {
 						</td>
 						<td class="p-2">
 							@partials.OpenOffCanvas() {
-								<div>
-									<h1>{ booking.Id }</h1>
-								</div>
+								@offCanvasBookingData(booking)
 							}
 						</td>
 					</tr>
@@ -220,6 +233,10 @@ templ offCanvasBookingData(booking dto.Booking) {
 				@partials.DefaultBadgeDanger("cancelled")
 			} else if booking.Status == "rejected" {
 				@partials.DefaultBadgeDanger("rejected")
+			} else if booking.Status == "pending" {
+				@partials.DefaultBadgeWarning("pending")
+			} else if booking.Status == "confirmed" {
+				@partials.DefaultBadgeProcessing("confirmed")
 			}
 		</div>
 		if booking.Status != "done" {
@@ -291,17 +308,9 @@ templ offCanvasBookingData(booking dto.Booking) {
 		<h1 class="text-xl font-medium">Included Extras</h1>
 		@partials.Divider()
 		<div>
-			<table>
-				<tbody>
-					for _, extra := range booking.Extras {
-						<tr>
-							<td>{ extra.Title }</td>
-							<td>{ extra.Description }</td>
-							<td>{ utils.FloatToString(extra.Price) }</td>
-						</tr>
-					}
-				</tbody>
-			</table>
+			for _, extra := range booking.Extras {
+				@collapsableExtra(extra)
+			}
 		</div>
 	</div>
 }

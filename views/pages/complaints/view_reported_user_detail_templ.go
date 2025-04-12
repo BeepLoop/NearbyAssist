@@ -701,7 +701,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div><div class=\"mt-2 flex gap-2 align-middle\"><span class=\"font-medium text-neutral-dark\">Vendor Rating:</span> <span class=\"flex gap-2 text-warning\"><p class=\"font-medium\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div><div class=\"mt-2 flex gap-2 items-center\"><span class=\"font-medium text-neutral-dark\">Vendor Rating:</span> <span class=\"flex gap-2 text-warning\"><p class=\"font-medium\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
