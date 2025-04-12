@@ -34,8 +34,7 @@ templ IdentityVerificationDetails(user models.AdminModel, request models.Identit
 				</form>
 				@rejectButton(request.Id)
 			</div>
-			<!-- Divider -->
-			<div class="mt-4 border-t-2 border-solid border-t-pale-gray outline-none"></div>
+			@partials.Divider()
 			<!-- Information -->
 			<div class="mt-4 grid gap-4">
 				<div class="flex gap-2 ">
@@ -63,8 +62,7 @@ templ IdentityVerificationDetails(user models.AdminModel, request models.Identit
 					<p class="text-neutral-gray">{ request.IdNumber }</p>
 				</div>
 			</div>
-			<!-- Divider -->
-			<div class="mt-4 border-t-2 border-solid border-t-pale-gray outline-none"></div>
+			@partials.Divider()
 			<!-- Images -->
 			<div class="mt-4">
 				<h3 class="mb-4 font-medium text-neutral-dark">Documents</h3>

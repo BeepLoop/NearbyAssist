@@ -138,8 +138,7 @@ templ overview(data dto.UserReportDetail) {
 templ booking(data dto.UserReportDetail) {
 	<div class="">
 		<h1 class="text-xl font-medium">Booking</h1>
-		<!-- Divider -->
-		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		@partials.Divider()
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">ID:</span>
 			<p class="text-neutral-gray">{ data.Booking.Id }</p>
@@ -184,8 +183,7 @@ templ booking(data dto.UserReportDetail) {
 	<!-- Service -->
 	<div class="mt-4">
 		<h1 class="text-xl font-medium">Service</h1>
-		<!-- Divider -->
-		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		@partials.Divider()
 		<div class="mt-2">
 			<span class="font-medium text-neutral-dark">Title:</span>
 			<p class="text-neutral-gray">{ data.Booking.Service.Title }</p>
@@ -218,8 +216,7 @@ templ booking(data dto.UserReportDetail) {
 	<!-- Extras -->
 	<div class="mt-4">
 		<h1 class="text-xl font-medium">Included Extras</h1>
-		<!-- Divider -->
-		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		@partials.Divider()
 		<div>
 			<table>
 				<tbody>
@@ -240,8 +237,7 @@ templ reported(data dto.UserReportDetail) {
 	<!-- Information -->
 	<div class="">
 		<h1 class="text-xl font-medium">Information</h1>
-		<!-- Divider -->
-		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		@partials.Divider()
 		<div>
 			<div class="mt-2 flex justify-between">
 				<img
@@ -285,8 +281,7 @@ templ reported(data dto.UserReportDetail) {
 	<!-- History -->
 	<div class="mt-4">
 		<h1 class="text-xl font-medium">History</h1>
-		<!-- Divider -->
-		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		@partials.Divider()
 		<div>
 			<div class="mt-2 flex gap-2 align-middle">
 				<span class="font-medium text-neutral-dark">Vendor Rating:</span>
@@ -335,8 +330,7 @@ templ reporter(data dto.UserReportDetail) {
 	<!-- Information -->
 	<div class="">
 		<h1 class="text-xl font-medium">Information</h1>
-		<!-- Divider -->
-		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		@partials.Divider()
 		<div>
 			<div class="mt-2 flex justify-between">
 				<img
@@ -380,8 +374,7 @@ templ reporter(data dto.UserReportDetail) {
 	<!-- History -->
 	<div class="mt-4">
 		<h1 class="text-xl font-medium">History</h1>
-		<!-- Divider -->
-		<div class="border-t-2 border-solid border-t-pale-gray outline-none"></div>
+		@partials.Divider()
 		<div>
 			<div class="mt-2 grid grid-cols-2 text-left">
 				<div class="mt-2 flex gap-2">
