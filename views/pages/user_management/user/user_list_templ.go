@@ -15,7 +15,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-func VendorList(user models.AdminModel, accounts []models.VendorModel) templ.Component {
+func UserList(user models.AdminModel, accounts []models.UserModel) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -48,15 +48,15 @@ func VendorList(user models.AdminModel, accounts []models.VendorModel) templ.Com
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = partials.PageBanner("Vendor list", "").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.PageBanner("User List", "").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- searchbar --> <div class=\"flex justify-end py-2\"><div class=\"relative flex w-full max-w-xs flex-col gap-1 text-neutral-gray\"><form action=\"/admin/user-management/vendors\" method=\"GET\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" aria-hidden=\"true\" class=\"absolute top-1/2 left-2.5 size-5 -translate-y-1/2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg> <input type=\"search\" name=\"query\" placeholder=\"Search email\" autocomplete=\"off\" aria-label=\"search\" id=\"searchInput\" class=\"w-full rounded-sm border border-neutral-gray-lighter py-2 pr-2 pl-10 text-sm focus:border-primary focus:outline-none\"><script>\n                        const searchInput = document.getElementById(\"searchInput\");\n                        const params = new URLSearchParams(location.search);\n                        if (params.has(\"query\")) {\n                            searchInput.value = params.get(\"query\");\n                        }\n                    </script></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- searchbar --> <div class=\"flex justify-end py-2\"><div class=\"relative flex w-full max-w-xs flex-col gap-1 text-neutral-gray\"><form action=\"/admin/user-management/users\" method=\"GET\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" aria-hidden=\"true\" class=\"absolute top-1/2 left-2.5 size-5 -translate-y-1/2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg> <input type=\"search\" name=\"query\" placeholder=\"Search email\" autocomplete=\"off\" aria-label=\"search\" id=\"searchInput\" class=\"w-full rounded-sm border border-neutral-gray-lighter py-2 pr-2 pl-10 text-sm focus:border-primary focus:outline-none\"><script>\n                        const searchInput = document.getElementById(\"searchInput\");\n                        const params = new URLSearchParams(location.search);\n                        if (params.has(\"query\")) {\n                            searchInput.value = params.get(\"query\");\n                        }\n                    </script></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = vendorTable(accounts).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = userTable(accounts).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -78,7 +78,7 @@ func VendorList(user models.AdminModel, accounts []models.VendorModel) templ.Com
 	})
 }
 
-func vendorTable(accounts []models.VendorModel) templ.Component {
+func userTable(accounts []models.UserModel) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -99,7 +99,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">User</th><th scope=\"col\" class=\"p-4\">Rating</th><th scope=\"col\" class=\"p-4\">Vendor Since</th><th scope=\"col\" class=\"p-4\">Status</th><th scope=\"col\" class=\"p-4\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">User</th><th scope=\"col\" class=\"p-4\">Member Since</th><th scope=\"col\" class=\"p-4\">Date Verified</th><th scope=\"col\" class=\"p-4\">Status</th><th scope=\"col\" class=\"p-4\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -117,7 +117,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(account.ImageUrl)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor_list.templ`, Line: 73, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_list.templ`, Line: 73, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -130,7 +130,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(account.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor_list.templ`, Line: 77, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_list.templ`, Line: 77, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -143,33 +143,33 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(account.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor_list.templ`, Line: 78, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_list.templ`, Line: 78, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div></div></td><td class=\"p-4\"><span class=\"flex gap-2 text-warning\"><p class=\"font-medium\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div></div></td><td class=\"p-4\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(account.Rating)
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(account.CreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor_list.templ`, Line: 84, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_list.templ`, Line: 82, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" class=\"size-4\"><path fill-rule=\"evenodd\" d=\"M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z\" clip-rule=\"evenodd\"></path></svg></span></td><td class=\"p-4\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"p-4\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(account.JoinedAt)
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(account.VerifiedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor_list.templ`, Line: 90, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_list.templ`, Line: 83, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -179,13 +179,13 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if account.Restricted {
-					templ_7745c5c3_Err = partials.SoftBadgeDanger("Restricted").Render(ctx, templ_7745c5c3_Buffer)
+				if account.Verified {
+					templ_7745c5c3_Err = partials.SoftBadgeSuccess("Verified").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = partials.SoftBadgeSuccess("Good").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = partials.SoftBadgeDanger("Unverified").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -194,7 +194,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var9 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/user-management/vendors/%s", account.VendorId))
+				var templ_7745c5c3_Var9 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/user-management/users/%s", account.Id))
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var9)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

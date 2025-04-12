@@ -4,7 +4,7 @@ import (
 	"context"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/utils"
-	pages "nearbyassist/views/pages/user_management"
+	pages "nearbyassist/views/pages/user_management/user"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
