@@ -288,15 +288,119 @@ templ previousBookings(data dto.VendorAccountDetail) {
 						</td>
 						<td class="p-2">
 							@partials.OpenOffCanvas() {
-								<div>
-									<h1>{ booking.Id }</h1>
-								</div>
+								@offCanvasBookingData(booking)
 							}
 						</td>
 					</tr>
 				}
 			</tbody>
 		</table>
+	</div>
+}
+
+templ offCanvasBookingData(booking dto.Booking) {
+	<div class="">
+		<h1 class="text-xl font-medium">Booking</h1>
+		@partials.Divider()
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">ID:</span>
+			<p class="text-neutral-gray">{ booking.Id }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Total:</span>
+			<p class="text-neutral-gray">₱ { utils.FloatToString(booking.Cost) }</p>
+		</div>
+		<div class="mt-2 flex items-center gap-2">
+			<span class="font-medium text-neutral-dark">Status:</span>
+			if booking.Status == "done" {
+				@partials.DefaultBadgeSuccess("completed")
+			} else if booking.Status == "cancelled" {
+				@partials.DefaultBadgeDanger("cancelled")
+			} else if booking.Status == "rejected" {
+				@partials.DefaultBadgeDanger("rejected")
+			}
+		</div>
+		if booking.Status != "done" {
+			<div class="mt-2 flex gap-2">
+				if booking.Status == "cancelled" {
+					<span class="font-medium text-neutral-dark">Cancel Reason:</span>
+				} else if booking.Status == "rejected" {
+					<span class="font-medium text-neutral-dark">Reject Reason:</span>
+				}
+				<p class="text-neutral-gray">{ booking.CancelReason }</p>
+			</div>
+		}
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Date Booked:</span>
+			<p class="text-neutral-gray">{ booking.CreatedAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Date Scheduled:</span>
+			<p class="text-neutral-gray">{ booking.ScheduledAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			if booking.Status == "cancelled" {
+				<span class="font-medium text-neutral-dark">Date Cancelled:</span>
+			} else if booking.Status == "rejected" {
+				<span class="font-medium text-neutral-dark">Date Rejected:</span>
+			} else if booking.Status == "confirmed" {
+				<span class="font-medium text-neutral-dark">Date Confirmed:</span>
+			} else if booking.Status == "done" {
+				<span class="font-medium text-neutral-dark">Date Completed:</span>
+			}
+			<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
+		</div>
+	</div>
+	<!-- Service -->
+	<div class="mt-4">
+		<h1 class="text-xl font-medium">Service</h1>
+		@partials.Divider()
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Title:</span>
+			<p class="text-neutral-gray">{ booking.Service.Title }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Description:</span>
+			<p class="text-neutral-gray">{ booking.Service.Description }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Tags:</span>
+			<div class="mt-1.5 flex gap-2">
+				for _, tag := range booking.Service.Tags {
+					@partials.DefaultBadgeSuccess(tag)
+				}
+			</div>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Rate:</span>
+			<p class="text-neutral-gray">₱ { utils.FloatToString(booking.Service.Rate) }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Created At:</span>
+			<p class="text-neutral-gray">{ booking.Service.CreatedAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Last Modified:</span>
+			<p class="text-neutral-gray">{ booking.Service.UpdatedAt }</p>
+		</div>
+	</div>
+	<!-- Extras -->
+	<div class="mt-4">
+		<h1 class="text-xl font-medium">Included Extras</h1>
+		@partials.Divider()
+		<div>
+			<table>
+				<tbody>
+					for _, extra := range booking.Extras {
+						<tr>
+							<td>{ extra.Title }</td>
+							<td>{ extra.Description }</td>
+							<td>{ utils.FloatToString(extra.Price) }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
 	</div>
 }
 

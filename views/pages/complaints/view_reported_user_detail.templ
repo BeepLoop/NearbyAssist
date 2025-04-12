@@ -147,10 +147,26 @@ templ booking(data dto.UserReportDetail) {
 			<span class="font-medium text-neutral-dark">Total:</span>
 			<p class="text-neutral-gray">₱ { utils.FloatToString(data.Booking.Cost) }</p>
 		</div>
-		<div class="mt-2 flex gap-2">
+		<div class="mt-2 flex items-center gap-2">
 			<span class="font-medium text-neutral-dark">Status:</span>
-			<p class="text-neutral-gray">{ data.Booking.Status }</p>
+			if data.Booking.Status == "done" {
+				@partials.DefaultBadgeSuccess("completed")
+			} else if data.Booking.Status == "cancelled" {
+				@partials.DefaultBadgeDanger("cancelled")
+			} else if data.Booking.Status == "rejected" {
+				@partials.DefaultBadgeDanger("rejected")
+			}
 		</div>
+		if data.Booking.Status != "done" {
+			<div class="mt-2 flex gap-2">
+				if data.Booking.Status == "cancelled" {
+					<span class="font-medium text-neutral-dark">Cancel Reason:</span>
+				} else if data.Booking.Status == "rejected" {
+					<span class="font-medium text-neutral-dark">Reject Reason:</span>
+				}
+				<p class="text-neutral-gray">{ data.Booking.CancelReason }</p>
+			</div>
+		}
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Date Booked:</span>
 			<p class="text-neutral-gray">{ data.Booking.CreatedAt }</p>
@@ -158,14 +174,6 @@ templ booking(data dto.UserReportDetail) {
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Date Scheduled:</span>
 			<p class="text-neutral-gray">{ data.Booking.ScheduledAt }</p>
-		</div>
-		<div class="mt-2 flex gap-2">
-			if data.Booking.Status == "cancelled" {
-				<span class="font-medium text-neutral-dark">Cancel Reason:</span>
-			} else if data.Booking.Status == "rejected" {
-				<span class="font-medium text-neutral-dark">Reject Reason:</span>
-			}
-			<p class="text-neutral-gray">{ data.Booking.CancelReason }</p>
 		</div>
 		<div class="mt-2 flex gap-2">
 			if data.Booking.Status == "cancelled" {
@@ -194,7 +202,7 @@ templ booking(data dto.UserReportDetail) {
 		</div>
 		<div class="mt-2">
 			<span class="font-medium text-neutral-dark">Tags:</span>
-			<div class="flex gap-2 mt-1.5">
+			<div class="mt-1.5 flex gap-2">
 				for _, tag := range data.Booking.Service.Tags {
 					@partials.DefaultBadgeSuccess(tag)
 				}
