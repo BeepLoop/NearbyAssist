@@ -21,7 +21,7 @@ type ReportedUserHistory struct {
 	CompletedBookings int
 	RejectedBookings  int
 	ActiveBookings    int
-	PreviousReports   int
+	PreviousReports   []PreviousReport
 	AccountCreatedAt  string
 	JoinedVendorAt    string
 	Rating            string
@@ -44,6 +44,23 @@ type Report struct {
 	Detail           string
 	Images           []string
 	Status           string
+	CreatedAt        string
+	CompletedAt      string
+}
+
+type PreviousReport struct {
+	Id               string
+	ReportedByUserId string
+	ReportedByName   string
+	Category         string
+	BookingId        string
+	Reason           string
+	Detail           string
+	Images           []string
+	Status           string
+	AdminId          string
+	AdminUsername    string
+	AdminNote        string
 	CreatedAt        string
 	CompletedAt      string
 }

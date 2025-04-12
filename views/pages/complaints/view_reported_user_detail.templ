@@ -296,20 +296,20 @@ templ reported(data dto.UserReportDetail) {
 		<h1 class="text-xl font-medium">History</h1>
 		@partials.Divider()
 		<div>
-			<div class="mt-2 flex items-center gap-2">
-				<span class="font-medium text-neutral-dark">Vendor Rating:</span>
-				<span class="flex gap-2 text-warning">
-					<p class="font-medium">{ data.ReportedUserHistory.Rating }</p>
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-						<path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"></path>
-					</svg>
-				</span>
-			</div>
-			<div class="mt-2 flex gap-2">
-				<span class="font-medium text-neutral-dark">Previous Reports:</span>
-				<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.PreviousReports) }</p>
-			</div>
 			<div class="mt-2 grid grid-cols-2 text-left">
+				<div class="mt-2 flex items-center gap-2">
+					<span class="font-medium text-neutral-dark">Vendor Rating:</span>
+					<span class="flex gap-2 text-warning">
+						<p class="font-medium">{ data.ReportedUserHistory.Rating }</p>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+							<path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"></path>
+						</svg>
+					</span>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Previous Reports:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(len(data.ReportedUserHistory.PreviousReports)) }</p>
+				</div>
 				<div class="mt-2 flex gap-2">
 					<span class="font-medium text-neutral-dark">Total Bookings:</span>
 					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.Bookings) }</p>
@@ -326,14 +326,41 @@ templ reported(data dto.UserReportDetail) {
 					<span class="font-medium text-neutral-dark">Rejected Bookings:</span>
 					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.RejectedBookings) }</p>
 				</div>
-				<div class="mt-2 flex gap-2">
-					<span class="font-medium text-neutral-dark">Account Created At:</span>
-					<p class="text-neutral-gray">{ data.ReportedUserHistory.AccountCreatedAt }</p>
-				</div>
-				<div class="mt-2 flex gap-2">
-					<span class="font-medium text-neutral-dark">Account Created At:</span>
-					<p class="text-neutral-gray">{ data.ReportedUserHistory.JoinedVendorAt }</p>
-				</div>
+			</div>
+			<!-- Previous reports -->
+			<div class="mt-6">
+				<table class="w-full table-auto border-collapse text-left text-xs">
+					<thead class="text-white text-xs bg-primary-greener">
+						<th class="p-1.5">Date Reported</th>
+						<th class="p-1.5">Date Handled</th>
+						<th class="p-1.5">Action Taken</th>
+						<th class="p-1.5"></th>
+					</thead>
+					<tbody class="divide-y divide-neutral-gray-lighter">
+						for _, report := range data.ReportedUserHistory.PreviousReports {
+							<tr>
+								<td class="p-2">
+									<p class="text-neutral-gray">{ report.CreatedAt }</p>
+								</td>
+								<td class="p-2">
+									<p class="text-neutral-gray">{ report.CompletedAt }</p>
+								</td>
+								<td class="p-2">
+									if report.Status == "resolved" {
+										@partials.DefaultBadgeSuccess(report.Status)
+									} else {
+										@partials.DefaultBadgeDanger(report.Status)
+									}
+								</td>
+								<td class="p-2">
+									@partials.OffCanvas() {
+										@previousReportMoreInfo(report)
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>
@@ -403,6 +430,66 @@ templ reporter(data dto.UserReportDetail) {
 					<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.CancelledBookings) }</p>
 				</div>
 			</div>
+		</div>
+	</div>
+}
+
+templ previousReportMoreInfo(data dto.PreviousReport) {
+	<div class="text-sm">
+		<div class="flex gap-2 items-center mt-2">
+			<span class="font-medium text-neutral-dark">ID:</span>
+			<p class="text-neutral-gray">{ data.Id }</p>
+		</div>
+		@partials.Divider()
+		<div class="flex gap-2 items-center mt-6">
+			<span class="font-medium text-neutral-dark">Reporter ID:</span>
+			<p class="text-neutral-gray">{ data.ReportedByUserId }</p>
+		</div>
+		<div class="flex gap-2 items-center mt-2">
+			<span class="font-medium text-neutral-dark">Reporter:</span>
+			<p class="text-neutral-gray">{ data.ReportedByName }</p>
+		</div>
+		<div class="flex gap-2 items-center mt-2">
+			<span class="font-medium text-neutral-dark">Date Reported:</span>
+			<p class="text-neutral-gray">{ data.CreatedAt }</p>
+		</div>
+		if data.Category == "booking_related" {
+			<div class="flex gap-2 items-center mt-2">
+				<span class="font-medium text-neutral-dark">Booking ID:</span>
+				<p class="text-neutral-gray">{ data.BookingId }</p>
+			</div>
+		}
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Reason:</span>
+			<p class="text-neutral-gray">{ data.Reason }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Detail:</span>
+			<p class="text-neutral-gray">{ data.Detail }</p>
+		</div>
+		<div class="flex gap-2 items-center mt-6">
+			<span class="font-medium text-neutral-dark">Handled By:</span>
+			<p class="text-neutral-gray">{ data.AdminUsername }</p>
+		</div>
+		<div class="flex gap-2 items-center mt-2">
+			<span class="font-medium text-neutral-dark">Admin ID:</span>
+			<p class="text-neutral-gray">{ data.AdminId }</p>
+		</div>
+		<div class="flex gap-2 items-center mt-2">
+			<span class="font-medium text-neutral-dark">Date Handled:</span>
+			<p class="text-neutral-gray">{ data.CompletedAt }</p>
+		</div>
+		<div class="flex gap-2 items-center mt-2">
+			<span class="font-medium text-neutral-dark">Action taken:</span>
+			if data.Status == "resolved" {
+				@partials.DefaultBadgeSuccess(data.Status)
+			} else {
+				@partials.DefaultBadgeDanger(data.Status)
+			}
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Note from admin:</span>
+			<p class="text-neutral-gray">{ data.AdminNote }</p>
 		</div>
 	</div>
 }

@@ -20,6 +20,7 @@ import (
 	"nearbyassist/internal/handler/api/vendor"
 	websocket_handler "nearbyassist/internal/handler/api/websocket"
 	"nearbyassist/internal/middleware"
+	admin_repo "nearbyassist/internal/repository/admin"
 	application_repo "nearbyassist/internal/repository/application"
 	booking_repo "nearbyassist/internal/repository/booking"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
@@ -313,6 +314,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
@@ -323,6 +325,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		complaintService := complaint_service.NewService(
 			reportUserStore,
+			adminStore,
 			userStore,
 			vendorStore,
 			bookingStore,

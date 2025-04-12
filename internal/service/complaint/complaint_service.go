@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
+	admin_repo "nearbyassist/internal/repository/admin"
 	booking_repo "nearbyassist/internal/repository/booking"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	notification_repo "nearbyassist/internal/repository/notification"
@@ -24,6 +25,7 @@ import (
 
 type Service struct {
 	reportUserStore report_user_repo.ReportUserRepository
+	adminStore      admin_repo.AdminRepository
 	userStore       user_repo.UserRepository
 	vendorStore     vendor_repo.VendorRepository
 	bookingStore    booking_repo.BookingRepository
@@ -39,6 +41,7 @@ type Service struct {
 
 func NewService(
 	reportUserStore report_user_repo.ReportUserRepository,
+	adminStore admin_repo.AdminRepository,
 	userStore user_repo.UserRepository,
 	vendorStore vendor_repo.VendorRepository,
 	bookingStore booking_repo.BookingRepository,
@@ -53,6 +56,7 @@ func NewService(
 ) *Service {
 	return &Service{
 		reportUserStore: reportUserStore,
+		adminStore:      adminStore,
 		userStore:       userStore,
 		vendorStore:     vendorStore,
 		bookingStore:    bookingStore,
@@ -233,6 +237,41 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 		return nil, err
 	}
 
+	previousReports := slices.AppendSeq(
+		make([]dto.PreviousReport, 0),
+		utils.Map(
+			slices.Collect(utils.Filter(reportedUserPreviousReports, func(r *models.UserReportModel) bool {
+				return r.Status != models.REPORT_STATUS_PENDING
+			})),
+			func(report *models.UserReportModel) dto.PreviousReport {
+				reporter, _ := s.userStore.FindById(report.ReporterUserId)
+				admin, _ := s.adminStore.FindById(report.AdminId.String)
+
+				return dto.PreviousReport{
+					Id:               report.Id,
+					ReportedByUserId: report.ReporterUserId,
+					ReportedByName:   utils.Must(s.encrypt.DecryptString(reporter.Name)),
+					Category:         string(report.Category),
+					BookingId:        report.BookingId.String,
+					Reason:           utils.Must(s.encrypt.DecryptString(report.Reason)),
+					Detail:           utils.Must(s.encrypt.DecryptString(report.Detail)),
+					Images: slices.AppendSeq(
+						make([]string, 0),
+						utils.Map(report.Images, func(image string) string {
+							return utils.Must(s.resourceService.SignURLWithDefaultDuration(image))
+						}),
+					),
+					Status:        string(report.Status),
+					AdminId:       report.AdminId.String,
+					AdminUsername: utils.Must(s.encrypt.DecryptString(admin.Username)),
+					AdminNote:     utils.Must(s.encrypt.DecryptString(report.AdminNote.String)),
+					CreatedAt:     utils.FormatDate(report.CreatedAt),
+					CompletedAt:   utils.FormatDate(report.UpdatedAt),
+				}
+			},
+		),
+	)
+
 	booking := dto.Booking{}
 	if report.Category == models.CATEGORY_BOOKING_RELATED {
 		res, err := s.bookingStore.FindById(report.BookingId.String)
@@ -404,7 +443,7 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 					}),
 				),
 			),
-			PreviousReports:  len(reportedUserPreviousReports),
+			PreviousReports:  previousReports,
 			AccountCreatedAt: utils.FormatDate(reported.CreatedAt),
 			JoinedVendorAt:   utils.FormatDate(vendor.JoinedAt),
 			Rating:           vendor.Rating,

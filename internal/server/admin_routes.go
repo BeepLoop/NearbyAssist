@@ -114,6 +114,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		complaintService := complaint_service.NewService(
 			reportUserStore,
+			adminStore,
 			userStore,
 			vendorStore,
 			bookingStore,
