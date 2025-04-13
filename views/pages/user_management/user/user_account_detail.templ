@@ -19,7 +19,7 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 		<!-- main content -->
 		<div class="max-w-4xl mx-auto">
 			<!-- Tabbed -->
-			<div x-data="{ selectedTab: 'profile' }" class="w-full">
+			<div x-data="tabs" class="w-full">
 				<!-- tab buttons button -->
 				<div
 					x-on:keydown.right.prevent="$focus.wrap().next()"
@@ -30,7 +30,7 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 				>
 					<!-- profile button -->
 					<button
-						x-on:click="selectedTab = 'profile'"
+						x-on:click="changeTab('profile')"
 						x-bind:aria-selected="selectedTab === 'profile'"
 						x-bind:tabindex="selectedTab === 'profile' ? '0' : '-1'"
 						x-bind:class="selectedTab === 'profile' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
@@ -41,7 +41,7 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 					>Profile</button>
 					<!-- active bookings button -->
 					<button
-						x-on:click="selectedTab = 'activeBookings'"
+						x-on:click="changeTab('activeBookings')"
 						x-bind:aria-selected="selectedTab === 'activeBookings'"
 						x-bind:tabindex="selectedTab === 'activeBookings' ? '0' : '-1'"
 						x-bind:class="selectedTab === 'activeBookings' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
@@ -52,7 +52,7 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 					>Active Bookings</button>
 					<!-- previous bookings button -->
 					<button
-						x-on:click="selectedTab = 'previousBookings'"
+						x-on:click="changeTab('previousBookings')"
 						x-bind:aria-selected="selectedTab === 'previousBookings'"
 						x-bind:tabindex="selectedTab === 'previousBookings' ? '0' : '-1'"
 						x-bind:class="selectedTab === 'previousBookings' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
@@ -77,6 +77,27 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 						@previousBookings(data)
 					</div>
 				</div>
+				<script>
+                    (function() {
+                        document.addEventListener("alpine:init", () => {
+                            Alpine.data("tabs", () => ({
+                                selectedTab: 'profile',
+                                init() {
+                                    const params = new URLSearchParams(window.location.search);
+                                    const tabParam = params.get('tab');
+                                    if (tabParam) this.selectedTab = tabParam;
+                                },
+                                changeTab(tab) {
+                                    this.selectedTab = tab;
+                                    const params = new URLSearchParams(window.location.search);
+                                    params.set('tab', tab);
+                                    const newURL = `${window.location.pathname}?${params.toString()}`;
+                                    history.replaceState({}, '', newURL);
+                                },
+                            }));
+                        });
+                     })();
+                </script>
 			</div>
 		</div>
 	}

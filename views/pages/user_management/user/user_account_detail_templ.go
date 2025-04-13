@@ -74,7 +74,7 @@ func UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flash
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- main content --> <div class=\"max-w-4xl mx-auto\"><!-- Tabbed --><div x-data=\"{ selectedTab: &#39;profile&#39; }\" class=\"w-full\"><!-- tab buttons button --><div x-on:keydown.right.prevent=\"$focus.wrap().next()\" x-on:keydown.left.prevent=\"$focus.wrap().previous()\" class=\"flex gap-2 overflow-x-auto border-b border-success\" role=\"tablist\" aria-label=\"tab options\"><!-- profile button --><button x-on:click=\"selectedTab = &#39;profile&#39;\" x-bind:aria-selected=\"selectedTab === &#39;profile&#39;\" x-bind:tabindex=\"selectedTab === &#39;profile&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;profile&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelProfile\">Profile</button><!-- active bookings button --><button x-on:click=\"selectedTab = &#39;activeBookings&#39;\" x-bind:aria-selected=\"selectedTab === &#39;activeBookings&#39;\" x-bind:tabindex=\"selectedTab === &#39;activeBookings&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;activeBookings&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelActiveBookings\">Active Bookings</button><!-- previous bookings button --><button x-on:click=\"selectedTab = &#39;previousBookings&#39;\" x-bind:aria-selected=\"selectedTab === &#39;previousBookings&#39;\" x-bind:tabindex=\"selectedTab === &#39;previousBookings&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;previousBookings&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelPreviousBookings\">Previous Bookings</button></div><!-- tab contents button --><div class=\"px-2 py-4 text-neutral-dark dark:text-neutral-dark\"><!-- profile content --><div x-cloak x-show=\"selectedTab === &#39;profile&#39;\" id=\"tabpanelProfile\" role=\"tabpanel\" aria-label=\"profile\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- main content --> <div class=\"max-w-4xl mx-auto\"><!-- Tabbed --><div x-data=\"tabs\" class=\"w-full\"><!-- tab buttons button --><div x-on:keydown.right.prevent=\"$focus.wrap().next()\" x-on:keydown.left.prevent=\"$focus.wrap().previous()\" class=\"flex gap-2 overflow-x-auto border-b border-success\" role=\"tablist\" aria-label=\"tab options\"><!-- profile button --><button x-on:click=\"changeTab(&#39;profile&#39;)\" x-bind:aria-selected=\"selectedTab === &#39;profile&#39;\" x-bind:tabindex=\"selectedTab === &#39;profile&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;profile&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelProfile\">Profile</button><!-- active bookings button --><button x-on:click=\"changeTab(&#39;activeBookings&#39;)\" x-bind:aria-selected=\"selectedTab === &#39;activeBookings&#39;\" x-bind:tabindex=\"selectedTab === &#39;activeBookings&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;activeBookings&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelActiveBookings\">Active Bookings</button><!-- previous bookings button --><button x-on:click=\"changeTab(&#39;previousBookings&#39;)\" x-bind:aria-selected=\"selectedTab === &#39;previousBookings&#39;\" x-bind:tabindex=\"selectedTab === &#39;previousBookings&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;previousBookings&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelPreviousBookings\">Previous Bookings</button></div><!-- tab contents button --><div class=\"px-2 py-4 text-neutral-dark dark:text-neutral-dark\"><!-- profile content --><div x-cloak x-show=\"selectedTab === &#39;profile&#39;\" id=\"tabpanelProfile\" role=\"tabpanel\" aria-label=\"profile\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -98,7 +98,7 @@ func UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flash
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><script>\n                    (function() {\n                        document.addEventListener(\"alpine:init\", () => {\n                            Alpine.data(\"tabs\", () => ({\n                                selectedTab: 'profile',\n                                init() {\n                                    const params = new URLSearchParams(window.location.search);\n                                    const tabParam = params.get('tab');\n                                    if (tabParam) this.selectedTab = tabParam;\n                                },\n                                changeTab(tab) {\n                                    this.selectedTab = tab;\n                                    const params = new URLSearchParams(window.location.search);\n                                    params.set('tab', tab);\n                                    const newURL = `${window.location.pathname}?${params.toString()}`;\n                                    history.replaceState({}, '', newURL);\n                                },\n                            }));\n                        });\n                     })();\n                </script></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -140,7 +140,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(data.User.ImageURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 88, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 109, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -153,7 +153,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.User.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 95, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 116, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -166,7 +166,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(data.User.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 96, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 117, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -179,7 +179,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(data.User.Phone)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 97, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 118, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -192,7 +192,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.User.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 103, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 124, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -205,7 +205,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.User.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 107, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 128, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -218,7 +218,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(data.User.DateVerified)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 111, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 132, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -236,7 +236,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(social)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 122, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 143, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -297,7 +297,7 @@ func activeBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Vendor.ImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 140, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 161, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -310,7 +310,7 @@ func activeBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Vendor.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 144, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 165, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -323,7 +323,7 @@ func activeBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Vendor.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 145, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 166, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -336,7 +336,7 @@ func activeBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(booking.CreatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 152, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 173, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -349,7 +349,7 @@ func activeBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ScheduledAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 156, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 177, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -436,7 +436,7 @@ func previousBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Vendor.ImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 181, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 202, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -449,7 +449,7 @@ func previousBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Vendor.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 185, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 206, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -462,7 +462,7 @@ func previousBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Vendor.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 186, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 207, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -495,7 +495,7 @@ func previousBookings(data dto.UserAccountDetail) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(booking.UpdatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 202, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 223, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -576,7 +576,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 222, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 243, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -589,7 +589,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FloatToString(booking.Cost))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 226, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 247, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -652,7 +652,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(booking.CancelReason)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 249, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 270, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {
@@ -670,7 +670,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(booking.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 254, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 275, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -683,7 +683,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ScheduledAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 258, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 279, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
@@ -721,7 +721,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(booking.UpdatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 270, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 291, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
@@ -742,7 +742,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 279, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 300, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -755,7 +755,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 283, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 304, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -778,7 +778,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FloatToString(booking.Service.Rate))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 295, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 316, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
@@ -791,7 +791,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 299, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 320, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -804,7 +804,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.UpdatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 303, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account_detail.templ`, Line: 324, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {

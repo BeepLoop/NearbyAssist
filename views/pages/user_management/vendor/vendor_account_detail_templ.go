@@ -74,7 +74,7 @@ func VendorAccountDetail(user models.AdminModel, data dto.VendorAccountDetail, f
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- main content --> <div class=\"mx-auto max-w-4xl\"><!-- Tabbed --><div x-data=\"{ selectedTab: &#39;profile&#39; }\" class=\"w-full\"><!-- tab buttons button --><div x-on:keydown.right.prevent=\"$focus.wrap().next()\" x-on:keydown.left.prevent=\"$focus.wrap().previous()\" class=\"flex gap-2 overflow-x-auto border-b border-success\" role=\"tablist\" aria-label=\"tab options\"><!-- profile button --><button x-on:click=\"selectedTab = &#39;profile&#39;\" x-bind:aria-selected=\"selectedTab === &#39;profile&#39;\" x-bind:tabindex=\"selectedTab === &#39;profile&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;profile&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelProfile\">Profile</button><!-- services button --><button x-on:click=\"selectedTab = &#39;services&#39;\" x-bind:aria-selected=\"selectedTab === &#39;services&#39;\" x-bind:tabindex=\"selectedTab === &#39;services&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;services&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelServices\">Services</button><!-- active bookings button --><button x-on:click=\"selectedTab = &#39;activeBookings&#39;\" x-bind:aria-selected=\"selectedTab === &#39;activeBookings&#39;\" x-bind:tabindex=\"selectedTab === &#39;activeBookings&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;activeBookings&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelActiveBookings\">Active Bookings</button><!-- previous bookings button --><button x-on:click=\"selectedTab = &#39;previousBookings&#39;\" x-bind:aria-selected=\"selectedTab === &#39;previousBookings&#39;\" x-bind:tabindex=\"selectedTab === &#39;previousBookings&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;previousBookings&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelPreviousBookings\">Previous Bookings</button></div><!-- tab contents button --><div class=\"px-2 py-4 text-neutral-dark dark:text-neutral-dark\"><!-- profile content --><div x-cloak x-show=\"selectedTab === &#39;profile&#39;\" id=\"tabpanelProfile\" role=\"tabpanel\" aria-label=\"profile\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <!-- main content --> <div class=\"mx-auto max-w-4xl\"><!-- Tabbed --><div x-data=\"tabs\" class=\"w-full\"><!-- tab buttons button --><div x-on:keydown.right.prevent=\"$focus.wrap().next()\" x-on:keydown.left.prevent=\"$focus.wrap().previous()\" class=\"flex gap-2 overflow-x-auto border-b border-success\" role=\"tablist\" aria-label=\"tab options\"><!-- profile button --><button x-on:click=\"changeTab(&#39;profile&#39;)\" x-bind:aria-selected=\"selectedTab === &#39;profile&#39;\" x-bind:tabindex=\"selectedTab === &#39;profile&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;profile&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelProfile\">Profile</button><!-- services button --><button x-on:click=\"changeTab(&#39;services&#39;)\" x-bind:aria-selected=\"selectedTab === &#39;services&#39;\" x-bind:tabindex=\"selectedTab === &#39;services&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;services&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelServices\">Services</button><!-- active bookings button --><button x-on:click=\"changeTab(&#39;activeBookings&#39;)\" x-bind:aria-selected=\"selectedTab === &#39;activeBookings&#39;\" x-bind:tabindex=\"selectedTab === &#39;activeBookings&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;activeBookings&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelActiveBookings\">Active Bookings</button><!-- previous bookings button --><button x-on:click=\"changeTab(&#39;previousBookings&#39;)\" x-bind:aria-selected=\"selectedTab === &#39;previousBookings&#39;\" x-bind:tabindex=\"selectedTab === &#39;previousBookings&#39; ? &#39;0&#39; : &#39;-1&#39;\" x-bind:class=\"selectedTab === &#39;previousBookings&#39; ? &#39;font-bold text-primary border-b-2 border-primary&#39; : &#39;text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark&#39;\" class=\"h-min px-4 py-2 text-sm\" type=\"button\" role=\"tab\" aria-controls=\"tabpanelPreviousBookings\">Previous Bookings</button></div><!-- tab contents button --><div class=\"px-2 py-4 text-neutral-dark dark:text-neutral-dark\"><!-- profile content --><div x-cloak x-show=\"selectedTab === &#39;profile&#39;\" id=\"tabpanelProfile\" role=\"tabpanel\" aria-label=\"profile\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -106,7 +106,7 @@ func VendorAccountDetail(user models.AdminModel, data dto.VendorAccountDetail, f
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><script>\n                    (function() {\n                        document.addEventListener(\"alpine:init\", () => {\n                            Alpine.data(\"tabs\", () => ({\n                                selectedTab: 'profile',\n                                init() {\n                                    const params = new URLSearchParams(window.location.search);\n                                    const tabParam = params.get('tab');\n                                    if (tabParam) this.selectedTab = tabParam;\n                                },\n                                changeTab(tab) {\n                                    this.selectedTab = tab;\n                                    const params = new URLSearchParams(window.location.search);\n                                    params.set('tab', tab);\n                                    const newURL = `${window.location.pathname}?${params.toString()}`;\n                                    history.replaceState({}, '', newURL);\n                                },\n                            }));\n                        });\n                     })();\n                </script></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -148,7 +148,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(data.Vendor.ImageURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 103, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 124, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -161,7 +161,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Vendor.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 110, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 131, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -174,7 +174,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(data.Vendor.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 111, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 132, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -187,7 +187,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(data.Vendor.Phone)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 112, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 133, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -200,7 +200,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.Vendor.Rating)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 119, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 140, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -213,7 +213,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.Vendor.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 127, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 148, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -226,7 +226,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(data.Vendor.JoinedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 131, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 152, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -239,7 +239,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(data.Vendor.DateVerified)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 135, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 156, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -257,7 +257,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(social)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 146, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 167, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -319,7 +319,7 @@ func services(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(service.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 167, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 188, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -332,7 +332,7 @@ func services(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(service.CreatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 168, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 189, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -369,7 +369,7 @@ func services(data dto.VendorAccountDetail) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(service.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 179, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 200, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -382,7 +382,7 @@ func services(data dto.VendorAccountDetail) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(service.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 183, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 204, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -395,7 +395,7 @@ func services(data dto.VendorAccountDetail) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FloatToString(service.Rate))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 186, Col: 103}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 207, Col: 103}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -503,7 +503,7 @@ func activeBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Client.ImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 240, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 261, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -516,7 +516,7 @@ func activeBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Client.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 244, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 265, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -529,7 +529,7 @@ func activeBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Client.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 245, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 266, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -542,7 +542,7 @@ func activeBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(booking.CreatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 252, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 273, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -555,7 +555,7 @@ func activeBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ScheduledAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 256, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 277, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -642,7 +642,7 @@ func previousBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Client.ImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 281, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 302, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
@@ -655,7 +655,7 @@ func previousBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Client.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 285, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 306, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
@@ -668,7 +668,7 @@ func previousBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Client.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 286, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 307, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
@@ -701,7 +701,7 @@ func previousBookings(data dto.VendorAccountDetail) templ.Component {
 			var templ_7745c5c3_Var34 string
 			templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(booking.UpdatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 302, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 323, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 			if templ_7745c5c3_Err != nil {
@@ -782,7 +782,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 322, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 343, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -795,7 +795,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FloatToString(booking.Cost))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 326, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 347, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -858,7 +858,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 			var templ_7745c5c3_Var39 string
 			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(booking.CancelReason)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 349, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 370, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 			if templ_7745c5c3_Err != nil {
@@ -876,7 +876,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(booking.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 354, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 375, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -889,7 +889,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var41 string
 		templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ScheduledAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 358, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 379, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 		if templ_7745c5c3_Err != nil {
@@ -927,7 +927,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var42 string
 		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(booking.UpdatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 370, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 391, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 		if templ_7745c5c3_Err != nil {
@@ -948,7 +948,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var43 string
 		templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 379, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 400, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 		if templ_7745c5c3_Err != nil {
@@ -961,7 +961,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var44 string
 		templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 383, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 404, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 		if templ_7745c5c3_Err != nil {
@@ -984,7 +984,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var45 string
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FloatToString(booking.Service.Rate))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 395, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 416, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
@@ -997,7 +997,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var46 string
 		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 399, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 420, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 		if templ_7745c5c3_Err != nil {
@@ -1010,7 +1010,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.UpdatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 403, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/vendor/vendor_account_detail.templ`, Line: 424, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {

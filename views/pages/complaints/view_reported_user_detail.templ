@@ -22,7 +22,7 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) 
 					@addressReportContent(data.Report.Id)
 				}
 			</div>
-			<div x-data="{ selectedTab: 'overview' }" class="w-full">
+			<div x-data="tabs" class="w-full">
 				<!-- tab buttons button -->
 				<div
 					x-on:keydown.right.prevent="$focus.wrap().next()"
@@ -33,7 +33,7 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) 
 				>
 					<!-- overview button -->
 					<button
-						x-on:click="selectedTab = 'overview'"
+						x-on:click="changeTab('overview')"
 						x-bind:aria-selected="selectedTab === 'overview'"
 						x-bind:tabindex="selectedTab === 'overview' ? '0' : '-1'"
 						x-bind:class="selectedTab === 'overview' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
@@ -45,7 +45,7 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) 
 					<!-- booking button -->
 					if data.Report.Category == "booking_related" {
 						<button
-							x-on:click="selectedTab = 'booking'"
+							x-on:click="changeTab('booking')"
 							x-bind:aria-selected="selectedTab === 'booking'"
 							x-bind:tabindex="selectedTab === 'booking' ? '0' : '-1'"
 							x-bind:class="selectedTab === 'booking' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
@@ -57,7 +57,7 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) 
 					}
 					<!-- reported button -->
 					<button
-						x-on:click="selectedTab = 'reported'"
+						x-on:click="changeTab('reported')"
 						x-bind:aria-selected="selectedTab === 'reported'"
 						x-bind:tabindex="selectedTab === 'reported' ? '0' : '-1'"
 						x-bind:class="selectedTab === 'reported' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
@@ -68,7 +68,7 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) 
 					>Reported</button>
 					<!-- reporter button -->
 					<button
-						x-on:click="selectedTab = 'reporter'"
+						x-on:click="changeTab('reporter')"
 						x-bind:aria-selected="selectedTab === 'reporter'"
 						x-bind:tabindex="selectedTab === 'reporter' ? '0' : '-1'"
 						x-bind:class="selectedTab === 'reporter' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
@@ -99,6 +99,27 @@ templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) 
 						@reporter(data)
 					</div>
 				</div>
+				<script>
+                    (function() {
+                        document.addEventListener("alpine:init", () => {
+                            Alpine.data("tabs", () => ({
+                                selectedTab: 'overview',
+                                init() {
+                                    const params = new URLSearchParams(window.location.search);
+                                    const tabParam = params.get('tab');
+                                    if (tabParam) this.selectedTab = tabParam;
+                                },
+                                changeTab(tab) {
+                                    this.selectedTab = tab;
+                                    const params = new URLSearchParams(window.location.search);
+                                    params.set('tab', tab);
+                                    const newURL = `${window.location.pathname}?${params.toString()}`;
+                                    history.replaceState({}, '', newURL);
+                                },
+                            }));
+                        });
+                     })();
+                </script>
 			</div>
 		</div>
 	}
