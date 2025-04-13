@@ -188,7 +188,7 @@ templ services(data dto.VendorAccountDetail) {
 						<td class="p-2">{ service.Title }</td>
 						<td class="p-2">Added on: { service.CreatedAt }</td>
 						<td class="p-2">
-							@partials.OffCanvas() {
+							@partials.OffCanvas(service.Id) {
 								<!-- Content -->
 								<div class="mt-4">
 									@carousel(service.Images)
@@ -277,7 +277,7 @@ templ activeBookings(data dto.VendorAccountDetail) {
 							<p class="text-neutral-gray">{ booking.ScheduledAt }</p>
 						</td>
 						<td class="p-2">
-							@partials.OffCanvas() {
+							@partials.OffCanvas(booking.Id) {
 								@offCanvasBookingData(booking)
 							}
 						</td>
@@ -323,7 +323,7 @@ templ previousBookings(data dto.VendorAccountDetail) {
 							<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 						</td>
 						<td class="p-2">
-							@partials.OffCanvas() {
+							@partials.OffCanvas(booking.Id) {
 								@offCanvasBookingData(booking)
 							}
 						</td>
