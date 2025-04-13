@@ -320,7 +320,6 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 				Rating:       vendor.Rating,
 				JoinedAt:     utils.FormatDate(vendor.JoinedAt),
 				DateVerified: utils.FormatDate(vendor.VerifiedAt),
-				Expertise:    vendor.Expertise,
 			},
 			Service: dto.Service{
 				Id:          service.Id,

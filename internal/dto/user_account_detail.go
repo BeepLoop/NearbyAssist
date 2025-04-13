@@ -36,7 +36,7 @@ type Vendor struct {
 	Phone        string
 	Socials      []string
 	Rating       string
-	Expertise    []string
+	Expertise    []Expertise
 	JoinedAt     string
 	DateVerified string
 	IsRestricted bool
@@ -79,4 +79,11 @@ type Service struct {
 type Image struct {
 	Id  string
 	URL string
+}
+
+type Expertise struct {
+	Title              string
+	DateApplied        string
+	DateApproved       string
+	SupportingDocument string
 }

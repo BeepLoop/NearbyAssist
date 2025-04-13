@@ -5,9 +5,9 @@ templ ImageViewer(image string) {
 		<!-- Image -->
 		<div
 			x-on:click="imageViewerOpen = true"
-			class="outline-1 outline-pale-gray cursor-pointer"
+			class="cursor-pointer outline-1 outline-pale-gray"
 		>
-			<img src={ image } alt="image" class=""/>
+			<img src={ image } alt="image" class="" loading="lazy"/>
 		</div>
 		<!-- Backdrop -->
 		<div
@@ -19,7 +19,7 @@ templ ImageViewer(image string) {
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="defaultModalTitle"
-			class="fixed inset-0 z-30 bg-neutral-gray/50 grid place-content-center"
+			class="fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50"
 		>
 			<!-- Modal Dialog -->
 			<div
@@ -27,13 +27,13 @@ templ ImageViewer(image string) {
 				x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
 				x-transition:enter-start="opacity-0"
 				x-transition:enter-end="opacity-100"
-				class="outline-1 outline-pale-gray p-2 rounded-sm bg-white p-4"
+				class="rounded-sm bg-white p-2 outline-1 outline-pale-gray"
 			>
 				<img
 					src={ image }
 					alt="image"
 					loading="lazy"
-					class="object-cover max-w-[80vw] max-h-[80vh]"
+					class="max-h-[80vh] max-w-[80vw] object-cover"
 				/>
 			</div>
 		</div>

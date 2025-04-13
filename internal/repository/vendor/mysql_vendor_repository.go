@@ -437,6 +437,43 @@ func (s *MysqlVendorRepository) AddExpertise(userId, expertiseId, supportingImag
 	return nil
 }
 
+func (s *MysqlVendorRepository) GetAllExpertise(userId string) ([]*models.UserExpertiseModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            ue.userId,
+            ue.expertiseId,
+            ue.supportingImage,
+            ue.createdAt,
+            e.title AS expertise,
+            a.createdAt AS dateApplied,
+            a.updatedAt AS dateApproved,
+            si.url AS supportingDocumentImage
+        FROM
+            UserExpertise ue
+            JOIN Expertise e ON e.id = ue.expertiseId
+            JOIN Application a ON a.applicantId = ue.userId
+            JOIN SupportingImage si ON si.id = ue.supportingImage
+        WHERE
+            ue.userId = ?
+        ORDER BY
+            ue.createdAt DESC
+    `
+
+	expertises := make([]*models.UserExpertiseModel, 0)
+	if err := s.db.SelectContext(ctx, &expertises, query, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return expertises, nil
+}
+
 func (s *MysqlVendorRepository) GetBookingsWithStatus(vendorId, status string) ([]*models.BookingModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

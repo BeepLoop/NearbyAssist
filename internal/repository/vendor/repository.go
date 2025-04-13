@@ -10,5 +10,6 @@ type VendorRepository interface {
 	GetTags(serviceId string) ([]*models.TagModel, error)
 	IsRestricted(userId string) (bool, error)
 	AddExpertise(userId, expertiseId, supportingImage string) error
+	GetAllExpertise(userId string) ([]*models.UserExpertiseModel, error)
 	GetBookingsWithStatus(vendorId, status string) ([]*models.BookingModel, error)
 }

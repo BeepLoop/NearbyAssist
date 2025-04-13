@@ -11,6 +11,7 @@ import (
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/service/core"
 	notification_service "nearbyassist/internal/service/notification"
+	resource_service "nearbyassist/internal/service/resource"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 	"slices"
@@ -18,14 +19,15 @@ import (
 )
 
 type Service struct {
-	userStore    user_repo.UserRepository
-	vendorStore  vendor_repo.VendorRepository
-	notifStore   notification_repo.NotificationRepository
-	bookingStore booking_repo.BookingRepository
-	serviceStore service_repo.ServiceRepository
-	ws           websocket.Socket
-	encrypt      core.Encryption
-	hash         core.Hash
+	userStore       user_repo.UserRepository
+	vendorStore     vendor_repo.VendorRepository
+	notifStore      notification_repo.NotificationRepository
+	bookingStore    booking_repo.BookingRepository
+	serviceStore    service_repo.ServiceRepository
+	resourceService *resource_service.Service
+	ws              websocket.Socket
+	encrypt         core.Encryption
+	hash            core.Hash
 }
 
 func NewService(
@@ -34,19 +36,21 @@ func NewService(
 	notifStore notification_repo.NotificationRepository,
 	bookingStore booking_repo.BookingRepository,
 	serviceStore service_repo.ServiceRepository,
+	resourceService *resource_service.Service,
 	ws websocket.Socket,
 	encrypt core.Encryption,
 	hash core.Hash,
 ) *Service {
 	return &Service{
-		userStore:    userStore,
-		vendorStore:  vendorStore,
-		notifStore:   notifStore,
-		bookingStore: bookingStore,
-		serviceStore: serviceStore,
-		ws:           ws,
-		encrypt:      encrypt,
-		hash:         hash,
+		userStore:       userStore,
+		vendorStore:     vendorStore,
+		notifStore:      notifStore,
+		bookingStore:    bookingStore,
+		serviceStore:    serviceStore,
+		resourceService: resourceService,
+		ws:              ws,
+		encrypt:         encrypt,
+		hash:            hash,
 	}
 }
 
@@ -127,7 +131,6 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						Rating:       vendor.Rating,
 						JoinedAt:     utils.FormatDate(vendor.JoinedAt),
 						DateVerified: utils.FormatDate(vendor.VerifiedAt),
-						Expertise:    vendor.Expertise,
 					},
 					Service: dto.Service{
 						Id:          service.Id,
@@ -220,7 +223,6 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						Rating:       vendor.Rating,
 						JoinedAt:     utils.FormatDate(vendor.JoinedAt),
 						DateVerified: utils.FormatDate(vendor.VerifiedAt),
-						Expertise:    vendor.Expertise,
 					},
 					Service: dto.Service{
 						Id:          service.Id,
@@ -282,6 +284,11 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 		return nil, err
 	}
 
+	expertises, err := s.vendorStore.GetAllExpertise(account.VendorId)
+	if err != nil {
+		return nil, err
+	}
+
 	services, err := s.vendorStore.GetVendorServiceList(userId)
 	if err != nil {
 		return nil, err
@@ -311,8 +318,18 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 					return utils.Must(s.encrypt.DecryptString(social))
 				}),
 			),
-			Rating:       account.Rating,
-			Expertise:    account.Expertise,
+			Rating: account.Rating,
+			Expertise: slices.AppendSeq(
+				make([]dto.Expertise, 0),
+				utils.Map(expertises, func(e *models.UserExpertiseModel) dto.Expertise {
+					return dto.Expertise{
+						Title:              e.Expertise,
+						DateApplied:        utils.FormatDate(e.DateApplied),
+						DateApproved:       utils.FormatDate(e.DateApproved),
+						SupportingDocument: utils.Must(s.resourceService.SignURLWithDefaultDuration(e.SupportingDocumentImage)),
+					}
+				}),
+			),
 			JoinedAt:     utils.FormatDate(account.JoinedAt),
 			DateVerified: utils.FormatDate(account.VerifiedAt),
 			IsRestricted: account.Restricted,
@@ -394,7 +411,6 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 							}),
 						),
 						Rating:       account.Rating,
-						Expertise:    account.Expertise,
 						JoinedAt:     utils.FormatDate(account.JoinedAt),
 						DateVerified: utils.FormatDate(account.VerifiedAt),
 						IsRestricted: account.Restricted,
@@ -489,7 +505,6 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 							}),
 						),
 						Rating:       account.Rating,
-						Expertise:    account.Expertise,
 						JoinedAt:     utils.FormatDate(account.JoinedAt),
 						DateVerified: utils.FormatDate(account.VerifiedAt),
 						IsRestricted: account.Restricted,
