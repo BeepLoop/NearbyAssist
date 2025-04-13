@@ -29,27 +29,27 @@ func ImageViewer(image string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{imageViewerOpen: false}\"><!-- Image --><div x-on:click=\"imageViewerOpen = true\" class=\"cursor-pointer outline-1 outline-pale-gray\"><img src=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{imageViewerOpen: false}\"><!-- Image --><div x-on:click=\"imageViewerOpen = true\" class=\"cursor-pointer outline-1 outline-pale-gray max-h-full h-full\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(image)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/image_viewer.templ`, Line: 10, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/image_viewer.templ`, Line: 11, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" class=\"\" loading=\"lazy\"></div><!-- Backdrop --><div x-cloak x-show=\"imageViewerOpen\" x-on:keydown.esc.window=\"imageViewerOpen = false\" x-on:click.self=\"imageViewerOpen = false\" x-transition role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50\"><!-- Modal Dialog --><div x-show=\"imageViewerOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"rounded-sm bg-white p-2 outline-1 outline-pale-gray\"><img src=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" alt=\"image\" class=\"max-h-full object-contain\" loading=\"lazy\"></div><!-- Backdrop --><div x-cloak x-show=\"imageViewerOpen\" x-on:keydown.esc.window=\"imageViewerOpen = false\" x-on:click.self=\"imageViewerOpen = false\" x-transition role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50\"><!-- Modal Dialog --><div x-show=\"imageViewerOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"rounded-sm bg-white p-2 outline-1 outline-pale-gray\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(image)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/image_viewer.templ`, Line: 33, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/image_viewer.templ`, Line: 38, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {

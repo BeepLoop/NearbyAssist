@@ -14,33 +14,35 @@ type VendorAccountDetail struct {
 }
 
 type User struct {
-	Id           string
-	Name         string
-	Email        string
-	ImageURL     string
-	Address      string
-	Phone        string
-	Socials      []string
-	CreatedAt    string
-	DateVerified string
-	IsRestricted bool
-	IsBanned     bool
+	Id             string
+	Name           string
+	Email          string
+	ImageURL       string
+	Address        string
+	Phone          string
+	Socials        []string
+	Identification Identification
+	CreatedAt      string
+	DateVerified   string
+	IsRestricted   bool
+	IsBanned       bool
 }
 
 type Vendor struct {
-	Id           string
-	Name         string
-	Email        string
-	ImageURL     string
-	Address      string
-	Phone        string
-	Socials      []string
-	Rating       string
-	Expertise    []Expertise
-	JoinedAt     string
-	DateVerified string
-	IsRestricted bool
-	IsBanned     bool
+	Id             string
+	Name           string
+	Email          string
+	ImageURL       string
+	Address        string
+	Phone          string
+	Socials        []string
+	Identification Identification
+	Rating         string
+	Expertise      []Expertise
+	JoinedAt       string
+	DateVerified   string
+	IsRestricted   bool
+	IsBanned       bool
 }
 
 type Booking struct {
@@ -86,4 +88,11 @@ type Expertise struct {
 	DateApplied        string
 	DateApproved       string
 	SupportingDocument string
+}
+
+type Identification struct {
+	Type          string
+	IdNumber      string
+	FrontImageURL string
+	BackImageURL  string
 }

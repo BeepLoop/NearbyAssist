@@ -8,6 +8,8 @@ type UserRepository interface {
 	FindByEmailHash(emailHash string) (*models.UserModel, error)
 	Login(data *models.SessionModel) error
 
+	GetIdentification(userId string) (*models.IdentificationModel, error)
+
 	GetUserAccountPageData(userId string) (*models.UserAccountPageData, error)
 
 	GetAllUserAccounts(limit, offset int) ([]*models.UserModel, error)

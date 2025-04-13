@@ -5,9 +5,14 @@ templ ImageViewer(image string) {
 		<!-- Image -->
 		<div
 			x-on:click="imageViewerOpen = true"
-			class="cursor-pointer outline-1 outline-pale-gray"
+			class="cursor-pointer outline-1 outline-pale-gray max-h-full h-full"
 		>
-			<img src={ image } alt="image" class="" loading="lazy"/>
+			<img
+				src={ image }
+				alt="image"
+				class="max-h-full object-contain"
+				loading="lazy"
+			/>
 		</div>
 		<!-- Backdrop -->
 		<div

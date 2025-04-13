@@ -17,7 +17,7 @@ templ UserAccountDetail(user models.AdminModel, data dto.UserAccountDetail, flas
 		<!-- back button -->
 		@partials.BackButton()
 		<!-- main content -->
-		<div class="max-w-4xl mx-auto">
+		<div class="mx-auto max-w-4xl">
 			<!-- Tabbed -->
 			<div x-data="tabs" class="w-full">
 				<!-- tab buttons button -->
@@ -134,15 +134,31 @@ templ profile(data dto.UserAccountDetail) {
 			</div>
 		</div>
 	</div>
+	<!-- Identification -->
+	<div class="mt-4">
+		<h2 class="text-xl font-medium text-neutral-dark">Identification</h2>
+		@partials.Divider()
+		<div class="mt-2 flex items-center gap-2">
+			<span class="font-medium text-neutral-dark">ID Type:</span>
+			<p>{ data.User.Identification.Type }</p>
+		</div>
+		<div class="mt-2 flex items-center gap-2">
+			<span class="font-medium text-neutral-dark">ID:</span>
+			<p>{ data.User.Identification.IdNumber }</p>
+		</div>
+		<div class="flex max-h-44 gap-2 mt-2">
+			@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.FrontImageURL))
+			@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.BackImageURL))
+		</div>
+	</div>
 	<!-- Socials -->
 	<div class="mt-4">
-		<div class="mt-4">
-			<span class="font-medium text-neutral-dark">Socials:</span>
-			<div class="mt-1.5">
-				for _, social := range data.User.Socials {
-					<li class="text-neutral-gray">{ social } </li>
-				}
-			</div>
+		<span class="text-xl font-medium text-neutral-dark">Socials:</span>
+		@partials.Divider()
+		<div class="mt-1.5">
+			for _, social := range data.User.Socials {
+				<li class="text-neutral-gray">{ social } </li>
+			}
 		</div>
 	</div>
 }
@@ -246,7 +262,7 @@ templ offCanvasBookingData(booking dto.Booking) {
 			<span class="font-medium text-neutral-dark">Total:</span>
 			<p class="text-neutral-gray">₱ { utils.FloatToString(booking.Cost) }</p>
 		</div>
-		<div class="mt-2 flex gap-2 items-center">
+		<div class="mt-2 flex items-center gap-2">
 			<span class="font-medium text-neutral-dark">Status:</span>
 			if booking.Status == "done" {
 				@partials.DefaultBadgeSuccess("completed")
@@ -305,7 +321,7 @@ templ offCanvasBookingData(booking dto.Booking) {
 		</div>
 		<div class="mt-2">
 			<span class="font-medium text-neutral-dark">Tags:</span>
-			<div class="flex gap-2 mt-1.5">
+			<div class="mt-1.5 flex gap-2">
 				for _, tag := range booking.Service.Tags {
 					@partials.DefaultBadgeSuccess(tag)
 				}
@@ -346,7 +362,7 @@ templ actions(user dto.User) {
 		<!-- Dropdown Toggle Button -->
 		<button
 			type="button"
-			class="inline-flex gap-2 items-center outline-1 outline-danger rounded-sm px-2 py-1.5 text-sm text-danger fond-medium bg-danger/25 cursor-pointer hover:opacity-75"
+			class="fond-medium inline-flex cursor-pointer items-center gap-2 rounded-sm bg-danger/25 px-2 py-1.5 text-sm text-danger outline-1 outline-danger hover:opacity-75"
 			id="pm-dropdown"
 			aria-haspopup="true"
 			x-bind:aria-expanded="userActionsOpen"
@@ -385,9 +401,9 @@ templ actions(user dto.User) {
 			class="absolute end-0 z-10 mt-2 w-44"
 		>
 			<div
-				class="outline-1 outline-pale-gray rounded-sm shadow-xl"
+				class="rounded-sm shadow-xl outline-1 outline-pale-gray"
 			>
-				<div class="p-1.5 grid gap-1.5">
+				<div class="grid gap-1.5 p-1.5">
 					if user.IsBanned {
 						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", user.Id), user.IsBanned)
 					} else {

@@ -238,6 +238,34 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	return user, nil
 }
 
+func (s *MysqlUserRepository) GetIdentification(userId string) (*models.IdentificationModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            idType AS type,
+            idNumber AS idNumber,
+            frontIdImageUrl AS frontImage,
+            backIdImageUrl AS backImage
+        FROM
+            IdentityVerification
+        WHERE
+            userId = ?
+    `
+
+	identification := new(models.IdentificationModel)
+	if err := s.db.GetContext(ctx, identification, query, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return identification, nil
+}
+
 func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.UserAccountPageData, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

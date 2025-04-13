@@ -60,6 +60,11 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 		return nil, err
 	}
 
+	identification, err := s.userStore.GetIdentification(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
 	bookings, err := s.bookingStore.GetConfirmed(userId, "client")
 	if err != nil {
 		return nil, err
@@ -84,6 +89,12 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 					return utils.Must(s.encrypt.DecryptString(social))
 				}),
 			),
+			Identification: dto.Identification{
+				Type:          identification.Type,
+				IdNumber:      utils.Must(s.encrypt.DecryptString(identification.IdNumber)),
+				FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(identification.FrontImage)),
+				BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(identification.BackImage)),
+			},
 			CreatedAt:    utils.FormatDate(user.CreatedAt),
 			DateVerified: utils.FormatDate(user.VerifiedAt),
 			IsRestricted: user.Restricted,
@@ -284,6 +295,11 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 		return nil, err
 	}
 
+	identification, err := s.userStore.GetIdentification(account.VendorId)
+	if err != nil {
+		return nil, err
+	}
+
 	expertises, err := s.vendorStore.GetAllExpertise(account.VendorId)
 	if err != nil {
 		return nil, err
@@ -318,6 +334,12 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 					return utils.Must(s.encrypt.DecryptString(social))
 				}),
 			),
+			Identification: dto.Identification{
+				Type:          identification.Type,
+				IdNumber:      utils.Must(s.encrypt.DecryptString(identification.IdNumber)),
+				FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(identification.FrontImage)),
+				BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(identification.BackImage)),
+			},
 			Rating: account.Rating,
 			Expertise: slices.AppendSeq(
 				make([]dto.Expertise, 0),
@@ -562,91 +584,6 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 	}
 
 	return data, nil
-}
-
-func (s *Service) GetSingleUser(userId string) (*models.UserAccountPageData, error) {
-	accountData, err := s.userStore.GetUserAccountPageData(userId)
-	if err != nil {
-		return nil, err
-	}
-
-	if restricted, expired, err := s.userStore.IsRestricted(userId); err != nil {
-		return nil, err
-	} else {
-		accountData.Restricted = restricted && !expired
-	}
-
-	if accountData.Restricted {
-		if err := s.userStore.LiftRestrictionIfExpired(userId); err != nil {
-			return nil, err
-		}
-	}
-
-	if stat, err := s.userStore.GetSentBookingCount(userId); err != nil {
-		accountData.Stat.Sent = models.SentStat{}
-	} else {
-		accountData.Stat.Sent = *stat
-	}
-
-	if stat, err := s.userStore.GetReceivedBookingCount(userId); err != nil {
-		accountData.Stat.Received = models.ReceivedStat{}
-	} else {
-		accountData.Stat.Received = *stat
-	}
-
-	if decrypted, err := s.encrypt.DecryptString(accountData.Name); err != nil {
-		return nil, err
-	} else {
-		accountData.Name = decrypted
-	}
-
-	if decrypted, err := s.encrypt.DecryptString(accountData.Email); err != nil {
-		return nil, err
-	} else {
-		accountData.Email = decrypted
-	}
-
-	if accountData.Address.Valid {
-		if decrypted, err := s.encrypt.DecryptString(accountData.Address.String); err != nil {
-			return nil, err
-		} else {
-			accountData.Address.String = decrypted
-		}
-	} else {
-		accountData.Address.String = ""
-	}
-
-	for _, service := range accountData.Services {
-		// Decrypt service title and description
-		if decrypted, err := s.encrypt.DecryptString(service.Title); err != nil {
-			return nil, err
-		} else {
-			service.Title = decrypted
-		}
-
-		if decrypted, err := s.encrypt.DecryptString(service.Description); err != nil {
-			return nil, err
-		} else {
-			service.Description = decrypted
-		}
-
-		// Decrypt service extra title and description
-		for _, extra := range service.Extras {
-			if decrypted, err := s.encrypt.DecryptString(extra.Title); err != nil {
-				return nil, err
-			} else {
-				extra.Title = decrypted
-			}
-
-			if decrypted, err := s.encrypt.DecryptString(extra.Description); err != nil {
-				return nil, err
-			} else {
-				extra.Description = decrypted
-			}
-		}
-	}
-
-	return accountData, nil
 }
 
 func (s *Service) BanUser(userId string) error {

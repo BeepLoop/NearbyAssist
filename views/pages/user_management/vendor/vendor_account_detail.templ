@@ -158,62 +158,80 @@ templ profile(data dto.VendorAccountDetail) {
 			</div>
 		</div>
 	</div>
-	<!-- Socials and Expertise -->
+	<!-- Identification -->
 	<div class="mt-4">
-		<div class="mt-4">
-			<span class="font-medium text-neutral-dark">Socials:</span>
-			<div class="mt-1.5">
-				for _, social := range data.Vendor.Socials {
-					<li class="text-neutral-gray">{ social } </li>
-				}
-			</div>
+		<h2 class="text-xl font-medium text-neutral-dark">Identification</h2>
+		@partials.Divider()
+		<div class="mt-2 flex items-center gap-2">
+			<span class="font-medium text-neutral-dark">ID Type:</span>
+			<p>{ data.Vendor.Identification.Type }</p>
 		</div>
-		<div class="mt-6">
-			<span class="font-medium text-neutral-dark">Expertise:</span>
-			<table class="w-full border-collapse text-left text-xs">
-				<tbody class="divide-y divide-neutral-gray-lighter">
-					for _, expertise := range data.Vendor.Expertise {
-						<tr>
-							<td class="p-2">
-								@partials.DefaultBadgeSuccess(expertise.Title)
-							</td>
-							<td class="p-2">
-								<span class="font-medium text-neutral-dark">Date applied:</span>
-								<p class="text-neutral-gray">{ expertise.DateApplied }</p>
-							</td>
-							<td class="p-2">
-								<span class="font-medium text-neutral-dark">Date approved:</span>
-								<p class="text-neutral-gray">{ expertise.DateApproved }</p>
-							</td>
-							<td>
-								@partials.OffCanvas(expertise.Title) {
-									<div class="text-sm">
-										<div class="mt-2 flex items-center gap-2">
-											<span class="font-medium text-neutral-dark">Title:</span>
-											@partials.DefaultBadgeSuccess(expertise.Title)
-										</div>
-										<div class="mt-2 flex gap-2">
-											<span class="font-medium text-neutral-dark">Date Applied:</span>
-											<p class="text-neutral-gray">{ expertise.DateApplied }</p>
-										</div>
-										<div class="mt-2 flex gap-2">
-											<span class="font-medium text-neutral-dark">Date Approved:</span>
-											<p class="text-neutral-gray">{ expertise.DateApproved }</p>
-										</div>
-										<div class="mt-2">
-											<span class="font-medium text-neutral-dark">Supporting Document:</span>
-											<div class="mt-1.5">
-												@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument))
-											</div>
+		<div class="mt-2 flex items-center gap-2">
+			<span class="font-medium text-neutral-dark">ID:</span>
+			<p>{ data.Vendor.Identification.IdNumber }</p>
+		</div>
+		<div class="mt-2 flex max-h-44 gap-2">
+			@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.FrontImageURL))
+			@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.BackImageURL))
+		</div>
+	</div>
+	<!-- Socials -->
+	<div class="mt-4">
+		<span class="text-xl font-medium text-neutral-dark">Socials:</span>
+		@partials.Divider()
+		<div class="mt-1.5">
+			for _, social := range data.Vendor.Socials {
+				<li class="text-neutral-gray">{ social } </li>
+			}
+		</div>
+	</div>
+	<!-- Expertise -->
+	<div class="mt-4">
+		<span class="text-xl font-medium text-neutral-dark">Expertise:</span>
+		@partials.Divider()
+		<table class="w-full border-collapse text-left text-xs">
+			<tbody class="divide-y divide-neutral-gray-lighter">
+				for _, expertise := range data.Vendor.Expertise {
+					<tr>
+						<td class="p-2">
+							@partials.DefaultBadgeSuccess(expertise.Title)
+						</td>
+						<td class="p-2">
+							<span class="font-medium text-neutral-dark">Date applied:</span>
+							<p class="text-neutral-gray">{ expertise.DateApplied }</p>
+						</td>
+						<td class="p-2">
+							<span class="font-medium text-neutral-dark">Date approved:</span>
+							<p class="text-neutral-gray">{ expertise.DateApproved }</p>
+						</td>
+						<td>
+							@partials.OffCanvas(expertise.Title) {
+								<div class="text-sm">
+									<div class="mt-2 flex items-center gap-2">
+										<span class="font-medium text-neutral-dark">Title:</span>
+										@partials.DefaultBadgeSuccess(expertise.Title)
+									</div>
+									<div class="mt-2 flex gap-2">
+										<span class="font-medium text-neutral-dark">Date Applied:</span>
+										<p class="text-neutral-gray">{ expertise.DateApplied }</p>
+									</div>
+									<div class="mt-2 flex gap-2">
+										<span class="font-medium text-neutral-dark">Date Approved:</span>
+										<p class="text-neutral-gray">{ expertise.DateApproved }</p>
+									</div>
+									<div class="mt-2">
+										<span class="font-medium text-neutral-dark">Supporting Document:</span>
+										<div class="mt-1.5">
+											@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument))
 										</div>
 									</div>
-								}
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-		</div>
+								</div>
+							}
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
 	</div>
 }
 
