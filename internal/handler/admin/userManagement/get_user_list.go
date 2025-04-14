@@ -67,7 +67,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 			Email:      account.Email,
 			ImageUrl:   account.ImageUrl,
 			Verified:   account.Verified,
-			VerifiedAt: account.VerifiedAt,
+			VerifiedAt: utils.FormatDate(account.VerifiedAt),
 		})
 	}
 

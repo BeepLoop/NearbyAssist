@@ -241,8 +241,16 @@ templ services(data dto.VendorAccountDetail) {
 			<tbody class="divide-y divide-neutral-gray-lighter">
 				for _, service := range  data.Services {
 					<tr class="">
-						<td class="p-2">{ service.Title }</td>
-						<td class="p-2">Added on: { service.CreatedAt }</td>
+						<td class="p-2">
+							<span class="font-medium text-neutral-dark">{ service.Title }</span>
+						</td>
+						<td class="p-2">
+							<span class="font-medium text-neutral-dark">₱ { utils.FloatToString(service.Rate) }</span>
+						</td>
+						<td class="p-2">
+							<span class="font-medium text-neutral-dark">Added on:</span>
+							<p class="text-neutral-gray">{ service.CreatedAt }</p>
+						</td>
 						<td class="p-2">
 							@partials.OffCanvas(service.Id) {
 								<!-- Content -->
