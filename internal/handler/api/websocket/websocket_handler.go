@@ -37,7 +37,6 @@ func (h *handler) Connect(c echo.Context) error {
 	// NOTE: Use bearer token when I successfully solved the problem of passing
 	// JWT from client Authorization header that works even on reconnect and JWT
 	// updates.
-	// bearerToken := utils.BearerTokenFromHeader(c)
 	token := c.QueryParam("token")
 	userId, err := utils.GetUserIdFromToken(token, h.jwt.GetClaims)
 	if err != nil {
@@ -51,11 +50,19 @@ func (h *handler) Connect(c echo.Context) error {
 	fmt.Println("user connected: ", userId)
 
 	for {
-		if gorilla_ws.IsCloseError(err, gorilla_ws.CloseNormalClosure, gorilla_ws.CloseGoingAway, gorilla_ws.CloseAbnormalClosure) {
-			h.ws.RemoveClient(userId)
-			fmt.Println("User disconnected: ", userId)
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			if gorilla_ws.IsCloseError(err, gorilla_ws.CloseNormalClosure, gorilla_ws.CloseGoingAway, gorilla_ws.CloseAbnormalClosure) {
+				h.ws.RemoveClient(userId)
+				fmt.Println("User disconnected: ", userId)
 
-			return nil
+				return nil
+			}
+
+			fmt.Println("read error: ", err.Error())
+			return err
 		}
+
+		fmt.Println("received: ", string(msg))
 	}
 }
