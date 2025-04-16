@@ -1,10 +1,8 @@
-include .db.env
+include .db.env .env
 # Simple Makefile for a Go project
 
 # Build the application
-all: templates css build
-
-dev: all run
+all: templates tailwind build
 
 build:
 	@echo "Building..."
@@ -27,17 +25,25 @@ clean:
 	@sudo rm -rf mysql
 	@rm -rf store
 	@rm -rf logs
+	@rm -rf tmp
+
+server-watch:
+	@air --build.cmd "go build -o tmp/main cmd/main.go" \
+	-- build.bin "tmpl/main" --build.delay "100" \
+	--build.exclude_dir ["node_modules", "mysql", "store", "logs"] --build.include_ext "go" \
+	--build.stop_on_error "false" \
+	--misc.clean_on_exit true
 
 templates:
 	@templ generate
 
 templates-watch:
-	@templ generate --watch
+	@templ generate --watch --proxy="http://localhost:${PORT}" -v
 
-css: 
+tailwind: 
 	@pnpm tailwindcss -i ./static/style/tailwind.css -o ./static/style/style.css
 
-css-watch:
+tailwind-watch:
 	@pnpm tailwindcss -i ./static/style/tailwind.css -o ./static/style/style.css --watch
 
 migrate-up:
@@ -51,19 +57,6 @@ migrate-status:
 
 # Live Reload
 watch:
-	@if [ -x "$(GOPATH)/bin/air" ]; then \
-	    "$(GOPATH)/bin/air"; \
-		@echo "Watching...";\
-	else \
-	    read -p "air is not installed. Do you want to install it now? (y/n) " choice; \
-	    if [ "$$choice" = "y" ]; then \
-			go install github.com/cosmtrek/air@latest; \
-	        "$(GOPATH)/bin/air"; \
-				@echo "Watching...";\
-	    else \
-	        echo "You chose not to install air. Exiting..."; \
-	        exit 1; \
-	    fi; \
-	fi
+	make -j3 templates-watch tailwind-watch server-watch
 
 .PHONY: all build run test clean
