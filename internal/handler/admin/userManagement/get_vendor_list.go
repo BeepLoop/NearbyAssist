@@ -4,7 +4,7 @@ import (
 	"context"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
-	pages "nearbyassist/views/pages/user_management/vendor"
+	pages "nearbyassist/views/pages/user_management/seller"
 	"net/http"
 	"strconv"
 

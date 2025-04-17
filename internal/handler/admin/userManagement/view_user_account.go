@@ -19,10 +19,10 @@ func (h *userManagementHandler) GetUser(c echo.Context) error {
 
 	data, err := h.managementService.GetUserAccountDetail(c.Param("userId"))
 	if err != nil {
-		page := pages.UserAccountDetail(*admin, dto.UserAccountDetail{}, flash)
+		page := pages.UserAccount(*admin, dto.UserAccountDetail{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	page := pages.UserAccountDetail(*admin, *data, flash)
+	page := pages.UserAccount(*admin, *data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

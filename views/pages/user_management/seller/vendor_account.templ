@@ -9,7 +9,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ VendorAccountDetail(user models.AdminModel, data dto.VendorAccountDetail, flash string) {
+templ VendorAccount(user models.AdminModel, data dto.VendorAccountDetail, flash string) {
 	@layout.Layout(user) {
 		<!-- toasy component -->
 		@templ.JSONScript("flash", flash)

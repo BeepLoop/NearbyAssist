@@ -1,0 +1,76 @@
+package pages
+
+import (
+	"fmt"
+	"nearbyassist/internal/dto"
+	"nearbyassist/views/partials"
+)
+
+templ actions(user dto.User) {
+	<!-- Dropdown Container -->
+	<div
+		x-data="{ userActionsOpen: false }"
+		x-on:keydown.esc.prevent.stop="userActionsOpen = false"
+		class="relative"
+	>
+		<!-- Dropdown Toggle Button -->
+		<button
+			type="button"
+			class="fond-medium inline-flex cursor-pointer items-center gap-2 rounded-sm bg-danger/25 px-2 py-1.5 text-sm text-danger outline-1 outline-danger hover:opacity-75"
+			id="pm-dropdown"
+			aria-haspopup="true"
+			x-bind:aria-expanded="userActionsOpen"
+			x-on:click="userActionsOpen = true"
+		>
+			<span>Actions</span>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 16 16"
+				fill="currentColor"
+				data-slot="icon"
+				class="hi-micro hi-chevron-down inline-block size-5 opacity-50"
+				x-bind:class="{ 'rotate-180': userActionsOpen }"
+			>
+				<path
+					fill-rule="evenodd"
+					d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+					clip-rule="evenodd"
+				></path>
+			</svg>
+		</button>
+		<!-- END Dropdown Toggle Button -->
+		<!-- Dropdown -->
+		<div
+			x-cloak
+			x-show="userActionsOpen"
+			x-transition:enter="transition ease-out duration-100"
+			x-transition:enter-start="opacity-0 -translate-y-3"
+			x-transition:enter-end="opacity-100 translate-y-0"
+			x-transition:leave="transition ease-in duration-75"
+			x-transition:leave-start="opacity-100 translate-y-0"
+			x-transition:leave-end="opacity-0 -translate-y-3"
+			x-on:click.outside="userActionsOpen = false"
+			role="menu"
+			aria-labelledby="pm-dropdown"
+			class="absolute end-0 z-10 mt-2 w-44"
+		>
+			<div
+				class="rounded-sm shadow-xl outline-1 outline-pale-gray"
+			>
+				<div class="grid gap-1.5 p-1.5">
+					if user.IsBanned {
+						@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", user.Id), user.IsBanned)
+					} else {
+						@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/user-management/ban/%s", user.Id), user.IsBanned)
+					}
+					if user.IsRestricted {
+						@partials.UnrestrictUser(fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id))
+					} else {
+						@partials.RestrictUser(fmt.Sprintf("/admin/user-management/restrict/%s", user.Id))
+					}
+				</div>
+			</div>
+		</div>
+		<!-- END Dropdown -->
+	</div>
+}

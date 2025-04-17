@@ -4,7 +4,7 @@ import (
 	"context"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/utils"
-	pages "nearbyassist/views/pages/user_management/vendor"
+	pages "nearbyassist/views/pages/user_management/seller"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -19,10 +19,10 @@ func (h *userManagementHandler) GetVendor(c echo.Context) error {
 
 	data, err := h.managementService.GetVendorAccountDetail(c.Param("userId"))
 	if err != nil {
-		page := pages.VendorAccountDetail(*admin, dto.VendorAccountDetail{}, flash)
+		page := pages.VendorAccount(*admin, dto.VendorAccountDetail{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	page := pages.VendorAccountDetail(*admin, *data, flash)
+	page := pages.VendorAccount(*admin, *data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }
