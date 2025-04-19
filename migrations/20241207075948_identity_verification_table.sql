@@ -2,23 +2,12 @@
 CREATE TABLE IF NOT EXISTS IdentityVerification (
     id VARCHAR(255) NOT NULL,
     userId VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    phone VARCHAR(255) NOT NULL,
-    latitude Decimal(12, 10) NOT NULL,
-    longitude Decimal(13, 10) NOT NULL,
-    idType VARCHAR(255) NOT NULL,
-    idNumber VARCHAR(255) NOT NULL,
-    frontIdImageUrl VARCHAR(255) NOT NULL,
-    backIdImageUrl VARCHAR(255) NOT NULL,
-    faceImageUrl VARCHAR(255) NOT NULL,
-    status Enum('pending', 'rejected', 'approved') NOT NULL DEFAULT 'pending',
-    rejectionReason TEXT,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    rejectionNote TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY(id, userId, idType),
-    FOREIGN KEY(userId) REFERENCES User(id),
-    INDEX(id, userId, status)
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    INDEX(id, userId)
 );
 -- +goose StatementBegin
 SELECT 'up SQL query';

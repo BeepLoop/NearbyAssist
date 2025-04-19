@@ -1,13 +1,11 @@
 package models
 
-import "database/sql"
-
 type UserAccountPageData struct {
 	Id         string
 	ProfileURL string
 	Name       string
 	Email      string
-	Address    sql.NullString
+	Address    string
 	Banned     bool
 	Restricted bool
 	CreatedAt  string

@@ -1,13 +1,13 @@
 package user
 
 import (
+	"encoding/json"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	user_service "nearbyassist/internal/service/user"
 	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -41,18 +41,20 @@ func (h *userHandler) GetUser(c echo.Context) error {
 	})
 }
 
-func (h *userHandler) RequestIdentityVerification(c echo.Context) error {
-	name := c.FormValue("name")
-	phone := c.FormValue("phone")
-	address := c.FormValue("address")
-	latitude := c.FormValue("latitude")
-	longitude := c.FormValue("longitude")
-	idType := c.FormValue("idType")
-	idNumber := c.FormValue("idNumber")
-	if name == "" || phone == "" || address == "" || latitude == "" || longitude == "" || idType == "" || idNumber == "" {
+func (h *userHandler) VerifyAccount(c echo.Context) error {
+	user := c.FormValue("user")
+	req := new(request.VerifyAccountPayload)
+	if err := json.Unmarshal([]byte(user), req); err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
+			Message: "Invalid payload",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Missing required fields",
-			Error:   "Missing required fields",
+			Message: "Error validating request body",
+			Error:   err.Error(),
 		})
 	}
 
@@ -65,38 +67,10 @@ func (h *userHandler) RequestIdentityVerification(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
-	lat, err := strconv.ParseFloat(latitude, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Invalid latitude",
-			Error:   err.Error(),
-		})
-	}
-
-	long, err := strconv.ParseFloat(longitude, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Invalid longitude",
-			Error:   err.Error(),
-		})
-	}
-
-	verificationId, err := h.userVerificationService.CreateVerificationRequest(
-		name,
-		phone,
-		address,
-		idType,
-		idNumber,
-		bearerToken,
-		lat,
-		long,
-		files,
-	)
-	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
-			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-				Message: "Verification request already exists",
+	if err := h.userVerificationService.UpdateVerificationRequest(bearerToken, req, files); err != nil {
+		if strings.Contains(err.Error(), verification_service.ERR_ALREADY_VERIFIED) {
+			return echo.NewHTTPError(http.StatusForbidden, models.Error{
+				Message: "Account already verified",
 				Error:   err.Error(),
 			})
 		}
@@ -107,12 +81,10 @@ func (h *userHandler) RequestIdentityVerification(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusCreated, utils.Mapper{
-		"verification": verificationId,
-	})
+	return c.JSON(http.StatusNoContent, nil)
 }
 
-func (h *userHandler) GetUserVerification(c echo.Context) error {
+func (h *userHandler) CheckVerificationStatus(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
 	isVerified, err := h.userService.IsVerified(bearerToken)

@@ -2,12 +2,13 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ IdentityVerification(user models.AdminModel, requests []models.IdentityVerificationModel) {
+templ IdentityVerificationList(user models.AdminModel, requests []dto.VerificationRequest) {
 	@layout.Layout(user) {
 		@partials.PageBanner("Verification requests", "View and manage identity verification requests")
 		@requestsData(requests)
@@ -15,7 +16,7 @@ templ IdentityVerification(user models.AdminModel, requests []models.IdentityVer
 	}
 }
 
-templ requestsData(requests []models.IdentityVerificationModel) {
+templ requestsData(requests []dto.VerificationRequest) {
 	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="text-white text-sm font-semibold bg-primary-greener">

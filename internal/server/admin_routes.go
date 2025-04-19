@@ -181,21 +181,22 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 		requestStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		requestService := verification_service.NewService(
 			userStore,
 			requestStore,
 			notificationStore,
+			resourceService,
 			s.WS,
 			s.FS,
 			s.Encrypt,
 			s.JWT,
 		)
-		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		requestHandler := verification.NewHandler(requestService, resourceService)
 
-		verificationRoute.GET("", requestHandler.GetIdentityVerification)
-		verificationRoute.GET("/:requestId", requestHandler.GetIdentityVerificationDetails)
+		verificationRoute.GET("", requestHandler.GetRequestList)
+		verificationRoute.GET("/:requestId", requestHandler.GetRequest)
 		verificationRoute.POST("/accept", requestHandler.AcceptRequest)
 		verificationRoute.POST("/reject", requestHandler.RejectRequest)
 	}
