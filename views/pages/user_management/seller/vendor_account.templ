@@ -171,8 +171,8 @@ templ profile(data dto.VendorAccountDetail) {
 			<p>{ data.Vendor.Identification.IdNumber }</p>
 		</div>
 		<div class="mt-2 flex max-h-44 gap-2">
-			@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.FrontImageURL))
-			@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.BackImageURL))
+			@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.FrontImageURL))
+			@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.BackImageURL))
 		</div>
 	</div>
 	<!-- Socials -->
@@ -222,7 +222,7 @@ templ profile(data dto.VendorAccountDetail) {
 									<div class="mt-2">
 										<span class="font-medium text-neutral-dark">Supporting Document:</span>
 										<div class="mt-1.5">
-											@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument))
+											@partials.ImageViewer("Supporting Document", fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument))
 										</div>
 									</div>
 								</div>

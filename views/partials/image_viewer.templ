@@ -1,6 +1,6 @@
 package partials
 
-templ ImageViewer(image string) {
+templ ImageViewer(title, image string) {
 	<div x-data="{imageViewerOpen: false}">
 		<!-- Image -->
 		<div
@@ -34,6 +34,9 @@ templ ImageViewer(image string) {
 				x-transition:enter-end="opacity-100"
 				class="rounded-sm bg-white p-2 outline-1 outline-pale-gray"
 			>
+				if title != "" {
+					<h3 class="mb-2 font-medium">{ title }</h3>
+				}
 				<img
 					src={ image }
 					alt="image"

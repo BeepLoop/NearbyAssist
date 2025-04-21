@@ -132,7 +132,7 @@ templ viewBug(bug models.BugReportModel) {
 					<!-- Images -->
 					<div class="grid gap-2 grid-cols-3 mt-4">
 						for _, image := range bug.Images {
-							@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", image))
+							@partials.ImageViewer("", fmt.Sprintf("/api/v1/resource/%s", image))
 						}
 					</div>
 					<!-- Action -->

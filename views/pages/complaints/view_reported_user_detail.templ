@@ -154,7 +154,7 @@ templ overview(data dto.UserReportDetail) {
 			<h4 class="font-bold text-neutral-dark">Images</h4>
 			<div class="mt-2 grid grid-cols-3 gap-2">
 				for _, image := range data.Report.Images {
-					@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", image))
+					@partials.ImageViewer("", fmt.Sprintf("/api/v1/resource/%s", image))
 				}
 			</div>
 		</div>

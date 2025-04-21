@@ -147,8 +147,8 @@ templ profile(data dto.UserAccountDetail) {
 			<p>{ data.User.Identification.IdNumber }</p>
 		</div>
 		<div class="flex max-h-44 gap-2 mt-2">
-			@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.FrontImageURL))
-			@partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.BackImageURL))
+			@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.FrontImageURL))
+			@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.BackImageURL))
 		</div>
 	</div>
 	<!-- Socials -->

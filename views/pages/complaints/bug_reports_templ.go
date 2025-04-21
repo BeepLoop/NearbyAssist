@@ -240,7 +240,7 @@ func viewBug(bug models.BugReportModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, image := range bug.Images {
-			templ_7745c5c3_Err = partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", image)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.ImageViewer("", fmt.Sprintf("/api/v1/resource/%s", image)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

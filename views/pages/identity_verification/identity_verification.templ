@@ -64,9 +64,9 @@ templ IdentityVerification(user models.AdminModel, request dto.VerificationReque
 			<div class="mt-4">
 				<h3 class="mb-4 font-medium text-neutral-dark">Documents</h3>
 				<div class="grid grid-cols-3 gap-2">
-					@imageViewer("Front ID", fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL))
-					@imageViewer("Back ID", fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL))
-					@imageViewer("Selfie", fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL))
+					@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL))
+					@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL))
+					@partials.ImageViewer("Selfie", fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL))
 				</div>
 			</div>
 		</div>
@@ -157,47 +157,6 @@ templ rejectButton(requestId string) {
 						</div>
 					</form>
 				</div>
-			</div>
-		</div>
-	</div>
-}
-
-templ imageViewer(title, image string) {
-	<div x-data="{imageViewerOpen: false}">
-		<!-- Image -->
-		<div
-			x-on:click="imageViewerOpen = true"
-			class="cursor-pointer outline-1 outline-pale-gray"
-		>
-			<img src={ image } alt="image" class="aspect-square object-contain"/>
-		</div>
-		<!-- Backdrop -->
-		<div
-			x-cloak
-			x-show="imageViewerOpen"
-			x-on:keydown.esc.window="imageViewerOpen = false"
-			x-on:click.self="imageViewerOpen = false"
-			x-transition
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="defaultModalTitle"
-			class="fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50"
-		>
-			<!-- Modal Dialog -->
-			<div
-				x-show="imageViewerOpen"
-				x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
-				x-transition:enter-start="opacity-0"
-				x-transition:enter-end="opacity-100"
-				class="rounded-sm bg-white p-2 p-4 outline-1 outline-pale-gray"
-			>
-				<h3 class="mb-2 font-medium">{ title }</h3>
-				<img
-					src={ image }
-					alt="image"
-					loading="lazy"
-					class="max-h-[80vh] max-w-[80vw] min-w-60 object-cover"
-				/>
 			</div>
 		</div>
 	</div>

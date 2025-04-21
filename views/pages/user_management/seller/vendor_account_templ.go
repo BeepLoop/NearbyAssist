@@ -283,11 +283,11 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.FrontImageURL)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.FrontImageURL)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.BackImageURL)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.BackImageURL)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -423,7 +423,7 @@ func profile(data dto.VendorAccountDetail) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = partials.ImageViewer(fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument)).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = partials.ImageViewer("Supporting Document", fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument)).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
