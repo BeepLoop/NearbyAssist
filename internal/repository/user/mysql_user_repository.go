@@ -338,10 +338,10 @@ func (s *MysqlUserRepository) GetIdentification(userId string) (*models.Identifi
             i.referenceNumber,
             i.frontImageUrl,
             i.backImageUrl,
-            i.selfiImageUrl
+            i.selfieImageUrl
         FROM
             Identification i
-            JOIN UserIdentity ui ON ui.identificationId = i.id
+            JOIN UserIdentification ui ON ui.identificationId = i.id
         WHERE
             ui.userId = ?
     `
