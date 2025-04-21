@@ -158,7 +158,6 @@ func (s *Service) FulfillResetPassword(requestId, newPassword, confirmationUsern
 		return err
 	}
 
-	// TODO: Send email to user for their reset credentials
 	account, err := s.adminStore.FindById(request.AdminId)
 	if err != nil {
 		return err

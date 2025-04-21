@@ -2,10 +2,9 @@ package user_repo
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
+	"slices"
 	"strings"
 	"time"
 
@@ -24,10 +23,69 @@ func (s *MysqlUserRepository) CreateUser(user *models.UserModel) (string, error)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	user.Id = utils.GenerateUserId()
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return "", err
+	}
 
-	query := "INSERT INTO User (id, name, email, imageUrl, emailHash) VALUES (:id, :name, :email, :imageUrl, :emailHash)"
-	if _, err := s.db.NamedExecContext(ctx, query, user); err != nil {
+	user.Id = utils.GenerateUserId()
+	createUser := `
+        INSERT INTO
+            User (id, name, email, imageUrl, emailHash, phone)
+        VALUES
+            (:id, :name, :email, :imageUrl, :emailHash, :phone)
+    `
+	if _, err := tx.NamedExecContext(ctx, createUser, user); err != nil {
+		return "", err
+	}
+
+	createAddress := `
+        INSERT INTO
+            Address (id, address, latitude, longitude)
+        VALUES
+            (:id, :address, :latitude, :longitude)
+    `
+	user.Address.Id = utils.GenerateId()
+	if _, err := tx.NamedExecContext(ctx, createAddress, user.Address); err != nil {
+		return "", err
+	}
+
+	createAddressRelation := `
+        INSERT INTO
+            UserAddress (userId, addressId)
+        VALUES
+            (?, ?)
+    `
+	if _, err := tx.ExecContext(ctx, createAddressRelation, user.Id, user.Address.Id); err != nil {
+		return "", err
+	}
+
+	createIdentification := `
+        INSERT INTO
+            Identification (id, type, referenceNumber, frontImageUrl, backImageUrl, selfieImageUrl)
+        VALUES
+            (:id, :type, :referenceNumber, :frontImageUrl, :backImageUrl, :selfieImageUrl)
+    `
+	user.Identification.Id = utils.GenerateId()
+	if _, err := tx.NamedExecContext(ctx, createIdentification, user.Identification); err != nil {
+		return "", err
+	}
+
+	createIdentificationRelation := `
+        INSERT INTO
+            UserIdentification (userId, identificationId)
+        VALUES
+            (?, ?)
+    `
+	if _, err := tx.ExecContext(ctx, createIdentificationRelation, user.Id, user.Identification.Id); err != nil {
+		return "", err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return "", err
+		}
+
 		return "", err
 	}
 
@@ -36,55 +94,6 @@ func (s *MysqlUserRepository) CreateUser(user *models.UserModel) (string, error)
 	}
 
 	return user.Id, nil
-}
-
-func (s *MysqlUserRepository) Login(data *models.SessionModel) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	data.Id = utils.GenerateId()
-
-	query := "INSERT INTO Session (id, refreshToken) VALUES (:id, :refreshToken)"
-	if _, err := s.db.NamedExecContext(ctx, query, data); err != nil {
-		return err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	return nil
-}
-
-func (s *MysqlUserRepository) Logout(refreshToken string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	tx, err := s.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	updateSession := "UPDATE Session SET status = 'offline' WHERE refreshToken = ? AND status = 'online'"
-	if _, err := s.db.ExecContext(ctx, updateSession, refreshToken); err != nil {
-		return err
-	}
-
-	id := utils.GenerateId()
-	blacklistToken := `INSERT INTO Blacklist (id, token) VALUES (?, ?)`
-	if _, err := tx.ExecContext(ctx, blacklistToken, id, refreshToken); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	return nil
 }
 
 func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models.UserModel, error) {
@@ -100,7 +109,7 @@ func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models
 
 	getAccountsQuery := `
         SELECT
-            u.id, u.name, u.email, u.imageUrl, u.createdAt
+            u.id, u.name, u.email, u.imageUrl, u.verified, u.verifiedAt, u.createdAt
         FROM
             User u
             LEFT JOIN Vendor v ON v.vendorId = u.id
@@ -115,15 +124,6 @@ func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models
 		}
 
 		return nil, err
-	}
-
-	for _, account := range accounts {
-		verified, date, err := s.IsVerified(account.Id)
-		if err != nil {
-			return nil, err
-		}
-		account.Verified = verified
-		account.VerifiedAt = date
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -146,7 +146,7 @@ func (s *MysqlUserRepository) GetAllUserAccounts(limit, offset int) ([]*models.U
 
 	getAccountsQuery := `
         SELECT
-            id, name, email, imageUrl, createdAt
+            id, name, email, imageUrl, verified, verifiedAt, createdAt
         FROM
             User
         ORDER BY createdAt DESC
@@ -159,15 +159,6 @@ func (s *MysqlUserRepository) GetAllUserAccounts(limit, offset int) ([]*models.U
 		}
 
 		return nil, err
-	}
-
-	for _, account := range accounts {
-		verified, date, err := s.IsVerified(account.Id)
-		if err != nil {
-			return nil, err
-		}
-		account.Verified = verified
-		account.VerifiedAt = date
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -183,15 +174,7 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 
 	getUserQuery := `
         SELECT 
-            id,
-            name,
-            email,
-            imageUrl,
-            address,
-            phone,
-            latitude,
-            longitude,
-            createdAt
+            id, name, email, imageUrl, phone, verified, verifiedAt, createdAt
         FROM 
             User 
         WHERE 
@@ -204,11 +187,58 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 		return nil, err
 	}
 
-	if verified, date, err := s.IsVerified(user.Id); err != nil {
+	if banned, err := s.IsBanned(user.Id); err != nil {
 		return nil, err
 	} else {
-		user.Verified = verified
-		user.VerifiedAt = date
+		user.Banned = banned
+	}
+
+	if restricted, expired, err := s.IsRestricted(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Restricted = restricted && !expired
+	}
+
+	if address, err := s.GetAddress(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Address = *address
+	}
+
+	if socials, err := s.GetSocials(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Socials = slices.AppendSeq(
+			make([]string, 0),
+			utils.Map(socials, func(social *models.SocialModel) string {
+				return social.Url
+			}),
+		)
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return user, nil
+}
+
+func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	user := new(models.UserModel)
+
+	query := `
+        SELECT 
+            id, name, email, imageUrl, phone, verified, verifiedAt, createdAt
+        FROM 
+            User 
+        WHERE 
+            emailHash = ?
+    `
+	if err := s.db.GetContext(ctx, user, query, emailHash); err != nil {
+		return nil, err
 	}
 
 	if banned, err := s.IsBanned(user.Id); err != nil {
@@ -223,13 +253,22 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 		user.Restricted = restricted && !expired
 	}
 
-	getUserSocialsQuery := `SELECT url FROM Social WHERE userId = ?`
-
-	socials := make([]string, 0)
-	if err := s.db.SelectContext(ctx, &socials, getUserSocialsQuery, id); err != nil {
+	if address, err := s.GetAddress(user.Id); err != nil {
 		return nil, err
+	} else {
+		user.Address = *address
 	}
-	user.Socials = socials
+
+	if socials, err := s.GetSocials(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Socials = slices.AppendSeq(
+			make([]string, 0),
+			utils.Map(socials, func(social *models.SocialModel) string {
+				return social.Url
+			}),
+		)
+	}
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
@@ -238,20 +277,73 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	return user, nil
 }
 
+func (s *MysqlUserRepository) GetAddress(userId string) (*models.AddressModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	getAddress := `
+        SELECT
+            a.id, a.address, a.latitude, a.longitude
+        FROM
+            Address a
+            JOIN UserAddress ua ON ua.addressId = a.id
+        WHERE
+            ua.userId = ?
+    `
+
+	address := new(models.AddressModel)
+	if err := s.db.GetContext(ctx, address, getAddress, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return address, nil
+}
+
+func (s *MysqlUserRepository) GetSocials(userId string) ([]*models.SocialModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            id, userId, url, createdAt
+        FROM
+            Social
+        WHERE
+            userId = ?
+    `
+
+	socials := make([]*models.SocialModel, 0)
+	if err := s.db.SelectContext(ctx, &socials, query, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return socials, nil
+}
+
 func (s *MysqlUserRepository) GetIdentification(userId string) (*models.IdentificationModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := `
         SELECT
-            idType AS type,
-            idNumber AS idNumber,
-            frontIdImageUrl AS frontImage,
-            backIdImageUrl AS backImage
+            i.type,
+            i.referenceNumber,
+            i.frontImageUrl,
+            i.backImageUrl,
+            i.selfiImageUrl
         FROM
-            IdentityVerification
+            Identification i
+            JOIN UserIdentity ui ON ui.identificationId = i.id
         WHERE
-            userId = ?
+            ui.userId = ?
     `
 
 	identification := new(models.IdentificationModel)
@@ -264,309 +356,6 @@ func (s *MysqlUserRepository) GetIdentification(userId string) (*models.Identifi
 	}
 
 	return identification, nil
-}
-
-func (s *MysqlUserRepository) GetUserAccountPageData(userId string) (*models.UserAccountPageData, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	accountData := new(models.UserAccountPageData)
-
-	getUserQuery := `
-        SELECT
-            id,
-            name,
-            email,
-            imageUrl,
-            address,
-            createdAt
-        FROM 
-            User 
-        WHERE 
-            id = ?
-    `
-	user := new(models.UserModel)
-	if err := s.db.GetContext(ctx, user, getUserQuery, userId); err != nil {
-		return nil, err
-	}
-	accountData.Id = user.Id
-	accountData.ProfileURL = user.ImageUrl
-	accountData.Name = user.Name
-	accountData.Email = user.Email
-	accountData.Address = user.Address
-	accountData.CreatedAt = user.CreatedAt
-
-	if verified, date, err := s.IsVerified(user.Id); err != nil {
-		return nil, err
-	} else {
-		accountData.Verified = verified
-		accountData.VerifiedAt = date
-	}
-
-	if banned, err := s.IsBanned(user.Id); err != nil {
-		return nil, err
-	} else {
-		accountData.Banned = banned
-	}
-
-	if restricted, expired, err := s.IsRestricted(user.Id); err != nil {
-		return nil, err
-	} else {
-		accountData.Restricted = restricted && !expired
-	}
-
-	getExpertiseQuery := `
-        SELECT
-            e.title
-        FROM
-            UserExpertise ve
-            JOIN Expertise e ON e.id = ve.expertiseId
-        WHERE
-            ve.userId = ?
-    `
-	expertise := make([]*models.ExpertiseModel, 0)
-	if err := s.db.SelectContext(ctx, &expertise, getExpertiseQuery, userId); err != nil {
-		return nil, err
-	}
-
-	for _, expertise := range expertise {
-		accountData.Expertise = append(accountData.Expertise, expertise.Title)
-	}
-
-	getServicesQuery := "SELECT * FROM Service WHERE vendorId = ? ORDER BY updatedAt DESC"
-	services := make([]*models.ServiceModel, 0)
-	if err := s.db.SelectContext(ctx, &services, getServicesQuery, userId); err != nil {
-		return nil, err
-	}
-	accountData.Services = services
-
-	getServiceTagsQuery := `
-        SELECT
-            t.title
-        FROM
-            ServiceTag st
-            JOIN Tag t ON st.tagId = t.id
-        WHERE
-            st.serviceId = ?
-    `
-	for _, service := range accountData.Services {
-		tags := make([]string, 0)
-		if err := s.db.SelectContext(ctx, &tags, getServiceTagsQuery, service.Id); err != nil {
-			return nil, err
-		}
-
-		service.TagsAsString = tags
-	}
-
-	getServiceImagesQuery := `
-        SELECT
-            id,
-            serviceId,
-            vendorId,
-            url
-        FROM
-            ServicePhoto
-        WHERE
-            serviceId = ?
-    `
-	for _, service := range accountData.Services {
-		images := make([]*models.ServicePhotoModel, 0)
-		if err := s.db.SelectContext(ctx, &images, getServiceImagesQuery, service.Id); err != nil {
-			return nil, err
-		}
-
-		service.Images = images
-	}
-
-	getServiceExtrasQuery := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price,
-            e.createdAt
-        FROM
-            ServiceExtra se
-            JOIN Extra e ON e.id = se.extraId
-        WHERE
-            se.serviceId = ?
-    `
-	for _, service := range accountData.Services {
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, getServiceExtrasQuery, service.Id); err != nil {
-			return nil, err
-		}
-
-		service.Extras = extras
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return accountData, nil
-}
-
-func (s *MysqlUserRepository) GetSentBookingCount(userId string) (*models.SentStat, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	stat := new(models.SentStat)
-
-	query := `
-        SELECT 
-            SUM(CASE 
-                    WHEN YEAR(createdAt) = YEAR(CURDATE()) 
-                    AND MONTH(createdAt) = MONTH(CURDATE()) 
-                    THEN 1 
-                    ELSE 0 
-                END) AS currentMonth,
-            SUM(CASE 
-                    WHEN YEAR(createdAt) = YEAR(CURDATE() - INTERVAL 1 MONTH) 
-                    AND MONTH(createdAt) = MONTH(CURDATE() - INTERVAL 1 MONTH) 
-                    THEN 1 
-                    ELSE 0 
-                END) AS lastMonth
-        FROM 
-            Booking
-        WHERE 
-            clientId = ?
-    `
-	if err := s.db.GetContext(ctx, stat, query, userId); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return stat, nil
-}
-
-func (s *MysqlUserRepository) GetReceivedBookingCount(userId string) (*models.ReceivedStat, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	stat := new(models.ReceivedStat)
-
-	query := `
-        SELECT 
-            SUM(CASE 
-                    WHEN YEAR(createdAt) = YEAR(CURDATE()) 
-                    AND MONTH(createdAt) = MONTH(CURDATE()) 
-                    THEN 1 
-                    ELSE 0 
-                END) AS currentMonth,
-            SUM(CASE 
-                    WHEN YEAR(createdAt) = YEAR(CURDATE() - INTERVAL 1 MONTH) 
-                    AND MONTH(createdAt) = MONTH(CURDATE() - INTERVAL 1 MONTH) 
-                    THEN 1 
-                    ELSE 0 
-                END) AS lastMonth
-        FROM 
-            Booking
-        WHERE 
-            vendorId = ?
-    `
-	if err := s.db.GetContext(ctx, stat, query, userId); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return stat, nil
-}
-
-func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	user := new(models.UserModel)
-
-	query := `
-        SELECT 
-            id,
-            name,
-            email,
-            imageUrl,
-            address,
-            phone,
-            latitude,
-            longitude,
-            createdAt
-        FROM 
-            User 
-        WHERE 
-            emailHash = ?
-    `
-	if err := s.db.GetContext(ctx, user, query, emailHash); err != nil {
-		return nil, err
-	}
-
-	if verified, date, err := s.IsVerified(user.Id); err != nil {
-		return nil, err
-	} else {
-		user.Verified = verified
-		user.VerifiedAt = date
-	}
-
-	if banned, err := s.IsBanned(user.Id); err != nil {
-		return nil, err
-	} else {
-		user.Banned = banned
-	}
-
-	if restricted, expired, err := s.IsRestricted(user.Id); err != nil {
-		return nil, err
-	} else {
-		user.Restricted = restricted && !expired
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return user, nil
-}
-
-func (s *MysqlUserRepository) FindSessionByToken(refreshToken string) (*models.SessionModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	session := new(models.SessionModel)
-	query := "SELECT id, status, refreshToken FROM Session WHERE refreshToken = ? AND status = 'online'"
-	if err := s.db.GetContext(ctx, session, query, refreshToken); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return session, nil
-}
-
-func (s *MysqlUserRepository) IsRefreshTokenBlacklisted(refreshToken string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	count := 0
-	query := "SELECT COUNT(id) FROM Blacklist WHERE token = ?"
-	if err := s.db.GetContext(ctx, &count, query, refreshToken); err != nil {
-		return err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	if count > 0 {
-		return nil
-	}
-
-	return errors.New("refreshToken blacklisted")
 }
 
 func (s *MysqlUserRepository) IsVendor(userId string) (bool, error) {
@@ -659,24 +448,6 @@ func (s *MysqlUserRepository) AddSocial(data *models.SocialModel) error {
 	return nil
 }
 
-func (s *MysqlUserRepository) GetSocials(userId string) ([]*models.SocialModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	getSocialsQuery := "SELECT * FROM Social WHERE userId = ?"
-
-	socials := make([]*models.SocialModel, 0)
-	if err := s.db.SelectContext(ctx, &socials, getSocialsQuery, userId); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return socials, nil
-}
-
 func (s *MysqlUserRepository) DeleteSocial(userId, id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -691,31 +462,6 @@ func (s *MysqlUserRepository) DeleteSocial(userId, id string) error {
 	}
 
 	return nil
-}
-
-func (s *MysqlUserRepository) IsVerified(userId string) (bool, string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	query := "SELECT updatedAt FROM IdentityVerification WHERE userId = ? AND status = 'approved' LIMIT 1"
-	var updatedAt sql.NullString
-	if err := s.db.GetContext(ctx, &updatedAt, query, userId); err != nil {
-		if strings.Contains(err.Error(), "no rows in result set") {
-			return false, "", nil
-		}
-
-		return false, "", err
-	}
-
-	if !updatedAt.Valid {
-		return false, "", nil
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return false, "", context.DeadlineExceeded
-	}
-
-	return true, updatedAt.String, nil
 }
 
 func (s *MysqlUserRepository) IsBanned(userId string) (bool, error) {

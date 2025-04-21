@@ -1,7 +1,6 @@
 package user_service
 
 import (
-	"database/sql"
 	"errors"
 	"nearbyassist/internal/models"
 	repository "nearbyassist/internal/repository/user"
@@ -159,53 +158,17 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		}
 	}
 
-	if plain, err := s.encrypt.DecryptString(user.Name); err != nil {
-		return nil, err
-	} else {
-		user.Name = plain
-	}
-
-	if plain, err := s.encrypt.DecryptString(user.Email); err != nil {
-		return nil, err
-	} else {
-		user.Email = plain
-	}
-
-	if user.Address.Valid {
-		if plain, err := s.encrypt.DecryptString(user.Address.String); err != nil {
-			return nil, err
-		} else {
-			user.Address = sql.NullString{String: plain, Valid: true}
-		}
-	}
-
-	if user.Phone.Valid {
-		if plain, err := s.encrypt.DecryptString(user.Phone.String); err != nil {
-			return nil, err
-		} else {
-			user.Phone = sql.NullString{String: plain, Valid: true}
-		}
-	}
-
-	if user.Latitude.Valid == false {
-		user.Latitude = sql.NullFloat64{Float64: 0.0, Valid: true}
-	}
-
-	if user.Longitude.Valid == false {
-		user.Longitude = sql.NullFloat64{Float64: 0.0, Valid: true}
-	}
-
 	response := &response.DetailedUser{
 		Id:           user.Id,
-		Name:         user.Name,
-		Email:        user.Email,
+		Name:         utils.Must(s.encrypt.DecryptString(user.Name)),
+		Email:        utils.Must(s.encrypt.DecryptString(user.Email)),
 		ImageUrl:     user.ImageUrl,
 		IsVerified:   user.Verified,
 		IsVendor:     isVendor,
-		Address:      user.Address.String,
-		Phone:        user.Phone.String,
-		Latitude:     user.Latitude.Float64,
-		Longitude:    user.Longitude.Float64,
+		Address:      utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+		Phone:        utils.Must(s.encrypt.DecryptString(user.Phone)),
+		Latitude:     user.Address.Latitude,
+		Longitude:    user.Address.Longitude,
 		Expertises:   vendorExpertises,
 		Socials:      user.Socials,
 		IsRestricted: isRestricted && !isRestrictionExpired,

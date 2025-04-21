@@ -1,8 +1,11 @@
 package models
 
 type IdentificationModel struct {
-	Type       string `db:"type"`
-	IdNumber   string `db:"idNumber"`
-	FrontImage string `db:"frontImage"`
-	BackImage  string `db:"backImage"`
+	Id              string `db:"id"`
+	Type            string `db:"type"`
+	ReferenceNumber string `db:"referenceNumber"`
+	FrontImageUrl   string `db:"frontImageUrl"`
+	BackImageUrl    string `db:"backImageUrl"`
+	SelfieImageUrl  string `db:"selfieImageUrl"`
+	CreatedAt       string `db:"createdAt"`
 }

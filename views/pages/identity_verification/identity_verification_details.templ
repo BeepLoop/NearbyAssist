@@ -2,12 +2,13 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ IdentityVerificationDetails(user models.AdminModel, request models.IdentityVerificationModel, flash string) {
+templ IdentityVerification(user models.AdminModel, request dto.VerificationRequest, flash string) {
 	@templ.JSONScript("flash", flash)
 	@partials.ToastNotification()
 	@layout.Layout(user) {
@@ -46,20 +47,16 @@ templ IdentityVerificationDetails(user models.AdminModel, request models.Identit
 					<p class="text-neutral-gray">{ request.CreatedAt }</p>
 				</div>
 				<div class="flex gap-2 ">
-					<h3 class="font-medium text-neutral-dark">Status:</h3>
-					@partials.SoftBadgeWarning(request.Status)
-				</div>
-				<div class="flex gap-2 ">
 					<h3 class="font-medium text-neutral-dark">Address:</h3>
 					<p class="text-neutral-gray">{ request.Address }</p>
 				</div>
 				<div class="flex gap-2 ">
 					<h3 class="font-medium text-neutral-dark">ID Type:</h3>
-					<p class="text-neutral-gray">{ request.IdType }</p>
+					<p class="text-neutral-gray">{ request.IDType }</p>
 				</div>
 				<div class="flex gap-2 ">
 					<h3 class="font-medium text-neutral-dark">ID:</h3>
-					<p class="text-neutral-gray">{ request.IdNumber }</p>
+					<p class="text-neutral-gray">{ request.ReferenceNumber }</p>
 				</div>
 			</div>
 			@partials.Divider()
@@ -67,9 +64,9 @@ templ IdentityVerificationDetails(user models.AdminModel, request models.Identit
 			<div class="mt-4">
 				<h3 class="mb-4 font-medium text-neutral-dark">Documents</h3>
 				<div class="grid grid-cols-3 gap-2">
-					@imageViewer("Front ID", fmt.Sprintf("/api/v1/resource/%s", request.FrontIdImageUrl))
-					@imageViewer("Back ID", fmt.Sprintf("/api/v1/resource/%s", request.BackIdImageUrl))
-					@imageViewer("Selfie", fmt.Sprintf("/api/v1/resource/%s", request.FaceImageUrl))
+					@imageViewer("Front ID", fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL))
+					@imageViewer("Back ID", fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL))
+					@imageViewer("Selfie", fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL))
 				</div>
 			</div>
 		</div>

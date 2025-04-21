@@ -2,8 +2,7 @@ package verification
 
 import (
 	"context"
-	"nearbyassist/internal/models"
-	"nearbyassist/internal/service/cache"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/identity_verification"
 	"net/http"
@@ -11,77 +10,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *verificationHandler) GetIdentityVerificationDetails(c echo.Context) error {
-	params := c.QueryParams()
-
+func (h *verificationHandler) GetRequest(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
-	flash, _, _ := utils.RetrieveFlashMessage(c)
-
-	requestId := c.Param("requestId")
-
-	var request *models.IdentityVerificationModel
-
-	if params.Has("fresh") && params.Get("fresh") == "true" {
-		res, err := h.verificationService.GetRequest(requestId)
-		if err != nil {
-			page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
-			return page.Render(context.Background(), c.Response().Writer)
-		}
-
-		request = res
-		cache.NewGoCache().Set(c.Request().RequestURI, res)
-	} else {
-		inCache, exists := cache.NewGoCache().Get(c.Request().RequestURI)
-		if exists {
-			request = inCache.(*models.IdentityVerificationModel)
-		} else {
-			res, err := h.verificationService.GetRequest(requestId)
-			if err != nil {
-				page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
-				return page.Render(context.Background(), c.Response().Writer)
-			}
-
-			request = res
-			cache.NewGoCache().Set(c.Request().RequestURI, res)
-		}
-	}
-
-	fontIdImage, err := h.resourceService.SignURLWithDefaultDuration(request.FrontIdImageUrl)
+	data, err := h.verificationService.GetRequest(c.Param("requestId"))
 	if err != nil {
-		page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
+		page := pages.IdentityVerification(*admin, dto.VerificationRequest{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	backIdImage, err := h.resourceService.SignURLWithDefaultDuration(request.BackIdImageUrl)
-	if err != nil {
-		page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
-		return page.Render(context.Background(), c.Response().Writer)
-	}
-
-	selfieImage, err := h.resourceService.SignURLWithDefaultDuration(request.FaceImageUrl)
-	if err != nil {
-		page := pages.IdentityVerificationDetails(*admin, models.IdentityVerificationModel{}, flash)
-		return page.Render(context.Background(), c.Response().Writer)
-	}
-
-	data := models.IdentityVerificationModel{
-		Model:           request.Model,
-		UpdateableModel: request.UpdateableModel,
-		UserId:          request.UserId,
-		Name:            request.Name,
-		Address:         request.Address,
-		IdType:          request.IdType,
-		IdNumber:        request.IdNumber,
-		Status:          request.Status,
-		FrontIdImageUrl: fontIdImage,
-		BackIdImageUrl:  backIdImage,
-		FaceImageUrl:    selfieImage,
-	}
-
-	page := pages.IdentityVerificationDetails(*admin, data, flash)
+	page := pages.IdentityVerification(*admin, *data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

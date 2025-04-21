@@ -5,11 +5,10 @@ CREATE TABLE IF NOT EXISTS User (
     email VARCHAR(255) NOT NULL UNIQUE,
     emailHash VARCHAR(64) NOT NULL,
     imageUrl VARCHAR(255),
-    address VARCHAR(255),
     phone VARCHAR(255),
-    latitude Decimal(12, 10),
-    longitude Decimal(13, 10),
+    verified BOOLEAN DEFAULT FALSE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    verifiedAt TIMESTAMP,
     PRIMARY KEY (id),
     INDEX(id, name, emailHash)
 );

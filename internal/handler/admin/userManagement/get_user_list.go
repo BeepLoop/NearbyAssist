@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/user_management/user"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -56,20 +57,19 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 		results = accounts
 	}
 
-	data := make([]models.UserModel, 0)
-	for _, account := range results {
-		data = append(data, models.UserModel{
-			Model: models.Model{
-				Id:        account.Id,
-				CreatedAt: utils.FormatDate(account.CreatedAt),
-			},
-			Name:       account.Name,
-			Email:      account.Email,
-			ImageUrl:   account.ImageUrl,
-			Verified:   account.Verified,
-			VerifiedAt: utils.FormatDate(account.VerifiedAt),
-		})
-	}
+	data := slices.AppendSeq(
+		make([]models.UserModel, 0),
+		utils.Map(results, func(user *models.UserModel) models.UserModel {
+			return models.UserModel{
+				Model:      models.Model{Id: user.Id, CreatedAt: utils.FormatDate(user.CreatedAt)},
+				Name:       user.Name,
+				Email:      user.Email,
+				ImageUrl:   user.ImageUrl,
+				Verified:   user.Verified,
+				VerifiedAt: user.VerifiedAt,
+			}
+		}),
+	)
 
 	page := pages.UserList(*admin, data)
 	return page.Render(context.Background(), c.Response().Writer)

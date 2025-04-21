@@ -1,37 +1,56 @@
 package userauth_service
 
 import (
-	"database/sql"
 	"errors"
+	"mime/multipart"
 	"nearbyassist/internal/models"
 	user_repo "nearbyassist/internal/repository/user"
+	"nearbyassist/internal/repository/userauth"
+	verification_repo "nearbyassist/internal/repository/verification"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
+	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/utils"
 )
 
 const (
-	ERR_BANNED_USER = "banned user"
+	ERR_BANNED_USER  = "banned user"
+	ERR_NOT_FOUND    = "not_found"
+	ERR_EMAIL_EXISTS = "email already exists"
 )
 
 type Service struct {
-	userStore user_repo.UserRepository
-	encrypt   core.Encryption
-	hash      core.Hash
-	jwt       core.Authenticator
+	userStore         user_repo.UserRepository
+	userAuthStore     userauth.Repository
+	verificationStore verification_repo.VerificationRepository
+	fs                fs.FileStorage
+	encrypt           core.Encryption
+	hash              core.Hash
+	jwt               core.Authenticator
 }
 
-func NewService(userStore user_repo.UserRepository, encrypt core.Encryption, hash core.Hash, jwt core.Authenticator) *Service {
+func NewService(
+	userStore user_repo.UserRepository,
+	userAuthStore userauth.Repository,
+	verificationStore verification_repo.VerificationRepository,
+	fs fs.FileStorage,
+	encrypt core.Encryption,
+	hash core.Hash,
+	jwt core.Authenticator,
+) *Service {
 	return &Service{
-		userStore: userStore,
-		encrypt:   encrypt,
-		hash:      hash,
-		jwt:       jwt,
+		userStore:         userStore,
+		userAuthStore:     userAuthStore,
+		verificationStore: verificationStore,
+		fs:                fs,
+		encrypt:           encrypt,
+		hash:              hash,
+		jwt:               jwt,
 	}
 }
 
-func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.LoginResponse, error) {
+func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse, error) {
 	emailHash, err := s.hash.Generate([]byte(req.Email))
 	if err != nil {
 		return nil, err
@@ -39,50 +58,17 @@ func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.Logi
 
 	existingUser, err := s.userStore.FindByEmailHash(emailHash)
 	if err != nil {
-		// If user is not found, continue to registration
-		return s.ThirdPartyRegister(req, emailHash)
+		return nil, errors.New(ERR_NOT_FOUND)
 	}
 
 	// Check if the user is banned
 	if existingUser.Banned {
 		return nil, errors.New(ERR_BANNED_USER)
 	}
-
-	if decrypted, err := s.encrypt.DecryptString(existingUser.Name); err != nil {
-		return nil, err
-	} else {
-		existingUser.Name = decrypted
-	}
-
-	if decrypted, err := s.encrypt.DecryptString(existingUser.Email); err != nil {
-		return nil, err
-	} else {
-		existingUser.Email = decrypted
-	}
-
-	if existingUser.Address.Valid {
-		if plain, err := s.encrypt.DecryptString(existingUser.Address.String); err != nil {
-			return nil, err
-		} else {
-			existingUser.Address = sql.NullString{String: plain, Valid: true}
-		}
-	}
-
-	if existingUser.Phone.Valid {
-		if plain, err := s.encrypt.DecryptString(existingUser.Phone.String); err != nil {
-			return nil, err
-		} else {
-			existingUser.Phone = sql.NullString{String: plain, Valid: true}
-		}
-	}
-
-	if existingUser.Latitude.Valid == false {
-		existingUser.Latitude = sql.NullFloat64{Float64: 0.0, Valid: true}
-	}
-
-	if existingUser.Longitude.Valid == false {
-		existingUser.Longitude = sql.NullFloat64{Float64: 0.0, Valid: true}
-	}
+	existingUser.Name = utils.Must(s.encrypt.DecryptString(existingUser.Name))
+	existingUser.Email = utils.Must(s.encrypt.DecryptString(existingUser.Email))
+	existingUser.Address.Address = utils.Must(s.encrypt.DecryptString(existingUser.Address.Address))
+	existingUser.Phone = utils.Must(s.encrypt.DecryptString(existingUser.Phone))
 
 	isVendor, err := s.userStore.IsVendor(existingUser.Id)
 	if err != nil {
@@ -129,7 +115,7 @@ func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.Logi
 	}
 
 	session := models.NewSessionModel(refreshToken)
-	if err := s.userStore.Login(session); err != nil {
+	if err := s.userAuthStore.Login(session); err != nil {
 		return nil, err
 	}
 
@@ -143,10 +129,10 @@ func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.Logi
 			ImageUrl:     existingUser.ImageUrl,
 			IsVerified:   existingUser.Verified,
 			IsVendor:     isVendor,
-			Address:      existingUser.Address.String,
-			Phone:        existingUser.Phone.String,
-			Latitude:     existingUser.Latitude.Float64,
-			Longitude:    existingUser.Longitude.Float64,
+			Address:      existingUser.Address.Address,
+			Phone:        existingUser.Phone,
+			Latitude:     existingUser.Address.Latitude,
+			Longitude:    existingUser.Address.Longitude,
 			Expertises:   vendorExpertises,
 			IsRestricted: existingUser.Restricted,
 		},
@@ -155,25 +141,92 @@ func (s *Service) ThirdPartyLogin(req *request.UserLoginPayload) (*response.Logi
 	return response, nil
 }
 
-func (s *Service) ThirdPartyRegister(req *request.UserLoginPayload, emailHash string) (*response.LoginResponse, error) {
-	newUser := new(models.UserModel)
-	newUser.EmailHash = emailHash
-	newUser.ImageUrl = req.Image
-
-	if cipher, err := s.encrypt.EncryptString(req.Name); err != nil {
-		return nil, err
-	} else {
-		newUser.Name = cipher
-	}
-
-	if cipher, err := s.encrypt.EncryptString(req.Email); err != nil {
-		return nil, err
-	} else {
-		newUser.Email = cipher
-	}
-
-	userId, err := s.userStore.CreateUser(newUser)
+func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.FileHeader) (*response.LoginResponse, error) {
+	emailHash, err := s.hash.Generate([]byte(req.Email))
 	if err != nil {
+		return nil, err
+	}
+
+	existing, _ := s.userStore.FindByEmailHash(emailHash)
+	if existing != nil {
+		return nil, errors.New(ERR_EMAIL_EXISTS)
+	}
+
+	user := &models.UserModel{
+		Name:      utils.Must(s.encrypt.EncryptString(req.Name)),
+		Email:     utils.Must(s.encrypt.EncryptString(req.Email)),
+		ImageUrl:  req.ImageURL,
+		EmailHash: emailHash,
+		Phone:     utils.Must(s.encrypt.EncryptString(req.Phone)),
+		Identification: models.IdentificationModel{
+			Type:            req.IDType,
+			ReferenceNumber: utils.Must(s.encrypt.EncryptString(req.ReferenceNumber)),
+		},
+		Address: models.AddressModel{
+			Address:   utils.Must(s.encrypt.EncryptString(req.Address)),
+			Latitude:  req.Latitude,
+			Longitude: req.Longitude,
+		},
+	}
+
+	for _, file := range files {
+		// Read bytes
+		bytes, err := utils.FileToBytes(file)
+		if err != nil {
+			return nil, err
+		}
+
+		// Encrypt the file
+		cipher, err := s.encrypt.EncryptFile(bytes)
+		if err != nil {
+			return nil, err
+		}
+
+		switch file.Filename {
+		case "frontId":
+			fileData := fs.File{
+				Data:     cipher,
+				Category: fs.ID_FRONT,
+			}
+			if url, err := s.fs.SaveFile(fileData); err != nil {
+				return nil, err
+			} else {
+				user.Identification.FrontImageUrl = url
+			}
+
+		case "backId":
+			fileData := fs.File{
+				Data:     cipher,
+				Category: fs.ID_BACK,
+			}
+			if url, err := s.fs.SaveFile(fileData); err != nil {
+				return nil, err
+			} else {
+				user.Identification.BackImageUrl = url
+			}
+
+		case "face":
+			fileData := fs.File{
+				Data:     cipher,
+				Category: fs.FACE,
+			}
+			if url, err := s.fs.SaveFile(fileData); err != nil {
+				return nil, err
+			} else {
+				user.Identification.SelfieImageUrl = url
+			}
+
+		default:
+			return nil, err
+		}
+	}
+
+	userId, err := s.userStore.CreateUser(user)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := s.verificationStore.Create(userId); err != nil {
 		return nil, err
 	}
 
@@ -192,7 +245,7 @@ func (s *Service) ThirdPartyRegister(req *request.UserLoginPayload, emailHash st
 	}
 
 	session := models.NewSessionModel(refreshToken)
-	if err := s.userStore.Login(session); err != nil {
+	if err := s.userAuthStore.Login(session); err != nil {
 		return nil, err
 	}
 
@@ -200,12 +253,17 @@ func (s *Service) ThirdPartyRegister(req *request.UserLoginPayload, emailHash st
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		User: response.DetailedUser{
-			Id:           newUser.Id,
+			Id:           user.Id,
 			Name:         req.Name,
 			Email:        req.Email,
-			ImageUrl:     req.Image,
+			ImageUrl:     req.ImageURL,
 			IsVerified:   false,
 			IsVendor:     false,
+			Address:      req.Address,
+			Phone:        req.Phone,
+			Latitude:     req.Latitude,
+			Longitude:    req.Longitude,
+			Expertises:   make([]response.Expertise, 0),
 			IsRestricted: false,
 		},
 	}
@@ -215,12 +273,12 @@ func (s *Service) ThirdPartyRegister(req *request.UserLoginPayload, emailHash st
 
 func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
 	// Check if refreshToken exists
-	if _, err := s.userStore.FindSessionByToken(refreshToken); err != nil {
+	if _, err := s.userAuthStore.FindSessionByToken(refreshToken); err != nil {
 		return "", err
 	}
 
 	// Check if refreshToken is blacklisted
-	if err := s.userStore.IsRefreshTokenBlacklisted(refreshToken); err == nil {
+	if err := s.userAuthStore.IsRefreshTokenBlacklisted(refreshToken); err == nil {
 		return "", err
 	}
 
@@ -264,11 +322,11 @@ func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
 }
 
 func (s *Service) Logout(refreshToken string) error {
-	if _, err := s.userStore.FindSessionByToken(refreshToken); err != nil {
+	if _, err := s.userAuthStore.FindSessionByToken(refreshToken); err != nil {
 		return err
 	}
 
-	if err := s.userStore.Logout(refreshToken); err != nil {
+	if err := s.userAuthStore.Logout(refreshToken); err != nil {
 		return err
 	}
 

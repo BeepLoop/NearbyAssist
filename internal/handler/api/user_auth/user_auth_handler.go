@@ -1,6 +1,7 @@
 package userauth_handler
 
 import (
+	"encoding/json"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	userauth_service "nearbyassist/internal/service/user_auth"
@@ -21,7 +22,7 @@ func NewHandler(authService *userauth_service.Service) *userAuthHandler {
 	}
 }
 
-func (h *userAuthHandler) ThirdPartyLogin(c echo.Context) error {
+func (h *userAuthHandler) Login(c echo.Context) error {
 	req := new(request.UserLoginPayload)
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -37,8 +38,15 @@ func (h *userAuthHandler) ThirdPartyLogin(c echo.Context) error {
 		})
 	}
 
-	response, err := h.authService.ThirdPartyLogin(req)
+	response, err := h.authService.Login(req)
 	if err != nil {
+		if strings.Contains(err.Error(), userauth_service.ERR_NOT_FOUND) {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "Account associated with this email not found",
+				Error:   err.Error(),
+			})
+		}
+
 		if strings.Contains(err.Error(), userauth_service.ERR_BANNED_USER) {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 				Message: "User is banned",
@@ -48,6 +56,49 @@ func (h *userAuthHandler) ThirdPartyLogin(c echo.Context) error {
 
 		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 			Message: "Error logging in",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, response)
+}
+
+func (h *userAuthHandler) Register(c echo.Context) error {
+	user := c.FormValue("user")
+	req := new(request.UserRegisterPayload)
+	if err := json.Unmarshal([]byte(user), req); err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
+			Message: "Invalid payload",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	files, err := utils.FormParser(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error parsing form",
+			Error:   err.Error(),
+		})
+	}
+
+	response, err := h.authService.Register(req, files)
+	if err != nil {
+		if strings.Contains(err.Error(), userauth_service.ERR_EMAIL_EXISTS) {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "Account associated with this email already exists",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Could not register user",
 			Error:   err.Error(),
 		})
 	}

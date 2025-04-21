@@ -1,6 +1,7 @@
 package verification
 
 import (
+	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
 	"net/http"
 	"strings"
@@ -21,7 +22,7 @@ func (h *verificationHandler) RejectRequest(c echo.Context) error {
 	}
 
 	if err := h.verificationService.RejectRequest(requestId, reason); err != nil {
-		if strings.Contains(err.Error(), "invalid reason") {
+		if strings.Contains(err.Error(), verification_service.ERR_INVALID_REASON) {
 			if err := utils.SetFlashMessage(c, "error", "Invalid reason"); err != nil {
 				return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId+"?error=invalid_reason_error")
 			}

@@ -36,6 +36,7 @@ import (
 	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
 	tag_repo "nearbyassist/internal/repository/tag"
 	user_repo "nearbyassist/internal/repository/user"
+	"nearbyassist/internal/repository/userauth"
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	verification_repo "nearbyassist/internal/repository/verification"
 	application_service "nearbyassist/internal/service/application"
@@ -83,10 +84,14 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	authRoute := v1.Group("/auth")
 	{
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
-		authService := userauth_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
+		userAuthStore := userauth.NewMysqlUserAuthRepository(s.DB)
+		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
+
+		authService := userauth_service.NewService(userStore, userAuthStore, verificationStore, s.FS, s.Encrypt, s.Hash, s.JWT)
 		handler := userauth_handler.NewHandler(authService)
 
-		authRoute.POST("/thirdPartyLogin", handler.ThirdPartyLogin)
+		authRoute.POST("/login", handler.Login)
+		authRoute.POST("/register", handler.Register)
 		authRoute.POST("/refresh", handler.Refresh)
 		authRoute.POST("/logout", handler.Logout, middleware.CheckAuth(s.JWT))
 	}
@@ -99,12 +104,14 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
 		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 		userVerificationService := verification_service.NewService(
 			userStore,
 			verificationStore,
 			notificationStore,
+			resourceService,
 			s.WS,
 			s.FS,
 			s.Encrypt,
@@ -114,8 +121,8 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		handler := user.NewHandler(userService, userVerificationService)
 
 		userRoute.GET("", handler.GetUser)
-		userRoute.GET("/verify", handler.GetUserVerification)
-		userRoute.POST("/verify", handler.RequestIdentityVerification)
+		userRoute.GET("/verify", handler.CheckVerificationStatus)
+		userRoute.POST("/verify", handler.VerifyAccount)
 		userRoute.POST("/socials", handler.AddSocial)
 		userRoute.DELETE("/socials", handler.DeleteSocial)
 	}
