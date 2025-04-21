@@ -298,7 +298,7 @@ func (s *Service) RejectRequest(id, reason string) error {
 
 	encryptedNotification := &models.NotificationModel{
 		Recipient: request.User.Id,
-		Type:      "success",
+		Type:      "fail",
 		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
 	}
