@@ -304,20 +304,20 @@ func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail,
 			},
 			Vendor: dto.Vendor{
 				Id:       vendor.VendorId,
-				Name:     utils.Must(s.encrypt.DecryptString(vendor.Name)),
-				Email:    utils.Must(s.encrypt.DecryptString(vendor.Email)),
-				ImageURL: vendor.ImageUrl,
-				Address:  utils.Try(s.encrypt.DecryptString(vendor.Address.String)),
-				Phone:    utils.Try(s.encrypt.DecryptString(vendor.Phone.String)),
+				Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
+				Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
+				ImageURL: vendor.User.ImageUrl,
+				Address:  utils.Try(s.encrypt.DecryptString(vendor.User.Address.Address)),
+				Phone:    utils.Try(s.encrypt.DecryptString(vendor.User.Phone)),
 				Socials: slices.AppendSeq(
 					make([]string, 0),
-					utils.Map(vendor.Socials, func(social string) string {
+					utils.Map(vendor.User.Socials, func(social string) string {
 						return utils.Must(s.encrypt.DecryptString(social))
 					}),
 				),
 				Rating:       vendor.Rating,
 				JoinedAt:     utils.FormatDate(vendor.JoinedAt),
-				DateVerified: utils.FormatDate(vendor.VerifiedAt),
+				DateVerified: utils.FormatDate(vendor.User.VerifiedAt.String),
 			},
 			Service: dto.Service{
 				Id:          service.Id,

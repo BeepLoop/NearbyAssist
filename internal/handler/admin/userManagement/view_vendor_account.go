@@ -2,6 +2,7 @@ package userManagement
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/user_management/seller"
@@ -19,6 +20,7 @@ func (h *userManagementHandler) GetVendor(c echo.Context) error {
 
 	data, err := h.managementService.GetVendorAccountDetail(c.Param("userId"))
 	if err != nil {
+		fmt.Println(err.Error())
 		page := pages.VendorAccount(*admin, dto.VendorAccountDetail{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}

@@ -8,22 +8,20 @@ import (
 )
 
 func (h *userManagementHandler) UnrestrictUser(c echo.Context) error {
+	redirectRoute := c.FormValue("redirectRoute")
 	userId := c.Param("userId")
-	if userId == "" {
-		return c.Redirect(http.StatusSeeOther, "/admin/user-management/"+userId+"?error=Invalid_request")
-	}
 
 	if err := h.managementService.UnrestrictUser(userId); err != nil {
 		if err := utils.SetFlashMessage(c, "error", err.Error()); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/user-management/"+userId+"?error=unrestrict_error")
+			return c.Redirect(http.StatusSeeOther, redirectRoute+"?error=unrestrict_error")
 		}
 
-		return c.Redirect(http.StatusSeeOther, "/admin/user-management/"+userId)
+		return c.Redirect(http.StatusSeeOther, redirectRoute)
 	}
 
 	if err := utils.SetFlashMessage(c, "success", "lifted restriction on user: "+userId); err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/user-management/"+userId+"?success=unrestrict_success")
+		return c.Redirect(http.StatusSeeOther, redirectRoute+"?success=unrestrict_success")
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/admin/user-management/"+userId)
+	return c.Redirect(http.StatusSeeOther, redirectRoute)
 }

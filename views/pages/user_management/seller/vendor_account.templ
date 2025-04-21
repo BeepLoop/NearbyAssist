@@ -14,10 +14,13 @@ templ VendorAccount(user models.AdminModel, data dto.VendorAccountDetail, flash 
 		<!-- toasy component -->
 		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()
-		<!-- back button -->
-		@partials.BackButton()
 		<!-- main content -->
 		<div class="mx-auto max-w-4xl">
+			<div class="flex justify-between items-center">
+				<!-- back button -->
+				@partials.BackButton()
+				@actions(data.Vendor)
+			</div>
 			<!-- Tabbed -->
 			<div x-data="tabs" class="w-full">
 				<!-- tab buttons button -->

@@ -123,10 +123,6 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 		return nil, err
 	}
 
-	if vendor.Phone.Valid {
-		vendor.Phone.String = utils.Must(s.encrypt.DecryptString(vendor.Phone.String))
-	}
-
 	response := &response.DetailedServiceResponse{
 		Service: response.Service{
 			Id:          service.Id,
@@ -163,14 +159,17 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 			},
 		},
 		Vendor: response.Vendor{
-			Id:        vendor.VendorId,
-			Name:      utils.Must(s.encrypt.DecryptString(vendor.Name)),
-			Email:     utils.Must(s.encrypt.DecryptString(vendor.Email)),
-			ImageUrl:  vendor.ImageUrl,
-			Phone:     vendor.Phone.String,
-			Rating:    vendor.Rating,
-			Socials:   vendor.Socials,
-			Expertise: vendor.Expertise,
+			Id:       vendor.VendorId,
+			Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
+			Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
+			ImageUrl: vendor.User.ImageUrl,
+			Phone:    vendor.User.Phone,
+			Rating:   vendor.Rating,
+			Socials:  vendor.User.Socials,
+			Expertise: slices.AppendSeq(
+				make([]string, 0),
+				utils.Map(vendor.Expertise, func(e models.ExpertiseModel) string { return e.Title }),
+			),
 		},
 		Reviews: slices.AppendSeq(
 			make([]response.Review, 0),

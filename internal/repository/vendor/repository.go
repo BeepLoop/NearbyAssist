@@ -8,7 +8,7 @@ type VendorRepository interface {
 	FindById(id string) (*models.VendorModel, error)
 	GetVendorServiceList(vendorId string) ([]*models.ServiceModel, error)
 	GetTags(serviceId string) ([]*models.TagModel, error)
-	IsRestricted(userId string) (bool, error)
+	IsRestricted(userId string) (bool, bool, error)
 	AddExpertise(userId, expertiseId, supportingImage string) error
 	GetAllExpertise(userId string) ([]*models.UserExpertiseModel, error)
 	GetBookingsWithStatus(vendorId, status string) ([]*models.BookingModel, error)

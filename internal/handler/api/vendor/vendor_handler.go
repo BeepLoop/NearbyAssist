@@ -49,7 +49,21 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, vendor)
+	response := response.Vendor{
+		Id:       vendor.VendorId,
+		Name:     vendor.User.Name,
+		Email:    vendor.User.Email,
+		ImageUrl: vendor.User.ImageUrl,
+		Phone:    vendor.User.Phone,
+		Rating:   vendor.Rating,
+		Socials:  vendor.User.Socials,
+		Expertise: slices.AppendSeq(
+			make([]string, 0),
+			utils.Map(vendor.Expertise, func(e models.ExpertiseModel) string { return e.Title }),
+		),
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
@@ -79,14 +93,17 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 
 	response := response.VendorServices{
 		Vendor: response.Vendor{
-			Id:        vendor.VendorId,
-			Name:      vendor.Name,
-			Email:     vendor.Email,
-			ImageUrl:  vendor.ImageUrl,
-			Phone:     vendor.Phone.String,
-			Rating:    vendor.Rating,
-			Socials:   vendor.Socials,
-			Expertise: vendor.Expertise,
+			Id:       vendor.VendorId,
+			Name:     vendor.User.Name,
+			Email:    vendor.User.Email,
+			ImageUrl: vendor.User.ImageUrl,
+			Phone:    vendor.User.Phone,
+			Rating:   vendor.Rating,
+			Socials:  vendor.User.Socials,
+			Expertise: slices.AppendSeq(
+				make([]string, 0),
+				utils.Map(vendor.Expertise, func(e models.ExpertiseModel) string { return e.Title }),
+			),
 		},
 		Servics: slices.AppendSeq(
 			make([]response.Service, 0),

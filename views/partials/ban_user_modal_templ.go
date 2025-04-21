@@ -29,14 +29,14 @@ func BanUserModal(text, actionUrl string, isBanned bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div x-data=\"{banModalOpen: false}\"><button x-on:click=\"banModalOpen = true\" type=\"button\" class=\"bg-danger/25 w-full rounded-sm p-2 text-danger text-center text-sm font-medium cursor-pointer transition hover:opacity-75\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div x-data=\"{banModalOpen: false}\"><button x-on:click=\"banModalOpen = true\" type=\"button\" class=\"bg-danger/25 w-full rounded-sm p-2 text-danger text-center text-sm font-medium cursor-pointer transition hover:opacity-75\"><span class=\"flex gap-1 items-center text-xs\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/ban_user_modal.templ`, Line: 15, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/ban_user_modal.templ`, Line: 14, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -49,7 +49,7 @@ func BanUserModal(text, actionUrl string, isBanned bool) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/ban_user_modal.templ`, Line: 39, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/ban_user_modal.templ`, Line: 37, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -79,14 +79,14 @@ func BanUserModal(text, actionUrl string, isBanned bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" method=\"POST\"><button x-on:click=\"banModalOpen = false\" type=\"submit\" class=\"rounded-sm bg-danger px-4 py-2 cursor-pointer text-white text-center text-sm font-medium hover:opacity-75\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" method=\"POST\"><div><input type=\"hidden\" name=\"redirectRoute\" id=\"redirectRoute\"><script>\n                                (function() {\n                                    function closestSiblingWithId(el, id) {\n                                        let sibling = el.previousElementSibling;\n\n                                        while(sibling) {\n                                            if (sibling.id === id) {\n                                                return sibling;\n                                            }\n\n                                            sibling = sibling.previousElementSibling;\n                                        }\n\n                                        return null;\n                                     }\n\n                                     const script = document.currentScript;\n                                     const hiddenInput = closestSiblingWithId(script, \"redirectRoute\")\n                                     if (!hiddenInput) return;\n\n                                     hiddenInput.value = window.location.pathname;\n                                 })();\n                            </script></div><button x-on:click=\"banModalOpen = false\" type=\"submit\" class=\"rounded-sm bg-danger px-4 py-2 cursor-pointer text-white text-center text-sm font-medium hover:opacity-75\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/ban_user_modal.templ`, Line: 84, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/ban_user_modal.templ`, Line: 108, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

@@ -1,54 +1,80 @@
 package vendor_service
 
 import (
-	"database/sql"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	service_repo "nearbyassist/internal/repository/service"
 	"nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/service/core"
+	resource_service "nearbyassist/internal/service/resource"
 	"nearbyassist/internal/utils"
+	"slices"
 )
 
 type Service struct {
-	vendorStore  vendor_repo.VendorRepository
-	serviceStore service_repo.ServiceRepository
-	encrypt      core.Encryption
-	hash         core.Hash
+	vendorStore     vendor_repo.VendorRepository
+	serviceStore    service_repo.ServiceRepository
+	resourceService *resource_service.Service
+	encrypt         core.Encryption
+	hash            core.Hash
 }
 
-func NewService(vendorStore vendor_repo.VendorRepository, serviceStore service_repo.ServiceRepository, encrypt core.Encryption, hash core.Hash) *Service {
+func NewService(
+	vendorStore vendor_repo.VendorRepository,
+	serviceStore service_repo.ServiceRepository,
+	resourceService *resource_service.Service,
+	encrypt core.Encryption,
+	hash core.Hash,
+) *Service {
 	return &Service{
-		vendorStore:  vendorStore,
-		serviceStore: serviceStore,
-		encrypt:      encrypt,
-		hash:         hash,
+		vendorStore:     vendorStore,
+		serviceStore:    serviceStore,
+		resourceService: resourceService,
+		encrypt:         encrypt,
+		hash:            hash,
 	}
 }
 
-func (s *Service) GetAll(limit, offset int) ([]*models.VendorModel, error) {
-	accounts, err := s.vendorStore.GetAll(limit, offset)
+func (s *Service) GetAll(limit, offset int) ([]dto.Vendor, error) {
+	vendors, err := s.vendorStore.GetAll(limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, account := range accounts {
-		if decrypted, err := s.encrypt.DecryptString(account.Name); err != nil {
-			return nil, err
-		} else {
-			account.Name = decrypted
-		}
+	data := slices.AppendSeq(
+		make([]dto.Vendor, 0),
+		utils.Map(vendors, func(vendor *models.VendorModel) dto.Vendor {
+			return dto.Vendor{
+				Id:       vendor.VendorId,
+				Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
+				Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
+				ImageURL: vendor.User.ImageUrl,
+				Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
+				Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
+				Socials: slices.AppendSeq(
+					make([]string, 0),
+					utils.Map(vendor.User.Socials, func(social string) string {
+						return utils.Must(s.encrypt.DecryptString(social))
+					}),
+				),
+				Identification: dto.Identification{
+					Type:     vendor.User.Identification.Type,
+					IdNumber: vendor.User.Identification.ReferenceNumber,
+				},
+				Rating:       vendor.Rating,
+				Expertise:    make([]dto.Expertise, 0),
+				JoinedAt:     vendor.JoinedAt,
+				DateVerified: utils.FormatDate(vendor.User.VerifiedAt.String),
+				IsRestricted: vendor.User.Restricted,
+				IsBanned:     vendor.User.Banned,
+			}
+		}),
+	)
 
-		if decrypted, err := s.encrypt.DecryptString(account.Email); err != nil {
-			return nil, err
-		} else {
-			account.Email = decrypted
-		}
-	}
-
-	return accounts, nil
+	return data, nil
 }
 
-func (s *Service) FindByEmail(email string) (*models.VendorModel, error) {
+func (s *Service) FindByEmail(email string) (*dto.Vendor, error) {
 	emailHash, err := s.hash.Generate([]byte(email))
 	if err != nil {
 		return nil, err
@@ -59,38 +85,34 @@ func (s *Service) FindByEmail(email string) (*models.VendorModel, error) {
 		return nil, err
 	}
 
-	if plainText, err := s.encrypt.DecryptString(vendor.Name); err != nil {
-		return nil, err
-	} else {
-		vendor.Name = plainText
+	data := &dto.Vendor{
+		Id:       vendor.VendorId,
+		Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
+		Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
+		ImageURL: vendor.User.ImageUrl,
+		Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
+		Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
+		Socials: slices.AppendSeq(
+			make([]string, 0),
+			utils.Map(vendor.User.Socials, func(social string) string {
+				return utils.Must(s.encrypt.DecryptString(social))
+			}),
+		),
+		Identification: dto.Identification{
+			Type:          vendor.User.Identification.Type,
+			IdNumber:      vendor.User.Identification.ReferenceNumber,
+			FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(vendor.User.Identification.FrontImageUrl)),
+			BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(vendor.User.Identification.BackImageUrl)),
+		},
+		Rating:       vendor.Rating,
+		Expertise:    make([]dto.Expertise, 0),
+		JoinedAt:     vendor.JoinedAt,
+		DateVerified: utils.FormatDate(vendor.User.VerifiedAt.String),
+		IsRestricted: vendor.User.Restricted,
+		IsBanned:     vendor.User.Banned,
 	}
 
-	if plainText, err := s.encrypt.DecryptString(vendor.Email); err != nil {
-		return nil, err
-	} else {
-		vendor.Email = plainText
-	}
-
-	if vendor.Phone.Valid {
-		if plainText, err := s.encrypt.DecryptString(vendor.Phone.String); err != nil {
-			return nil, err
-		} else {
-			vendor.Phone = sql.NullString{String: plainText, Valid: true}
-		}
-	}
-
-	decryptedSocials := make([]string, 0)
-	for _, social := range vendor.Socials {
-		decrypted, err := s.encrypt.DecryptString(social)
-		if err != nil {
-			return nil, err
-		}
-
-		decryptedSocials = append(decryptedSocials, decrypted)
-	}
-	vendor.Socials = decryptedSocials
-
-	return vendor, nil
+	return data, nil
 }
 
 func (s *Service) FindById(id string) (*models.VendorModel, error) {
@@ -99,24 +121,45 @@ func (s *Service) FindById(id string) (*models.VendorModel, error) {
 		return nil, err
 	}
 
-	vendor.Name = utils.Must(s.encrypt.DecryptString(vendor.Name))
-	vendor.Email = utils.Must(s.encrypt.DecryptString(vendor.Email))
-	if vendor.Phone.Valid {
-		vendor.Phone.String = utils.Must(s.encrypt.DecryptString(vendor.Phone.String))
+	data := &models.VendorModel{
+		VendorId: vendor.VendorId,
+		Rating:   vendor.Rating,
+		JoinedAt: vendor.JoinedAt,
+		User: models.UserModel{
+			Model:      vendor.User.Model,
+			Name:       utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
+			Email:      utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
+			ImageUrl:   vendor.User.ImageUrl,
+			Phone:      utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
+			Verified:   vendor.User.Verified,
+			VerifiedAt: vendor.User.VerifiedAt,
+			Banned:     vendor.User.Banned,
+			Restricted: vendor.User.Restricted,
+			Socials: slices.AppendSeq(
+				make([]string, 0),
+				utils.Map(vendor.User.Socials, func(social string) string {
+					return utils.Must(s.encrypt.DecryptString(social))
+				}),
+			),
+			Address: models.AddressModel{
+				Id:        vendor.User.Address.Id,
+				Address:   utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
+				Latitude:  vendor.User.Address.Latitude,
+				Longitude: vendor.User.Address.Longitude,
+			},
+			Identification: models.IdentificationModel{
+				Id:              vendor.User.Identification.Id,
+				Type:            vendor.User.Identification.Type,
+				ReferenceNumber: vendor.User.Identification.ReferenceNumber,
+				FrontImageUrl:   utils.Must(s.resourceService.SignURLWithDefaultDuration(vendor.User.Identification.FrontImageUrl)),
+				BackImageUrl:    utils.Must(s.resourceService.SignURLWithDefaultDuration(vendor.User.Identification.BackImageUrl)),
+				SelfieImageUrl:  utils.Must(s.resourceService.SignURLWithDefaultDuration(vendor.User.Identification.SelfieImageUrl)),
+				CreatedAt:       vendor.User.Identification.CreatedAt,
+			},
+		},
 	}
 
-	decryptedSocials := make([]string, 0)
-	for _, social := range vendor.Socials {
-		decrypted, err := s.encrypt.DecryptString(social)
-		if err != nil {
-			return nil, err
-		}
-
-		decryptedSocials = append(decryptedSocials, decrypted)
-	}
-	vendor.Socials = decryptedSocials
-
-	return vendor, nil
+	return data, nil
 }
 
 func (s *Service) GetVendorServicesList(vendorId string) ([]*models.ServiceModel, error) {

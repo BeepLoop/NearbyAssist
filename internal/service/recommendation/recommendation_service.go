@@ -50,7 +50,7 @@ func (s *Service) GetRecommendations(limit, offset int) (*response.Recommendatio
 		recommendServices = append(recommendServices, &response.ServiceRecommendation{
 			Id:          service.Id,
 			VendorId:    service.VendorId,
-			Vendor:      utils.Must(s.encrypt.DecryptString(vendor.Name)),
+			Vendor:      utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
 			Thumbnail:   thumbnail,
 			Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 			Description: utils.Must(s.encrypt.DecryptString(service.Description)),

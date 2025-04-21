@@ -7,13 +7,11 @@ templ BanUserModal(text, actionUrl string, isBanned bool) {
 			type="button"
 			class="bg-danger/25 w-full rounded-sm p-2 text-danger text-center text-sm font-medium cursor-pointer transition hover:opacity-75"
 		>
-			<span class="flex gap-1 items-center">
+			<span class="flex gap-1 items-center text-xs">
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"></path>
 				</svg>
-				<p>
-					{ text }
-				</p>
+				<p>{ text }</p>
 			</span>
 		</button>
 		<div
@@ -71,6 +69,32 @@ templ BanUserModal(text, actionUrl string, isBanned bool) {
 						action={ templ.SafeURL(actionUrl) }
 						method="POST"
 					>
+						<div>
+							<input type="hidden" name="redirectRoute" id="redirectRoute"/>
+							<script>
+                                (function() {
+                                    function closestSiblingWithId(el, id) {
+                                        let sibling = el.previousElementSibling;
+
+                                        while(sibling) {
+                                            if (sibling.id === id) {
+                                                return sibling;
+                                            }
+
+                                            sibling = sibling.previousElementSibling;
+                                        }
+
+                                        return null;
+                                     }
+
+                                     const script = document.currentScript;
+                                     const hiddenInput = closestSiblingWithId(script, "redirectRoute")
+                                     if (!hiddenInput) return;
+
+                                     hiddenInput.value = window.location.pathname;
+                                 })();
+                            </script>
+						</div>
 						<button
 							x-on:click="banModalOpen = false"
 							type="submit"

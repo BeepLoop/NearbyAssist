@@ -10,12 +10,13 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-func VendorList(user models.AdminModel, accounts []models.VendorModel) templ.Component {
+func VendorList(user models.AdminModel, vendors []dto.Vendor) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -56,7 +57,7 @@ func VendorList(user models.AdminModel, accounts []models.VendorModel) templ.Com
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = vendorTable(accounts).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = vendorTable(vendors).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -78,7 +79,7 @@ func VendorList(user models.AdminModel, accounts []models.VendorModel) templ.Com
 	})
 }
 
-func vendorTable(accounts []models.VendorModel) templ.Component {
+func vendorTable(vendors []dto.Vendor) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -103,21 +104,21 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(accounts) < 1 {
+		if len(vendors) < 1 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<tr class=\"\"><td class=\"px-6 py-4 text-neutral-dark\" align=\"center\" colspan=\"5\" id=\"emptyTable\">Empty</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			for _, account := range accounts {
+			for _, vendor := range vendors {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<tr class=\"text-xs\"><td class=\"p-4\"><div class=\"flex w-max items-center gap-2\"><img class=\"size-8 rounded-full object-cover\" src=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(account.ImageUrl)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(vendor.ImageURL)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 73, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 74, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -128,9 +129,9 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(account.Name)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(vendor.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 77, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 78, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -141,9 +142,9 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(account.Email)
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(vendor.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 78, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 79, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -154,9 +155,9 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(account.Rating)
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(vendor.Rating)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 84, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 85, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -167,9 +168,9 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(account.JoinedAt)
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(vendor.JoinedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 90, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_list.templ`, Line: 91, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -179,7 +180,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if account.Restricted {
+				if vendor.IsRestricted {
 					templ_7745c5c3_Err = partials.SoftBadgeDanger("Restricted").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -194,7 +195,7 @@ func vendorTable(accounts []models.VendorModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var9 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/user-management/vendors/%s", account.VendorId))
+				var templ_7745c5c3_Var9 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/user-management/vendors/%s", vendor.Id))
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var9)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

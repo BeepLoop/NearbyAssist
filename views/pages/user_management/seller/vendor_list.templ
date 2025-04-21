@@ -2,12 +2,13 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ VendorList(user models.AdminModel, accounts []models.VendorModel) {
+templ VendorList(user models.AdminModel, vendors []dto.Vendor) {
 	@layout.Layout(user) {
 		@partials.PageBanner("Vendor list", "")
 		<!-- searchbar -->
@@ -41,12 +42,12 @@ templ VendorList(user models.AdminModel, accounts []models.VendorModel) {
 				</form>
 			</div>
 		</div>
-		@vendorTable(accounts)
+		@vendorTable(vendors)
 		@partials.Pagination()
 	}
 }
 
-templ vendorTable(accounts []models.VendorModel) {
+templ vendorTable(vendors []dto.Vendor) {
 	<div class="w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="bg-primary-greener text-sm font-semibold text-white">
@@ -59,37 +60,37 @@ templ vendorTable(accounts []models.VendorModel) {
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-300">
-				if len(accounts) < 1 {
+				if len(vendors) < 1 {
 					<tr class="">
 						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="5" id="emptyTable">Empty</td>
 					</tr>
 				} else {
-					for _, account := range accounts {
+					for _, vendor := range vendors {
 						<tr class="text-xs">
 							<td class="p-4">
 								<div class="flex w-max items-center gap-2">
 									<img
 										class="size-8 rounded-full object-cover"
-										src={ account.ImageUrl }
+										src={ vendor.ImageURL }
 										alt="user avatar"
 									/>
 									<div class="flex flex-col">
-										<span class="font-medium text-neutral-900">{ account.Name }</span>
-										<span class="text-neutral-600 opacity-85">{ account.Email }</span>
+										<span class="font-medium text-neutral-900">{ vendor.Name }</span>
+										<span class="text-neutral-600 opacity-85">{ vendor.Email }</span>
 									</div>
 								</div>
 							</td>
 							<td class="p-4">
 								<span class="flex gap-2 text-warning">
-									<p class="font-medium">{ account.Rating }</p>
+									<p class="font-medium">{ vendor.Rating }</p>
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
 										<path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"></path>
 									</svg>
 								</span>
 							</td>
-							<td class="p-4">{ account.JoinedAt }</td>
+							<td class="p-4">{ vendor.JoinedAt }</td>
 							<td class="p-4">
-								if account.Restricted {
+								if vendor.IsRestricted {
 									@partials.SoftBadgeDanger("Restricted")
 								} else {
 									@partials.SoftBadgeSuccess("Good")
@@ -98,7 +99,7 @@ templ vendorTable(accounts []models.VendorModel) {
 							<td class="p-4">
 								<ul>
 									<a
-										href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/vendors/%s", account.VendorId)) }
+										href={ templ.SafeURL(fmt.Sprintf("/admin/user-management/vendors/%s", vendor.Id)) }
 										class="w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75"
 									>
 										view profile

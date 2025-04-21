@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
 	"slices"
 	"strings"
 	"time"
@@ -21,136 +22,85 @@ func NewMysqlVendorRepository(db *sqlx.DB) *MysqlVendorRepository {
 	return &MysqlVendorRepository{db: db}
 }
 
-func (s *MysqlVendorRepository) GetAll(limit, offset int) ([]*models.VendorModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	query := `
-        SELECT  
-            v.joinedAt,
-            v.vendorId,
-            v.rating,
-            u.name AS name,
-            u.email AS email,
-            u.phone AS phone,
-            u.imageUrl AS imageUrl
-        FROM 
-            Vendor  v
-            JOIN User u ON u.id = v.vendorId
-        LIMIT ? OFFSET ?
-    `
-
-	accounts := make([]*models.VendorModel, 0)
-	if err := s.db.SelectContext(ctx, &accounts, query, limit, offset); err != nil {
-		return nil, err
-	}
-
-	expertiseQuery := `
-        SELECT
-            e.title
-        FROM
-            Expertise e
-            JOIN UserExpertise ve ON ve.expertiseId = e.id
-        WHERE
-            ve.userId = ?
-    `
-
-	getSocialsQuery := `
-        SELECT
-            url
-        FROM
-            Social
-        WHERE
-            userId = ?
-    `
-
-	for _, account := range accounts {
-		if restricted, err := s.IsRestricted(account.VendorId); err != nil {
-			return nil, err
-		} else {
-			account.Restricted = restricted
-		}
-
-		expertise := make([]string, 0)
-		if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, account.VendorId); err != nil {
-			return nil, err
-		}
-		account.Expertise = expertise
-
-		socials := make([]string, 0)
-		if err := s.db.SelectContext(ctx, &socials, getSocialsQuery, account.VendorId); err != nil {
-			return nil, err
-		}
-		account.Socials = socials
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return accounts, nil
-}
-
 func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.VendorModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	vendor := new(models.VendorModel)
-	query := `
+	findVendorQuery := `
         SELECT  
-            v.joinedAt,
-            v.vendorId,
-            v.rating,
-            u.name AS name,
-            u.email AS email,
-            u.phone AS phone,
-            u.imageUrl AS imageUrl
+            v.vendorId, v.joinedAt, v.rating
         FROM 
             Vendor  v
             JOIN User u ON u.id = v.vendorId
         WHERE 
             u.emailHash = ?
     `
-	if err := s.db.GetContext(ctx, vendor, query, emailHash); err != nil {
+	if err := s.db.GetContext(ctx, vendor, findVendorQuery, emailHash); err != nil {
 		return nil, err
 	}
 
-	if restricted, err := s.IsRestricted(vendor.VendorId); err != nil {
+	getUserQuery := `
+        SELECT 
+            id, name, email, imageUrl, phone, verified, verifiedAt, createdAt
+        FROM 
+            User 
+        WHERE 
+            id = ?
+    `
+
+	if err := s.db.GetContext(ctx, &vendor.User, getUserQuery, vendor.VendorId); err != nil {
+		return nil, err
+	}
+
+	if identification, err := s.getIdentification(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
-		vendor.Restricted = restricted
+		vendor.User.Identification = *identification
 	}
 
-	expertiseQuery := `
-        SELECT
-            e.title
-        FROM
-            Expertise e
-            JOIN UserExpertise ve ON ve.expertiseId = e.id
-        WHERE
-            ve.userId = ?
-    `
-
-	expertise := make([]string, 0)
-	if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, vendor.VendorId); err != nil {
+	if banned, err := s.IsBanned(vendor.User.Id); err != nil {
 		return nil, err
+	} else {
+		vendor.User.Banned = banned
 	}
-	vendor.Expertise = expertise
 
-	getSocialsQuery := `
-        SELECT
-            url
-        FROM
-            Social
-        WHERE
-            userId = ?
-    `
-
-	socials := make([]string, 0)
-	if err := s.db.SelectContext(ctx, &socials, getSocialsQuery, vendor.VendorId); err != nil {
+	if restricted, expired, err := s.IsRestricted(vendor.User.Id); err != nil {
 		return nil, err
+	} else {
+		vendor.User.Restricted = restricted && !expired
 	}
-	vendor.Socials = socials
+
+	if address, err := s.GetAddress(vendor.User.Id); err != nil {
+		return nil, err
+	} else {
+		vendor.User.Address = *address
+	}
+
+	if socials, err := s.GetSocials(vendor.User.Id); err != nil {
+		return nil, err
+	} else {
+		vendor.User.Socials = slices.AppendSeq(
+			make([]string, 0),
+			utils.Map(socials, func(social *models.SocialModel) string {
+				return social.Url
+			}),
+		)
+	}
+
+	if list, err := s.getVendorExpertise(vendor.User.Id); err != nil {
+		return nil, err
+	} else {
+		vendor.Expertise = slices.AppendSeq(
+			make([]models.ExpertiseModel, 0),
+			utils.Map(list, func(e *models.ExpertiseModel) models.ExpertiseModel {
+				return models.ExpertiseModel{
+					Model: models.Model{Id: e.Id, CreatedAt: e.CreatedAt},
+					Title: e.Title,
+				}
+			}),
+		)
+	}
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
@@ -159,91 +109,84 @@ func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.Vendo
 	return vendor, nil
 }
 
-func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error) {
+func (s *MysqlVendorRepository) FindById(vendorId string) (*models.VendorModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	vendor := new(models.VendorModel)
-	query := `
+	findVendorQuery := `
         SELECT  
-            v.vendorId,
-            v.joinedAt,
-            v.vendorId,
-            v.rating,
-            u.name AS name,
-            u.email AS email,
-            u.phone AS phone,
-            u.imageUrl AS imageUrl
+            v.vendorId, v.joinedAt, v.rating
         FROM 
             Vendor  v
             JOIN User u ON u.id = v.vendorId
         WHERE 
-            vendorId = ?
+            u.id = ?
     `
-	if err := s.db.GetContext(ctx, vendor, query, id); err != nil {
+	if err := s.db.GetContext(ctx, vendor, findVendorQuery, vendorId); err != nil {
 		return nil, err
 	}
 
-	if _, date, err := s.IsVerified(id); err != nil {
+	getUserQuery := `
+        SELECT 
+            id, name, email, imageUrl, phone, verified, verifiedAt, createdAt
+        FROM 
+            User 
+        WHERE 
+            id = ?
+    `
+
+	if err := s.db.GetContext(ctx, &vendor.User, getUserQuery, vendor.VendorId); err != nil {
+		return nil, err
+	}
+
+	if identification, err := s.getIdentification(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
-		vendor.VerifiedAt = date
+		vendor.User.Identification = *identification
 	}
 
-	if restricted, err := s.IsRestricted(vendor.VendorId); err != nil {
+	if banned, err := s.IsBanned(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
-		vendor.Restricted = restricted
+		vendor.User.Banned = banned
 	}
 
-	if banned, err := s.IsBanned(vendor.VendorId); err != nil {
+	if restricted, expired, err := s.IsRestricted(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
-		vendor.Banned = banned
+		vendor.User.Restricted = restricted && !expired
 	}
 
-	expertiseQuery := `
-        SELECT
-            e.title
-        FROM
-            Expertise e
-            JOIN UserExpertise ve ON ve.expertiseId = e.id
-        WHERE
-            ve.userId = ?
-    `
-
-	expertise := make([]string, 0)
-	if err := s.db.SelectContext(ctx, &expertise, expertiseQuery, id); err != nil {
+	if address, err := s.GetAddress(vendor.User.Id); err != nil {
 		return nil, err
+	} else {
+		vendor.User.Address = *address
 	}
-	vendor.Expertise = expertise
 
-	getSocialsQuery := `
-        SELECT
-            url
-        FROM
-            Social
-        WHERE
-            userId = ?
-    `
-
-	socials := make([]string, 0)
-	if err := s.db.SelectContext(ctx, &socials, getSocialsQuery, id); err != nil {
+	if socials, err := s.GetSocials(vendor.User.Id); err != nil {
 		return nil, err
+	} else {
+		vendor.User.Socials = slices.AppendSeq(
+			make([]string, 0),
+			utils.Map(socials, func(social *models.SocialModel) string {
+				return social.Url
+			}),
+		)
 	}
-	vendor.Socials = socials
 
-	getAddressQuery := `
-        SELECT
-            u.address
-        FROM
-            User u
-            JOIN Vendor v ON u.id = v.vendorId
-        WHERE
-            v.vendorId = ?
-    `
-	if err := s.db.GetContext(ctx, &vendor.Address, getAddressQuery, id); err != nil {
+	if list, err := s.getVendorExpertise(vendor.User.Id); err != nil {
 		return nil, err
+	} else {
+		vendor.Expertise = slices.AppendSeq(
+			make([]models.ExpertiseModel, 0),
+			utils.Map(list, func(e *models.ExpertiseModel) models.ExpertiseModel {
+				return models.ExpertiseModel{
+					Model: models.Model{Id: e.Id, CreatedAt: e.CreatedAt},
+					Title: e.Title,
+				}
+			}),
+		)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -251,6 +194,40 @@ func (s *MysqlVendorRepository) FindById(id string) (*models.VendorModel, error)
 	}
 
 	return vendor, nil
+}
+
+func (s *MysqlVendorRepository) GetAll(limit, offset int) ([]*models.VendorModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT  
+            v.vendorId, v.rating, v.joinedAt
+        FROM 
+            Vendor  v
+            JOIN User u ON u.id = v.vendorId
+        LIMIT ? OFFSET ?
+    `
+
+	vendors := make([]*models.VendorModel, 0)
+	if err := s.db.SelectContext(ctx, &vendors, query, limit, offset); err != nil {
+		return nil, err
+	}
+
+	for _, vendor := range vendors {
+		if res, err := s.FindById(vendor.VendorId); err != nil {
+			return nil, err
+		} else {
+			vendor.User = res.User
+			vendor.Expertise = res.Expertise
+		}
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return vendors, nil
 }
 
 func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models.ServiceModel, error) {
@@ -365,29 +342,46 @@ func (s *MysqlVendorRepository) IsVerified(userId string) (bool, string, error) 
 	return true, updatedAt.String, nil
 }
 
-func (s *MysqlVendorRepository) IsRestricted(userId string) (bool, error) {
+// Return isRestricted, isExpired, error
+func (s *MysqlVendorRepository) IsRestricted(userId string) (bool, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := `
+	isRestrictedQuery := `
         SELECT
             CASE
-                WHEN EXISTS (SELECT 1 FROM Restricted WHERE userId = ?)
+                WHEN (SELECT 1 FROM Restricted WHERE userId = ?)
                 THEN 1
                 ELSE 0
             END AS user_exists;
     `
-
 	isRestricted := false
-	if err := s.db.GetContext(ctx, &isRestricted, query, userId); err != nil {
-		return false, err
+	if err := s.db.GetContext(ctx, &isRestricted, isRestrictedQuery, userId); err != nil {
+		return false, false, err
+	}
+
+	if !isRestricted {
+		return false, false, nil
+	}
+
+	isRestrictionExpiredQuery := `
+        SELECT
+            CASE
+                WHEN (SELECT 1 FROM Restricted WHERE userId = ? AND endTime < ?)
+                THEN 1
+                ELSE 0
+            END AS isExpired;
+    `
+	isExpired := false
+	if err := s.db.GetContext(ctx, &isExpired, isRestrictionExpiredQuery, userId, utils.CurrentTimeStamp()); err != nil {
+		return false, false, nil
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return false, context.DeadlineExceeded
+		return false, false, context.DeadlineExceeded
 	}
 
-	return isRestricted, nil
+	return isRestricted, isExpired, nil
 }
 
 func (s *MysqlVendorRepository) IsBanned(userId string) (bool, error) {
@@ -506,4 +500,111 @@ func (s *MysqlVendorRepository) GetBookingsWithStatus(vendorId, status string) (
 	}
 
 	return bookings, nil
+}
+
+func (s *MysqlVendorRepository) GetAddress(userId string) (*models.AddressModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	getAddress := `
+        SELECT
+            a.id, a.address, a.latitude, a.longitude
+        FROM
+            Address a
+            JOIN UserAddress ua ON ua.addressId = a.id
+        WHERE
+            ua.userId = ?
+    `
+
+	address := new(models.AddressModel)
+	if err := s.db.GetContext(ctx, address, getAddress, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return address, nil
+}
+
+func (s *MysqlVendorRepository) GetSocials(userId string) ([]*models.SocialModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            id, userId, url, createdAt
+        FROM
+            Social
+        WHERE
+            userId = ?
+    `
+
+	socials := make([]*models.SocialModel, 0)
+	if err := s.db.SelectContext(ctx, &socials, query, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return socials, nil
+}
+
+func (s *MysqlVendorRepository) getVendorExpertise(vendorId string) ([]*models.ExpertiseModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            e.id, e.title, e.createdAt
+        FROM
+            Expertise e
+            JOIN UserExpertise ve ON ve.expertiseId = e.id
+        WHERE
+            ve.userId = ?
+    `
+
+	expertise := make([]*models.ExpertiseModel, 0)
+	if err := s.db.SelectContext(ctx, &expertise, query, vendorId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return expertise, nil
+}
+
+func (s *MysqlVendorRepository) getIdentification(userId string) (*models.IdentificationModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            i.type,
+            i.referenceNumber,
+            i.frontImageUrl,
+            i.backImageUrl,
+            i.selfieImageUrl
+        FROM
+            Identification i
+            JOIN UserIdentification ui ON ui.identificationId = i.id
+        WHERE
+            ui.userId = ?
+    `
+
+	identification := new(models.IdentificationModel)
+	if err := s.db.GetContext(ctx, identification, query, userId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return identification, nil
 }

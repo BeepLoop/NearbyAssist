@@ -163,8 +163,8 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 
-		vendorService := vendor_service.NewService(vendorStore, serviceStore, s.Encrypt, s.Hash)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+		vendorService := vendor_service.NewService(vendorStore, serviceStore, resourceService, s.Encrypt, s.Hash)
 
 		handler := vendor.NewHandler(vendorService, resourceService)
 
