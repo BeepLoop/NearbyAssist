@@ -17,7 +17,7 @@ func NewMysqlVerificationRepository(db *sqlx.DB) *MysqlVerificationRepository {
 	return &MysqlVerificationRepository{db: db}
 }
 
-func (s *MysqlVerificationRepository) Create(userId string) (string, error) {
+func (s *MysqlVerificationRepository) CreateLink(userId string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -39,7 +39,7 @@ func (s *MysqlVerificationRepository) Create(userId string) (string, error) {
 	return id, nil
 }
 
-func (s *MysqlVerificationRepository) Update(requestId string, updated *models.IdentityVerificationModel) error {
+func (s *MysqlVerificationRepository) UpdateUserInfo(updated *models.IdentityVerificationModel, newTimestamp bool) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -105,6 +105,21 @@ func (s *MysqlVerificationRepository) Update(requestId string, updated *models.I
 		updated.User.Identification.Id,
 	); err != nil {
 		return err
+	}
+
+	// Update updatedAt timestamp
+	updateTimestamp := `
+        UPDATE
+            IdentityVerification
+        SET
+            updatedAt = CURRENT_TIMESTAMP()
+        WHERE
+            id = ?
+    `
+	if newTimestamp {
+		if _, err := tx.ExecContext(ctx, updateTimestamp, updated.Id); err != nil {
+			return err
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -178,6 +193,9 @@ func (s *MysqlVerificationRepository) FindByUserId(userId string) (*models.Ident
             IdentityVerification
         WHERE
             userId = ?
+        ORDER BY
+            createdAt DESC
+        LIMIT 1
     `
 	request := new(models.IdentityVerificationModel)
 	if err := s.db.GetContext(ctx, request, getRequest, userId); err != nil {

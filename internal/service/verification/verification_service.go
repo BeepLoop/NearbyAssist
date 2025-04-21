@@ -149,15 +149,26 @@ func (s *Service) UpdateVerificationRequest(bearerToken string, payload *request
 		}
 	}
 
-	if err := s.verificationStore.Update(previousRequest.Id, updatedRequest); err != nil {
-		return err
+	if previousRequest.Status == models.IDENTITY_VERIF_STATUS_REJECTED {
+		// Update user data and create new request if previous is rejected
+		if err := s.verificationStore.UpdateUserInfo(updatedRequest, false); err != nil {
+			return err
+		}
+
+		if _, err := s.verificationStore.CreateLink(updatedRequest.UserId); err != nil {
+			return err
+		}
+	} else {
+		if err := s.verificationStore.UpdateUserInfo(updatedRequest, true); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func (s *Service) GetRequestList() ([]dto.VerificationRequest, error) {
-	requests, err := s.verificationStore.GetAll("pending")
+	requests, err := s.verificationStore.GetAll(models.IDENTITY_VERIF_STATUS_PENDING)
 	if err != nil {
 		return nil, err
 	}

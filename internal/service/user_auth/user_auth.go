@@ -226,7 +226,7 @@ func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.
 		return nil, err
 	}
 
-	if _, err := s.verificationStore.Create(userId); err != nil {
+	if _, err := s.verificationStore.CreateLink(userId); err != nil {
 		return nil, err
 	}
 
