@@ -18,12 +18,12 @@ func (h *complaintHandler) GetReport(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
-	data, err := h.complaintService.GetReportedUserDetail(reportId)
+	data, err := h.complaintService.GetReport(reportId)
 	if err != nil {
-		page := pages.ViewReportedUserDetail(*admin, dto.UserReportDetail{})
+		page := pages.ReportedUser(*admin, dto.UserReportDetail{})
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	page := pages.ViewReportedUserDetail(*admin, *data)
+	page := pages.ReportedUser(*admin, *data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

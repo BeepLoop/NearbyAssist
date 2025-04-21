@@ -8,7 +8,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ ReportedUsers(user models.AdminModel, users []dto.UserReport, flash string) {
+templ ReportedUserList(user models.AdminModel, users []dto.UserReport, flash string) {
 	@layout.Layout(user) {
 		<!-- toasy component -->
 		@templ.JSONScript("flash", flash)

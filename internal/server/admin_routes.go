@@ -130,7 +130,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		complaintHandler := complaint.NewHandler(complaintService, resourceService)
 
-		complaintRoute.GET("/users", complaintHandler.GetUserReports)
+		complaintRoute.GET("/users", complaintHandler.GetReportList)
 		complaintRoute.GET("/users/:reportId", complaintHandler.GetReport)
 		complaintRoute.POST("/users/close", complaintHandler.Close)
 

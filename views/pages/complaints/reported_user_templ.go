@@ -18,7 +18,7 @@ import (
 	"strconv"
 )
 
-func ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) templ.Component {
+func ReportedUser(user models.AdminModel, data dto.UserReportDetail) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -179,7 +179,7 @@ func overview(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Report.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 132, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 132, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -192,7 +192,7 @@ func overview(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(data.Report.Category)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 136, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 136, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -210,7 +210,7 @@ func overview(data dto.UserReportDetail) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(data.Report.BookingId)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 141, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 141, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -228,7 +228,7 @@ func overview(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.Report.Reason)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 146, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 146, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -241,7 +241,7 @@ func overview(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.Report.Detail)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 150, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 150, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -301,7 +301,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 170, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 170, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -314,7 +314,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FloatToString(data.Booking.Cost))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 174, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 174, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -367,7 +367,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.CancelReason)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 193, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 193, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -385,7 +385,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 198, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 198, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -398,7 +398,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.ScheduledAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 202, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 202, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -436,7 +436,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.UpdatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 214, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 214, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -466,7 +466,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.Service.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 229, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 229, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -479,7 +479,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.Service.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 233, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 233, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -502,7 +502,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FloatToString(data.Booking.Service.Rate))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 245, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 245, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -515,7 +515,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.Service.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 249, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 249, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -528,7 +528,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(data.Booking.Service.UpdatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 253, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 253, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -554,7 +554,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(extra.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 265, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 265, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -567,7 +567,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(extra.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 266, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 266, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -580,7 +580,7 @@ func booking(data dto.UserReportDetail) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FloatToString(extra.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 267, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 267, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -635,7 +635,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reported.ImageURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 284, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 284, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -657,7 +657,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reported.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 297, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 297, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -670,7 +670,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reported.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 301, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 301, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -683,7 +683,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reported.Address)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 305, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 305, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -696,7 +696,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reported.Phone)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 309, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 309, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
@@ -709,7 +709,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reported.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 313, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 313, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
@@ -722,7 +722,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reported.DateVerified)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 317, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 317, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -743,7 +743,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(data.ReportedUserHistory.Rating)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 330, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 330, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -756,7 +756,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(data.ReportedUserHistory.PreviousReports)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 338, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 338, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
@@ -769,7 +769,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.ReportedUserHistory.Bookings))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 342, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 342, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -782,7 +782,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.ReportedUserHistory.ActiveBookings))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 346, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 346, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -795,7 +795,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.ReportedUserHistory.CompletedBookings))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 350, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 350, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
@@ -808,7 +808,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.ReportedUserHistory.RejectedBookings))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 354, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 354, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -826,7 +826,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(report.CreatedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 370, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 370, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 			if templ_7745c5c3_Err != nil {
@@ -839,7 +839,7 @@ func reported(data dto.UserReportDetail) templ.Component {
 			var templ_7745c5c3_Var42 string
 			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(report.CompletedAt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 373, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 373, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 			if templ_7745c5c3_Err != nil {
@@ -935,7 +935,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var45 string
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reporter.ImageURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 404, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 404, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
@@ -957,7 +957,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reporter.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 417, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 417, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
@@ -970,7 +970,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var48 string
 		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reporter.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 421, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 421, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 		if templ_7745c5c3_Err != nil {
@@ -983,7 +983,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var49 string
 		templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reporter.Address)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 425, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 425, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 		if templ_7745c5c3_Err != nil {
@@ -996,7 +996,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var50 string
 		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reporter.Phone)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 429, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 429, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 		if templ_7745c5c3_Err != nil {
@@ -1009,7 +1009,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var51 string
 		templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reporter.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 433, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 433, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 		if templ_7745c5c3_Err != nil {
@@ -1022,7 +1022,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var52 string
 		templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reporter.DateVerified)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 437, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 437, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 		if templ_7745c5c3_Err != nil {
@@ -1043,7 +1043,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var53 string
 		templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.ReporterHistory.ReportsFiled))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 449, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 449, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 		if templ_7745c5c3_Err != nil {
@@ -1056,7 +1056,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var54 string
 		templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.ReporterHistory.FalseReports))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 453, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 453, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 		if templ_7745c5c3_Err != nil {
@@ -1069,7 +1069,7 @@ func reporter(data dto.UserReportDetail) templ.Component {
 		var templ_7745c5c3_Var55 string
 		templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(data.ReporterHistory.CancelledBookings))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 457, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 457, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 		if templ_7745c5c3_Err != nil {
@@ -1111,7 +1111,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var57 string
 		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(data.Id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 468, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 468, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {
@@ -1132,7 +1132,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var58 string
 		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(data.ReportedByUserId)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 473, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 473, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 		if templ_7745c5c3_Err != nil {
@@ -1145,7 +1145,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var59 string
 		templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(data.ReportedByName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 477, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 477, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 		if templ_7745c5c3_Err != nil {
@@ -1158,7 +1158,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var60 string
 		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(data.CreatedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 481, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 481, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
@@ -1176,7 +1176,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 			var templ_7745c5c3_Var61 string
 			templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(data.BookingId)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 486, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 486, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 			if templ_7745c5c3_Err != nil {
@@ -1194,7 +1194,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var62 string
 		templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(data.Reason)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 491, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 491, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 		if templ_7745c5c3_Err != nil {
@@ -1207,7 +1207,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var63 string
 		templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(data.Detail)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 495, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 495, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 		if templ_7745c5c3_Err != nil {
@@ -1220,7 +1220,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var64 string
 		templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(data.AdminUsername)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 499, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 499, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 		if templ_7745c5c3_Err != nil {
@@ -1233,7 +1233,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var65 string
 		templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(data.AdminId)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 503, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 503, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 		if templ_7745c5c3_Err != nil {
@@ -1246,7 +1246,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var66 string
 		templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(data.CompletedAt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 507, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 507, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 		if templ_7745c5c3_Err != nil {
@@ -1274,7 +1274,7 @@ func previousReportMoreInfo(data dto.PreviousReport) templ.Component {
 		var templ_7745c5c3_Var67 string
 		templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(data.AdminNote)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 519, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 519, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 		if templ_7745c5c3_Err != nil {
@@ -1316,7 +1316,7 @@ func addressReportContent(reportId string) templ.Component {
 		var templ_7745c5c3_Var69 string
 		templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(reportId)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/view_reported_user_detail.templ`, Line: 534, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user.templ`, Line: 534, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 		if templ_7745c5c3_Err != nil {

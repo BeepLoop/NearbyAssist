@@ -175,7 +175,7 @@ func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload,
 	return reportId, nil
 }
 
-func (s *Service) GetReportedUsers(limit, offset int) ([]dto.UserReport, error) {
+func (s *Service) GetReportList(limit, offset int) ([]dto.UserReport, error) {
 	reports, err := s.reportUserStore.GetAllWithStatus("pending", limit, offset)
 	if err != nil {
 		return nil, err
@@ -196,7 +196,7 @@ func (s *Service) GetReportedUsers(limit, offset int) ([]dto.UserReport, error) 
 	return data, nil
 }
 
-func (s *Service) GetReportedUserDetail(reportId string) (*dto.UserReportDetail, error) {
+func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 	report, err := s.reportUserStore.FindById(reportId)
 	if err != nil {
 		return nil, err

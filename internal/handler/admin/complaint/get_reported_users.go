@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *complaintHandler) GetUserReports(c echo.Context) error {
+func (h *complaintHandler) GetReportList(c echo.Context) error {
 	params := c.QueryParams()
 	flash, _, _ := utils.RetrieveFlashMessage(c)
 	admin, err := utils.GetAdminFromSession(c)
@@ -34,15 +34,15 @@ func (h *complaintHandler) GetUserReports(c echo.Context) error {
 			offset = DEFAULT_OFFSET
 		}
 
-		data, err := h.complaintService.GetReportedUsers(limit, offset)
+		data, err := h.complaintService.GetReportList(limit, offset)
 		if err != nil {
 			fmt.Println(err.Error())
-			page := pages.ReportedUsers(*admin, make([]dto.UserReport, 0), flash)
+			page := pages.ReportedUserList(*admin, make([]dto.UserReport, 0), flash)
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		reports = data
 	}
 
-	page := pages.ReportedUsers(*admin, reports, flash)
+	page := pages.ReportedUserList(*admin, reports, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

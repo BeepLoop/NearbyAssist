@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-templ ViewReportedUserDetail(user models.AdminModel, data dto.UserReportDetail) {
+templ ReportedUser(user models.AdminModel, data dto.UserReportDetail) {
 	@layout.Layout(user) {
 		<!-- Actions -->
 		<div class="flex justify-between">
