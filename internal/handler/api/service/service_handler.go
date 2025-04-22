@@ -216,6 +216,32 @@ func (h *serviceHandler) DeleteImage(c echo.Context) error {
 	return c.JSON(http.StatusNoContent, nil)
 }
 
+func (h *serviceHandler) Disable(c echo.Context) error {
+	serviceId := c.Param("serviceId")
+	if serviceId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Service ID missing",
+			Error:   "Service ID is required for this action",
+		})
+	}
+
+	bearerToken := utils.BearerTokenFromHeader(c)
+	return h.service_service.Disable(bearerToken, serviceId)
+}
+
+func (h *serviceHandler) Enable(c echo.Context) error {
+	serviceId := c.Param("serviceId")
+	if serviceId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Service ID missing",
+			Error:   "Service ID is required for this action",
+		})
+	}
+
+	bearerToken := utils.BearerTokenFromHeader(c)
+	return h.service_service.Enable(bearerToken, serviceId)
+}
+
 func (h *serviceHandler) AddExtra(c echo.Context) error {
 	req := new(request.AddExtraPayload)
 	if err := c.Bind(req); err != nil {

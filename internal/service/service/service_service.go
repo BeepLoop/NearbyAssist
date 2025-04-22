@@ -19,6 +19,10 @@ import (
 	"strings"
 )
 
+const (
+	ERR_FORBIDDEN_ACTION = "action not allowed"
+)
+
 type Service struct {
 	serviceStore service_repo.ServiceRepository
 	vendorStore  vendor_repo.VendorRepository
@@ -157,6 +161,7 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 				Latitude:  service.Latitude,
 				Longitude: service.Longitude,
 			},
+			Disabled: service.Disabled,
 		},
 		Vendor: response.Vendor{
 			Id:       vendor.VendorId,
@@ -301,6 +306,40 @@ func (s *Service) DeleteImage(bearerToken, imageId string) error {
 	}
 
 	return nil
+}
+
+func (s *Service) Disable(bearerToken, serviceId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	service, err := s.serviceStore.FindById(serviceId)
+	if err != nil {
+		return err
+	}
+	if service.VendorId != userId {
+		return errors.New(ERR_FORBIDDEN_ACTION)
+	}
+
+	return s.serviceStore.Disable(service.Id)
+}
+
+func (s *Service) Enable(bearerToken, serviceId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	service, err := s.serviceStore.FindById(serviceId)
+	if err != nil {
+		return err
+	}
+	if service.VendorId != userId {
+		return errors.New(ERR_FORBIDDEN_ACTION)
+	}
+
+	return s.serviceStore.Enable(service.Id)
 }
 
 func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) (string, error) {

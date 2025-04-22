@@ -33,31 +33,6 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
 		return "", err
 	}
 
-	checkDuplicate := `
-        SELECT CASE
-            WHEN EXISTS
-                (
-                    SELECT
-                        1
-                    FROM
-                        Booking
-                    WHERE
-                        (clientId = ? AND serviceId = ?)
-                        AND (status = 'confirmed' OR status = 'pending')
-                )
-            THEN 1
-            ELSE 0
-        END AS duplicate_booking
-    `
-	alreadyBooked := false
-	if err := tx.GetContext(ctx, &alreadyBooked, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
-		return "", err
-	}
-
-	if alreadyBooked {
-		return "", errors.New("You already have an confirmed or pending booking for this service")
-	}
-
 	query := `
         INSERT INTO
             Booking (id, vendorId, clientId, serviceId, cost)
@@ -188,6 +163,38 @@ func (s *MysqlBookingRepository) GetAll() ([]*models.BookingModel, error) {
 	}
 
 	return bookings, nil
+}
+
+func (s *MysqlBookingRepository) HasOngoingBookingForService(data *models.BookingModel) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	checkDuplicate := `
+        SELECT CASE
+            WHEN EXISTS
+                (
+                    SELECT
+                        1
+                    FROM
+                        Booking
+                    WHERE
+                        (clientId = ? AND serviceId = ?)
+                        AND (status = 'confirmed' OR status = 'pending')
+                )
+            THEN 1
+            ELSE 0
+        END AS duplicate_booking
+    `
+	alreadyBooked := false
+	if err := s.db.GetContext(ctx, &alreadyBooked, checkDuplicate, data.ClientId, data.ServiceId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return alreadyBooked, nil
 }
 
 func (s *MysqlBookingRepository) GetConfirmedBookingsOfVendor(vendorId string) ([]*models.BookingModel, error) {

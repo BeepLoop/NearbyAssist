@@ -6,14 +6,22 @@ import (
 	"nearbyassist/internal/models"
 	booking_repo "nearbyassist/internal/repository/booking"
 	notification_repo "nearbyassist/internal/repository/notification"
+	service_repo "nearbyassist/internal/repository/service"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/core"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
+	"slices"
+)
+
+const (
+	ERR_DISABLED_SERVICE         = "service is disabled"
+	ERR_HAS_PENDING_OR_CONFIRMED = "already have pending or confirmed booking for service"
 )
 
 type Service struct {
+	serviceStore service_repo.ServiceRepository
 	notifStore   notification_repo.NotificationRepository
 	bookingStore booking_repo.BookingRepository
 	ws           websocket.Socket
@@ -22,6 +30,7 @@ type Service struct {
 }
 
 func NewService(
+	serviceStore service_repo.ServiceRepository,
 	notifStore notification_repo.NotificationRepository,
 	bookingStore booking_repo.BookingRepository,
 	ws websocket.Socket,
@@ -29,6 +38,7 @@ func NewService(
 	jwt core.Authenticator,
 ) *Service {
 	return &Service{
+		serviceStore: serviceStore,
 		notifStore:   notifStore,
 		bookingStore: bookingStore,
 		ws:           ws,
@@ -38,22 +48,34 @@ func NewService(
 }
 
 func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) {
+	service, err := s.serviceStore.FindById(req.ServiceId)
+	if err != nil {
+		return "", err
+	}
+	if service.Disabled {
+		return "", errors.New(ERR_DISABLED_SERVICE)
+	}
+
 	booking := &models.BookingModel{
 		ClientId:  req.ClientId,
 		VendorId:  req.VendorId,
 		ServiceId: req.ServiceId,
 		Cost:      req.Cost,
+		Extras: slices.AppendSeq(
+			make([]*models.ExtraModel, 0),
+			utils.Map(req.Extras, func(extra request.Extra) *models.ExtraModel {
+				return &models.ExtraModel{Model: models.Model{Id: extra.Id}}
+			}),
+		),
 	}
 
-	extras := make([]*models.ExtraModel, 0)
-	for _, extra := range req.Extras {
-		extras = append(extras, &models.ExtraModel{
-			Model: models.Model{
-				Id: extra.Id,
-			},
-		})
+	hasOngoing, err := s.bookingStore.HasOngoingBookingForService(booking)
+	if err != nil {
+		return "", err
 	}
-	booking.Extras = extras
+	if hasOngoing {
+		return "", errors.New(ERR_HAS_PENDING_OR_CONFIRMED)
+	}
 
 	bookingId, err := s.bookingStore.Create(booking)
 	if err != nil {

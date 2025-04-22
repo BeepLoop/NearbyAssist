@@ -51,7 +51,14 @@ func (h *bookingHandler) CreateBooking(c echo.Context) error {
 
 	bookingId, err := h.bookingService.CreateBooking(req)
 	if err != nil {
-		if strings.Contains(err.Error(), "You already have an confirmed or pending booking for this service") {
+		if strings.Contains(err.Error(), booking_service.ERR_DISABLED_SERVICE) {
+			return echo.NewHTTPError(http.StatusForbidden, models.Error{
+				Message: "Service is disabled, booking not allowed",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), booking_service.ERR_HAS_PENDING_OR_CONFIRMED) {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
 				Message: "You already have an confirmed or pending booking for this service",
 				Error:   err.Error(),

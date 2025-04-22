@@ -200,8 +200,10 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		serviceRoute.GET("/search", handler.SearchService)
 		serviceRoute.GET("/:serviceId", handler.GetService)
 		serviceRoute.PUT("", handler.UpdateService)
-		serviceRoute.DELETE("/deleteImage/:imageId", handler.DeleteImage)
 		serviceRoute.POST("/addImage/:serviceId", handler.AddImage)
+		serviceRoute.DELETE("/deleteImage/:imageId", handler.DeleteImage)
+		serviceRoute.POST("/disable/:serviceId", handler.Disable)
+		serviceRoute.POST("/enable/:serviceId", handler.Enable)
 		serviceRoute.POST("/addExtra", handler.AddExtra)
 		serviceRoute.PUT("/editExtra", handler.EditExtra)
 		serviceRoute.DELETE("/deleteExtra/:extraId", handler.DeleteExtra)
@@ -234,6 +236,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.FS,
 		)
 		bookingService := booking_service.NewService(
+			serviceStore,
 			notifStore,
 			bookingStore,
 			s.WS,

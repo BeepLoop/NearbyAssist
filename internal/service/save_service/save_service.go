@@ -136,6 +136,7 @@ func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServ
 					Latitude:  service.Latitude,
 					Longitude: service.Longitude,
 				},
+				Disabled: service.Disabled,
 			},
 			Vendor: response.Vendor{
 				Id:       vendor.VendorId,

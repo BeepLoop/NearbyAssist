@@ -244,7 +244,8 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
             latitude, 
             longitude,
             createdAt,
-            updatedAt
+            updatedAt,
+            disabled
         FROM 
             Service
         WHERE

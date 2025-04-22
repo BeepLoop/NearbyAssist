@@ -38,4 +38,7 @@ type ServiceRepository interface {
 	AddExtra(data *models.ExtraModel) (string, error)
 	EditExtra(data *models.ExtraModel) error
 	DeleteExtra(extraId string) error
+
+	Disable(serviceId string) error
+	Enable(serviceId string) error
 }

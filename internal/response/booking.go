@@ -40,6 +40,7 @@ type Service struct {
 	Extras      []Extra  `json:"extras"`
 	Images      []Image  `json:"images"`
 	Location    Location `json:"location"`
+	Disabled    bool     `json:"disabled"`
 }
 
 type Extra struct {

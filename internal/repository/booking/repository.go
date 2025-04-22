@@ -8,6 +8,7 @@ type BookingRepository interface {
 	Create(data *models.BookingModel) (string, error)
 	FindById(id string) (*models.BookingModel, error)
 	GetAll() ([]*models.BookingModel, error)
+	HasOngoingBookingForService(data *models.BookingModel) (bool, error)
 
 	GetConfirmedBookingsOfVendor(vendorId string) ([]*models.BookingModel, error)
 

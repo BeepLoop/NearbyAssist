@@ -117,9 +117,12 @@ func (s *MysqlServiceRepository) FindAll(limit, offset int) ([]*models.ServiceMo
             FORMAT(rate, 2) AS rate,
             latitude,
             longitude,
-            createdAt
+            createdAt,
+            disabled
         FROM 
             Service
+        WHERE
+            disabled = 0
         ORDER BY
             createdAt, updatedAt DESC
         LIMIT ?
@@ -186,7 +189,8 @@ func (s *MysqlServiceRepository) FindAllByTag(tag string) ([]*models.ServiceMode
             s.description,
             FORMAT(s.rate, 2) as rate,
             s.latitude, 
-            s.longitude
+            s.longitude,
+            s.disabled
         FROM 
             ServiceTag st
             JOIN Service s ON s.id = st.serviceId
@@ -222,7 +226,8 @@ func (s *MysqlServiceRepository) FindById(serviceId string) (*models.ServiceMode
             latitude, 
             longitude,
             createdAt,
-            updatedAt
+            updatedAt,
+            disabled
         FROM 
             Service
         WHERE
@@ -275,7 +280,7 @@ func (s *MysqlServiceRepository) FindBySignature(signature string) (*models.Serv
 	defer cancel()
 
 	service := new(models.ServiceModel)
-	query := "SELECT id, vendorId, description, rate, latitude, longitude FROM Service WHERE signature = ?"
+	query := "SELECT id, vendorId, description, rate, latitude, longitude, disabled FROM Service WHERE signature = ?"
 	if err := s.db.GetContext(ctx, service, query, signature); err != nil {
 		return nil, err
 	}
@@ -802,7 +807,8 @@ func (s *MysqlServiceRepository) GetAllByVendorId(vendorId string) ([]*models.Se
             description,
             rate,
             latitude,
-            longitude
+            longitude,
+            disabled
         FROM 
             Service
         WHERE
@@ -849,6 +855,7 @@ func (s *MysqlServiceRepository) GeoSpatialSearch(params map[string]string) ([]*
             JOIN User u ON u.id = s.vendorId
             JOIN Tag t ON t.id = st.tagId
         WHERE
+            s.disabled = 0 AND
     `
 
 	if q, ok := params["q"]; ok {
@@ -946,4 +953,36 @@ func (s *MysqlServiceRepository) IsVendorBanned(serviceId string) (bool, error) 
 	}
 
 	return isBanned, nil
+}
+
+func (s *MysqlServiceRepository) Disable(serviceId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE Service SET disabled = 1 WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, serviceId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlServiceRepository) Enable(serviceId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE Service SET disabled = 0 WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, serviceId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
 }

@@ -157,6 +157,7 @@ func (s *Service) FindById(id string) (*models.VendorModel, error) {
 				CreatedAt:       vendor.User.Identification.CreatedAt,
 			},
 		},
+		Expertise: vendor.Expertise,
 	}
 
 	return data, nil

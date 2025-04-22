@@ -141,6 +141,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 						Latitude:  s.Latitude,
 						Longitude: s.Longitude,
 					},
+					Disabled: s.Disabled,
 				}
 			}),
 		),
