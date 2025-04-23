@@ -2,8 +2,7 @@ package suggestion_engine
 
 import (
 	"math"
-	"nearbyassist/internal/models"
-	"nearbyassist/internal/response"
+	"nearbyassist/internal/dto"
 )
 
 type criteria struct {
@@ -36,44 +35,33 @@ func NewWeightedScoring() *weightedScoring {
 	}
 }
 
-func (w *weightedScoring) GenerateSuggestions(services []*models.GeoSpatialSearchResult) ([]*response.ServiceSearchResult, error) {
-	scores := make([]*response.ServiceSearchResult, 0)
-
+func (w *weightedScoring) GenerateSuggestions(services []dto.GeospatialOperation) (map[string]float32, error) {
 	w.getTopScores(services)
 
+	scores := make(map[string]float32)
 	for _, service := range services {
 		score, err := w.calculateScore(service)
 		if err != nil {
 			return nil, err
 		}
 
-		scores = append(scores, &response.ServiceSearchResult{
-			Id:                service.Id,
-			VendorName:        service.VendorName,
-			SuggestionScore:   score,
-			Rate:              service.Rate,
-			Rating:            service.Rating,
-			Latitude:          service.Latitude,
-			Longitude:         service.Longitude,
-			CompletedBookings: service.CompletedBookings,
-			Distance:          service.Distance,
-		})
+		scores[service.Id] = score
 	}
 
 	return scores, nil
 }
 
-func (w *weightedScoring) calculateScore(service *models.GeoSpatialSearchResult) (float32, error) {
+func (w *weightedScoring) calculateScore(service dto.GeospatialOperation) (float32, error) {
 	priceScore := w.minimize(service.Rate, w.lowestPrice)
 	ratingScore := w.maximize(service.Rating, w.highestRating)
-	distanceScore := w.minimize(service.Distance, w.shortestDistance)
+	distanceScore := w.minimize(service.DistanceFromOrigin, w.shortestDistance)
 	bookingsScore := w.maximize(service.CompletedBookings, w.mostBookings)
 
 	score := (w.priceWeight * priceScore) + (w.ratingWeight * ratingScore) + (w.distanceWeight * distanceScore) + (w.bookingsWeight * bookingsScore)
 	return score, nil
 }
 
-func (w *weightedScoring) getTopScores(services []*models.GeoSpatialSearchResult) {
+func (w *weightedScoring) getTopScores(services []dto.GeospatialOperation) {
 	var lowestPrice float32 = math.MaxFloat32
 	var highestRating float32 = 1.0
 	var shortestDistance float32 = math.MaxFloat32
@@ -88,8 +76,8 @@ func (w *weightedScoring) getTopScores(services []*models.GeoSpatialSearchResult
 			highestRating = service.Rating
 		}
 
-		if service.Distance < shortestDistance {
-			shortestDistance = service.Distance
+		if service.DistanceFromOrigin < shortestDistance {
+			shortestDistance = service.DistanceFromOrigin
 		}
 
 		if service.CompletedBookings > mostBookings {

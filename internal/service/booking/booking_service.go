@@ -18,6 +18,8 @@ import (
 const (
 	ERR_DISABLED_SERVICE         = "service is disabled"
 	ERR_HAS_PENDING_OR_CONFIRMED = "already have pending or confirmed booking for service"
+	ERR_DISALLOWED_ACTION        = "invalid action performed"
+	ERR_UNAUTHORIZED             = "unauthorized"
 )
 
 type Service struct {
@@ -157,15 +159,15 @@ func (s *Service) CancelBooking(bearerToken string, req *request.CancelRequestPa
 	}
 
 	if booking.Status != models.BOOKING_STATUS_PENDING {
-		return errors.New("Could not cancel non-pending booking")
+		return errors.New(ERR_DISALLOWED_ACTION)
 	}
 
 	if booking.Status == models.BOOKING_STATUS_DONE || booking.Status == models.BOOKING_STATUS_CANCELLED {
-		return errors.New("Booking already completed or cancelled")
+		return errors.New(ERR_DISALLOWED_ACTION)
 	}
 
 	if booking.ClientId != userId {
-		return errors.New("Unauthorized cancel request")
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	encryptedReason := utils.Must(s.encrypt.EncryptString(req.Reason))
@@ -225,15 +227,15 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 	}
 
 	if booking.Status != models.BOOKING_STATUS_PENDING {
-		return errors.New("Could not accept non-pending booking")
+		return errors.New(ERR_DISALLOWED_ACTION)
 	}
 
 	if booking.Status == models.BOOKING_STATUS_DONE || booking.Status == models.BOOKING_STATUS_CANCELLED {
-		return errors.New("Booking already completed or cancelled")
+		return errors.New(ERR_DISALLOWED_ACTION)
 	}
 
 	if booking.VendorId != userId {
-		return errors.New("Unauthorized accept request")
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	schedule := utils.FormatDate(req.Schedule)
@@ -292,15 +294,15 @@ func (s *Service) RejectBookingRequest(bearerToken string, req *request.RejectRe
 	}
 
 	if booking.Status != models.BOOKING_STATUS_PENDING {
-		return errors.New("Could not reject non-pending booking")
+		return errors.New(ERR_DISALLOWED_ACTION)
 	}
 
 	if booking.Status == models.BOOKING_STATUS_DONE || booking.Status == models.BOOKING_STATUS_CANCELLED {
-		return errors.New("Booking already completed or cancelled")
+		return errors.New(ERR_DISALLOWED_ACTION)
 	}
 
 	if booking.VendorId != userId {
-		return errors.New("Unauthorized accept request")
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	encryptedReason := utils.Must(s.encrypt.EncryptString(req.Reason))
@@ -518,7 +520,7 @@ func (s *Service) CompleteBooking(bearerToken, bookingId string) error {
 		return err
 	} else {
 		if booking.VendorId != userId {
-			return errors.New("unauthorized")
+			return errors.New(ERR_UNAUTHORIZED)
 		}
 	}
 

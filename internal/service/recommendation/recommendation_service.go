@@ -24,7 +24,7 @@ func NewService(serviceStore service_repo.ServiceRepository, vendorStore vendor_
 }
 
 func (s *Service) GetRecommendations(limit, offset int) (*response.Recommendation, error) {
-	services, err := s.serviceStore.FindAll(limit, offset)
+	services, err := s.serviceStore.GetAll(limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -32,11 +32,6 @@ func (s *Service) GetRecommendations(limit, offset int) (*response.Recommendatio
 	recommendServices := make([]*response.ServiceRecommendation, 0)
 
 	for _, service := range services {
-		for _, extra := range service.Extras {
-			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
-		}
-
 		vendor, err := s.vendorStore.FindById(service.VendorId)
 		if err != nil {
 			return nil, err

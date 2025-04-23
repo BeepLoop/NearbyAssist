@@ -2,43 +2,49 @@ package map_service
 
 import (
 	"nearbyassist/internal/models"
-	map_repo "nearbyassist/internal/repository/map"
 	service_repo "nearbyassist/internal/repository/service"
 	"nearbyassist/internal/service/core"
+	"nearbyassist/internal/utils"
+	"slices"
 )
 
 type Service struct {
-	mapStore     map_repo.MapRepository
 	serviceStore service_repo.ServiceRepository
 	encrypt      core.Encryption
 }
 
-func NewService(mapStore map_repo.MapRepository, serviceStore service_repo.ServiceRepository, encrypt core.Encryption) *Service {
+func NewService(serviceStore service_repo.ServiceRepository, encrypt core.Encryption) *Service {
 	return &Service{
-		mapStore:     mapStore,
 		serviceStore: serviceStore,
 		encrypt:      encrypt,
 	}
 }
 
 func (s *Service) GetServices(query string) ([]*models.ServiceModel, error) {
-	services, err := s.serviceStore.FindAllByTag(query)
+	services, err := s.serviceStore.GetAllWithTag(query)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, service := range services {
-		if decrypted, err := s.encrypt.DecryptString(service.Title); err != nil {
-			return nil, err
-		} else {
-			service.Title = decrypted
-		}
+		service.Title = utils.Must(s.encrypt.DecryptString(service.Title))
+		service.Description = utils.Must(s.encrypt.DecryptString(service.Description))
+		service.Address.Address = utils.Must(s.encrypt.DecryptString(service.Address.Address))
 
-		if decrypted, err := s.encrypt.DecryptString(service.Description); err != nil {
-			return nil, err
-		} else {
-			service.Description = decrypted
-		}
+		service.Extras = slices.AppendSeq(
+			make([]*models.ExtraModel, 0),
+			utils.Map(service.Extras, func(extra *models.ExtraModel) *models.ExtraModel {
+				return &models.ExtraModel{
+					Model:           extra.Model,
+					UpdateableModel: extra.UpdateableModel,
+					Title:           utils.Must(s.encrypt.DecryptString(extra.Title)),
+					Description:     utils.Must(s.encrypt.DecryptString(extra.Description)),
+					Price:           extra.Price,
+					Deleted:         extra.Deleted,
+					ServiceId:       extra.ServiceId,
+				}
+			}),
+		)
 	}
 
 	return services, nil

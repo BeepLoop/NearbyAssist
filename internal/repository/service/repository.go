@@ -6,30 +6,22 @@ import (
 
 type ServiceRepository interface {
 	Create(data *models.ServiceModel) (string, error)
-	FindAll(limit, offset int) ([]*models.ServiceModel, error)
-	FindAllByTag(tag string) ([]*models.ServiceModel, error)
 	FindById(id string) (*models.ServiceModel, error)
 	FindBySignature(signature string) (*models.ServiceModel, error)
+	GetAll(limit, offset int) ([]*models.ServiceModel, error)
+	GetAllWithTag(tag string) ([]*models.ServiceModel, error)
+	FuzzyMatchTags(tags []string) ([]*models.ServiceModel, error)
 
 	Update(data *models.ServiceModel) error
 
-	Delete(serviceId string) error
-
 	// Return nil if vendorId is found in vendor, else error
-	IsVendor(vendorId string) error
-
-	GetTags(serviceId string) ([]*models.TagModel, error)
+	IsVendor(vendorId string) (bool, error)
 
 	GetReviews(serviceId string) ([]*models.ReviewModel, error)
 
 	FindPhotoById(imageId string) (*models.ServicePhotoModel, error)
-	GetPhotos(serviceId string) ([]*models.ServicePhotoModel, error)
 	AddImage(data *models.ServicePhotoModel) (string, error)
 	DeleteImage(imageId string) error
-
-	GetAllByVendorId(vendorId string) ([]*models.ServiceModel, error)
-
-	GeoSpatialSearch(params map[string]string) ([]*models.GeoSpatialSearchResult, error)
 
 	IsVendorRestricted(serviceId string) (bool, error)
 	IsVendorBanned(serviceId string) (bool, error)
@@ -41,4 +33,6 @@ type ServiceRepository interface {
 
 	Disable(serviceId string) error
 	Enable(serviceId string) error
+
+	HasActiveBookingWithThisExtra(extraId string) (bool, error)
 }

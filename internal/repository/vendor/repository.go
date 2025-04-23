@@ -7,9 +7,9 @@ type VendorRepository interface {
 	FindByEmailHash(emailhash string) (*models.VendorModel, error)
 	FindById(id string) (*models.VendorModel, error)
 	GetVendorServiceList(vendorId string) ([]*models.ServiceModel, error)
-	GetTags(serviceId string) ([]*models.TagModel, error)
 	IsRestricted(userId string) (bool, bool, error)
 	AddExpertise(userId, expertiseId, supportingImage string) error
 	GetAllExpertise(userId string) ([]*models.UserExpertiseModel, error)
 	GetBookingsWithStatus(vendorId, status string) ([]*models.BookingModel, error)
+	CompletedBookingCountOfService(vendorId, serviceId string) (int, error)
 }

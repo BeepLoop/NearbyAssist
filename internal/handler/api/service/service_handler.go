@@ -47,7 +47,14 @@ func (h *serviceHandler) CreateService(c echo.Context) error {
 
 	serviceId, err := h.service_service.CreateService(req)
 	if err != nil {
-		if strings.Contains(err.Error(), "duplicate service") {
+		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
+				Message: "You are not allowed to perform this action",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), service_service.ERR_DUPLICATE_SERVICE) {
 			return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
 				Message: "Duplicate service listing",
 				Error:   err.Error(),
@@ -132,7 +139,7 @@ func (h *serviceHandler) UpdateService(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.service_service.UpdateService(bearerToken, req); err != nil {
-		if strings.Contains(err.Error(), "unauthorized") {
+		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not allowed to perform this action",
 				Error:   err.Error(),
@@ -169,7 +176,7 @@ func (h *serviceHandler) AddImage(c echo.Context) error {
 
 	imageData, err := h.service_service.AddImage(bearerToken, serviceId, files)
 	if err != nil {
-		if strings.Contains(err.Error(), "unauthorized") {
+		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not allowed to do this action",
 				Error:   err.Error(),
@@ -200,7 +207,7 @@ func (h *serviceHandler) DeleteImage(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.service_service.DeleteImage(bearerToken, imageId); err != nil {
-		if strings.Contains(err.Error(), "unauthorized") {
+		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "You are not allowed to delete this image",
 				Error:   err.Error(),
@@ -262,7 +269,7 @@ func (h *serviceHandler) AddExtra(c echo.Context) error {
 
 	extraId, err := h.service_service.AddExtra(bearerToken, req)
 	if err != nil {
-		if strings.Contains(err.Error(), "unauthorized") {
+		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not authorized to do this action",
 				Error:   err.Error(),
@@ -299,7 +306,7 @@ func (h *serviceHandler) EditExtra(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.service_service.EditExtra(bearerToken, req); err != nil {
-		if strings.Contains(err.Error(), "unauthorized") {
+		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not authorized to do this action",
 				Error:   err.Error(),
@@ -327,16 +334,16 @@ func (h *serviceHandler) DeleteExtra(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.service_service.DeleteExtra(bearerToken, extraId); err != nil {
-		if strings.Contains(err.Error(), "unauthorized") {
+		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
-				Message: "you are not authorized to do this action",
+				Message: "You are not authorized to do this action",
 				Error:   err.Error(),
 			})
 		}
 
-		if strings.Contains(err.Error(), "extra_actively_used") {
-			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
-				Message: "Extra actively being used",
+		if strings.Contains(err.Error(), service_service.ERR_ACTIVELY_USED) {
+			return echo.NewHTTPError(http.StatusForbidden, models.Error{
+				Message: "Action not allowed, resource is actively in use",
 				Error:   err.Error(),
 			})
 		}

@@ -138,8 +138,8 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 						}),
 					),
 					Location: response.Location{
-						Latitude:  s.Latitude,
-						Longitude: s.Longitude,
+						Latitude:  s.Address.Latitude,
+						Longitude: s.Address.Longitude,
 					},
 					Disabled: s.Disabled,
 				}

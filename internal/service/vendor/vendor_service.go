@@ -170,12 +170,6 @@ func (s *Service) GetVendorServicesList(vendorId string) ([]*models.ServiceModel
 	}
 
 	for _, service := range services {
-		if images, err := s.serviceStore.GetPhotos(service.Id); err != nil {
-			return nil, err
-		} else {
-			service.Images = images
-		}
-
 		service.Title = utils.Must(s.encrypt.DecryptString(service.Title))
 		service.Description = utils.Must(s.encrypt.DecryptString(service.Description))
 

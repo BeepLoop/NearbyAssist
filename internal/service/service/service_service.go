@@ -2,8 +2,9 @@ package service_service
 
 import (
 	"errors"
-	"fmt"
+	"math"
 	"mime/multipart"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	service_repo "nearbyassist/internal/repository/service"
 	vendor_repo "nearbyassist/internal/repository/vendor"
@@ -17,10 +18,14 @@ import (
 	"nearbyassist/internal/utils"
 	"slices"
 	"strings"
+	"sync"
 )
 
 const (
-	ERR_FORBIDDEN_ACTION = "action not allowed"
+	ERR_FORBIDDEN_ACTION  = "action not allowed"
+	ERR_UNAUTHORIZED      = "unauthorized"
+	ERR_DUPLICATE_SERVICE = "duplicate service"
+	ERR_ACTIVELY_USED     = "resource is actively in use"
 )
 
 type Service struct {
@@ -48,20 +53,23 @@ func NewService(serviceStore service_repo.ServiceRepository, vendorStore vendor_
 }
 
 func (s *Service) CreateService(req *request.AddServicePayload) (string, error) {
-	if err := s.serviceStore.IsVendor(req.VendorId); err != nil {
+	isVendor, err := s.serviceStore.IsVendor(req.VendorId)
+	if err != nil {
 		return "", err
+	}
+	if !isVendor {
+		return "", errors.New(ERR_UNAUTHORIZED)
 	}
 
 	// Compute signature
-	rawStr := fmt.Sprintf("%s_%s_%f_%f", req.VendorId, req.Description, req.Location.Latitude, req.Location.Longitude)
-	signature := utils.Must(s.hash.Generate([]byte(rawStr)))
+	signature := computeSignature(req.VendorId, req.Title, req.Description, s.hash.Generate)
 
 	service, err := s.serviceStore.FindBySignature(signature)
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
 		return "", err
 	}
 	if service != nil {
-		return "", errors.New("duplicate service")
+		return "", errors.New(ERR_DUPLICATE_SERVICE)
 	}
 
 	newService := &models.ServiceModel{
@@ -70,10 +78,6 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
 		Rate:         req.Rate,
 		TagsAsString: req.Tags,
-		GeoSpatialModel: models.GeoSpatialModel{
-			Latitude:  req.Location.Latitude,
-			Longitude: req.Location.Longitude,
-		},
 		Extras: slices.AppendSeq(
 			make([]*models.ExtraModel, 0),
 			utils.Map(req.Extras, func(x request.NewExtra) *models.ExtraModel {
@@ -87,12 +91,7 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 		Signature: signature,
 	}
 
-	serviceId, err := s.serviceStore.Create(newService)
-	if err != nil {
-		return "", err
-	}
-
-	return serviceId, nil
+	return s.serviceStore.Create(newService)
 }
 
 func (s *Service) GetService(serviceId string) (*response.DetailedServiceResponse, error) {
@@ -158,8 +157,8 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 				}),
 			),
 			Location: response.Location{
-				Latitude:  service.Latitude,
-				Longitude: service.Longitude,
+				Latitude:  service.Address.Latitude,
+				Longitude: service.Address.Longitude,
 			},
 			Disabled: service.Disabled,
 		},
@@ -208,12 +207,8 @@ func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePa
 		return err
 	}
 	if vendor.VendorId != req.VendorId {
-		return errors.New("unauthorized")
+		return errors.New(ERR_UNAUTHORIZED)
 	}
-
-	// Recompute signature
-	rawStr := fmt.Sprintf("%s_%s_%s_%f_%f", req.VendorId, req.Title, req.Description, req.Location.Latitude, req.Location.Longitude)
-	signature := utils.Must(s.hash.Generate([]byte(rawStr)))
 
 	updatedService := &models.ServiceModel{
 		Model:        models.Model{Id: req.Id},
@@ -222,11 +217,7 @@ func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePa
 		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
 		Rate:         req.Rate,
 		TagsAsString: req.Tags,
-		GeoSpatialModel: models.GeoSpatialModel{
-			Latitude:  req.Location.Latitude,
-			Longitude: req.Location.Longitude,
-		},
-		Signature: signature,
+		Signature:    computeSignature(req.VendorId, req.Title, req.Description, s.hash.Generate),
 	}
 
 	if err := s.serviceStore.Update(updatedService); err != nil {
@@ -248,7 +239,7 @@ func (s *Service) AddImage(bearerToken, serviceId string, files []*multipart.Fil
 	}
 
 	if service.VendorId != userId {
-		return nil, errors.New("unauthorized")
+		return nil, errors.New(ERR_UNAUTHORIZED)
 	}
 
 	file := files[0]
@@ -294,7 +285,7 @@ func (s *Service) DeleteImage(bearerToken, imageId string) error {
 	}
 
 	if image.VendorId != userId {
-		return errors.New("unauthorized")
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	if err := s.fs.DeleteFile(image.Url); err != nil {
@@ -354,7 +345,7 @@ func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) (
 	}
 
 	if service.VendorId != userId {
-		return "", errors.New("unauthorized")
+		return "", errors.New(ERR_UNAUTHORIZED)
 	}
 
 	data := &models.ExtraModel{
@@ -401,7 +392,7 @@ func (s *Service) EditExtra(bearerToken string, data *request.EditExtraPayload) 
 	}
 
 	if service.VendorId != userId {
-		return errors.New("unauthorized")
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	updatedExtra := &models.ExtraModel{
@@ -438,26 +429,27 @@ func (s *Service) DeleteExtra(bearerToken, extraId string) error {
 
 	extra, err := s.serviceStore.FindExtraById(extraId)
 	if err != nil {
-		fmt.Println("find extra by id: ", err.Error())
 		return err
 	}
 
 	service, err := s.serviceStore.FindById(extra.ServiceId)
 	if err != nil {
-		fmt.Println("find service by id: ", err.Error())
 		return err
 	}
 
 	if service.VendorId != userId {
-		return errors.New("unauthorized")
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
-	if err := s.serviceStore.DeleteExtra(extraId); err != nil {
-		fmt.Println("delete extra: ", err.Error())
+	isActive, err := s.serviceStore.HasActiveBookingWithThisExtra(extraId)
+	if err != nil {
 		return err
 	}
+	if isActive {
+		return errors.New(ERR_ACTIVELY_USED)
+	}
 
-	return nil
+	return s.serviceStore.DeleteExtra(extraId)
 }
 
 func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSearchResult, error) {
@@ -471,66 +463,141 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		}
 	}
 
-	services, err := s.serviceStore.GeoSpatialSearch(params)
+	origin := new(models.GeoSpatialModel)
+	if location, ok := params["l"]; ok {
+		if err := origin.FromString(location); err != nil {
+			return nil, err
+		}
+	}
+
+	tags := make([]string, 0)
+	if q, ok := params["q"]; ok {
+		cleaned := utils.Map(strings.Split(q, ","), func(tag string) string {
+			return strings.ReplaceAll(tag, "_", " ")
+		})
+		slices.AppendSeq(tags, cleaned)
+	}
+
+	matchedServices, err := s.serviceStore.FuzzyMatchTags(tags)
 	if err != nil {
 		return nil, err
 	}
 
-	// Filter out services with restricted OR banned vendor
-	validServices := make([]*models.GeoSpatialSearchResult, 0)
-	for _, service := range services {
-		restricted, err := s.serviceStore.IsVendorRestricted(service.Id)
-		if err != nil {
-			return nil, err
-		}
-
-		banned, err := s.serviceStore.IsVendorBanned(service.Id)
-		if err != nil {
-			return nil, err
-		}
-
-		if !restricted && !banned {
-			validServices = append(validServices, service)
-		}
-	}
-
-	// Compute service distance
-	for _, service := range validServices {
-		origin := new(models.GeoSpatialModel)
-		if location, ok := params["l"]; ok {
-			if err := origin.FromString(location); err != nil {
-				return nil, err
+	// Filter out services where vendor is banned or restricted
+	validServices := slices.AppendSeq(
+		make([]*models.ServiceModel, 0),
+		utils.Retain(matchedServices, func(service *models.ServiceModel) bool {
+			restricted, err := s.serviceStore.IsVendorRestricted(service.Id)
+			if err != nil || restricted {
+				return false
 			}
-		}
 
-		destination := new(models.GeoSpatialModel)
-		destination.Latitude = service.Latitude
-		destination.Longitude = service.Longitude
+			banned, err := s.serviceStore.IsVendorBanned(service.Id)
+			if err != nil || banned {
+				return false
+			}
 
-		if distance, err := s.route.GetDistance(origin, destination); err != nil {
+			return !restricted && !banned
+		}),
+	)
+
+	// Retrieve vendor details of each service
+	for _, service := range validServices {
+		if vendor, err := s.vendorStore.FindById(service.VendorId); err != nil {
 			return nil, err
 		} else {
-			service.Distance = distance
+			service.Vendor = *vendor
 		}
 	}
 
-	// Decrypt vendor name
-	for _, service := range services {
-		decrypted, err := s.encrypt.DecryptString(service.VendorName)
+	// Compute distance from origin to each service
+	distanceChan := make(chan dto.DistanceCalculationResult)
+	var wg sync.WaitGroup
+
+	for _, service := range validServices {
+		destination := &models.GeoSpatialModel{
+			Latitude:  service.Address.Latitude,
+			Longitude: service.Address.Longitude,
+		}
+
+		go func(ch chan<- dto.DistanceCalculationResult, wg *sync.WaitGroup) {
+			defer wg.Done()
+
+			if distance, err := s.route.GetDistance(origin, destination); err != nil {
+				ch <- dto.DistanceCalculationResult{
+					ServiceID: service.Id,
+					Distance:  math.MaxFloat32,
+				}
+			} else {
+				ch <- dto.DistanceCalculationResult{
+					ServiceID: service.Id,
+					Distance:  distance,
+				}
+			}
+		}(distanceChan, &wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(distanceChan)
+	}()
+
+	suggestionOpsInput := make([]dto.GeospatialOperation, 0)
+	for item := range distanceChan {
+		index := slices.IndexFunc(validServices, func(service *models.ServiceModel) bool {
+			return service.Id == item.ServiceID
+		})
+		if index == -1 {
+			// Should never happen, skip if it happens
+			continue
+		}
+
+		service := validServices[index]
+		completedBookings, err := s.vendorStore.CompletedBookingCountOfService(service.VendorId, service.Id)
 		if err != nil {
-			return nil, err
+			// If error, skip this service
+			continue
 		}
 
-		service.VendorName = decrypted
+		suggestionOpsInput = append(suggestionOpsInput, dto.GeospatialOperation{
+			Id:                 item.ServiceID,
+			Rate:               utils.StringToFloat32ElseZero(service.Rate),
+			Rating:             utils.StringToFloat32ElseZero(service.Vendor.Rating),
+			Latitude:           float32(service.Vendor.User.Address.Latitude),
+			Longitude:          float32(service.Vendor.User.Address.Longitude),
+			CompletedBookings:  float32(completedBookings),
+			DistanceFromOrigin: item.Distance,
+		})
 	}
 
-	// Compute service suggestion score
-	scoredServices, err := s.suggest.GenerateSuggestions(services)
+	// Compute suggestibility score of each service
+	serviceScores, err := s.suggest.GenerateSuggestions(suggestionOpsInput)
 	if err != nil {
 		return nil, err
 	}
 
-	return scoredServices, nil
+	results := slices.AppendSeq(
+		make([]*response.ServiceSearchResult, 0),
+		utils.Map(validServices, func(service *models.ServiceModel) *response.ServiceSearchResult {
+			// Index should be guaranteed to not be -1, something is terribly wrong if it is -1
+			index := slices.IndexFunc(suggestionOpsInput, func(s dto.GeospatialOperation) bool {
+				return s.Id == service.Id
+			})
+
+			return &response.ServiceSearchResult{
+				Id:                service.Id,
+				VendorName:        utils.Must(s.encrypt.DecryptString(service.Vendor.User.Name)),
+				SuggestionScore:   float32(serviceScores[service.Id]),
+				Rate:              float32(utils.StringToFloat64ElseZero(service.Rate)),
+				Rating:            float32(utils.StringToFloat64ElseZero(service.Vendor.Rating)),
+				Latitude:          service.Vendor.User.Address.Latitude,
+				Longitude:         service.Vendor.User.Address.Longitude,
+				CompletedBookings: suggestionOpsInput[index].CompletedBookings,
+			}
+		}),
+	)
+
+	return results, nil
 }
 
 func (s *Service) FindRoute(serviceId string, origin string) (route_engine.PolylineCode, error) {
@@ -539,18 +606,18 @@ func (s *Service) FindRoute(serviceId string, origin string) (route_engine.Polyl
 		return "", err
 	}
 
-	lat, long, err := models.ParseCoordinate(origin)
+	originLatitude, originLongitude, err := models.ParseCoordinate(origin)
 	if err != nil {
 		return "", err
 	}
 
 	from := &models.GeoSpatialModel{
-		Latitude:  lat,
-		Longitude: long,
+		Latitude:  originLatitude,
+		Longitude: originLongitude,
 	}
 	distination := &models.GeoSpatialModel{
-		Latitude:  service.Latitude,
-		Longitude: service.Longitude,
+		Latitude:  service.Address.Latitude,
+		Longitude: service.Address.Longitude,
 	}
 
 	polyline, err := s.route.GetPolyline(from, distination)

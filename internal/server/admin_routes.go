@@ -19,7 +19,6 @@ import (
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
 	expertise_repo "nearbyassist/internal/repository/expertise"
 	invitation_repo "nearbyassist/internal/repository/invitation"
-	map_repo "nearbyassist/internal/repository/map"
 	notification_repo "nearbyassist/internal/repository/notification"
 	passwordreset_repo "nearbyassist/internal/repository/password_reset"
 	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
@@ -89,8 +88,7 @@ func (s *Server) AdminRoutes(r *echo.Group) {
 
 		tagService := tag_service.NewService(tagStore)
 
-		mapStore := map_repo.NewMysqlMapRepository(s.DB)
-		mapService := map_service.NewService(mapStore, serviceStore, s.Encrypt)
+		mapService := map_service.NewService(serviceStore, s.Encrypt)
 		mapHandler := map_handler.NewHandler(mapService, tagService)
 
 		mapRoute.GET("", mapHandler.GetMap)

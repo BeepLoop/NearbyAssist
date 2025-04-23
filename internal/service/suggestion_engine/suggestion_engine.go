@@ -1,10 +1,10 @@
 package suggestion_engine
 
 import (
-	"nearbyassist/internal/models"
-	"nearbyassist/internal/response"
+	"nearbyassist/internal/dto"
 )
 
 type Engine interface {
-	GenerateSuggestions(services []*models.GeoSpatialSearchResult) ([]*response.ServiceSearchResult, error)
+	// Returns map with service ID as key and score as value
+	GenerateSuggestions(services []dto.GeospatialOperation) (map[string]float32, error)
 }

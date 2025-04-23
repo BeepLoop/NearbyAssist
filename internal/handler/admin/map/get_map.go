@@ -11,12 +11,11 @@ import (
 )
 
 func (h *mapHandler) GetMap(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
-
-	flash, _, _ := utils.RetrieveFlashMessage(c)
 
 	services := make([]models.ServiceModel, 0)
 	tags := make([]string, 0)
@@ -36,12 +35,12 @@ func (h *mapHandler) GetMap(c echo.Context) error {
 
 		for _, service := range services {
 			pageData.Services = append(pageData.Services, models.ServiceModel{
-				Model:           service.Model,
-				GeoSpatialModel: service.GeoSpatialModel,
-				VendorId:        service.VendorId,
-				Title:           service.Title,
-				Description:     service.Description,
-				Rate:            service.Rate,
+				Model:       service.Model,
+				Address:     service.Address,
+				VendorId:    service.VendorId,
+				Title:       service.Title,
+				Description: service.Description,
+				Rate:        service.Rate,
 			})
 		}
 	}

@@ -143,7 +143,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						Id:          service.Id,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-						Rate:        utils.StringToFloatElseZero(service.Rate),
+						Rate:        utils.StringToFloat64ElseZero(service.Rate),
 						Tags: slices.AppendSeq(
 							make([]string, 0),
 							utils.Map(service.Tags, func(t *models.TagModel) string { return t.Title }),
@@ -168,7 +168,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
-					Cost:   utils.StringToFloatElseZero(booking.Cost),
+					Cost:   utils.StringToFloat64ElseZero(booking.Cost),
 					Status: string(booking.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),
@@ -231,7 +231,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						Id:          service.Id,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-						Rate:        utils.StringToFloatElseZero(service.Rate),
+						Rate:        utils.StringToFloat64ElseZero(service.Rate),
 						Tags: slices.AppendSeq(
 							make([]string, 0),
 							utils.Map(service.Tags, func(t *models.TagModel) string { return t.Title }),
@@ -256,7 +256,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
-					Cost:   utils.StringToFloatElseZero(h.Cost),
+					Cost:   utils.StringToFloat64ElseZero(h.Cost),
 					Status: string(h.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),
@@ -352,13 +352,11 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 		Services: slices.AppendSeq(
 			make([]dto.Service, 0),
 			utils.Map(services, func(service *models.ServiceModel) dto.Service {
-				images, _ := s.serviceStore.GetPhotos(service.Id)
-
 				return dto.Service{
 					Id:          service.Id,
 					Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 					Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-					Rate:        utils.StringToFloatElseZero(service.Rate),
+					Rate:        utils.StringToFloat64ElseZero(service.Rate),
 					Tags: slices.AppendSeq(
 						make([]string, 0),
 						utils.Map(service.Tags, func(t *models.TagModel) string { return t.Title }),
@@ -376,7 +374,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 					),
 					Images: slices.AppendSeq(
 						make([]dto.Image, 0),
-						utils.Map(images, func(img *models.ServicePhotoModel) dto.Image {
+						utils.Map(service.Images, func(img *models.ServicePhotoModel) dto.Image {
 							return dto.Image{Id: img.Id, URL: img.Url}
 						}),
 					),
@@ -430,7 +428,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 						Id:          service.Id,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-						Rate:        utils.StringToFloatElseZero(service.Rate),
+						Rate:        utils.StringToFloat64ElseZero(service.Rate),
 						Tags: slices.AppendSeq(
 							make([]string, 0),
 							utils.Map(service.Tags, func(t *models.TagModel) string { return t.Title }),
@@ -455,7 +453,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
-					Cost:   utils.StringToFloatElseZero(booking.Cost),
+					Cost:   utils.StringToFloat64ElseZero(booking.Cost),
 					Status: string(booking.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),
@@ -520,7 +518,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 						Id:          service.Id,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-						Rate:        utils.StringToFloatElseZero(service.Rate),
+						Rate:        utils.StringToFloat64ElseZero(service.Rate),
 						Tags: slices.AppendSeq(
 							make([]string, 0),
 							utils.Map(service.Tags, func(t *models.TagModel) string { return t.Title }),
@@ -545,7 +543,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
-					Cost:   utils.StringToFloatElseZero(h.Cost),
+					Cost:   utils.StringToFloat64ElseZero(h.Cost),
 					Status: string(h.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),

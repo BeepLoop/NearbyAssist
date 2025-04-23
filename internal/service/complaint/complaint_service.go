@@ -240,7 +240,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 	previousReports := slices.AppendSeq(
 		make([]dto.PreviousReport, 0),
 		utils.Map(
-			slices.Collect(utils.Filter(reportedUserPreviousReports, func(r *models.UserReportModel) bool {
+			slices.Collect(utils.Retain(reportedUserPreviousReports, func(r *models.UserReportModel) bool {
 				return r.Status != models.REPORT_STATUS_PENDING
 			})),
 			func(report *models.UserReportModel) dto.PreviousReport {
@@ -323,7 +323,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				Id:          service.Id,
 				Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 				Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-				Rate:        utils.StringToFloatElseZero(service.Rate),
+				Rate:        utils.StringToFloat64ElseZero(service.Rate),
 				Tags: slices.AppendSeq(
 					make([]string, 0),
 					utils.Map(service.Tags, func(t *models.TagModel) string { return t.Title }),
@@ -348,7 +348,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				CreatedAt: utils.FormatDate(service.CreatedAt),
 				UpdatedAt: utils.FormatDate(service.UpdatedAt),
 			},
-			Cost:   utils.StringToFloatElseZero(res.Cost),
+			Cost:   utils.StringToFloat64ElseZero(res.Cost),
 			Status: string(res.Status),
 			Extras: slices.AppendSeq(
 				make([]dto.Extra, 0),
@@ -405,7 +405,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			ReportsFiled: len(reporterReportsFiled),
 			FalseReports: len(
 				slices.Collect(
-					utils.Filter(reporterReportsFiled, func(r *models.UserReportModel) bool {
+					utils.Retain(reporterReportsFiled, func(r *models.UserReportModel) bool {
 						return r.Status == models.REPORT_STATUS_DISMISSED
 					}),
 				),
@@ -417,21 +417,21 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			Bookings: len(vendorBookings),
 			CompletedBookings: len(
 				slices.Collect(
-					utils.Filter(vendorBookings, func(b *models.BookingModel) bool {
+					utils.Retain(vendorBookings, func(b *models.BookingModel) bool {
 						return b.Status == models.BOOKING_STATUS_DONE
 					}),
 				),
 			),
 			RejectedBookings: len(
 				slices.Collect(
-					utils.Filter(vendorBookings, func(b *models.BookingModel) bool {
+					utils.Retain(vendorBookings, func(b *models.BookingModel) bool {
 						return b.Status == models.BOOKING_STATUS_REJECTED
 					}),
 				),
 			),
 			ActiveBookings: len(
 				slices.Collect(
-					utils.Filter(vendorBookings, func(b *models.BookingModel) bool {
+					utils.Retain(vendorBookings, func(b *models.BookingModel) bool {
 						return b.Status == models.BOOKING_STATUS_CONFIRMED
 					}),
 				),

@@ -1,7 +1,7 @@
 package suggestion_engine
 
 import (
-	"nearbyassist/internal/models"
+	"nearbyassist/internal/dto"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,24 +9,24 @@ import (
 
 func TestWeightedScoring(t *testing.T) {
 	t.Run("Test GetTopScore", func(t *testing.T) {
-		testData := []*models.GeoSpatialSearchResult{
+		testData := []dto.GeospatialOperation{
 			{
-				Rate:              100,
-				Rating:            2.2,
-				Distance:          100,
-				CompletedBookings: 100,
+				Rate:               100,
+				Rating:             2.2,
+				DistanceFromOrigin: 100,
+				CompletedBookings:  100,
 			},
 			{
-				Rate:              100,
-				Rating:            2.3,
-				Distance:          110,
-				CompletedBookings: 100,
+				Rate:               100,
+				Rating:             2.3,
+				DistanceFromOrigin: 110,
+				CompletedBookings:  100,
 			},
 			{
-				Rate:              10,
-				Rating:            2.3,
-				Distance:          99.9,
-				CompletedBookings: 101,
+				Rate:               10,
+				Rating:             2.3,
+				DistanceFromOrigin: 99.9,
+				CompletedBookings:  101,
 			},
 		}
 

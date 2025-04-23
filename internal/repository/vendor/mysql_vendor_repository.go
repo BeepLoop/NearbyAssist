@@ -71,13 +71,13 @@ func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.Vendo
 		vendor.User.Restricted = restricted && !expired
 	}
 
-	if address, err := s.GetAddress(vendor.User.Id); err != nil {
+	if address, err := s.getAddress(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
 		vendor.User.Address = *address
 	}
 
-	if socials, err := s.GetSocials(vendor.User.Id); err != nil {
+	if socials, err := s.getSocials(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
 		vendor.User.Socials = slices.AppendSeq(
@@ -158,13 +158,13 @@ func (s *MysqlVendorRepository) FindById(vendorId string) (*models.VendorModel, 
 		vendor.User.Restricted = restricted && !expired
 	}
 
-	if address, err := s.GetAddress(vendor.User.Id); err != nil {
+	if address, err := s.getAddress(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
 		vendor.User.Address = *address
 	}
 
-	if socials, err := s.GetSocials(vendor.User.Id); err != nil {
+	if socials, err := s.getSocials(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
 		vendor.User.Socials = slices.AppendSeq(
@@ -240,47 +240,38 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
             vendorId,
             title,
             description,
-            format(rate, 2) as rate,
-            latitude, 
-            longitude,
+            FORMAT(rate, 2) AS rate,
             createdAt,
-            updatedAt,
             disabled
         FROM 
             Service
         WHERE
             vendorId = ?
+        ORDER BY
+            createdAt, updatedAt DESC
     `
-
 	services := make([]*models.ServiceModel, 0)
 	if err := s.db.SelectContext(ctx, &services, query, vendorId); err != nil {
 		return nil, err
 	}
 
-	extrasQuery := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN ServiceExtra se ON se.extraId = e.id
-        WHERE
-            se.serviceId = ? AND e.deleted = 0
-    `
-
 	for _, service := range services {
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, extrasQuery, service.Id); err != nil {
+		if extras, err := s.getExtras(service.Id); err != nil {
 			return nil, err
+		} else {
+			service.Extras = extras
 		}
-		service.Extras = extras
 
-		if tags, err := s.GetTags(service.Id); err != nil {
+		if tags, err := s.getTags(service.Id); err != nil {
 			return nil, err
 		} else {
 			service.Tags = tags
+		}
+
+		if images, err := s.getPhotos(service.Id); err != nil {
+			return nil, err
+		} else {
+			service.Images = images
 		}
 	}
 
@@ -291,7 +282,7 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
 	return services, nil
 }
 
-func (s *MysqlVendorRepository) GetTags(serviceId string) ([]*models.TagModel, error) {
+func (s *MysqlVendorRepository) getTags(serviceId string) ([]*models.TagModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -316,6 +307,53 @@ func (s *MysqlVendorRepository) GetTags(serviceId string) ([]*models.TagModel, e
 	}
 
 	return tags, nil
+}
+
+func (s *MysqlVendorRepository) getExtras(serviceId string) ([]*models.ExtraModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	extrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN ServiceExtra se ON se.extraId = e.id
+        WHERE
+            se.serviceId = ? AND e.deleted = 0
+    `
+
+	extras := make([]*models.ExtraModel, 0)
+	if err := s.db.SelectContext(ctx, &extras, extrasQuery, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return extras, nil
+}
+
+func (s *MysqlVendorRepository) getPhotos(serviceId string) ([]*models.ServicePhotoModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT id, serviceId, url, vendorId FROM ServicePhoto WHERE serviceId = ?"
+
+	images := make([]*models.ServicePhotoModel, 0)
+	if err := s.db.SelectContext(ctx, &images, query, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return images, nil
 }
 
 func (s *MysqlVendorRepository) IsVerified(userId string) (bool, string, error) {
@@ -503,7 +541,7 @@ func (s *MysqlVendorRepository) GetBookingsWithStatus(vendorId, status string) (
 	return bookings, nil
 }
 
-func (s *MysqlVendorRepository) GetAddress(userId string) (*models.AddressModel, error) {
+func (s *MysqlVendorRepository) getAddress(userId string) (*models.AddressModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -529,7 +567,7 @@ func (s *MysqlVendorRepository) GetAddress(userId string) (*models.AddressModel,
 	return address, nil
 }
 
-func (s *MysqlVendorRepository) GetSocials(userId string) ([]*models.SocialModel, error) {
+func (s *MysqlVendorRepository) getSocials(userId string) ([]*models.SocialModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -608,4 +646,28 @@ func (s *MysqlVendorRepository) getIdentification(userId string) (*models.Identi
 	}
 
 	return identification, nil
+}
+
+func (s *MysqlVendorRepository) CompletedBookingCountOfService(vendorId, serviceId string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            COUNT(id)
+        FROM
+            Booking
+        WHERE
+            vendorId = ? AND status = 'done' AND serviceId = ?
+    `
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query, vendorId, serviceId); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
 }

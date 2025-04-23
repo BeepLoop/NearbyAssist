@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
-	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -22,7 +21,7 @@ func NewMysqlServiceRepository(db *sqlx.DB) *MysqlServiceRepository {
 	}
 }
 
-func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, error) {
+func (s *MysqlServiceRepository) Create(service *models.ServiceModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -31,41 +30,45 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
 		return "", err
 	}
 
-	data.Id = utils.GenerateId()
-
-	registerService := `
+	createService := `
 	        INSERT INTO
-	            Service
-	                (id, vendorId, title, description, rate, latitude, longitude, signature)
+	            Service (id, vendorId, title, description, rate, signature)
 	        VALUES 
-                (
-                    :id,
-                    :vendorId,
-                    :title,
-                    :description,
-                    :rate,
-                    :latitude,
-                    :longitude,
-                    :signature
-                )
-	    `
-	if _, err := tx.NamedExecContext(ctx, registerService, data); err != nil {
+                (:id, :vendorId, :title, :description, :rate, :signature)
+    `
+	service.Id = utils.GenerateId()
+	if _, err := tx.NamedExecContext(ctx, createService, service); err != nil {
+		return "", err
+	}
+
+	serviceAddressRelation := `
+        INSERT INTO
+            ServiceAddress (serviceId, addressId)
+        SELECT
+            ?, addressId
+        FROM
+            UserAddress
+        WHERE
+            userId = ?
+            
+    `
+	if _, err := tx.ExecContext(ctx, serviceAddressRelation, service.Id, service.VendorId); err != nil {
 		return "", err
 	}
 
 	registerTag := `
         INSERT INTO 
             ServiceTag (id, serviceId, tagId)
-        VALUES
-            (
-                ?,
-                ?,
-                (SELECT id FROM Tag WHERE title = ?)
-            )
+        SELECT
+            ?, ?, t.id
+        FROM
+            Tag t.
+        WHERE
+            t.title = ?
     `
-	for _, tag := range data.TagsAsString {
+	for _, tag := range service.TagsAsString {
 		tagId := utils.GenerateId()
-		if _, err := tx.ExecContext(ctx, registerTag, tagId, data.Id, tag); err != nil {
+		if _, err := tx.ExecContext(ctx, registerTag, tagId, service.Id, tag); err != nil {
 			return "", err
 		}
 	}
@@ -82,13 +85,13 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
         VALUES
             (?, ?)
     `
-	for _, extra := range data.Extras {
+	for _, extra := range service.Extras {
 		extraId := utils.GenerateId()
-		if _, err := tx.ExecContext(ctx, registerExtra, extraId, extra.Title, extra.Description, extra.Price, data.Id); err != nil {
+		if _, err := tx.ExecContext(ctx, registerExtra, extraId, extra.Title, extra.Description, extra.Price, service.Id); err != nil {
 			return "", err
 		}
 
-		if _, err := tx.ExecContext(ctx, registerServiceExtra, data.Id, extraId); err != nil {
+		if _, err := tx.ExecContext(ctx, registerServiceExtra, service.Id, extraId); err != nil {
 			return "", err
 		}
 	}
@@ -101,113 +104,7 @@ func (s *MysqlServiceRepository) Create(data *models.ServiceModel) (string, erro
 		return "", context.DeadlineExceeded
 	}
 
-	return data.Id, nil
-}
-
-func (s *MysqlServiceRepository) FindAll(limit, offset int) ([]*models.ServiceModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := `
-        SELECT
-            id,
-            vendorId,
-            title,
-            description,
-            FORMAT(rate, 2) AS rate,
-            latitude,
-            longitude,
-            createdAt,
-            disabled
-        FROM 
-            Service
-        WHERE
-            disabled = 0
-        ORDER BY
-            createdAt, updatedAt DESC
-        LIMIT ?
-        OFFSET ?
-    `
-
-	services := make([]*models.ServiceModel, 0)
-	if err := s.db.SelectContext(ctx, &services, query, limit, offset); err != nil {
-		return nil, err
-	}
-
-	extrasQuery := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN ServiceExtra se ON se.extraId = e.id
-        WHERE
-            se.serviceId = ? AND e.deleted = 0
-    `
-
-	for _, service := range services {
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, extrasQuery, service.Id); err != nil {
-			return nil, err
-		}
-		service.Extras = extras
-
-		if tags, err := s.GetTags(service.Id); err != nil {
-			return nil, err
-		} else {
-			service.Tags = tags
-		}
-
-		if images, err := s.GetPhotos(service.Id); err != nil {
-			return nil, err
-		} else {
-			service.Images = images
-		}
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return services, nil
-}
-
-func (s *MysqlServiceRepository) FindAllByTag(tag string) ([]*models.ServiceModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	services := make([]*models.ServiceModel, 0)
-
-	query := `
-        SELECT
-            s.id,
-            s.createdAt,
-            s.vendorId,
-            s.title,
-            s.description,
-            FORMAT(s.rate, 2) as rate,
-            s.latitude, 
-            s.longitude,
-            s.disabled
-        FROM 
-            ServiceTag st
-            JOIN Service s ON s.id = st.serviceId
-            JOIN Tag t ON t.id = st.tagId
-        WHERE
-            t.title = ?
-    `
-
-	if err := s.db.SelectContext(ctx, &services, query, tag); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return services, nil
+	return service.Id, nil
 }
 
 func (s *MysqlServiceRepository) FindById(serviceId string) (*models.ServiceModel, error) {
@@ -223,8 +120,6 @@ func (s *MysqlServiceRepository) FindById(serviceId string) (*models.ServiceMode
             title,
             description,
             format(rate, 2) as rate,
-            latitude, 
-            longitude,
             createdAt,
             updatedAt,
             disabled
@@ -237,32 +132,25 @@ func (s *MysqlServiceRepository) FindById(serviceId string) (*models.ServiceMode
 		return nil, err
 	}
 
-	extrasQuery := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN ServiceExtra se ON se.extraId = e.id
-        WHERE
-            se.serviceId = ? AND e.deleted = 0
-    `
-
-	extras := make([]*models.ExtraModel, 0)
-	if err := s.db.SelectContext(ctx, &extras, extrasQuery, serviceId); err != nil {
+	if address, err := s.getAddress(serviceId); err != nil {
 		return nil, err
+	} else {
+		service.Address = *address
 	}
-	service.Extras = extras
 
-	if tags, err := s.GetTags(serviceId); err != nil {
+	if extras, err := s.getExtras(serviceId); err != nil {
+		return nil, err
+	} else {
+		service.Extras = extras
+	}
+
+	if tags, err := s.getTags(serviceId); err != nil {
 		return nil, err
 	} else {
 		service.Tags = tags
 	}
 
-	if images, err := s.GetPhotos(serviceId); err != nil {
+	if images, err := s.getPhotos(serviceId); err != nil {
 		return nil, err
 	} else {
 		service.Images = images
@@ -279,9 +167,14 @@ func (s *MysqlServiceRepository) FindBySignature(signature string) (*models.Serv
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	service := new(models.ServiceModel)
-	query := "SELECT id, vendorId, description, rate, latitude, longitude, disabled FROM Service WHERE signature = ?"
-	if err := s.db.GetContext(ctx, service, query, signature); err != nil {
+	query := "SELECT id FROM Service WHERE signature = ?"
+	var id string
+	if err := s.db.GetContext(ctx, &id, query, signature); err != nil {
+		return nil, err
+	}
+
+	service, err := s.FindById(id)
+	if err != nil {
 		return nil, err
 	}
 
@@ -292,52 +185,134 @@ func (s *MysqlServiceRepository) FindBySignature(signature string) (*models.Serv
 	return service, nil
 }
 
-func (s *MysqlServiceRepository) IsVendor(vendorId string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	isVendor := false
-	query := "SELECT EXISTS (SELECT 1 FROM Vendor WHERE vendorId = ?) AS is_vendor"
-	if err := s.db.GetContext(ctx, &isVendor, query, vendorId); err != nil {
-		return err
-	}
-
-	if !isVendor {
-		return errors.New("vendorId not vendor")
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	return nil
-}
-
-func (s *MysqlServiceRepository) GetTags(serviceId string) ([]*models.TagModel, error) {
+func (s *MysqlServiceRepository) GetAll(limit, offset int) ([]*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         SELECT
-            t.id,
-            t.title
-        FROM
-            ServiceTag st
-            JOIN Tag t ON t.id = st.tagId
+            id
+        FROM 
+            Service
         WHERE
-            st.serviceId = ?;
+            disabled = 0
+        ORDER BY
+            createdAt, updatedAt DESC
+        LIMIT ? OFFSET ?
     `
-
-	tags := make([]*models.TagModel, 0)
-	if err := s.db.SelectContext(ctx, &tags, query, serviceId); err != nil {
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, query, limit, offset); err != nil {
 		return nil, err
+	}
+
+	services := make([]*models.ServiceModel, 0)
+	for _, id := range ids {
+		service, err := s.FindById(id)
+		if err != nil {
+			return nil, err
+		}
+
+		services = append(services, service)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
 
-	return tags, nil
+	return services, nil
+}
+
+func (s *MysqlServiceRepository) GetAllWithTag(tag string) ([]*models.ServiceModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT
+            s.id
+        FROM 
+            ServiceTag st
+            JOIN Service s ON s.id = st.serviceId
+            JOIN Tag t ON t.id = st.tagId
+        WHERE
+            t.title = ? AND s.disabled = 0
+    `
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, query, tag); err != nil {
+		return nil, err
+	}
+
+	services := make([]*models.ServiceModel, 0)
+	for _, id := range ids {
+		service, err := s.FindById(id)
+		if err != nil {
+			return nil, err
+		}
+
+		services = append(services, service)
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return services, nil
+}
+
+func (s *MysqlServiceRepository) FuzzyMatchTags(tags []string) ([]*models.ServiceModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT
+            s.id
+        FROM 
+            ServiceTag st
+            JOIN Service s ON s.id = st.serviceId
+            JOIN Tag t ON t.id = st.tagId
+        WHERE
+            s.disabled = 0
+    `
+	for _, tag := range tags {
+		query += fmt.Sprintf(" AND t.title LIKE '%%%s%%'", tag)
+	}
+
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, query); err != nil {
+		return nil, err
+	}
+
+	services := make([]*models.ServiceModel, 0)
+	for _, id := range ids {
+		service, err := s.FindById(id)
+		if err != nil {
+			return nil, err
+		}
+
+		services = append(services, service)
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return services, nil
+}
+
+func (s *MysqlServiceRepository) IsVendor(vendorId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := "SELECT EXISTS (SELECT 1 FROM Vendor WHERE vendorId = ?) AS is_vendor"
+	isVendor := false
+	if err := s.db.GetContext(ctx, &isVendor, query, vendorId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return isVendor, nil
 }
 
 func (s *MysqlServiceRepository) GetReviews(serviceId string) ([]*models.ReviewModel, error) {
@@ -401,24 +376,6 @@ func (s *MysqlServiceRepository) FindPhotoById(imageId string) (*models.ServiceP
 	}
 
 	return photo, nil
-}
-
-func (s *MysqlServiceRepository) GetPhotos(serviceId string) ([]*models.ServicePhotoModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	query := "SELECT id, serviceId, url, vendorId FROM ServicePhoto WHERE serviceId = ?"
-
-	images := make([]*models.ServicePhotoModel, 0)
-	if err := s.db.SelectContext(ctx, &images, query, serviceId); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return images, nil
 }
 
 func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) error {
@@ -713,38 +670,8 @@ func (s *MysqlServiceRepository) DeleteExtra(extraId string) error {
 		return err
 	}
 
-	bookingsWithThisExtraQuery := `
-        SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.cost
-        FROM
-            BookingExtra te
-            JOIN Booking t ON t.id = te.bookingId
-        WHERE
-            te.extraId = ? AND (t.status = 'pending' OR t.status = 'confirmed')
-    `
-
-	bookingsWithThisExtra := make([]*models.BookingModel, 0)
-	if err := tx.SelectContext(ctx, &bookingsWithThisExtra, bookingsWithThisExtraQuery, extraId); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-
-		return err
-	}
-
-	if len(bookingsWithThisExtra) != 0 {
-		return errors.New("extra_actively_used")
-	}
-
 	markExtraAsDeletedQuery := "UPDATE Extra set deleted = 1 WHERE id = ?"
 	if _, err := tx.ExecContext(ctx, markExtraAsDeletedQuery, extraId); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-
 		return err
 	}
 
@@ -779,128 +706,6 @@ func (s *MysqlServiceRepository) FindExtraById(extraId string) (*models.ExtraMod
 	}
 
 	return extra, nil
-}
-
-func (s *MysqlServiceRepository) Delete(serviceId string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := "DELETE FROM Service WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, serviceId); err != nil {
-		return err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	return nil
-}
-
-func (s *MysqlServiceRepository) GetAllByVendorId(vendorId string) ([]*models.ServiceModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := `
-        SELECT
-            vendorId,
-            description,
-            rate,
-            latitude,
-            longitude,
-            disabled
-        FROM 
-            Service
-        WHERE
-            vendorId = ?
-    `
-
-	services := make([]*models.ServiceModel, 0)
-	if err := s.db.SelectContext(ctx, &services, query, vendorId); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return services, nil
-}
-
-func (s *MysqlServiceRepository) GeoSpatialSearch(params map[string]string) ([]*models.GeoSpatialSearchResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	query := `
-        SELECT 
-            s.id,
-            s.vendorId,
-            u.name AS vendorName,
-            format(s.rate, 2) AS rate,
-            s.latitude,
-            s.longitude,
-            (
-                SELECT v.rating
-                FROM Vendor v
-                WHERE v.vendorId = s.vendorId
-            ) AS rating,
-            (
-                SELECT COUNT(id)
-                FROM Booking t
-                WHERE t.vendorId = s.vendorId AND t.status = 'done' AND t.serviceId = s.id
-            ) AS bookings
-        FROM 
-            ServiceTag st
-            JOIN Service s ON s.id = st.serviceId
-            JOIN User u ON u.id = s.vendorId
-            JOIN Tag t ON t.id = st.tagId
-        WHERE
-            s.disabled = 0 AND
-    `
-
-	if q, ok := params["q"]; ok {
-		condition := ""
-		tags := strings.Split(q, ",")
-		for i, tag := range tags {
-			cleaned := strings.ReplaceAll(tag, "_", " ")
-			if i == 0 {
-				condition += fmt.Sprintf(" t.title LIKE '%%%s%%'", cleaned)
-			} else {
-				condition += fmt.Sprintf(" OR t.title LIKE '%%%s%%'", cleaned)
-			}
-		}
-
-		query += condition
-	} else {
-		return nil, fmt.Errorf("Missing query parameter 'q'")
-	}
-
-	if l, ok := params["l"]; ok {
-		location := strings.Split(l, ",")
-		if len(location) != 2 {
-			return nil, fmt.Errorf("Malformed location parameter 'l'")
-		}
-		condition := fmt.Sprintf(" AND ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(%v, %v))", location[1], location[0])
-		query += condition
-	} else {
-		return nil, fmt.Errorf("Missing location parameter 'l'")
-	}
-
-	if r, ok := params["r"]; ok {
-		query += fmt.Sprintf(" < %v", r)
-	}
-
-	services := make([]*models.GeoSpatialSearchResult, 0)
-	err := s.db.SelectContext(ctx, &services, query)
-	if err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return services, nil
 }
 
 func (s *MysqlServiceRepository) IsVendorRestricted(serviceId string) (bool, error) {
@@ -985,4 +790,133 @@ func (s *MysqlServiceRepository) Enable(serviceId string) error {
 	}
 
 	return nil
+}
+
+func (s *MysqlServiceRepository) HasActiveBookingWithThisExtra(extraId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT EXISTS
+            (
+                SELECT
+                    1
+                FROM
+                    BookingExtra be
+                    JOIN Booking b ON b.id = be.bookingId
+                WHERE
+                    be.extraId = ? AND (b.status = 'pending' OR b.status = 'confirmed')
+            )
+        AS has_booking
+    `
+
+	hasBooking := false
+	if err := s.db.GetContext(ctx, &hasBooking, query, extraId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return hasBooking, nil
+}
+
+func (s *MysqlServiceRepository) getTags(serviceId string) ([]*models.TagModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT
+            t.id,
+            t.title
+        FROM
+            ServiceTag st
+            JOIN Tag t ON t.id = st.tagId
+        WHERE
+            st.serviceId = ?;
+    `
+
+	tags := make([]*models.TagModel, 0)
+	if err := s.db.SelectContext(ctx, &tags, query, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return tags, nil
+}
+
+func (s *MysqlServiceRepository) getPhotos(serviceId string) ([]*models.ServicePhotoModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT id, serviceId, url, vendorId FROM ServicePhoto WHERE serviceId = ?"
+
+	images := make([]*models.ServicePhotoModel, 0)
+	if err := s.db.SelectContext(ctx, &images, query, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return images, nil
+}
+
+func (s *MysqlServiceRepository) getAddress(serviceId string) (*models.AddressModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            a.id, a.address, a.latitude, a.longitude
+        FROM
+            Address a
+            JOIN ServiceAddress sa ON sa.addressId = a.id
+        WHERE
+            sa.serviceId = ?
+    `
+	address := new(models.AddressModel)
+	if err := s.db.GetContext(ctx, address, query, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return address, nil
+}
+
+func (s *MysqlServiceRepository) getExtras(serviceId string) ([]*models.ExtraModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	extrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN ServiceExtra se ON se.extraId = e.id
+        WHERE
+            se.serviceId = ? AND e.deleted = 0
+    `
+
+	extras := make([]*models.ExtraModel, 0)
+	if err := s.db.SelectContext(ctx, &extras, extrasQuery, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return extras, nil
 }

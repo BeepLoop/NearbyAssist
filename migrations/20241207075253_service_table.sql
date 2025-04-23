@@ -5,8 +5,6 @@ CREATE TABLE IF NOT EXISTS Service (
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     rate Double NOT NULL,
-    latitude Decimal(12, 10) NOT NULL,
-    longitude Decimal(13, 10) NOT NULL,
     signature VARCHAR(64) NOT NULL,
     disabled BOOLEAN DEFAULT FALSE,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

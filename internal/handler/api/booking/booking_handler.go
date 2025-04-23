@@ -226,8 +226,22 @@ func (h *bookingHandler) Cancel(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.bookingService.CancelBooking(bearerToken, req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Error cancellation request",
+		if strings.Contains(err.Error(), booking_service.ERR_DISALLOWED_ACTION) {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "Action performed is not allowed",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), booking_service.ERR_UNAUTHORIZED) {
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+				Message: "You are not authorized to performed this action",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Cancellation request error",
 			Error:   err.Error(),
 		})
 	}
@@ -247,7 +261,21 @@ func (h *bookingHandler) Accept(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.bookingService.AcceptBookingRequest(bearerToken, req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+		if strings.Contains(err.Error(), booking_service.ERR_DISALLOWED_ACTION) {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "Action performed is not allowed",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), booking_service.ERR_UNAUTHORIZED) {
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+				Message: "You are not authorized to performed this action",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error accepting booking request",
 			Error:   err.Error(),
 		})
@@ -267,7 +295,21 @@ func (h *bookingHandler) Reject(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 	if err := h.bookingService.RejectBookingRequest(bearerToken, req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+		if strings.Contains(err.Error(), booking_service.ERR_DISALLOWED_ACTION) {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "Action performed is not allowed",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), booking_service.ERR_UNAUTHORIZED) {
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+				Message: "You are not authorized to performed this action",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error rejecting booking request",
 			Error:   err.Error(),
 		})
@@ -655,15 +697,15 @@ func (h *bookingHandler) CompleteBooking(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
 	if err := h.bookingService.CompleteBooking(bearerToken, bookingId); err != nil {
-		if strings.Contains(err.Error(), "unauthorized") {
+		if strings.Contains(err.Error(), booking_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
-				Message: "You are not authorized to complete this booking",
+				Message: "You are not authorized to perform this action",
 				Error:   err.Error(),
 			})
 		}
 
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error marking booking as complete",
+			Message: "Error completing this booking",
 			Error:   err.Error(),
 		})
 	}

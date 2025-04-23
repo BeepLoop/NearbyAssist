@@ -133,8 +133,8 @@ func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServ
 					}),
 				),
 				Location: response.Location{
-					Latitude:  service.Latitude,
-					Longitude: service.Longitude,
+					Latitude:  service.Address.Latitude,
+					Longitude: service.Address.Longitude,
 				},
 				Disabled: service.Disabled,
 			},

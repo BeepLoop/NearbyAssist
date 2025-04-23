@@ -86,9 +86,9 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
             t.status,
             t.cost,
             t.createdAt,
+            t.updatedAt,
             t.scheduledAt,
             t.cancelReason,
-            t.updatedAt,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -101,7 +101,7 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
 
 	booking := new(models.BookingModel)
 	if err := s.db.GetContext(ctx, booking, bookingQuery, id); err != nil {
-		fmt.Println("error get booking: ", err.Error())
+		fmt.Println("error get booking by id: ", err.Error())
 		return nil, err
 	}
 
@@ -111,34 +111,17 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
 		booking.IsReviewed = isReviewed
 	}
 
-	serviceQuery := "SELECT * FROM Service WHERE id = ?"
-
-	service := new(models.ServiceModel)
-	if err := s.db.GetContext(ctx, service, serviceQuery, booking.ServiceId); err != nil {
-		fmt.Println("error get service: ", err.Error())
+	if service, err := s.getService(booking.ServiceId); err != nil {
 		return nil, err
+	} else {
+		booking.Service = service
 	}
-	booking.Service = service
 
-	extrasQuery := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            BookingExtra te
-            JOIN Extra e ON e.id = te.extraId
-        WHERE
-            te.bookingId = ?
-    `
-
-	extras := make([]*models.ExtraModel, 0)
-	if err := s.db.SelectContext(ctx, &extras, extrasQuery, booking.Id); err != nil {
-		fmt.Println("error get extra: ", err.Error())
+	if extras, err := s.getBookingExtras(booking.Id); err != nil {
 		return nil, err
+	} else {
+		booking.Extras = extras
 	}
-	booking.Extras = extras
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
@@ -147,14 +130,14 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
 	return booking, nil
 }
 
-func (s *MysqlBookingRepository) GetAll() ([]*models.BookingModel, error) {
+func (s *MysqlBookingRepository) GetAll(limit, offset int) ([]*models.BookingModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	bookings := make([]*models.BookingModel, 0)
+	query := "SELECT * FROM Booking ORDER BY createdAt, updatedAt DESC LIMIT ? OFFSET ?"
 
-	query := "SELECT * FROM Booking"
-	if err := s.db.SelectContext(ctx, &bookings, query); err != nil {
+	bookings := make([]*models.BookingModel, 0)
+	if err := s.db.SelectContext(ctx, &bookings, query, limit, offset); err != nil {
 		return nil, err
 	}
 
@@ -203,16 +186,26 @@ func (s *MysqlBookingRepository) GetConfirmedBookingsOfVendor(vendorId string) (
 
 	query := `
         SELECT
-            *
+            id
         FROM
             Booking
         WHERE
             vendorId = ? AND status = 'confirmed'
     `
 
-	bookings := make([]*models.BookingModel, 0)
-	if err := s.db.SelectContext(ctx, &bookings, query, vendorId); err != nil {
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, query, vendorId); err != nil {
 		return nil, err
+	}
+
+	bookings := make([]*models.BookingModel, 0)
+	for _, id := range ids {
+		booking, err := s.FindById(id)
+		if err != nil {
+			return nil, err
+		}
+
+		bookings = append(bookings, booking)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -226,7 +219,7 @@ func (s *MysqlBookingRepository) GetBookingSent(id string) ([]*models.BookingMod
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	bookingQuery := `
+	query := `
         SELECT
             t.id,
             t.vendorId,
@@ -248,59 +241,19 @@ func (s *MysqlBookingRepository) GetBookingSent(id string) ([]*models.BookingMod
         ORDER BY
             t.updatedAt DESC
     `
-
-	bookings := make([]*models.BookingModel, 0)
-	if err := s.db.SelectContext(ctx, &bookings, bookingQuery, id); err != nil {
+	sent := make([]*models.BookingModel, 0)
+	if err := s.db.SelectContext(ctx, &sent, query, id); err != nil {
 		return nil, err
 	}
 
-	getService := `
-        SELECT
-            s.id,
-            s.vendorId,
-            s.title,
-            s.description,
-            s.rate,
-            s.latitude,
-            s.longitude
-        FROM
-            Service s
-            JOIN Booking t ON s.id = t.serviceId
-        WHERE
-            t.id = ?
-    `
-
-	getExtras := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN BookingExtra te ON e.id = te.extraId
-        WHERE
-            te.bookingId = ?
-    `
-
-	for _, booking := range bookings {
-		if isReviewed, err := s.IsReviewed(booking.Id); err != nil {
-			return nil, err
-		} else {
-			booking.IsReviewed = isReviewed
-		}
-
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, getExtras, booking.Id); err != nil {
+	bookings := make([]*models.BookingModel, 0)
+	for _, b := range sent {
+		booking, err := s.FindById(b.Id)
+		if err != nil {
 			return nil, err
 		}
-		booking.Extras = extras
 
-		service := new(models.ServiceModel)
-		if err := s.db.GetContext(ctx, service, getService, booking.Id); err != nil {
-			return nil, err
-		}
-		booking.Service = service
+		bookings = append(bookings, booking)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -336,59 +289,19 @@ func (s *MysqlBookingRepository) GetBookingReceived(id string) ([]*models.Bookin
         ORDER BY
             t.updatedAt DESC
     `
-
-	bookings := make([]*models.BookingModel, 0)
-	if err := s.db.SelectContext(ctx, &bookings, bookingQuery, id); err != nil {
+	received := make([]*models.BookingModel, 0)
+	if err := s.db.SelectContext(ctx, &received, bookingQuery, id); err != nil {
 		return nil, err
 	}
 
-	getService := `
-        SELECT
-            s.id,
-            s.vendorId,
-            s.title,
-            s.description,
-            s.rate,
-            s.latitude,
-            s.longitude
-        FROM
-            Service s
-            JOIN Booking t ON s.id = t.serviceId
-        WHERE
-            t.id = ?
-    `
-
-	getExtras := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN BookingExtra te ON e.id = te.extraId
-        WHERE
-            te.bookingId = ?
-    `
-
-	for _, booking := range bookings {
-		if isReviewed, err := s.IsReviewed(booking.Id); err != nil {
-			return nil, err
-		} else {
-			booking.IsReviewed = isReviewed
-		}
-
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, getExtras, booking.Id); err != nil {
+	bookings := make([]*models.BookingModel, 0)
+	for _, b := range received {
+		booking, err := s.FindById(b.Id)
+		if err != nil {
 			return nil, err
 		}
-		booking.Extras = extras
 
-		service := new(models.ServiceModel)
-		if err := s.db.GetContext(ctx, service, getService, booking.Id); err != nil {
-			return nil, err
-		}
-		booking.Service = service
+		bookings = append(bookings, booking)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -423,59 +336,19 @@ func (s *MysqlBookingRepository) GetRecent(userId string) ([]*models.BookingMode
         LIMIT
             10
     `
-
-	bookings := make([]*models.BookingModel, 0)
-	if err := s.db.SelectContext(ctx, &bookings, bookingQuery, userId, userId); err != nil {
+	recents := make([]*models.BookingModel, 0)
+	if err := s.db.SelectContext(ctx, &recents, bookingQuery, userId, userId); err != nil {
 		return nil, err
 	}
 
-	getService := `
-        SELECT
-            s.id,
-            s.vendorId,
-            s.title,
-            s.description,
-            s.rate,
-            s.latitude,
-            s.longitude
-        FROM
-            Service s
-            JOIN Booking t ON s.id = t.serviceId
-        WHERE
-            t.id = ?
-    `
-
-	getExtras := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN BookingExtra te ON e.id = te.extraId
-        WHERE
-            te.bookingId = ?
-    `
-
-	for _, booking := range bookings {
-		if isReviewed, err := s.IsReviewed(booking.Id); err != nil {
-			return nil, err
-		} else {
-			booking.IsReviewed = isReviewed
-		}
-
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, getExtras, booking.Id); err != nil {
+	bookings := make([]*models.BookingModel, 0)
+	for _, b := range recents {
+		booking, err := s.FindById(b.Id)
+		if err != nil {
 			return nil, err
 		}
-		booking.Extras = extras
 
-		service := new(models.ServiceModel)
-		if err := s.db.GetContext(ctx, service, getService, booking.Id); err != nil {
-			return nil, err
-		}
-		booking.Service = service
+		bookings = append(bookings, booking)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -540,67 +413,28 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
             t.updatedAt DESC
     `
 
-	bookings := make([]*models.BookingModel, 0)
+	confirmedBookings := make([]*models.BookingModel, 0)
 	switch filter {
 	case "vendor":
-		err := s.db.SelectContext(ctx, &bookings, queryForVendor, id)
+		err := s.db.SelectContext(ctx, &confirmedBookings, queryForVendor, id)
 		if err != nil {
 			return nil, err
 		}
 	case "client":
-		err := s.db.SelectContext(ctx, &bookings, queryForClient, id)
+		err := s.db.SelectContext(ctx, &confirmedBookings, queryForClient, id)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	getService := `
-        SELECT
-            s.id,
-            s.vendorId,
-            s.title,
-            s.description,
-            s.rate,
-            s.latitude,
-            s.longitude
-        FROM
-            Service s
-            JOIN Booking t ON s.id = t.serviceId
-        WHERE
-            t.id = ?
-    `
-
-	getExtras := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN BookingExtra te ON e.id = te.extraId
-        WHERE
-            te.bookingId = ?
-    `
-
-	for _, booking := range bookings {
-		if isReviewed, err := s.IsReviewed(booking.Id); err != nil {
-			return nil, err
-		} else {
-			booking.IsReviewed = isReviewed
-		}
-
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, getExtras, booking.Id); err != nil {
+	bookings := make([]*models.BookingModel, 0)
+	for _, b := range confirmedBookings {
+		booking, err := s.FindById(b.Id)
+		if err != nil {
 			return nil, err
 		}
-		booking.Extras = extras
 
-		service := new(models.ServiceModel)
-		if err := s.db.GetContext(ctx, service, getService, booking.Id); err != nil {
-			return nil, err
-		}
-		booking.Service = service
+		bookings = append(bookings, booking)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -667,67 +501,28 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.updatedAt DESC
     `
 
-	bookings := make([]*models.BookingModel, 0)
+	history := make([]*models.BookingModel, 0)
 	switch filter {
 	case "vendor":
-		err := s.db.SelectContext(ctx, &bookings, queryForVendor, id)
+		err := s.db.SelectContext(ctx, &history, queryForVendor, id)
 		if err != nil {
 			return nil, err
 		}
 	case "client":
-		err := s.db.SelectContext(ctx, &bookings, queryForClient, id)
+		err := s.db.SelectContext(ctx, &history, queryForClient, id)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	getService := `
-        SELECT
-            s.id,
-            s.vendorId,
-            s.title,
-            s.description,
-            s.rate,
-            s.latitude,
-            s.longitude
-        FROM
-            Service s
-            JOIN Booking t ON s.id = t.serviceId
-        WHERE
-            t.id = ?
-    `
-
-	getExtras := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN BookingExtra te ON e.id = te.extraId
-        WHERE
-            te.bookingId = ?
-    `
-
-	for _, booking := range bookings {
-		if isReviewed, err := s.IsReviewed(booking.Id); err != nil {
-			return nil, err
-		} else {
-			booking.IsReviewed = isReviewed
-		}
-
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, getExtras, booking.Id); err != nil {
+	bookings := make([]*models.BookingModel, 0)
+	for _, b := range history {
+		booking, err := s.FindById(b.Id)
+		if err != nil {
 			return nil, err
 		}
-		booking.Extras = extras
 
-		service := new(models.ServiceModel)
-		if err := s.db.GetContext(ctx, service, getService, booking.Id); err != nil {
-			return nil, err
-		}
-		booking.Service = service
+		bookings = append(bookings, booking)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -766,59 +561,20 @@ func (s *MysqlBookingRepository) GetReviewableBookings(userId string) ([]*models
             t.updatedAt DESC
     `
 
-	bookings := make([]*models.BookingModel, 0)
-	err := s.db.SelectContext(ctx, &bookings, bookingQuery, userId)
+	reviewables := make([]*models.BookingModel, 0)
+	err := s.db.SelectContext(ctx, &reviewables, bookingQuery, userId)
 	if err != nil {
 		return nil, err
 	}
 
-	getService := `
-        SELECT
-            s.id,
-            s.vendorId,
-            s.title,
-            s.description,
-            s.rate,
-            s.latitude,
-            s.longitude
-        FROM
-            Service s
-            JOIN Booking t ON s.id = t.serviceId
-        WHERE
-            t.id = ?
-    `
-
-	getExtras := `
-        SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
-        FROM 
-            Extra e
-            JOIN BookingExtra te ON e.id = te.extraId
-        WHERE
-            te.bookingId = ?
-    `
-
-	for _, booking := range bookings {
-		if isReviewed, err := s.IsReviewed(booking.Id); err != nil {
-			return nil, err
-		} else {
-			booking.IsReviewed = isReviewed
-		}
-
-		extras := make([]*models.ExtraModel, 0)
-		if err := s.db.SelectContext(ctx, &extras, getExtras, booking.Id); err != nil {
+	bookings := make([]*models.BookingModel, 0)
+	for _, b := range reviewables {
+		booking, err := s.FindById(b.Id)
+		if err != nil {
 			return nil, err
 		}
-		booking.Extras = extras
 
-		service := new(models.ServiceModel)
-		if err := s.db.GetContext(ctx, service, getService, booking.Id); err != nil {
-			return nil, err
-		}
-		booking.Service = service
+		bookings = append(bookings, booking)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -936,4 +692,187 @@ func (s *MysqlBookingRepository) IsReviewed(bookingId string) (bool, error) {
 	}
 
 	return isReviewed, nil
+}
+
+func (s *MysqlBookingRepository) getBookingExtras(bookingId string) ([]*models.ExtraModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	extrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            BookingExtra te
+            JOIN Extra e ON e.id = te.extraId
+        WHERE
+            te.bookingId = ?
+    `
+	extras := make([]*models.ExtraModel, 0)
+	if err := s.db.SelectContext(ctx, &extras, extrasQuery, bookingId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return extras, nil
+}
+
+func (s *MysqlBookingRepository) getService(serviceId string) (*models.ServiceModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	service := new(models.ServiceModel)
+
+	query := `
+        SELECT
+            id,
+            vendorId,
+            title,
+            description,
+            format(rate, 2) as rate,
+            createdAt,
+            updatedAt,
+            disabled
+        FROM 
+            Service
+        WHERE
+            id = ?
+    `
+	if err := s.db.GetContext(ctx, service, query, serviceId); err != nil {
+		return nil, err
+	}
+
+	if address, err := s.getAddress(serviceId); err != nil {
+		return nil, err
+	} else {
+		service.Address = *address
+	}
+
+	if extras, err := s.getExtras(serviceId); err != nil {
+		return nil, err
+	} else {
+		service.Extras = extras
+	}
+
+	if tags, err := s.getTags(serviceId); err != nil {
+		return nil, err
+	} else {
+		service.Tags = tags
+	}
+
+	if images, err := s.getPhotos(serviceId); err != nil {
+		return nil, err
+	} else {
+		service.Images = images
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return service, nil
+}
+
+func (s *MysqlBookingRepository) getTags(serviceId string) ([]*models.TagModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	query := `
+        SELECT
+            t.id,
+            t.title
+        FROM
+            ServiceTag st
+            JOIN Tag t ON t.id = st.tagId
+        WHERE
+            st.serviceId = ?;
+    `
+
+	tags := make([]*models.TagModel, 0)
+	if err := s.db.SelectContext(ctx, &tags, query, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return tags, nil
+}
+
+func (s *MysqlBookingRepository) getPhotos(serviceId string) ([]*models.ServicePhotoModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT id, serviceId, url, vendorId FROM ServicePhoto WHERE serviceId = ?"
+
+	images := make([]*models.ServicePhotoModel, 0)
+	if err := s.db.SelectContext(ctx, &images, query, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return images, nil
+}
+
+func (s *MysqlBookingRepository) getAddress(serviceId string) (*models.AddressModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            a.id, a.address, a.latitude, a.longitude
+        FROM
+            Address a
+            JOIN ServiceAddress sa ON sa.addressId = a.id
+        WHERE
+            sa.serviceId = ?
+    `
+	address := new(models.AddressModel)
+	if err := s.db.GetContext(ctx, address, query, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return address, nil
+}
+
+func (s *MysqlBookingRepository) getExtras(serviceId string) ([]*models.ExtraModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	extrasQuery := `
+        SELECT
+            e.id,
+            e.title,
+            e.description,
+            e.price
+        FROM 
+            Extra e
+            JOIN ServiceExtra se ON se.extraId = e.id
+        WHERE
+            se.serviceId = ? AND e.deleted = 0
+    `
+
+	extras := make([]*models.ExtraModel, 0)
+	if err := s.db.SelectContext(ctx, &extras, extrasQuery, serviceId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return extras, nil
 }
