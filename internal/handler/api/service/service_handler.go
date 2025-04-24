@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
@@ -67,8 +68,14 @@ func (h *serviceHandler) CreateService(c echo.Context) error {
 		})
 	}
 
+	service, err := h.service_service.GetService(serviceId)
+	if err != nil {
+		// This should NOT happen
+		fmt.Println("Error get service after creating: ", err.Error())
+	}
+
 	return c.JSON(http.StatusCreated, utils.Mapper{
-		"service": serviceId,
+		"service": service,
 	})
 }
 
