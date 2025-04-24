@@ -62,7 +62,7 @@ func (s *MysqlServiceRepository) Create(service *models.ServiceModel) (string, e
         SELECT
             ?, ?, t.id
         FROM
-            Tag t.
+            Tag t
         WHERE
             t.title = ?
     `
