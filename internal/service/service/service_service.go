@@ -18,7 +18,6 @@ import (
 	"nearbyassist/internal/utils"
 	"slices"
 	"strings"
-	"sync"
 )
 
 const (
@@ -511,48 +510,18 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 	}
 
 	// Compute distance from origin to each service
-	distanceChan := make(chan dto.DistanceCalculationResult)
-	var wg sync.WaitGroup
-
+	suggestionOpsInput := make([]dto.GeospatialOperation, 0)
 	for _, service := range validServices {
 		destination := &models.GeoSpatialModel{
 			Latitude:  service.Address.Latitude,
 			Longitude: service.Address.Longitude,
 		}
 
-		go func(ch chan<- dto.DistanceCalculationResult, wg *sync.WaitGroup) {
-			defer wg.Done()
-
-			if distance, err := s.route.GetDistance(origin, destination); err != nil {
-				ch <- dto.DistanceCalculationResult{
-					ServiceID: service.Id,
-					Distance:  math.MaxFloat32,
-				}
-			} else {
-				ch <- dto.DistanceCalculationResult{
-					ServiceID: service.Id,
-					Distance:  distance,
-				}
-			}
-		}(distanceChan, &wg)
-	}
-
-	go func() {
-		wg.Wait()
-		close(distanceChan)
-	}()
-
-	suggestionOpsInput := make([]dto.GeospatialOperation, 0)
-	for item := range distanceChan {
-		index := slices.IndexFunc(validServices, func(service *models.ServiceModel) bool {
-			return service.Id == item.ServiceID
-		})
-		if index == -1 {
-			// Should never happen, skip if it happens
-			continue
+		distance, err := s.route.GetDistance(origin, destination)
+		if err != nil {
+			distance = math.MaxFloat32
 		}
 
-		service := validServices[index]
 		completedBookings, err := s.vendorStore.CompletedBookingCountOfService(service.VendorId, service.Id)
 		if err != nil {
 			// If error, skip this service
@@ -560,13 +529,13 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		}
 
 		suggestionOpsInput = append(suggestionOpsInput, dto.GeospatialOperation{
-			Id:                 item.ServiceID,
+			Id:                 service.Id,
 			Rate:               utils.StringToFloat32ElseZero(service.Rate),
 			Rating:             utils.StringToFloat32ElseZero(service.Vendor.Rating),
 			Latitude:           float32(service.Vendor.User.Address.Latitude),
 			Longitude:          float32(service.Vendor.User.Address.Longitude),
 			CompletedBookings:  float32(completedBookings),
-			DistanceFromOrigin: item.Distance,
+			DistanceFromOrigin: distance,
 		})
 	}
 

@@ -9,8 +9,3 @@ type GeospatialOperation struct {
 	CompletedBookings  float32
 	DistanceFromOrigin float32
 }
-
-type DistanceCalculationResult struct {
-	ServiceID string
-	Distance  float32
-}
