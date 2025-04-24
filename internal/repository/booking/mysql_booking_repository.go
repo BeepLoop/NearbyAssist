@@ -35,7 +35,7 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
 
 	query := `
         INSERT INTO
-            Booking (id, vendorId, clientId, serviceId, cost)
+            Booking (id, vendorId, clientId, serviceId, FORMAT(cost, 2) AS cost)
         VALUES
             (:id, :vendorId, :clientId, :serviceId, :cost)
     `
@@ -84,7 +84,7 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
             t.scheduledAt,
@@ -226,7 +226,7 @@ func (s *MysqlBookingRepository) GetBookingSent(id string) ([]*models.BookingMod
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
             t.scheduledAt,
@@ -274,7 +274,7 @@ func (s *MysqlBookingRepository) GetBookingReceived(id string) ([]*models.Bookin
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
             t.scheduledAt,
@@ -322,7 +322,7 @@ func (s *MysqlBookingRepository) GetRecent(userId string) ([]*models.BookingMode
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -374,7 +374,7 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
             t.scheduledAt,
@@ -397,7 +397,7 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
             t.scheduledAt,
@@ -460,7 +460,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
             t.scheduledAt,
@@ -484,7 +484,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
             t.scheduledAt,
@@ -543,7 +543,7 @@ func (s *MysqlBookingRepository) GetReviewableBookings(userId string) ([]*models
             t.clientId,
             t.serviceId,
             t.status,
-            t.cost,
+            FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
             t.scheduledAt,
@@ -670,6 +670,29 @@ func (s *MysqlBookingRepository) MarkComplete(bookingId string) error {
 	return nil
 }
 
+func (s *MysqlBookingRepository) Reschedule(bookingId, schedule string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        UPDATE
+            Booking
+        SET
+            scheduledAt = ?
+        WHERE
+            id = ?
+    `
+	if _, err := s.db.ExecContext(ctx, query, schedule, bookingId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlBookingRepository) IsReviewed(bookingId string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -734,7 +757,7 @@ func (s *MysqlBookingRepository) getService(serviceId string) (*models.ServiceMo
             vendorId,
             title,
             description,
-            format(rate, 2) as rate,
+            FORMAT(rate, 2) AS rate,
             createdAt,
             updatedAt,
             disabled

@@ -712,3 +712,44 @@ func (h *bookingHandler) CompleteBooking(c echo.Context) error {
 
 	return c.JSON(http.StatusNoContent, nil)
 }
+
+func (h *bookingHandler) Reschedule(c echo.Context) error {
+	req := new(request.RescheduleBookingPayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	bearerToken := utils.BearerTokenFromHeader(c)
+	if err := h.bookingService.Reschedule(bearerToken, req); err != nil {
+		if strings.Contains(err.Error(), booking_service.ERR_UNAUTHORIZED) {
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+				Message: "You are not authorized to perform this action",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), booking_service.ERR_SCHEDULE_OVERLAP) {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "Provided schedule has conflict/overlap with existing schedule",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error rescheduling this booking",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}

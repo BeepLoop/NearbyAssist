@@ -20,6 +20,7 @@ const (
 	ERR_HAS_PENDING_OR_CONFIRMED = "already have pending or confirmed booking for service"
 	ERR_DISALLOWED_ACTION        = "invalid action performed"
 	ERR_UNAUTHORIZED             = "unauthorized"
+	ERR_SCHEDULE_OVERLAP         = "schedule overlap"
 )
 
 type Service struct {
@@ -527,6 +528,81 @@ func (s *Service) CompleteBooking(bearerToken, bookingId string) error {
 	if err := s.bookingStore.MarkComplete(bookingId); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (s *Service) Reschedule(bearerToken string, req *request.RescheduleBookingPayload) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	booking, err := s.bookingStore.FindById(req.BookingId)
+	if err != nil {
+		return err
+	}
+
+	if booking.VendorId != userId {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
+	if booking.Status == models.BOOKING_STATUS_DONE || booking.Status == models.BOOKING_STATUS_CANCELLED {
+		return errors.New(ERR_DISALLOWED_ACTION)
+	}
+
+	confirmedBookings, err := s.bookingStore.GetConfirmedBookingsOfVendor(userId)
+	if err != nil {
+		return err
+	}
+	if utils.HasScheduleOverlap(req.Schedule, confirmedBookings) {
+		return errors.New(ERR_SCHEDULE_OVERLAP)
+	}
+
+	schedule := utils.FormatDate(req.Schedule)
+	if err := s.bookingStore.Reschedule(req.BookingId, schedule); err != nil {
+		return err
+	}
+
+	notificationHeading := "Booking rescheduled"
+	notificationContent := "Your booking has been rescheduled"
+
+	notification := &models.NotificationModel{
+		Recipient: booking.VendorId,
+		Type:      "generic",
+		Title:     "Booking has been rescheduled",
+		Content: fmt.Sprintf(
+			"Your booking with the vendor: %s, has been rescheduled to %s",
+			utils.Must(s.encrypt.DecryptString(booking.Vendor)),
+			schedule,
+		),
+	}
+
+	encryptedNotification := &models.NotificationModel{
+		Recipient: booking.VendorId,
+		Type:      "generic",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
+	}
+
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
+		return err
+	} else {
+		notification.Id = notifId
+	}
+
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(booking.ClientId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: booking.ClientId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(notifEvent)
 
 	return nil
 }

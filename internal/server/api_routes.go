@@ -258,6 +258,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		bookingRoute.GET("/toReview", handler.GetReviewableBookings)
 		bookingRoute.GET("/history", handler.GetBookingHistory)
 		bookingRoute.POST("/complete/:bookingId", handler.CompleteBooking)
+		bookingRoute.PUT("/reschedule", handler.Reschedule)
 	}
 
 	// ===== APPLICATION =======

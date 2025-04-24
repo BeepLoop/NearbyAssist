@@ -25,6 +25,7 @@ type BookingRepository interface {
 	Accept(bookingId, schedule string) error
 	Reject(bookingId, reason string) error
 	MarkComplete(bookingId string) error
+	Reschedule(bookingId, schedule string) error
 
 	IsReviewed(bookingId string) (bool, error)
 }

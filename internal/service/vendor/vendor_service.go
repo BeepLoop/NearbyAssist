@@ -177,6 +177,8 @@ func (s *Service) GetVendorServicesList(vendorId string) ([]*models.ServiceModel
 			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
 			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
 		}
+
+		service.Address.Address = utils.Must(s.encrypt.DecryptString(service.Address.Address))
 	}
 
 	return services, nil

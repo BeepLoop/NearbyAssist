@@ -273,6 +273,12 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
 		} else {
 			service.Images = images
 		}
+
+		if address, err := s.getAddress(service.VendorId); err != nil {
+			return nil, err
+		} else {
+			service.Address = *address
+		}
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
