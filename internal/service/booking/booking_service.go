@@ -568,7 +568,7 @@ func (s *Service) Reschedule(bearerToken string, req *request.RescheduleBookingP
 	notificationContent := "Your booking has been rescheduled"
 
 	notification := &models.NotificationModel{
-		Recipient: booking.VendorId,
+		Recipient: booking.ClientId,
 		Type:      "generic",
 		Title:     "Booking has been rescheduled",
 		Content: fmt.Sprintf(
@@ -579,7 +579,7 @@ func (s *Service) Reschedule(bearerToken string, req *request.RescheduleBookingP
 	}
 
 	encryptedNotification := &models.NotificationModel{
-		Recipient: booking.VendorId,
+		Recipient: booking.ClientId,
 		Type:      "generic",
 		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
