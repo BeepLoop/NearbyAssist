@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (s *Server) DevRoutes(r *echo.Group) {
+func (s *Server) devRoutes(r *echo.Group) {
 
 	pingRoute := r.Group("/ping")
 	{

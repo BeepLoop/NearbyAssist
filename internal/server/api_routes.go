@@ -18,7 +18,6 @@ import (
 	"nearbyassist/internal/handler/api/user"
 	userauth_handler "nearbyassist/internal/handler/api/user_auth"
 	"nearbyassist/internal/handler/api/vendor"
-	websocket_handler "nearbyassist/internal/handler/api/websocket"
 	"nearbyassist/internal/middleware"
 	admin_repo "nearbyassist/internal/repository/admin"
 	application_repo "nearbyassist/internal/repository/application"
@@ -399,16 +398,6 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		resourceRoute.GET("/:path", handler.GetPrivateFile)
 		resourceRoute.GET("/public/:path", handler.GetPublicFile)
-	}
-
-	websocketRoute := v1.Group("/ws")
-	{
-		handler := websocket_handler.NewHandler(s.WS, s.JWT)
-
-		// NOTE: this route is separate because I have problems passing JWT from
-		// client Authorization header and continuously pass updated token on
-		// reconnect. Hard skill issues
-		websocketRoute.GET("", handler.Connect)
 	}
 
 	recommendationRoute := v1.Group("/recommendations")

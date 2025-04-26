@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (s *Server) AuthRoutes(r *echo.Group) {
+func (s *Server) authRoutes(r *echo.Group) {
 	adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 	authService := adminauth_service.NewService(adminStore, s.Encrypt, s.Hash)
 

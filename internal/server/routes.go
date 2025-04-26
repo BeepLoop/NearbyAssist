@@ -20,13 +20,16 @@ func (s *Server) routes() {
 	}
 
 	dev := s.Echo.Group("/dev")
-	s.DevRoutes(dev)
+	s.devRoutes(dev)
 
 	auth := s.Echo.Group("/auth")
-	s.AuthRoutes(auth)
+	s.authRoutes(auth)
 
 	admin := s.Echo.Group("/admin")
-	s.AdminRoutes(admin)
+	s.adminRoutes(admin)
+
+	ws := s.Echo.Group("/ws")
+	s.websocketRoute(ws)
 
 	s.Echo.RouteNotFound("/*", web.GetNotFound)
 }

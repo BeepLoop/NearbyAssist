@@ -64,5 +64,10 @@ func (h *handler) Connect(c echo.Context) error {
 		}
 
 		fmt.Println("received: ", string(msg))
+
+		if string(msg) == "ping" {
+			conn.WriteMessage(gorilla_ws.TextMessage, []byte("pong"))
+			continue
+		}
 	}
 }

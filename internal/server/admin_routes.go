@@ -47,7 +47,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (s *Server) AdminRoutes(r *echo.Group) {
+func (s *Server) adminRoutes(r *echo.Group) {
 	resetRoute := r.Group("/reset")
 	{
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
