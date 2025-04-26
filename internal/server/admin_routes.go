@@ -272,8 +272,8 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		handler := accountmanagement.NewHandler(adminService, passwordResetService)
 
-		accountManagementRoute.GET("/accounts", handler.GetAccounts)
-		accountManagementRoute.GET("/reset", handler.ResetRequests)
+		accountManagementRoute.GET("/accounts", handler.AccountList)
+		accountManagementRoute.GET("/reset", handler.PasswordResetRequestList)
 		accountManagementRoute.POST("/reset/fulfill", handler.FufillResetRequest)
 		accountManagementRoute.POST("/reset/reject", handler.RejectResetRequest)
 	}

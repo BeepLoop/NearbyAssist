@@ -1,12 +1,13 @@
 package pages
 
 import (
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ ResetRequests(user models.AdminModel, requests []models.PasswordResetRequestModel, flash string) {
+templ ResetRequests(user models.AdminModel, requests []dto.PasswordResetRequest, flash string) {
 	@layout.Layout(user) {
 		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()
@@ -15,7 +16,7 @@ templ ResetRequests(user models.AdminModel, requests []models.PasswordResetReque
 	}
 }
 
-templ requestTable(requests []models.PasswordResetRequestModel) {
+templ requestTable(requests []dto.PasswordResetRequest) {
 	<div class="w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="bg-primary-greener text-sm font-semibold text-white">
@@ -49,7 +50,7 @@ templ requestTable(requests []models.PasswordResetRequestModel) {
 	</div>
 }
 
-templ fulfillRequest(request models.PasswordResetRequestModel) {
+templ fulfillRequest(request dto.PasswordResetRequest) {
 	<div x-data="{fulfillCanvasOpen: false}">
 		<!-- offCanvas Button -->
 		<button
@@ -187,7 +188,7 @@ templ fulfillRequest(request models.PasswordResetRequestModel) {
 	</div>
 }
 
-templ rejectRequest(request models.PasswordResetRequestModel) {
+templ rejectRequest(request dto.PasswordResetRequest) {
 	<div x-data="{rejectCanvasOpen: false}">
 		<!-- offCanvas Button -->
 		<button

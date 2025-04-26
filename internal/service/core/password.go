@@ -1,7 +1,14 @@
 package core
 
 import (
+	"slices"
+	"unicode"
+
 	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	PASSWORD_MIN_LENGTH = 8
 )
 
 func BcryptPassword(pwd string) (string, error) {
@@ -22,9 +29,27 @@ func IsPasswordMatch(hashedPwd, plainPwd string) bool {
 }
 
 func IsPasswordSecure(password string) bool {
-	if len(password) < 8 {
+	allowed_special_chars := []string{"@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "-", "=", "!", "?"}
+
+	if len(password) < PASSWORD_MIN_LENGTH {
 		return false
 	}
 
-	return true
+	hasUpper := false
+	hasLower := false
+	hasDigit := false
+	hasSpecialChar := false
+	for _, char := range password {
+		if unicode.IsUpper(char) {
+			hasUpper = true
+		} else if unicode.IsLower(char) {
+			hasLower = true
+		} else if unicode.IsDigit(char) {
+			hasDigit = true
+		} else if slices.Contains(allowed_special_chars, string(char)) {
+			hasSpecialChar = true
+		}
+	}
+
+	return hasUpper && hasLower && hasDigit && hasSpecialChar
 }
