@@ -321,6 +321,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			},
 			Service: dto.Service{
 				Id:          service.Id,
+				VendorId:    service.VendorId,
 				Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 				Description: utils.Must(s.encrypt.DecryptString(service.Description)),
 				Rate:        utils.StringToFloat64ElseZero(service.Rate),
@@ -345,6 +346,11 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 						return dto.Image{Id: img.Id, URL: img.Url}
 					}),
 				),
+				Address: dto.Address{
+					Address:   utils.Must(s.encrypt.DecryptString(service.Address.Address)),
+					Latitude:  service.Address.Latitude,
+					Longitude: service.Address.Longitude,
+				},
 				CreatedAt: utils.FormatDate(service.CreatedAt),
 				UpdatedAt: utils.FormatDate(service.UpdatedAt),
 			},

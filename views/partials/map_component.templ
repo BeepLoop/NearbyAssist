@@ -1,13 +1,14 @@
 package partials
 
-import "nearbyassist/internal/models"
+import "nearbyassist/internal/dto"
 
-templ MapComponent(data models.MapPageDataModel) {
+templ MapComponent(data dto.MapData) {
 	<div id="map" class="h-[80vh] outline-1 outline-pale-gray"></div>
 	@templ.JSONScript("services", data.Services)
 	<script>
         (function() {
             const services = JSON.parse(document.getElementById("services").textContent);
+            if (!services) return;
 
             const middleOfTagum = [125.80935362791702, 7.446905276490894];
 
@@ -24,7 +25,7 @@ templ MapComponent(data models.MapPageDataModel) {
 
             const bounds = new maplibregl.LngLatBounds();
             services.forEach(service => {
-                bounds.extend([service.longitude, service.latitude]);
+                bounds.extend([service.Address.Longitude, service.Address.Latitude]);
             });
             map.fitBounds(bounds, {
                 padding: 100,
@@ -34,7 +35,7 @@ templ MapComponent(data models.MapPageDataModel) {
             services.forEach(service => {
                 const popup = createPopup(service);
                 let marker = new maplibregl.Marker({color: "red"});
-                const coord = new maplibregl.LngLat(service.longitude, service.latitude);
+                const coord = new maplibregl.LngLat(service.Address.Longitude, service.Address.Latitude);
                 marker.setLngLat(coord);
                 marker.setPopup(popup);
                 marker.addTo(map);
@@ -56,7 +57,7 @@ templ MapComponent(data models.MapPageDataModel) {
                     "mb-2",
                 ];
                 const h = document.createElement("h2");
-                h.innerText = service.title;
+                h.innerText = service.Title;
                 hStyles.forEach(style => {
                     h.classList.add(style);
                 });
@@ -73,7 +74,7 @@ templ MapComponent(data models.MapPageDataModel) {
                     "hover:opacity-75",
                 ];
                 const a = document.createElement("a");
-                a.href = `/admin/user-management/vendors/${service.vendorId}`
+                a.href = `/admin/user-management/vendors/${service.VendorId}?tab=services&offCanvas=${service.Id}`
                 a.innerText = "View"
                 aStyles.forEach(style => {
                     a.classList.add(style);

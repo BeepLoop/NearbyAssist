@@ -38,7 +38,6 @@ import (
 	map_service "nearbyassist/internal/service/map"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	resource_service "nearbyassist/internal/service/resource"
-	tag_service "nearbyassist/internal/service/tag"
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/service/user_management_service"
 	vendor_service "nearbyassist/internal/service/vendor"
@@ -86,10 +85,8 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		tagStore := tag_repo.NewMysqlTagRepository(s.DB)
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 
-		tagService := tag_service.NewService(tagStore)
-
-		mapService := map_service.NewService(serviceStore, s.Encrypt)
-		mapHandler := map_handler.NewHandler(mapService, tagService)
+		mapService := map_service.NewService(serviceStore, tagStore, s.Encrypt)
+		mapHandler := map_handler.NewHandler(mapService)
 
 		mapRoute.GET("", mapHandler.GetMap)
 	}

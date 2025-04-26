@@ -141,6 +141,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 					},
 					Service: dto.Service{
 						Id:          service.Id,
+						VendorId:    service.VendorId,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
 						Rate:        utils.StringToFloat64ElseZero(service.Rate),
@@ -165,6 +166,11 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 								return dto.Image{Id: img.Id, URL: img.Url}
 							}),
 						),
+						Address: dto.Address{
+							Address:   utils.Must(s.encrypt.DecryptString(service.Address.Address)),
+							Latitude:  service.Address.Latitude,
+							Longitude: service.Address.Longitude,
+						},
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
@@ -229,6 +235,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 					},
 					Service: dto.Service{
 						Id:          service.Id,
+						VendorId:    service.VendorId,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
 						Rate:        utils.StringToFloat64ElseZero(service.Rate),
@@ -253,6 +260,11 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 								return dto.Image{Id: img.Id, URL: img.Url}
 							}),
 						),
+						Address: dto.Address{
+							Address:   utils.Must(s.encrypt.DecryptString(service.Address.Address)),
+							Latitude:  service.Address.Latitude,
+							Longitude: service.Address.Longitude,
+						},
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
@@ -354,6 +366,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 			utils.Map(services, func(service *models.ServiceModel) dto.Service {
 				return dto.Service{
 					Id:          service.Id,
+					VendorId:    service.VendorId,
 					Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 					Description: utils.Must(s.encrypt.DecryptString(service.Description)),
 					Rate:        utils.StringToFloat64ElseZero(service.Rate),
@@ -378,6 +391,11 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 							return dto.Image{Id: img.Id, URL: img.Url}
 						}),
 					),
+					Address: dto.Address{
+						Address:   utils.Must(s.encrypt.DecryptString(service.Address.Address)),
+						Latitude:  service.Address.Latitude,
+						Longitude: service.Address.Longitude,
+					},
 					CreatedAt: utils.FormatDate(service.CreatedAt),
 					UpdatedAt: utils.FormatDate(service.UpdatedAt),
 				}
@@ -426,6 +444,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 					},
 					Service: dto.Service{
 						Id:          service.Id,
+						VendorId:    service.VendorId,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
 						Rate:        utils.StringToFloat64ElseZero(service.Rate),
@@ -450,6 +469,11 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 								return dto.Image{Id: img.Id, URL: img.Url}
 							}),
 						),
+						Address: dto.Address{
+							Address:   utils.Must(s.encrypt.DecryptString(service.Address.Address)),
+							Latitude:  service.Address.Latitude,
+							Longitude: service.Address.Longitude,
+						},
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
@@ -516,6 +540,7 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 					},
 					Service: dto.Service{
 						Id:          service.Id,
+						VendorId:    service.VendorId,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
 						Rate:        utils.StringToFloat64ElseZero(service.Rate),
@@ -540,6 +565,11 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 								return dto.Image{Id: img.Id, URL: img.Url}
 							}),
 						),
+						Address: dto.Address{
+							Address:   utils.Must(s.encrypt.DecryptString(service.Address.Address)),
+							Latitude:  service.Address.Latitude,
+							Longitude: service.Address.Longitude,
+						},
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},

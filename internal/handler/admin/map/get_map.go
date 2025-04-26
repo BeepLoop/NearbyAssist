@@ -2,7 +2,6 @@ package map_handler
 
 import (
 	"context"
-	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/map"
 	"net/http"
@@ -17,44 +16,9 @@ func (h *mapHandler) GetMap(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
-	services := make([]models.ServiceModel, 0)
-	tags := make([]string, 0)
+	query := utils.Ternary(c.QueryParams().Has("query"), c.QueryParams().Get("query"), "")
+	mapdata, _ := h.mapService.GetMapData(query)
 
-	pageData := models.MapPageDataModel{
-		Services: services,
-		Tags:     tags,
-	}
-
-	params := c.QueryParams()
-	if params.Has("query") {
-		services, err := h.mapService.GetServices(params.Get("query"))
-		if err != nil {
-			page := pages.Map(*admin, pageData, flash)
-			return page.Render(context.Background(), c.Response().Writer)
-		}
-
-		for _, service := range services {
-			pageData.Services = append(pageData.Services, models.ServiceModel{
-				Model:       service.Model,
-				Address:     service.Address,
-				VendorId:    service.VendorId,
-				Title:       service.Title,
-				Description: service.Description,
-				Rate:        service.Rate,
-			})
-		}
-	}
-
-	result, err := h.tagService.GetTags()
-	if err != nil {
-		page := pages.Map(*admin, pageData, flash)
-		return page.Render(context.Background(), c.Response().Writer)
-	}
-
-	for _, tag := range result {
-		pageData.Tags = append(pageData.Tags, tag.Title)
-	}
-
-	page := pages.Map(*admin, pageData, flash)
+	page := pages.Map(*admin, *mapdata, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

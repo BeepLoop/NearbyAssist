@@ -1,13 +1,14 @@
 package pages
 
 import (
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 	"strconv"
 )
 
-templ Map(user models.AdminModel, data models.MapPageDataModel, flash string) {
+templ Map(user models.AdminModel, data dto.MapData, flash string) {
 	@layout.Layout(user) {
 		@templ.JSONScript("flash", flash)
 		@partials.ToastNotification()

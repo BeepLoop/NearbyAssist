@@ -68,12 +68,14 @@ type Extra struct {
 
 type Service struct {
 	Id          string
+	VendorId    string
 	Title       string
 	Description string
 	Rate        float64
 	Tags        []string
 	Extras      []Extra
 	Images      []Image
+	Address     Address
 	CreatedAt   string
 	UpdatedAt   string
 }
@@ -95,4 +97,10 @@ type Identification struct {
 	IdNumber      string
 	FrontImageURL string
 	BackImageURL  string
+}
+
+type Address struct {
+	Address   string
+	Latitude  float64
+	Longitude float64
 }
