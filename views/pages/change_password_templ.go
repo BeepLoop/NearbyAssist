@@ -58,7 +58,41 @@ func ChangePassword(flash string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <div class=\"fixed right-0 left-0 grid h-full place-items-center\"><form action=\"/admin/reset/cp\" method=\"POST\" class=\"grid max-w-xl gap-4 rounded-sm bg-white p-4 shadow-2xl outline-1 outline-neutral-gray-lighter\"><div class=\"text-center\"><h2 class=\"font-medium text-neutral-dark\">Update Password</h2><p class=\"mt-1.5 rounded-sm bg-neutral-gray/25 p-2 text-xs font-semibold text-neutral-gray\">You are required to change your password after a password reset.</p></div><div><label for=\"username\" class=\"text-xs font-medium\">Username</label> <input type=\"text\" name=\"username\" id=\"username\" placeholder=\"username\" autocomplete=\"off\" autofocus class=\"mt-1.5 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 text-xs focus:border-primary focus:outline-none\"></div><div><label for=\"oldPassword\" class=\"text-xs font-medium\">Old Password</label> <input type=\"password\" name=\"oldPassword\" id=\"oldPassword\" placeholder=\"old password\" autocomplete=\"off\" class=\"mt-1.5 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 text-xs focus:border-primary focus:outline-none\"></div><div><label for=\"password\" class=\"text-xs font-medium\">New Password</label><!-- Information --><div class=\"mt-1 flex gap-2 rounded-sm bg-good/25 px-1 py-2 text-xs text-neutral-gray\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg><p class=\"\">Password must be  <span class=\"font-bold\">at least 8 characters long, at least 1 uppercase, at least 1 lowercase, at least 1 special character, and no whitespace</span></p></div><input type=\"password\" name=\"password\" id=\"password\" placeholder=\"new password\" autocomplete=\"off\" class=\"mt-1.5 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 text-xs focus:border-primary focus:outline-none\"></div><div><label for=\"confirmationPassword\" class=\"text-xs font-medium\">Confirm Password</label> <input type=\"password\" name=\"confirmationPassword\" id=\"confirmationPassword\" placeholder=\"confirm password\" autocomplete=\"off\" class=\"mt-1.5 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 text-xs focus:border-primary focus:outline-none\"></div><div class=\"mt-4 flex justify-end gap-2\"><a href=\"/\" role=\"button\" class=\"cursor-pointer rounded-sm bg-neutral-gray/50 px-2 py-1.5 text-xs font-medium text-neutral-gray hover:opacity-75\">Cancel</a> <button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs font-medium text-white hover:opacity-75\">Continue</button></div></form></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <div class=\"fixed right-0 left-0 grid h-full place-items-center\"><form action=\"/admin/reset/cp\" method=\"POST\" class=\"grid max-w-xl gap-4 rounded-sm bg-white p-4 shadow-2xl outline-1 outline-neutral-gray-lighter\"><div class=\"text-center\"><h2 class=\"font-medium text-neutral-dark\">Update Password</h2><p class=\"mt-1.5 rounded-sm bg-neutral-gray/25 p-2 text-xs font-semibold text-neutral-gray\">You are required to change your password after a password reset.</p></div><div><label for=\"username\" class=\"text-xs font-medium\">Username</label> <input type=\"text\" name=\"username\" id=\"username\" placeholder=\"username\" autocomplete=\"off\" autofocus class=\"mt-1.5 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 text-xs focus:border-primary focus:outline-none\"></div><div><label for=\"oldPassword\" class=\"text-xs font-medium\">Old Password</label>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
+				Id:          "oldPassword",
+				Name:        "oldPassword",
+				Placeholder: "old password",
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div><label for=\"password\" class=\"text-xs font-medium\">New Password</label><!-- Information --><div class=\"mt-1 flex gap-2 rounded-sm bg-good/25 px-1 py-2 text-xs text-neutral-gray\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg><p class=\"\">Password must be  <span class=\"font-bold\">at least 8 characters long, at least 1 uppercase, at least 1 lowercase, at least 1 special character, and no whitespace</span></p></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
+				Placeholder: "new password",
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><label for=\"confirmationPassword\" class=\"text-xs font-medium\">Confirm Password</label>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
+				Id:          "confirmationPassword",
+				Name:        "confirmationPassword",
+				Placeholder: "confirm password",
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div class=\"mt-4 flex justify-end gap-2\"><a href=\"/\" role=\"button\" class=\"cursor-pointer rounded-sm bg-neutral-gray/50 px-2 py-1.5 text-xs font-medium text-neutral-gray hover:opacity-75\">Cancel</a> <button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs font-medium text-white hover:opacity-75\">Continue</button></div></form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
