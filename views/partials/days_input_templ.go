@@ -111,7 +111,7 @@ func DaysInput(props DaysInputProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " value=\"1\" autocomplete=\"off\" required min=\"1\" class=\"p-2 text-xs focus:border-none focus:outline-none\"> <span class=\"bg-neutral-gray border-l border-neutral-gray-lighter p-2 text-xs text-neutral-gray\">Days</span></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " value=\"1\" autocomplete=\"off\" required min=\"1\" class=\"p-2 text-xs focus:border-none focus:outline-none\"> <span class=\"bg-neutral-gray/25 border-l border-neutral-gray-lighter p-2 text-xs text-neutral-gray\">Days</span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

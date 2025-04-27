@@ -223,7 +223,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 			s.Encrypt,
 			s.Hash,
 		)
-		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
+		userService := user_service.NewService(userStore, resourceService, s.Encrypt, s.Hash, s.JWT)
 		vendorService := vendor_service.NewService(vendorStore, serviceStore, resourceService, s.Encrypt, s.Hash)
 
 		managementHandler := userManagement.NewHandler(managementService, userService, vendorService, resourceService)

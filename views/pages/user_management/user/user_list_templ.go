@@ -10,13 +10,13 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-func UserList(user models.AdminModel, accounts []models.UserModel) templ.Component {
+func UserList(user models.AdminModel, accounts []dto.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -79,7 +79,7 @@ func UserList(user models.AdminModel, accounts []models.UserModel) templ.Compone
 	})
 }
 
-func userTable(accounts []models.UserModel) templ.Component {
+func userTable(accounts []dto.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -116,7 +116,7 @@ func userTable(accounts []models.UserModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(account.ImageUrl)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(account.ImageURL)
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_list.templ`, Line: 74, Col: 32}
 				}
@@ -168,9 +168,9 @@ func userTable(accounts []models.UserModel) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatDate(account.VerifiedAt.String))
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(account.DateVerified)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_list.templ`, Line: 84, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_list.templ`, Line: 84, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -180,13 +180,23 @@ func userTable(accounts []models.UserModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if account.Verified {
-					templ_7745c5c3_Err = partials.SoftBadgeSuccess("Verified").Render(ctx, templ_7745c5c3_Buffer)
+				if account.IsBanned {
+					templ_7745c5c3_Err = partials.SoftBadgeDanger("Banned").Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else if account.IsRestricted {
+					templ_7745c5c3_Err = partials.SoftBadgeWarning("Restricted").Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else if account.DateVerified == "" {
+					templ_7745c5c3_Err = partials.SoftBadgeWarning("Unverified").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = partials.SoftBadgeDanger("Unverified").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = partials.SoftBadgeSuccess("Verified").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

@@ -10,8 +10,7 @@ import (
 )
 
 func (s *Service) RestrictUser(userId, reason, duration string) error {
-	duration += duration + "d"
-	d, err := utils.ParseStringDuration(duration)
+	d, err := utils.StringDaysToDuration(duration)
 	if err != nil {
 		return err
 	}
@@ -84,7 +83,7 @@ func (s *Service) UnrestrictUser(userId string) error {
 		Recipient: userId,
 		Type:      "success",
 		Title:     "Restriction Lifted",
-		Content:   "The restriction to your account has been lifted by the administrator. Avoid committing violations to prevent future restrictions.",
+		Content:   "Restriction to your account has been lifted. Avoid violations of community guidelines to prevent future restrictions.",
 	}
 
 	encryptedNotification := &models.NotificationModel{

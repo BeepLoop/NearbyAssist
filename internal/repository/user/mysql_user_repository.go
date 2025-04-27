@@ -100,30 +100,31 @@ func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	tx, err := s.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	accounts := make([]*models.UserModel, 0)
-
 	getAccountsQuery := `
         SELECT
-            u.id, u.name, u.email, u.imageUrl, u.verified, u.verifiedAt, u.createdAt
+            u.id
         FROM
             User u
             LEFT JOIN Vendor v ON v.vendorId = u.id
         WHERE
             v.vendorId IS NULL
-        ORDER BY createdAt DESC
+        ORDER BY
+            createdAt DESC
         LIMIT ? OFFSET ?
     `
-	if err := tx.SelectContext(ctx, &accounts, getAccountsQuery, limit, offset); err != nil {
-		if err := tx.Rollback(); err != nil {
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, getAccountsQuery, limit, offset); err != nil {
+		return nil, err
+	}
+
+	accounts := make([]*models.UserModel, 0)
+	for _, id := range ids {
+		account, err := s.FindById(id)
+		if err != nil {
 			return nil, err
 		}
 
-		return nil, err
+		accounts = append(accounts, account)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -137,28 +138,28 @@ func (s *MysqlUserRepository) GetAllUserAccounts(limit, offset int) ([]*models.U
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	tx, err := s.db.BeginTxx(ctx, nil)
-	if err != nil {
+	query := `
+        SELECT
+            id
+        FROM
+            User
+        ORDER BY
+            createdAt DESC
+        LIMIT ? OFFSET ?
+    `
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, query, limit, offset); err != nil {
 		return nil, err
 	}
 
 	accounts := make([]*models.UserModel, 0)
-
-	getAccountsQuery := `
-        SELECT
-            id, name, email, imageUrl, verified, verifiedAt, createdAt
-        FROM
-            User
-        ORDER BY createdAt DESC
-        LIMIT ?
-        OFFSET ?
-    `
-	if err := tx.SelectContext(ctx, &accounts, getAccountsQuery, limit, offset); err != nil {
-		if err := tx.Rollback(); err != nil {
+	for _, id := range ids {
+		account, err := s.FindById(id)
+		if err != nil {
 			return nil, err
 		}
 
-		return nil, err
+		accounts = append(accounts, account)
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -203,6 +204,12 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 		return nil, err
 	} else {
 		user.Address = *address
+	}
+
+	if identification, err := s.GetIdentification(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Identification = *identification
 	}
 
 	if socials, err := s.GetSocials(user.Id); err != nil {
@@ -257,6 +264,12 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
 		return nil, err
 	} else {
 		user.Address = *address
+	}
+
+	if identification, err := s.GetIdentification(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.Identification = *identification
 	}
 
 	if socials, err := s.GetSocials(user.Id); err != nil {

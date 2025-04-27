@@ -105,7 +105,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
-		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
+		userService := user_service.NewService(userStore, resourceService, s.Encrypt, s.Hash, s.JWT)
 		userVerificationService := verification_service.NewService(
 			userStore,
 			verificationStore,
@@ -223,7 +223,8 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 
-		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+		userService := user_service.NewService(userStore, resourceService, s.Encrypt, s.Hash, s.JWT)
 		serviceService := service_service.NewService(
 			serviceStore,
 			vendorStore,
@@ -266,7 +267,6 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		applicationRoute.Use(middleware.CheckAuth(s.JWT))
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
-		userService := user_service.NewService(userStore, s.Encrypt, s.Hash, s.JWT)
 
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
 		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
@@ -283,6 +283,8 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.Encrypt,
 			s.JWT,
 		)
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+		userService := user_service.NewService(userStore, resourceService, s.Encrypt, s.Hash, s.JWT)
 
 		handler := application.NewHandler(applicationService, userService)
 

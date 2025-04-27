@@ -43,6 +43,15 @@ func ParseStringDuration(duration string) (time.Duration, error) {
 	}
 }
 
+func StringDaysToDuration(duration string) (time.Duration, error) {
+	days, err := strconv.Atoi(duration)
+	if err != nil {
+		return 0, err
+	}
+
+	return (time.Hour * 24) * time.Duration(days), nil
+}
+
 func FormatDurationToString(d time.Duration) string {
 	d = d.Abs()
 

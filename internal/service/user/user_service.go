@@ -2,26 +2,37 @@ package user_service
 
 import (
 	"errors"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	repository "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
+	resource_service "nearbyassist/internal/service/resource"
 	"nearbyassist/internal/utils"
+	"slices"
 )
 
 type Service struct {
-	userStore repository.UserRepository
-	encrypt   core.Encryption
-	hash      core.Hash
-	jwt       core.Authenticator
+	userStore       repository.UserRepository
+	resourceService *resource_service.Service
+	encrypt         core.Encryption
+	hash            core.Hash
+	jwt             core.Authenticator
 }
 
-func NewService(userStore repository.UserRepository, encrypt core.Encryption, hash core.Hash, jwt core.Authenticator) *Service {
+func NewService(
+	userStore repository.UserRepository,
+	resourceService *resource_service.Service,
+	encrypt core.Encryption,
+	hash core.Hash,
+	jwt core.Authenticator,
+) *Service {
 	return &Service{
-		userStore: userStore,
-		encrypt:   encrypt,
-		hash:      hash,
-		jwt:       jwt,
+		userStore:       userStore,
+		resourceService: resourceService,
+		encrypt:         encrypt,
+		hash:            hash,
+		jwt:             jwt,
 	}
 }
 
@@ -48,53 +59,68 @@ func (s *Service) GetAll(limit, offset int) ([]*models.UserModel, error) {
 	return accounts, nil
 }
 
-func (s *Service) GetAllBasicUsers(limit, offset int) ([]*models.UserModel, error) {
+func (s *Service) GetAllBasicUsers(limit, offset int) ([]dto.User, error) {
 	accounts, err := s.userStore.GetBasicUserAccounts(limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, account := range accounts {
-		if decrypted, err := s.encrypt.DecryptString(account.Name); err != nil {
-			return nil, err
-		} else {
-			account.Name = decrypted
-		}
+	data := slices.AppendSeq(
+		make([]dto.User, 0),
+		utils.Map(accounts, func(account *models.UserModel) dto.User {
+			return dto.User{
+				Id:       account.Id,
+				Name:     utils.Must(s.encrypt.DecryptString(account.Name)),
+				Email:    utils.Must(s.encrypt.DecryptString(account.Email)),
+				ImageURL: account.ImageUrl,
+				Address:  utils.Must(s.encrypt.DecryptString(account.Address.Address)),
+				Phone:    utils.Must(s.encrypt.DecryptString(account.Phone)),
+				Socials:  account.Socials,
+				Identification: dto.Identification{
+					Type:          account.Identification.Type,
+					IdNumber:      utils.Must(s.encrypt.DecryptString(account.Identification.ReferenceNumber)),
+					FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(account.Identification.FrontImageUrl)),
+					BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(account.Identification.BackImageUrl)),
+				},
+				CreatedAt:    utils.FormatDate(account.CreatedAt),
+				DateVerified: utils.FormatDate(account.VerifiedAt.String),
+				IsRestricted: account.Restricted,
+				IsBanned:     account.Banned,
+			}
+		}),
+	)
 
-		if decrypted, err := s.encrypt.DecryptString(account.Email); err != nil {
-			return nil, err
-		} else {
-			account.Email = decrypted
-		}
-	}
-
-	return accounts, nil
+	return data, nil
 }
 
-func (s *Service) FindByEmail(email string) (*models.UserModel, error) {
-	emailHash, err := s.hash.Generate([]byte(email))
-	if err != nil {
-		return nil, err
-	}
-
+func (s *Service) FindByEmail(email string) (*dto.User, error) {
+	emailHash := utils.Must(s.hash.Generate([]byte(email)))
 	user, err := s.userStore.FindByEmailHash(emailHash)
 	if err != nil {
 		return nil, err
 	}
 
-	if decrypted, err := s.encrypt.DecryptString(user.Name); err != nil {
-		return nil, err
-	} else {
-		user.Name = decrypted
+	data := &dto.User{
+		Id:       user.Id,
+		Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
+		Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
+		ImageURL: user.ImageUrl,
+		Address:  utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+		Phone:    utils.Must(s.encrypt.DecryptString(user.Phone)),
+		Socials:  user.Socials,
+		Identification: dto.Identification{
+			Type:          user.Identification.Type,
+			IdNumber:      utils.Must(s.encrypt.DecryptString(user.Identification.ReferenceNumber)),
+			FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.FrontImageUrl)),
+			BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.BackImageUrl)),
+		},
+		CreatedAt:    utils.FormatDate(user.CreatedAt),
+		DateVerified: utils.FormatDate(user.VerifiedAt.String),
+		IsRestricted: user.Restricted,
+		IsBanned:     user.Banned,
 	}
 
-	if decrypted, err := s.encrypt.DecryptString(user.Email); err != nil {
-		return nil, err
-	} else {
-		user.Email = decrypted
-	}
-
-	return user, nil
+	return data, nil
 }
 
 func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {

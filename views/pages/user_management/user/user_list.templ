@@ -2,13 +2,13 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ UserList(user models.AdminModel, accounts []models.UserModel) {
+templ UserList(user models.AdminModel, accounts []dto.User) {
 	@layout.Layout(user) {
 		@partials.PageBanner("User List", "")
 		<!-- searchbar -->
@@ -47,7 +47,7 @@ templ UserList(user models.AdminModel, accounts []models.UserModel) {
 	}
 }
 
-templ userTable(accounts []models.UserModel) {
+templ userTable(accounts []dto.User) {
 	<div class="w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="bg-primary-greener text-sm font-semibold text-white">
@@ -71,7 +71,7 @@ templ userTable(accounts []models.UserModel) {
 								<div class="flex w-max items-center gap-2">
 									<img
 										class="size-8 rounded-full object-cover"
-										src={ account.ImageUrl }
+										src={ account.ImageURL }
 										alt="user avatar"
 									/>
 									<div class="flex flex-col">
@@ -81,12 +81,16 @@ templ userTable(accounts []models.UserModel) {
 								</div>
 							</td>
 							<td class="p-4">{ account.CreatedAt }</td>
-							<td class="p-4">{ utils.FormatDate(account.VerifiedAt.String) } </td>
+							<td class="p-4">{ account.DateVerified } </td>
 							<td class="p-4">
-								if account.Verified {
-									@partials.SoftBadgeSuccess("Verified")
+								if account.IsBanned {
+									@partials.SoftBadgeDanger("Banned")
+								} else if account.IsRestricted {
+									@partials.SoftBadgeWarning("Restricted")
+								} else if account.DateVerified == "" {
+									@partials.SoftBadgeWarning("Unverified")
 								} else {
-									@partials.SoftBadgeDanger("Unverified")
+									@partials.SoftBadgeSuccess("Verified")
 								}
 							</td>
 							<td class="p-4">

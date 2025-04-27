@@ -134,6 +134,15 @@ templ profile(data dto.UserAccountDetail) {
 					<span class="font-medium text-neutral-dark">Date Verified: </span>
 					<p class="text-neutral-gray">{ data.User.DateVerified } </p>
 				</div>
+				if data.User.IsBanned {
+					<div class="mt-2 flex gap-2">
+						@partials.DefaultBadgeDanger("banned")
+					</div>
+				} else if data.User.IsRestricted {
+					<div class="mt-2 flex gap-2">
+						@partials.DefaultBadgeWarning("restricted")
+					</div>
+				}
 			</div>
 		</div>
 	</div>

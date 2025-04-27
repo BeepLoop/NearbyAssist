@@ -17,10 +17,6 @@ const (
 )
 
 func (s *Service) BanUser(userId string) error {
-	if err := s.userStore.BanUser(userId); err != nil {
-		return err
-	}
-
 	reports, err := s.reportUserStore.GetAllReportedIs(userId)
 	if err != nil {
 		return err
@@ -34,6 +30,10 @@ func (s *Service) BanUser(userId string) error {
 	)
 	if len(resolvedReports) < MINIMUM_REPORTS_FOR_BANNING {
 		return errors.New(ERR_DID_NOT_MEET_BANNING_REQUIREMENT)
+	}
+
+	if err := s.userStore.BanUser(userId); err != nil {
+		return err
 	}
 
 	notification := &models.NotificationModel{
