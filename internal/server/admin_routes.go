@@ -208,6 +208,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
+		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		managementService := user_management_service.NewService(
@@ -216,6 +217,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 			notifStore,
 			bookingStore,
 			serviceStore,
+			reportUserStore,
 			resourceService,
 			s.WS,
 			s.Encrypt,
