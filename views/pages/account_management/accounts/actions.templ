@@ -1,0 +1,49 @@
+package pages
+
+templ actions() {
+	<div
+		x-data="{ isOpen: false, openedWithKeyboard: false }"
+		class="w-fit"
+		x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
+	>
+		<!-- Toggle Button -->
+		<button
+			type="button"
+			x-on:click="isOpen = ! isOpen"
+			class="w-min cursor-pointer rounded-sm p-1 font-semibold text-neutral-dark hover:bg-neutral-gray/50 focus:outline-none focus:border-none"
+			aria-haspopup="true"
+			x-on:keydown.space.prevent="openedWithKeyboard = true"
+			x-on:keydown.enter.prevent="openedWithKeyboard = true"
+			x-on:keydown.down.prevent="openedWithKeyboard = true"
+			x-bind:class="isOpen || openedWithKeyboard ? 'text-neutral-dark' : 'text-neutral-gray'"
+			x-bind:aria-expanded="isOpen || openedWithKeyboard"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"></path>
+			</svg>
+		</button>
+		<!-- Dropdown Menu -->
+		<div
+			x-cloak
+			x-show="isOpen || openedWithKeyboard"
+			x-transition
+			x-trap="openedWithKeyboard"
+			x-on:click.outside="isOpen = false, openedWithKeyboard = false"
+			x-on:keydown.down.prevent="$focus.wrap().next()"
+			x-on:keydown.up.prevent="$focus.wrap().previous()"
+			role="menu"
+			class="absolute top-0 right-0 z-50 mr-1 flex w-fit min-w-48 flex-col rounded-sm border border-neutral-gray-lighter bg-neutral-gray/25"
+		>
+			<a
+				href="#"
+				class="px-4 py-2 text-sm text-neutral-dark hover:opacity-75"
+				role="menuitem"
+			>Disable</a>
+			<a
+				href="#"
+				class="px-4 py-2 text-sm text-neutral-dark hover:opacity-75"
+				role="menuitem"
+			>Delete</a>
+		</div>
+	</div>
+}

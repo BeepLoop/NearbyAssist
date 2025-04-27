@@ -9,12 +9,13 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-func AccountList(user models.AdminModel, accounts []models.AdminModel, flash string) templ.Component {
+func AccountList(user models.AdminModel, accounts []dto.Admin, flash string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -71,7 +72,7 @@ func AccountList(user models.AdminModel, accounts []models.AdminModel, flash str
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = inviteUser().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = inviteMember().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -93,7 +94,7 @@ func AccountList(user models.AdminModel, accounts []models.AdminModel, flash str
 	})
 }
 
-func accountsTable(accounts []models.AdminModel) templ.Component {
+func accountsTable(accounts []dto.Admin) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -114,12 +115,12 @@ func accountsTable(accounts []models.AdminModel) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">Account ID</th><th scope=\"col\" class=\"p-4\">Username</th><th scope=\"col\" class=\"p-4\">Email</th><th scope=\"col\" class=\"p-4\">Created At</th><th scope=\"col\" class=\"p-4\">Role</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-neutral-gray-lighter\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">Account ID</th><th scope=\"col\" class=\"p-4\">Username</th><th scope=\"col\" class=\"p-4\">Email</th><th scope=\"col\" class=\"p-4\">Created At</th><th scope=\"col\" class=\"p-4\">Role</th><th scope=\"col\" class=\"p-4\"></th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(accounts) < 1 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<tr class=\"\"><td class=\"px-6 py-4 text-neutral-dark\" align=\"center\" colspan=\"5\" id=\"emptyTable\">Empty</td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<tr class=\"\"><td class=\"px-6 py-4 text-neutral-dark\" align=\"center\" colspan=\"6\" id=\"emptyTable\">Empty</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -132,7 +133,7 @@ func accountsTable(accounts []models.AdminModel) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(account.Id)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/accounts/account_list.templ`, Line: 41, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/accounts/account_list.templ`, Line: 43, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -145,7 +146,7 @@ func accountsTable(accounts []models.AdminModel) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(account.Username)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/accounts/account_list.templ`, Line: 42, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/accounts/account_list.templ`, Line: 44, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -158,7 +159,7 @@ func accountsTable(accounts []models.AdminModel) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(account.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/accounts/account_list.templ`, Line: 43, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/accounts/account_list.templ`, Line: 45, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -171,7 +172,7 @@ func accountsTable(accounts []models.AdminModel) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(account.CreatedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/accounts/account_list.templ`, Line: 44, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/account_management/accounts/account_list.templ`, Line: 46, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -192,42 +193,21 @@ func accountsTable(accounts []models.AdminModel) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</td><td class=\"p-4\"><div class=\"relative\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = actions().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</tbody></table></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-func inviteUser() templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div x-data=\"{offCanvasOpen: false, disabledPasswordInput: true}\"><!-- offCanvas Button --><button x-on:click=\"offCanvasOpen = !offCanvasOpen\" type=\"button\" class=\"cursor-pointer rounded-sm bg-primary/25 p-2 text-xs font-medium text-primary outline-1 outline-primary hover:opacity-75\">Invite Member</button><!-- offCanvas Backdrop --><div x-cloak x-show=\"offCanvasOpen\" x-on:keydown.esc.window=\"offCanvasOpen = false\" x-on:click.self=\"offCanvasOpen = false\" role=\"dialog\" class=\"fixed inset-0 bg-neutral-gray/50\"><!-- offCanvas Sidebar --><div x-cloak x-show=\"offCanvasOpen\" x-transition:enter=\"transition ease-out duration-200\" x-transition:enter-start=\"translate-x-full\" x-transition:enter-end=\"translate-x-0\" x-transition:leave=\"transition ease-in duration-200\" x-transition:leave-start=\"translate-x-0\" x-transition:leave-end=\"translate-x-full\" role=\"document\" class=\"fixed top-0 right-0 flex h-full w-md flex-col bg-white p-4 outline-1 outline-pale-gray\"><!-- Header --><div class=\"flex justify-between\"><h3 class=\"text-sm font-medium text-neutral-dark\">Member Invitation</h3><button x-on:click=\"offCanvasOpen = false\" type=\"button\" class=\"flex cursor-pointer items-center rounded-sm px-3 py-1.5 hover:bg-neutral-gray/25 hover:opacity-75\"><svg class=\"hi-solid hi-x -mx-1 inline-block size-4\" fill=\"currentColor\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z\" clip-rule=\"evenodd\"></path></svg></button></div><!-- Content --><div class=\"mt-4\"><form action=\"/admin/invites\" method=\"POST\" class=\"grid gap-4\"><div><label for=\"email\" class=\"text-xs font-medium\">Email</label> <input type=\"email\" placeholder=\"user@email.com\" name=\"email\" id=\"email\" required autocomplete=\"off\" class=\"mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-xs focus:border-primary focus:outline-none\"></div><div><label for=\"username\" class=\"text-xs font-medium\">Username</label> <input type=\"text\" placeholder=\"account_username\" name=\"username\" id=\"username\" required autocomplete=\"off\" class=\"mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-xs focus:border-primary focus:outline-none\"></div><div><span class=\"flex items-center justify-between\"><label for=\"defaultPassword\" class=\"text-xs font-medium\">Default Password</label><div class=\"relative inline-block h-5 w-11\"><input x-on:click=\"disabledPasswordInput = !disabledPasswordInput\" x-bind:checked=\"!disabledPasswordInput\" id=\"switch-component\" type=\"checkbox\" class=\"peer h-5 w-11 cursor-pointer appearance-none rounded-full bg-primary/25 transition-colors duration-200 checked:bg-primary\"> <label for=\"switch-component\" class=\"absolute top-0 left-0 h-5 w-5 cursor-pointer rounded-full border border-primary/50 bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-6 peer-checked:border-primary/50\"></label></div></span><!-- Information --><div class=\"mt-1.5 flex gap-2 rounded-sm bg-good/25 px-1 py-2 text-xs text-neutral-gray\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg><p>User is required to change this password on first login</p></div><input type=\"text\" placeholder=\"password_default\" name=\"defaultPassword\" id=\"defaultPassword\" required value=\"password_default\" x-bind:readonly=\"disabledPasswordInput\" autocomplete=\"off\" class=\"mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-xs text-neutral-dark read-only:border-neutral-gray/25 read-only:bg-neutral-gray/10 read-only:text-neutral-gray-lighter focus:border-primary focus:outline-none\"></div><div><label for=\"duration\" class=\"text-xs font-medium\">Invitation Expiry</label><!-- Information --><div class=\"flex gap-2 rounded-sm bg-good/25 px-1 py-2 text-xs text-neutral-gray\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg><p>Invite links will expire after the set amount of duration</p></div><input type=\"text\" name=\"duration\" id=\"duration\" placeholder=\"ex. 2d (2 days)\" autocomplete=\"off\" required class=\"mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-xs focus:border-primary focus:outline-none\"></div><div class=\"flex justify-end\"><button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary bg-primary p-2 text-sm font-semibold text-white hover:opacity-75\"><span class=\"flex items-center gap-2\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5\"></path></svg><p>Send Invite </p></span></button></div></form></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</tbody></table></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

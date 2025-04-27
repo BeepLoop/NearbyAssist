@@ -1,0 +1,36 @@
+package partials
+
+type DaysInputProps struct {
+	Id          string
+	Name        string
+	Placeholder string
+}
+
+templ DaysInput(props DaysInputProps) {
+	<div class="flex w-min max-w-min items-center border border-neutral-gray-lighter rounded-sm">
+		<input
+			type="number"
+			if props.Id == "" {
+				id="duration"
+			} else {
+				id={ props.Id }
+			}
+			if props.Name == "" {
+				name="duration"
+			} else {
+				name={ props.Name }
+			}
+			if props.Placeholder== "" {
+				placeholder="ex. 2d (2 days)"
+			} else {
+				placeholder={ props.Placeholder }
+			}
+			value="1"
+			autocomplete="off"
+			required
+			min="1"
+			class="p-2 text-xs focus:border-none focus:outline-none"
+		/>
+		<span class="bg-neutral-gray border-l border-neutral-gray-lighter p-2 text-xs text-neutral-gray">Days</span>
+	</div>
+}

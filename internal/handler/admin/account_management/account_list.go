@@ -2,7 +2,7 @@ package accountmanagement
 
 import (
 	"context"
-	"nearbyassist/internal/models"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/account_management/accounts"
 	"net/http"
@@ -11,35 +11,18 @@ import (
 )
 
 func (h *accountManagementHandler) AccountList(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
-	flash, _, _ := utils.RetrieveFlashMessage(c)
-
-	filter := c.QueryParam("filter")
-
-	accounts, err := h.adminService.GetAll(filter)
+	accounts, err := h.adminService.GetAccounts(c.QueryParam("role"))
 	if err != nil {
-		page := pages.AccountList(*admin, make([]models.AdminModel, 0), flash)
+		page := pages.AccountList(*admin, make([]dto.Admin, 0), flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	data := make([]models.AdminModel, 0)
-	for _, account := range accounts {
-		data = append(data, models.AdminModel{
-			Model: models.Model{
-				Id:        account.Id,
-				CreatedAt: utils.FormatDate(account.CreatedAt),
-			},
-			Username:           account.Username,
-			Email:              account.Email,
-			Role:               account.Role,
-			MustChangePassword: account.MustChangePassword,
-		})
-	}
-
-	page := pages.AccountList(*admin, data, flash)
+	page := pages.AccountList(*admin, accounts, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

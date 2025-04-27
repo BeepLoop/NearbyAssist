@@ -3,11 +3,12 @@ package models
 type AdminModel struct {
 	Model
 	UpdateableModel
-	Username           string `json:"username" db:"username"`
-	Email              string `json:"email" db:"email"`
-	Password           string `json:"-" db:"password"`
-	UsernameHash       string `json:"-" db:"usernameHash"`
-	EmailHash          string `json:"-" db:"emailHash"`
-	MustChangePassword bool   `json:"-" db:"mustChangePassword"`
-	Role               string `json:"role" db:"role"`
+	Username           string `db:"username"`
+	Email              string `db:"email"`
+	Password           string `db:"password"`
+	UsernameHash       string `db:"usernameHash"`
+	EmailHash          string `db:"emailHash"`
+	MustChangePassword bool   `db:"mustChangePassword"`
+	Suspended          bool   `db:"suspended"`
+	Role               string `db:"role"`
 }

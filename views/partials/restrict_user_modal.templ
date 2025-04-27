@@ -86,14 +86,11 @@ templ RestrictUser(actionUrl string) {
 								for="duration"
 								class="text-sm text-neutral-dark font-medium"
 							>Duration</label>
-							<input
-								type="text"
-								name="duration"
-								id="duration"
-								placeholder="ex: 3d (3 days)"
-								autocomplete="off"
-								class="text-sm text-neutral-dark outline-1 outline-pale-gray rounded-sm p-2 w-full"
-							/>
+							@DaysInput(DaysInputProps{
+								Id:          "duration",
+								Name:        "duration",
+								Placeholder: "restriction duration",
+							})
 						</div>
 						<!-- reason -->
 						<div>
