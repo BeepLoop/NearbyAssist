@@ -29,7 +29,6 @@ templ accountsTable(accounts []dto.Admin) {
 					<th scope="col" class="p-4">Email</th>
 					<th scope="col" class="p-4">Created At</th>
 					<th scope="col" class="p-4">Role</th>
-					<th scope="col" class="p-4"></th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-300">
@@ -50,11 +49,6 @@ templ accountsTable(accounts []dto.Admin) {
 								} else {
 									@partials.SoftBadgeWarning(account.Role)
 								}
-							</td>
-							<td class="p-4">
-								<div class="relative">
-									@actions()
-								</div>
 							</td>
 						</tr>
 					}
