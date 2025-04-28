@@ -14,6 +14,10 @@ import (
 	"strings"
 )
 
+const (
+	ERR_FORBIDDEN = "action forbidden"
+)
+
 type Service struct {
 	userStore            user_repo.UserRepository
 	vendorStore          vendor_repo.VendorRepository
@@ -65,7 +69,7 @@ func (s *Service) AddUserExpertise(bearerToken, expertiseId string, file *multip
 		return err
 	} else {
 		if !isVendor {
-			return errors.New("forbidden")
+			return errors.New(ERR_FORBIDDEN)
 		}
 	}
 

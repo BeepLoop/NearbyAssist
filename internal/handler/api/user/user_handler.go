@@ -162,3 +162,52 @@ func (h *userHandler) DeleteSocial(c echo.Context) error {
 
 	return c.JSON(http.StatusNoContent, nil)
 }
+
+func (h *userHandler) AddExpertise(c echo.Context) error {
+	expertiseId := c.FormValue("expertiseId")
+	if expertiseId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Missing required fields",
+			Error:   "Missing required fields",
+		})
+	}
+
+	files, err := utils.FormParser(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error reading files from form",
+			Error:   err.Error(),
+		})
+	}
+
+	bearerToken := utils.BearerTokenFromHeader(c)
+	if err := h.userService.AddUserExpertise(bearerToken, expertiseId, files[0]); err != nil {
+		if strings.Contains(err.Error(), user_service.ERR_FORBIDDEN) {
+			return echo.NewHTTPError(http.StatusForbidden, models.Error{
+				Message: "Adding expertise not allowed",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), user_service.ERR_DUPLICATE_EXPERTISE) {
+			return echo.NewHTTPError(http.StatusForbidden, models.Error{
+				Message: "You already have the applied expertise",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), user_service.ERR_DUPLICATE_APPLICATION) {
+			return echo.NewHTTPError(http.StatusForbidden, models.Error{
+				Message: "You already have a pending application for the expertise",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error adding expertise",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}

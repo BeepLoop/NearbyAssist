@@ -465,7 +465,7 @@ func (s *MysqlVendorRepository) AddExpertise(userId, expertiseId, supportingImag
             (?, ?, ?)
     `
 
-	if _, err := s.db.ExecContext(ctx, query, userId, expertiseId); err != nil {
+	if _, err := s.db.ExecContext(ctx, query, userId, expertiseId, supportingImageId); err != nil {
 		return err
 	}
 
@@ -676,4 +676,52 @@ func (s *MysqlVendorRepository) CompletedBookingCountOfService(vendorId, service
 	}
 
 	return count, nil
+}
+
+func (s *MysqlVendorRepository) HasExpertise(vendorId, expertiseId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT EXISTS
+            (SELECT 1 FROM UserExpertise WHERE userId = ? AND expertiseId = ?)
+        AS has_expertise
+    `
+	hasExpertise := false
+	if err := s.db.GetContext(ctx, &hasExpertise, query, vendorId, expertiseId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return hasExpertise, nil
+}
+
+func (s *MysqlVendorRepository) GetPoliceClearance(vendorId string) (*models.PoliceClearanceModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            p.*
+        FROM
+            Vendor v
+            JOIN Application a ON a.applicantId = v.vendorId
+            JOIN PoliceClearance p ON p.id = a.policeClearance
+        WHERE
+            v.vendorId = ?
+        LIMIT 1
+    `
+	clearance := new(models.PoliceClearanceModel)
+	if err := s.db.GetContext(ctx, clearance, query, vendorId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return clearance, nil
 }

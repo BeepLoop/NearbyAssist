@@ -38,7 +38,6 @@ func (h *handler) AddUserExpertise(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	if err := h.expertiseService.AddUserExpertise(bearerToken, expertiseId, files[0]); err != nil {
 		if strings.Contains(err.Error(), "forbidden") {
 			return echo.NewHTTPError(http.StatusForbidden, models.Error{

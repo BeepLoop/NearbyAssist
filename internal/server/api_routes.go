@@ -5,7 +5,6 @@ import (
 	"nearbyassist/internal/handler/api/booking"
 	"nearbyassist/internal/handler/api/complaint"
 	"nearbyassist/internal/handler/api/e2ee"
-	"nearbyassist/internal/handler/api/expertise"
 	"nearbyassist/internal/handler/api/health"
 	"nearbyassist/internal/handler/api/message"
 	"nearbyassist/internal/handler/api/notification"
@@ -24,7 +23,6 @@ import (
 	booking_repo "nearbyassist/internal/repository/booking"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
-	expertise_repo "nearbyassist/internal/repository/expertise"
 	message_repo "nearbyassist/internal/repository/message"
 	notification_repo "nearbyassist/internal/repository/notification"
 	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
@@ -42,7 +40,6 @@ import (
 	booking_service "nearbyassist/internal/service/booking"
 	complaint_service "nearbyassist/internal/service/complaint"
 	e2ee_service "nearbyassist/internal/service/e2ee"
-	expertise_service "nearbyassist/internal/service/expertise"
 	health_service "nearbyassist/internal/service/health"
 	message_service "nearbyassist/internal/service/message"
 	notification_service "nearbyassist/internal/service/notification"
@@ -101,11 +98,14 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userRoute.Use(middleware.CheckAuth(s.JWT))
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
+		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
+		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 
-		userService := user_service.NewService(userStore, resourceService, s.Encrypt, s.Hash, s.JWT)
+		userService := user_service.NewService(userStore, vendorStore, applicationStore, supportingImageStore, resourceService, s.FS, s.Encrypt, s.Hash, s.JWT)
 		userVerificationService := verification_service.NewService(
 			userStore,
 			verificationStore,
@@ -124,6 +124,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userRoute.POST("/verify", handler.VerifyAccount)
 		userRoute.POST("/socials", handler.AddSocial)
 		userRoute.DELETE("/socials", handler.DeleteSocial)
+		userRoute.POST("/addExpertise", handler.AddExpertise)
 	}
 
 	// ===== TAGS =======
@@ -135,23 +136,6 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		tagRoute.GET("", handler.GetTags)
 		tagRoute.GET("/expertise", handler.GetExpertise)
-	}
-
-	// ===== Expertise =======
-	expertiseRoute := v1.Group("/expertise")
-	{
-		expertiseRoute.Use(middleware.CheckAuth(s.JWT))
-
-		userStore := user_repo.NewMysqlUserRepository(s.DB)
-		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
-		expertiseStore := expertise_repo.NewMysqlExpertiseRepository(s.DB)
-		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
-
-		expertiseService := expertise_service.NewService(userStore, vendorStore, expertiseStore, supportingImageStore, s.FS, s.Encrypt, s.Hash, s.JWT)
-
-		handler := expertise.NewHandler(expertiseService)
-
-		expertiseRoute.POST("/add", handler.AddUserExpertise)
 	}
 
 	// ===== VENDOR =======
@@ -218,13 +202,15 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		bookingRoute.Use(middleware.CheckAuth(s.JWT))
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
-		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
+		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
-		userService := user_service.NewService(userStore, resourceService, s.Encrypt, s.Hash, s.JWT)
+		userService := user_service.NewService(userStore, vendorStore, applicationStore, supportingImageStore, resourceService, s.FS, s.Encrypt, s.Hash, s.JWT)
 		serviceService := service_service.NewService(
 			serviceStore,
 			vendorStore,
@@ -267,7 +253,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		applicationRoute.Use(middleware.CheckAuth(s.JWT))
 
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
-
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
 		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
 		policeClearanceStore := policeclearance_repo.NewMysqlImplementation(s.DB)
@@ -284,7 +270,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			s.JWT,
 		)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
-		userService := user_service.NewService(userStore, resourceService, s.Encrypt, s.Hash, s.JWT)
+		userService := user_service.NewService(userStore, vendorStore, applicationStore, supportingImageStore, resourceService, s.FS, s.Encrypt, s.Hash, s.JWT)
 
 		handler := application.NewHandler(applicationService, userService)
 

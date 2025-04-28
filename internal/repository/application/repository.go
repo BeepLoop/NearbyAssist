@@ -13,4 +13,6 @@ type ApplicationRepository interface {
 
 	AcceptRequest(applicationId string) error
 	RejectRequest(applicationId, reason string) error
+
+	HasPendingApplication(userId, expertiseId string) (bool, error)
 }

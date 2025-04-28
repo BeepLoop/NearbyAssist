@@ -209,6 +209,8 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
+		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
+		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		managementService := user_management_service.NewService(
@@ -223,7 +225,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 			s.Encrypt,
 			s.Hash,
 		)
-		userService := user_service.NewService(userStore, resourceService, s.Encrypt, s.Hash, s.JWT)
+		userService := user_service.NewService(userStore, vendorStore, applicationStore, supportingImageStore, resourceService, s.FS, s.Encrypt, s.Hash, s.JWT)
 		vendorService := vendor_service.NewService(vendorStore, serviceStore, resourceService, s.Encrypt, s.Hash)
 
 		managementHandler := userManagement.NewHandler(managementService, userService, vendorService, resourceService)

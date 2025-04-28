@@ -12,4 +12,6 @@ type VendorRepository interface {
 	GetAllExpertise(userId string) ([]*models.UserExpertiseModel, error)
 	GetBookingsWithStatus(vendorId, status string) ([]*models.BookingModel, error)
 	CompletedBookingCountOfService(vendorId, serviceId string) (int, error)
+	HasExpertise(vendorId, expertiseId string) (bool, error)
+	GetPoliceClearance(vendorId string) (*models.PoliceClearanceModel, error)
 }

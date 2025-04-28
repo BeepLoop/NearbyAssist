@@ -2,7 +2,6 @@ package application_repo
 
 import (
 	"context"
-	"errors"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"time"
@@ -23,34 +22,6 @@ func NewMysqlApplicationRepository(db *sqlx.DB) *MysqlApplicationRepository {
 func (s *MysqlApplicationRepository) Create(data *models.ApplicationModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-
-	checkDupePending := `
-        SELECT EXISTS
-            (SELECT 1 FROM Application WHERE applicantId = ? AND expertiseId = ? AND status = 'pending')
-        AS has_duplicate_pending
-    `
-
-	hasDupePending := false
-	if err := s.db.GetContext(ctx, &hasDupePending, checkDupePending, data.ApplicantId, data.ExpertiseId); err != nil {
-		return "", err
-	}
-	if hasDupePending {
-		return "", errors.New("Duplicate entry")
-	}
-
-	checkAlreadyApproved := `
-        SELECT EXISTS
-            (SELECT 1 FROM Application WHERE applicantId = ? AND expertiseId = ? AND status = 'approved')
-        AS already_approved
-    `
-
-	alreadyApproved := false
-	if err := s.db.GetContext(ctx, &alreadyApproved, checkAlreadyApproved, data.ApplicantId, data.ExpertiseId); err != nil {
-		return "", err
-	}
-	if alreadyApproved {
-		return "", errors.New("Already approved")
-	}
 
 	data.Id = utils.GenerateId()
 	createQuery := `
@@ -292,4 +263,25 @@ func (s *MysqlApplicationRepository) RejectRequest(applicationId, reason string)
 	}
 
 	return nil
+}
+
+func (s *MysqlApplicationRepository) HasPendingApplication(userId, expertiseId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT EXISTS
+            (SELECT 1 FROM Application WHERE applicantId = ? AND expertiseId = ? AND status = 'pending')
+        AS has_duplicate_pending
+    `
+	hasPending := false
+	if err := s.db.GetContext(ctx, &hasPending, query, userId, expertiseId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return hasPending, nil
 }

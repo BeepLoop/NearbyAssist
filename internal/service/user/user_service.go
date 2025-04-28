@@ -2,37 +2,60 @@ package user_service
 
 import (
 	"errors"
+	"mime/multipart"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
+	application_repo "nearbyassist/internal/repository/application"
+	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
 	repository "nearbyassist/internal/repository/user"
+	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
+	"nearbyassist/internal/service/fs"
 	resource_service "nearbyassist/internal/service/resource"
 	"nearbyassist/internal/utils"
 	"slices"
 )
 
+const (
+	ERR_FORBIDDEN             = "forbidden action"
+	ERR_DUPLICATE_EXPERTISE   = "already have expertise"
+	ERR_DUPLICATE_APPLICATION = "already have pending application for the expertise"
+)
+
 type Service struct {
-	userStore       repository.UserRepository
-	resourceService *resource_service.Service
-	encrypt         core.Encryption
-	hash            core.Hash
-	jwt             core.Authenticator
+	userStore            repository.UserRepository
+	vendorStore          vendor_repo.VendorRepository
+	applicationStore     application_repo.ApplicationRepository
+	supportingImageStore supportingimage_repo.Repository
+	resourceService      *resource_service.Service
+	fs                   fs.FileStorage
+	encrypt              core.Encryption
+	hash                 core.Hash
+	jwt                  core.Authenticator
 }
 
 func NewService(
 	userStore repository.UserRepository,
+	vendorStore vendor_repo.VendorRepository,
+	applicationStore application_repo.ApplicationRepository,
+	supportingImageStore supportingimage_repo.Repository,
 	resourceService *resource_service.Service,
+	fs fs.FileStorage,
 	encrypt core.Encryption,
 	hash core.Hash,
 	jwt core.Authenticator,
 ) *Service {
 	return &Service{
-		userStore:       userStore,
-		resourceService: resourceService,
-		encrypt:         encrypt,
-		hash:            hash,
-		jwt:             jwt,
+		userStore:            userStore,
+		vendorStore:          vendorStore,
+		applicationStore:     applicationStore,
+		supportingImageStore: supportingImageStore,
+		resourceService:      resourceService,
+		fs:                   fs,
+		encrypt:              encrypt,
+		hash:                 hash,
+		jwt:                  jwt,
 	}
 }
 
@@ -267,6 +290,74 @@ func (s *Service) DeleteSocial(bearerToken, url string) error {
 	}
 
 	if err := s.userStore.DeleteSocial(userId, socialId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) AddUserExpertise(bearerToken, expertiseId string, file *multipart.FileHeader) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	if isVendor, err := s.userStore.IsVendor(userId); err != nil {
+		return err
+	} else {
+		if !isVendor {
+			return errors.New(ERR_FORBIDDEN)
+		}
+	}
+
+	if hasExpertise, err := s.vendorStore.HasExpertise(userId, expertiseId); err != nil {
+		return err
+	} else {
+		if hasExpertise {
+			return errors.New(ERR_DUPLICATE_EXPERTISE)
+		}
+	}
+
+	if hasApplication, err := s.applicationStore.HasPendingApplication(userId, expertiseId); err != nil {
+		return err
+	} else {
+		if hasApplication {
+			return errors.New(ERR_DUPLICATE_APPLICATION)
+		}
+	}
+
+	b, err := utils.FileToBytes(file)
+	if err != nil {
+		return err
+	}
+
+	cipher := utils.Must(s.encrypt.EncryptFile(b))
+	fileData := fs.File{
+		Data:     cipher,
+		Category: fs.APPLICATION_PROOF_DIR,
+	}
+
+	url, err := s.fs.SaveFile(fileData)
+	if err != nil {
+		return err
+	}
+
+	supportingDocumentId, err := s.supportingImageStore.Create(url)
+	if err != nil {
+		return err
+	}
+	policeClearance, err := s.vendorStore.GetPoliceClearance(userId)
+	if err != nil {
+		return err
+	}
+
+	application := &models.ApplicationModel{
+		ApplicantId:        userId,
+		ExpertiseId:        expertiseId,
+		SupportingDocument: supportingDocumentId,
+		PoliceClearance:    policeClearance.Id,
+	}
+	if _, err := s.applicationStore.Create(application); err != nil {
 		return err
 	}
 
