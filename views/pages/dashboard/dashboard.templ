@@ -48,11 +48,13 @@ templ dashboardData(data models.DashboardModel) {
 					</card>
 				</a>
 			</div>
+			<!--
 			<div class="col-span-3 grid">
 				<a href="/admin/complaints/bugs" class="grid">
 					@dashboardcomponent.BugReport(data.ReportData.WeeklyBugReport)
 				</a>
 			</div>
+            -->
 			<div class="col-span-3 grid">
 				<a href="/admin/complaints/users" class="grid">
 					@dashboardcomponent.VendorReport(data.ReportData.WeeklyVendorReport)

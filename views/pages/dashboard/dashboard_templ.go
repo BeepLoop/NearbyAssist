@@ -118,15 +118,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</p><p class=\"text-xs font-semibold text-neutral-gray\">total</p></div></card></a></div><div class=\"col-span-3 grid\"><a href=\"/admin/complaints/bugs\" class=\"grid\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = dashboardcomponent.BugReport(data.ReportData.WeeklyBugReport).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</a></div><div class=\"col-span-3 grid\"><a href=\"/admin/complaints/users\" class=\"grid\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</p><p class=\"text-xs font-semibold text-neutral-gray\">total</p></div></card></a></div><!--\n\t\t\t<div class=\"col-span-3 grid\">\n\t\t\t\t<a href=\"/admin/complaints/bugs\" class=\"grid\">\n\t\t\t\t\t@dashboardcomponent.BugReport(data.ReportData.WeeklyBugReport)\n\t\t\t\t</a>\n\t\t\t</div>\n            --><div class=\"col-span-3 grid\"><a href=\"/admin/complaints/users\" class=\"grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -134,7 +126,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</a></div></div><div class=\"grid grid-cols-12 gap-4\"><div class=\"col-span-4 grid\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</a></div></div><div class=\"grid grid-cols-12 gap-4\"><div class=\"col-span-4 grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -142,7 +134,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div class=\"col-span-8 grid\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><div class=\"col-span-8 grid\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -150,7 +142,7 @@ func dashboardData(data models.DashboardModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></div></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

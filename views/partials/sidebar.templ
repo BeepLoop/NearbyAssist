@@ -125,9 +125,11 @@ templ navlist(user models.AdminModel) {
 			}
 			@navWithSubItem("Reports") {
 				@subNavItem("/admin/complaints/users", "Reported users")
-				if user.Role == "admin" {
+				<!--
+				f user.Role == "admin" {
 					@subNavItem("/admin/complaints/bugs", "Bug reports")
 				}
+                -->
 			}
 			if user.Role == "admin" {
 				@navWithSubItem("Account Management") {
