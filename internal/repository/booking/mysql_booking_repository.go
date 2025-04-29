@@ -35,7 +35,7 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
 
 	query := `
         INSERT INTO
-            Booking (id, vendorId, clientId, serviceId, FORMAT(cost, 2) AS cost)
+            Booking (id, vendorId, clientId, serviceId, cost)
         VALUES
             (:id, :vendorId, :clientId, :serviceId, :cost)
     `
