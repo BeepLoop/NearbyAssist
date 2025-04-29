@@ -207,12 +207,17 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 		return nil, err
 	}
 
-	reported, err := s.userStore.FindById(report.ReportedUserId)
+	reporterCancelledBooking, err := s.bookingStore.GetHistory(reporter.Id, "client")
 	if err != nil {
 		return nil, err
 	}
 
-	reporterCancelledBooking, err := s.bookingStore.GetHistory(reporter.Id, "client")
+	reporterReportsFiled, err := s.reportUserStore.GetAllReportedBy(reporter.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	reported, err := s.userStore.FindById(report.ReportedUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -227,20 +232,15 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 		return nil, err
 	}
 
-	reportedUserPreviousReports, err := s.reportUserStore.GetAllReportedIs(reported.Id)
+	reportedUserReportHistory, err := s.reportUserStore.GetAllReportedIs(reported.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	reporterReportsFiled, err := s.reportUserStore.GetAllReportedBy(reporter.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	previousReports := slices.AppendSeq(
+	reportHistory := slices.AppendSeq(
 		make([]dto.PreviousReport, 0),
 		utils.Map(
-			slices.Collect(utils.Retain(reportedUserPreviousReports, func(r *models.UserReportModel) bool {
+			slices.Collect(utils.Retain(reportedUserReportHistory, func(r *models.UserReportModel) bool {
 				return r.Status != models.REPORT_STATUS_PENDING
 			})),
 			func(report *models.UserReportModel) dto.PreviousReport {
@@ -380,6 +380,8 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			Name:     utils.Must(s.encrypt.DecryptString(reporter.Name)),
 			Email:    utils.Must(s.encrypt.DecryptString(reporter.Email)),
 			ImageURL: reporter.ImageUrl,
+			Address:  utils.Must(s.encrypt.DecryptString(reporter.Address.Address)),
+			Phone:    utils.Must(s.encrypt.DecryptString(reporter.Phone)),
 			Socials: slices.AppendSeq(
 				make([]string, 0),
 				utils.Map(reported.Socials, func(social string) string {
@@ -396,6 +398,8 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			Name:     utils.Must(s.encrypt.DecryptString(reported.Name)),
 			Email:    utils.Must(s.encrypt.DecryptString(reported.Email)),
 			ImageURL: reported.ImageUrl,
+			Address:  utils.Must(s.encrypt.DecryptString(reported.Address.Address)),
+			Phone:    utils.Must(s.encrypt.DecryptString(reported.Phone)),
 			Socials: slices.AppendSeq(
 				make([]string, 0),
 				utils.Map(reported.Socials, func(social string) string {
@@ -442,7 +446,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 					}),
 				),
 			),
-			PreviousReports:  previousReports,
+			PreviousReports:  reportHistory,
 			AccountCreatedAt: utils.FormatDate(reported.CreatedAt),
 			JoinedVendorAt:   utils.FormatDate(vendor.JoinedAt),
 			Rating:           vendor.Rating,
