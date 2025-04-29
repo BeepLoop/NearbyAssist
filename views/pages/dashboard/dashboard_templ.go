@@ -160,7 +160,7 @@ func recentUsers(data dto.Dashboard) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if len(data.Users.Recent) < 1 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"grid place-items-center text-xs\"><p>No Data</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"grid h-full place-items-center text-xs\"><p>No Data</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -170,7 +170,7 @@ func recentUsers(data dto.Dashboard) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, user := range data.Users.Recent {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<tr class=\"p-1 text-xs items-center cursor-pointer hover:bg-neutral-gray/25\"><td class=\"p-2\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<tr class=\"cursor-pointer items-center p-1 text-xs hover:bg-neutral-gray/25\"><td class=\"p-2\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -275,7 +275,7 @@ func recentSearches(data []string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if len(data) < 1 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"grid place-items-center text-xs h-full\"><p>No Data</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"grid h-full place-items-center text-xs\"><p>No Data</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -285,7 +285,7 @@ func recentSearches(data []string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for i, searchterm := range data {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<tr class=\"p-1 text-xs items-center cursor-pointer hover:bg-neutral-gray/25\"><td class=\"p-2 font-medium text-neutral-gray\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<tr class=\"cursor-pointer items-center p-1 text-xs hover:bg-neutral-gray/25\"><td class=\"p-2 font-medium text-neutral-gray\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

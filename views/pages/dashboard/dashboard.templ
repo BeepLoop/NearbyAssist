@@ -43,13 +43,13 @@ templ recentUsers(data dto.Dashboard) {
 			<h3 class="text-xs font-medium text-neutral-gray">Recent Users</h3>
 		</div>
 		if len(data.Users.Recent) < 1 {
-			<div class="grid place-items-center text-xs">
+			<div class="grid h-full place-items-center text-xs">
 				<p>No Data</p>
 			</div>
 		} else {
 			<table class="w-full border-collapse overflow-scroll">
 				for _, user := range data.Users.Recent {
-					<tr class="p-1 text-xs items-center cursor-pointer hover:bg-neutral-gray/25">
+					<tr class="cursor-pointer items-center p-1 text-xs hover:bg-neutral-gray/25">
 						<td class="p-2">
 							<a href={ templ.URL(fmt.Sprintf("/admin/user-management/users/%s", user.Id)) }>
 								<div class="flex w-max items-center gap-2">
@@ -79,13 +79,13 @@ templ recentSearches(data []string) {
 			<h3 class="text-xs font-medium text-neutral-gray">Recent Searches</h3>
 		</div>
 		if len(data) < 1 {
-			<div class="grid place-items-center text-xs h-full">
+			<div class="grid h-full place-items-center text-xs">
 				<p>No Data</p>
 			</div>
 		} else {
 			<table class="w-full border-collapse overflow-scroll text-left">
 				for i, searchterm := range data {
-					<tr class="p-1 text-xs items-center cursor-pointer hover:bg-neutral-gray/25">
+					<tr class="cursor-pointer items-center p-1 text-xs hover:bg-neutral-gray/25">
 						<td class="p-2 font-medium text-neutral-gray">{ strconv.Itoa(i+1) }</td>
 						<td class="p-2 font-medium text-neutral-dark">{ searchterm }</td>
 						<td class="p-2 font-medium text-neutral-dark">{  }</td>
