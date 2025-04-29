@@ -1,6 +1,7 @@
 package service_service
 
 import (
+	"database/sql"
 	"errors"
 	"math"
 	"mime/multipart"
@@ -22,6 +23,7 @@ import (
 
 const (
 	ERR_FORBIDDEN_ACTION  = "action not allowed"
+	ERR_NOT_FOUND         = "resource not found"
 	ERR_UNAUTHORIZED      = "unauthorized"
 	ERR_DUPLICATE_SERVICE = "duplicate service"
 	ERR_ACTIVELY_USED     = "resource is actively in use"
@@ -280,9 +282,12 @@ func (s *Service) DeleteImage(bearerToken, imageId string) error {
 
 	image, err := s.serviceStore.FindPhotoById(imageId)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New(ERR_NOT_FOUND)
+		}
+
 		return err
 	}
-
 	if image.VendorId != userId {
 		return errors.New(ERR_UNAUTHORIZED)
 	}

@@ -212,8 +212,14 @@ func (h *serviceHandler) DeleteImage(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	if err := h.service_service.DeleteImage(bearerToken, imageId); err != nil {
+		if strings.Contains(err.Error(), service_service.ERR_NOT_FOUND) {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "Image not found",
+				Error:   err.Error(),
+			})
+		}
+
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "You are not allowed to delete this image",
