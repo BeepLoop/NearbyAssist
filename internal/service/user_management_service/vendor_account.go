@@ -18,11 +18,6 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 		return nil, err
 	}
 
-	expertises, err := s.vendorStore.GetAllExpertise(account.VendorId)
-	if err != nil {
-		return nil, err
-	}
-
 	services, err := s.vendorStore.GetVendorServiceList(userId)
 	if err != nil {
 		return nil, err
@@ -61,12 +56,12 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 			Rating: account.Rating,
 			Expertise: slices.AppendSeq(
 				make([]dto.Expertise, 0),
-				utils.Map(expertises, func(e *models.UserExpertiseModel) dto.Expertise {
+				utils.Map(account.Expertise, func(e models.ExpertiseModel) dto.Expertise {
 					return dto.Expertise{
-						Title:              e.Expertise,
+						Title:              e.Title,
 						DateApplied:        utils.FormatDate(e.DateApplied),
-						DateApproved:       utils.FormatDate(e.DateApproved),
-						SupportingDocument: utils.Must(s.resourceService.SignURLWithDefaultDuration(e.SupportingDocumentImage)),
+						DateApproved:       utils.FormatDate(e.DateApproved.String),
+						SupportingDocument: utils.Must(s.resourceService.SignURLWithDefaultDuration(e.SupportingImageUrl)),
 					}
 				}),
 			),

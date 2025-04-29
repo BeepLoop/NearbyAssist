@@ -182,8 +182,13 @@ func (s *MysqlVendorRepository) FindById(vendorId string) (*models.VendorModel, 
 			make([]models.ExpertiseModel, 0),
 			utils.Map(list, func(e *models.ExpertiseModel) models.ExpertiseModel {
 				return models.ExpertiseModel{
-					Model: models.Model{Id: e.Id, CreatedAt: e.CreatedAt},
-					Title: e.Title,
+					Model:              models.Model{Id: e.Id, CreatedAt: e.CreatedAt},
+					UpdateableModel:    e.UpdateableModel,
+					Title:              e.Title,
+					Tags:               e.Tags,
+					DateApplied:        e.DateApplied,
+					DateApproved:       e.DateApproved,
+					SupportingImageUrl: e.SupportingImageUrl,
 				}
 			}),
 		)
@@ -476,43 +481,6 @@ func (s *MysqlVendorRepository) AddExpertise(userId, expertiseId, supportingImag
 	return nil
 }
 
-func (s *MysqlVendorRepository) GetAllExpertise(userId string) ([]*models.UserExpertiseModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	query := `
-        SELECT
-            ue.userId,
-            ue.expertiseId,
-            ue.supportingImage,
-            ue.createdAt,
-            e.title AS expertise,
-            a.createdAt AS dateApplied,
-            a.updatedAt AS dateApproved,
-            si.url AS supportingDocumentImage
-        FROM
-            UserExpertise ue
-            JOIN Expertise e ON e.id = ue.expertiseId
-            JOIN Application a ON a.applicantId = ue.userId
-            JOIN SupportingImage si ON si.id = ue.supportingImage
-        WHERE
-            ue.userId = ?
-        ORDER BY
-            ue.createdAt DESC
-    `
-
-	expertises := make([]*models.UserExpertiseModel, 0)
-	if err := s.db.SelectContext(ctx, &expertises, query, userId); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return expertises, nil
-}
-
 func (s *MysqlVendorRepository) GetBookingsWithStatus(vendorId, status string) ([]*models.BookingModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -604,12 +572,19 @@ func (s *MysqlVendorRepository) getVendorExpertise(vendorId string) ([]*models.E
 
 	query := `
         SELECT
-            e.id, e.title, e.createdAt
+            e.id,
+            e.title,
+            e.createdAt,
+            a.createdAt AS dateApplied,
+            a.updatedAt AS dateApproved,
+            i.url AS supportingImageUrl
         FROM
             Expertise e
-            JOIN UserExpertise ve ON ve.expertiseId = e.id
+            JOIN UserExpertise ue ON ue.expertiseId = e.id
+            JOIN Application a ON a.applicantid = ue.userId
+            JOIN SupportingImage i ON i.id = ue.supportingImage
         WHERE
-            ve.userId = ?
+            ue.userId = ? AND a.status = 'approved'
     `
 
 	expertise := make([]*models.ExpertiseModel, 0)

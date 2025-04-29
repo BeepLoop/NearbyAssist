@@ -69,7 +69,7 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 			Id:        application.Id,
 			CreatedAt: utils.FormatDate(application.CreatedAt),
 		},
-		UpdateableModel:       application.UpdateableModel,
+		UpdatedAt:             application.UpdatedAt,
 		GeoSpatialModel:       application.GeoSpatialModel,
 		ApplicantId:           application.ApplicantId,
 		ExpertiseId:           application.ExpertiseId,

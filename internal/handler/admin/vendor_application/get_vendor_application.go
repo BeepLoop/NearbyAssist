@@ -28,7 +28,7 @@ func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
 
 		data = append(data, models.ApplicationModel{
 			Model:                 models.Model{Id: application.Id, CreatedAt: date},
-			UpdateableModel:       application.UpdateableModel,
+			UpdatedAt:             application.UpdatedAt,
 			GeoSpatialModel:       application.GeoSpatialModel,
 			ApplicantId:           application.ApplicantId,
 			ExpertiseId:           application.ApplicantId,
