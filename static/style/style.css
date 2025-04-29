@@ -1712,6 +1712,13 @@
       }
     }
   }
+  .hover\:bg-neutral-gray\/10 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, var(--color-neutral-gray) 10%, transparent);
+      }
+    }
+  }
   .hover\:bg-neutral-gray\/25 {
     &:hover {
       @media (hover: hover) {

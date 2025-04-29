@@ -84,13 +84,20 @@ templ recentSearches(data []string) {
 			</div>
 		} else {
 			<table class="w-full border-collapse overflow-scroll text-left">
-				for i, searchterm := range data {
-					<tr class="cursor-pointer items-center p-1 text-xs hover:bg-neutral-gray/25">
-						<td class="p-2 font-medium text-neutral-gray">{ strconv.Itoa(i+1) }</td>
-						<td class="p-2 font-medium text-neutral-dark">{ searchterm }</td>
-						<td class="p-2 font-medium text-neutral-dark">{  }</td>
-					</tr>
-				}
+				<tbody>
+					for i, searchterm := range data {
+						<tr class="cursor-pointer items-center p-1 text-xs hover:bg-neutral-gray/10">
+							<td class="p-2 font-medium text-neutral-gray">{ strconv.Itoa(i+1) }</td>
+							<td class="p-2 font-medium text-neutral-dark">{ searchterm }</td>
+							<td class="p-2 font-medium text-neutral-dark">
+								<a
+									href={ templ.URL(fmt.Sprintf("/admin/map?query=%s", searchterm)) }
+									class="text-good cursor-pointer hover:underline"
+								>view</a>
+							</td>
+						</tr>
+					}
+				</tbody>
 			</table>
 		}
 	</card>
