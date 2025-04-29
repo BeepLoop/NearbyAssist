@@ -1,6 +1,8 @@
 package pages
 
 import (
+	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
@@ -8,66 +10,88 @@ import (
 	"strconv"
 )
 
-templ Dashboard(user models.AdminModel, data models.DashboardModel) {
+templ Dashboard(user models.AdminModel, data dto.Dashboard) {
 	@layout.Layout(user) {
 		@partials.PageBanner("Overview", "Monitor your activities")
-		@dashboardData(data)
+		@newDashboard(data)
 	}
 }
 
-templ dashboardData(data models.DashboardModel) {
+templ newDashboard(data dto.Dashboard) {
 	<section class="grid gap-4">
+		<!-- Head part -->
+		@counts(data)
 		<div class="grid grid-cols-12 gap-4">
-			<div class="col-span-3 grid">
-				<a href="/admin/verification-requests" class="grid">
-					<card class="w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary">
-						<!-- Title -->
-						<span class="flex justify-between p-2">
-							<p class="text-xs font-medium text-neutral-gray">Verification requests</p>
-						</span>
-						<!-- Count -->
-						<div class="flex items-baseline gap-2 p-2">
-							<p class="text-4xl font-semibold text-neutral-dark">{ strconv.Itoa(data.RequestData.IdentityVerification.Total) }</p>
-							<p class="text-xs font-semibold text-neutral-gray">total</p>
-						</div>
-					</card>
-				</a>
-			</div>
-			<div class="col-span-3 grid">
-				<a href="/admin/vendor-applications" class="grid">
-					<card class="w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary">
-						<!-- Title -->
-						<span class="flex justify-between p-2">
-							<p class="text-xs font-medium text-neutral-gray">Vendor applications</p>
-						</span>
-						<!-- Count -->
-						<div class="flex items-baseline gap-2 p-2">
-							<p class="text-4xl font-semibold text-neutral-dark">{ strconv.Itoa(data.RequestData.VendorApplication.Total) }</p>
-							<p class="text-xs font-semibold text-neutral-gray">total</p>
-						</div>
-					</card>
-				</a>
-			</div>
-			<!--
-			<div class="col-span-3 grid">
-				<a href="/admin/complaints/bugs" class="grid">
-					@dashboardcomponent.BugReport(data.ReportData.WeeklyBugReport)
-				</a>
-			</div>
-            -->
-			<div class="col-span-3 grid">
-				<a href="/admin/complaints/users" class="grid">
-					@dashboardcomponent.VendorReport(data.ReportData.WeeklyVendorReport)
-				</a>
-			</div>
-		</div>
-		<div class="grid grid-cols-12 gap-4">
-			<div class="col-span-4 grid">
-				@dashboardcomponent.UserData(data.UserData)
+			<div class="col-span-4 grid gap-4">
+				<div class="grid">
+					@recentUsers(data)
+				</div>
+				<div class="grid">
+					@recentSearches(data.SearchTrend.Searches)
+				</div>
 			</div>
 			<div class="col-span-8 grid">
-				@dashboardcomponent.Booking(data.BookingData)
+				@dashboardcomponent.Booking(data.WeeklyBooking)
 			</div>
 		</div>
 	</section>
+}
+
+templ recentUsers(data dto.Dashboard) {
+	<card class="w-full rounded-sm p-2 outline-1 outline-pale-gray hover:outline-primary">
+		<div class="mb-2">
+			<h3 class="text-xs font-medium text-neutral-gray">Recent Users</h3>
+		</div>
+		if len(data.Users.Recent) < 1 {
+			<div class="grid place-items-center text-xs">
+				<p>No Data</p>
+			</div>
+		} else {
+			<table class="w-full border-collapse overflow-scroll">
+				for _, user := range data.Users.Recent {
+					<tr class="p-1 text-xs items-center cursor-pointer hover:bg-neutral-gray/25">
+						<td class="p-2">
+							<a href={ templ.URL(fmt.Sprintf("/admin/user-management/users/%s", user.Id)) }>
+								<div class="flex w-max items-center gap-2">
+									<img
+										class="size-8 rounded-full object-cover"
+										src={ user.ImageURL }
+										alt="user avatar"
+									/>
+									<div class="flex flex-col">
+										<span class="font-medium text-neutral-900">{ user.Name }</span>
+										<span class="text-neutral-600 opacity-85">{ user.Email }</span>
+									</div>
+								</div>
+							</a>
+						</td>
+						<td class="p-2">{ user.CreatedAt }</td>
+					</tr>
+				}
+			</table>
+		}
+	</card>
+}
+
+templ recentSearches(data []string) {
+	<card class="w-full rounded-sm p-2 outline-1 outline-pale-gray hover:outline-primary">
+		<div class="mb-2">
+			<h3 class="text-xs font-medium text-neutral-gray">Recent Searches</h3>
+		</div>
+		if len(data) < 1 {
+			<div class="grid place-items-center text-xs h-full">
+				<p>No Data</p>
+			</div>
+		} else {
+			<table class="w-full border-collapse overflow-scroll text-left">
+				for i, searchterm := range data {
+					<tr class="p-1 text-xs items-center cursor-pointer hover:bg-neutral-gray/25">
+						<td class="p-2 font-medium text-neutral-gray">{ strconv.Itoa(i+1) }</td>
+						<td class="p-2 font-medium text-neutral-dark">{ searchterm }</td>
+						<td class="p-2 font-medium text-neutral-dark">{  }</td>
+					</tr>
+				}
+			</table>
+		}
+	</card>
 }

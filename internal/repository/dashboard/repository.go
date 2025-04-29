@@ -1,6 +1,9 @@
 package dashboard_repo
 
-import "nearbyassist/internal/models"
+import (
+	"nearbyassist/internal/dto"
+	"nearbyassist/internal/models"
+)
 
 type UserStatusFilter string
 type VendorStatusFilter string
@@ -26,5 +29,19 @@ type DashboardRepository interface {
 	GetVendorReportData() (*models.WeeklyVendorReportData, error)
 	GetIdentityVerificationRequestsData() (*models.IdentityVerificationRequestData, error)
 	GetVendorApplicationRequestsData() (*models.VendorApplicationRequestData, error)
-	GetBookingData() (*models.WeeklyBookingData, error)
+
+	// NEW
+
+	TotalUsers() (int, error)
+	TotalVendors() (int, error)
+	TotalReported() (int, error)
+	TotalRestricted() (int, error)
+	RecentUsers() ([]*models.UserModel, error)
+
+	TotalServices() (int, error)
+	TotalActiveServices() (int, error)
+	TotalPendingApplications() (int, error)
+	TotalActiveReports() (int, error)
+
+	GetBookingData() (*dto.WeeklyBookingData, error)
 }

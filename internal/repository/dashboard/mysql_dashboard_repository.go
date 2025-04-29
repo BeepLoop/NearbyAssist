@@ -2,6 +2,7 @@ package dashboard_repo
 
 import (
 	"context"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"time"
 
@@ -306,7 +307,195 @@ func (s *MysqlDashboardRepository) GetVendorApplicationRequestsData() (*models.V
 	return data, nil
 }
 
-func (s *MysqlDashboardRepository) GetBookingData() (*models.WeeklyBookingData, error) {
+// ==== NEW
+
+func (s *MysqlDashboardRepository) TotalUsers() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT COUNT(id) FROM User"
+
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
+func (s *MysqlDashboardRepository) TotalVendors() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT COUNT(*) FROM Vendor"
+
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
+func (s *MysqlDashboardRepository) TotalReported() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            COUNT(*)
+        FROM
+            User u
+            LEFT JOIN UserReport r ON u.id = r.reportedUserId
+        WHERE
+            r.reportedUserId IS NULL
+    `
+
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
+func (s *MysqlDashboardRepository) TotalRestricted() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            COUNT(*)
+        FROM
+            User u
+            LEFT JOIN Restricted r ON u.id = r.userId
+        WHERE
+            r.userId IS NOT NULL
+    `
+
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
+func (s *MysqlDashboardRepository) RecentUsers() ([]*models.UserModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            id, name, email, imageUrl, createdAt
+        FROM
+            User
+        ORDER BY
+            createdAt DESC
+        LIMIT 10
+    `
+
+	users := make([]*models.UserModel, 0)
+	if err := s.db.SelectContext(ctx, &users, query); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return users, nil
+}
+
+func (s *MysqlDashboardRepository) TotalServices() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT COUNT(*) FROM Service"
+
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
+func (s *MysqlDashboardRepository) TotalActiveServices() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT COUNT(*) FROM Service WHERE disabled = 0"
+
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
+func (s *MysqlDashboardRepository) TotalPendingApplications() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT COUNT(*) FROM Application WHERE status = 'pending'"
+
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
+func (s *MysqlDashboardRepository) TotalActiveReports() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT COUNT(*) FROM UserReport WHERE status = 'pending'"
+
+	count := 0
+	if err := s.db.GetContext(ctx, &count, query); err != nil {
+		return 0, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0, context.DeadlineExceeded
+	}
+
+	return count, nil
+}
+
+func (s *MysqlDashboardRepository) GetBookingData() (*dto.WeeklyBookingData, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -338,7 +527,7 @@ func (s *MysqlDashboardRepository) GetBookingData() (*models.WeeklyBookingData, 
             d.reportDate;
     `
 
-	bookingCountThisWeek := make([]models.DailyBookingData, 0)
+	bookingCountThisWeek := make([]dto.DailyBookingData, 0)
 	if err := s.db.SelectContext(ctx, &bookingCountThisWeek, bookingCountThisWeekQuery); err != nil {
 		return nil, err
 	}
@@ -391,7 +580,7 @@ func (s *MysqlDashboardRepository) GetBookingData() (*models.WeeklyBookingData, 
 	// Negative difference = good
 	difference := totalThisWeek - totalLastWeek
 
-	data := &models.WeeklyBookingData{
+	data := &dto.WeeklyBookingData{
 		Total:      totalThisWeek,
 		Daily:      bookingCountThisWeek,
 		Difference: difference,

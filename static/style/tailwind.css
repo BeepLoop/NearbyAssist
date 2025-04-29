@@ -18,6 +18,7 @@
     --color-warning-light: var(--color-yellow-500);
     --color-danger: var(--color-red-500);
     --color-danger-light: var(--color-red-400);
+    --color-ringe: var(--color-orange-600);
 
     --font-roboto: "Inter", sans-serif;
 }

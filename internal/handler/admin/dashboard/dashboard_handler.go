@@ -2,7 +2,7 @@ package dashboard
 
 import (
 	"context"
-	"nearbyassist/internal/models"
+	"nearbyassist/internal/dto"
 	dashboard_service "nearbyassist/internal/service/dashboard"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/dashboard"
@@ -25,12 +25,12 @@ func (h *dashboardHandler) GetDashboard(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
-	analytics, err := h.dashboardService.GetAnalytics()
+	data, err := h.dashboardService.GetDashbaordData()
 	if err != nil {
-		page := pages.Dashboard(*admin, models.DashboardModel{})
+		page := pages.Dashboard(*admin, dto.Dashboard{})
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	page := pages.Dashboard(*admin, *analytics)
+	page := pages.Dashboard(*admin, *data)
 	return page.Render(context.Background(), c.Response().Writer)
 }

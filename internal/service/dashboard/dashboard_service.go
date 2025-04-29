@@ -1,61 +1,64 @@
 package dashboard_service
 
 import (
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	dashboard_repo "nearbyassist/internal/repository/dashboard"
+	"nearbyassist/internal/service/core"
+	searchhistory "nearbyassist/internal/service/search_history"
+	"nearbyassist/internal/utils"
+	"slices"
 )
 
 type Service struct {
-	store dashboard_repo.DashboardRepository
+	dashboardStore dashboard_repo.DashboardRepository
+	encrypt        core.Encryption
 }
 
-func NewService(store dashboard_repo.DashboardRepository) *Service {
-	return &Service{store: store}
+func NewService(store dashboard_repo.DashboardRepository, encrypt core.Encryption) *Service {
+	return &Service{dashboardStore: store, encrypt: encrypt}
 }
 
-func (s *Service) GetAnalytics() (*models.DashboardModel, error) {
-	userData, err := s.store.GetUserData()
+func (s *Service) GetDashbaordData() (*dto.Dashboard, error) {
+	recentUsers, err := s.dashboardStore.RecentUsers()
 	if err != nil {
 		return nil, err
 	}
 
-	bugReportData, err := s.store.GetBugReportData()
-	if err != nil {
-		return nil, err
-	}
-
-	vendorReportData, err := s.store.GetVendorReportData()
-	if err != nil {
-		return nil, err
-	}
-
-	verificationRequests, err := s.store.GetIdentityVerificationRequestsData()
-	if err != nil {
-		return nil, err
-	}
-
-	vendorRequests, err := s.store.GetVendorApplicationRequestsData()
-	if err != nil {
-		return nil, err
-	}
-
-	bookingData, err := s.store.GetBookingData()
-	if err != nil {
-		return nil, err
-	}
-
-	dashboardData := &models.DashboardModel{
-		UserData:    *userData,
-		BookingData: *bookingData,
-		ReportData: models.ReportData{
-			WeeklyBugReport:    *bugReportData,
-			WeeklyVendorReport: *vendorReportData,
+	data := &dto.Dashboard{
+		Users: dto.DashboardUsers{
+			Total:      utils.Must(s.dashboardStore.TotalUsers()),
+			Reported:   utils.Must(s.dashboardStore.TotalReported()),
+			Restricted: utils.Must(s.dashboardStore.TotalRestricted()),
+			Vendor:     utils.Must(s.dashboardStore.TotalVendors()),
+			Recent: slices.AppendSeq(
+				make([]dto.User, 0),
+				utils.Map(recentUsers, func(user *models.UserModel) dto.User {
+					return dto.User{
+						Id:        user.Id,
+						Name:      utils.Must(s.encrypt.DecryptString(user.Name)),
+						Email:     utils.Must(s.encrypt.DecryptString(user.Email)),
+						ImageURL:  user.ImageUrl,
+						CreatedAt: utils.DateMonth(user.CreatedAt),
+					}
+				}),
+			),
 		},
-		RequestData: models.RequestData{
-			IdentityVerification: *verificationRequests,
-			VendorApplication:    *vendorRequests,
+		Services: dto.DashboardServices{
+			Total:  utils.Must(s.dashboardStore.TotalServices()),
+			Active: utils.Must(s.dashboardStore.TotalActiveServices()),
+		},
+		WeeklyBooking: *utils.Must(s.dashboardStore.GetBookingData()),
+		SearchTrend: dto.Trend{
+			Searches: searchhistory.New().GetAll(),
+		},
+		Application: dto.Application{
+			Pending: utils.Must(s.dashboardStore.TotalPendingApplications()),
+		},
+		Report: dto.DashboardReports{
+			Pending: utils.Must(s.dashboardStore.TotalActiveReports()),
 		},
 	}
 
-	return dashboardData, nil
+	return data, nil
 }

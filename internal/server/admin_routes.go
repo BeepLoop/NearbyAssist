@@ -69,7 +69,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		dashboardRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		dashboardStore := dashboard_repo.NewMysqlDashboardRepository(s.DB)
-		dashboardService := dashboard_service.NewService(dashboardStore)
+		dashboardService := dashboard_service.NewService(dashboardStore, s.Encrypt)
 		dashboardHandler := dashboard.NewHandler(dashboardService)
 
 		dashboardRoute.GET("", dashboardHandler.GetDashboard)

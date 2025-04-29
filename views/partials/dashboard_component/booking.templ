@@ -1,14 +1,14 @@
 package dashboardcomponent
 
 import (
-	"nearbyassist/internal/models"
+	"nearbyassist/internal/dto"
 	"nearbyassist/views/partials"
 	"strconv"
 )
 
 var loadBookingChart = templ.NewOnceHandle()
 
-templ Booking(data models.WeeklyBookingData) {
+templ Booking(data dto.WeeklyBookingData) {
 	<card class="w-full rounded-sm outline-1 outline-pale-gray hover:shadow-xl hover:outline-primary">
 		@templ.JSONScript("bookingData", data)
 		<div class="p-2">
