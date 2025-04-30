@@ -9,6 +9,7 @@ type AdminRepository interface {
 	GetAll() ([]*models.AdminModel, error)
 	GetAllWithRole(role string) ([]*models.AdminModel, error)
 	DoesUsernameExists(usernamehash string) (bool, error)
+	DoesEmailExists(emailHash string) (bool, error)
 	Suspend(id string) error
 	Unsuspend(id string) error
 }

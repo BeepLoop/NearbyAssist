@@ -2,6 +2,7 @@ package invite_service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -13,6 +14,13 @@ import (
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/mailer"
 	"nearbyassist/internal/utils"
+)
+
+const (
+	ERR_DUPLICATE_USERNAME = "username already taken"
+	ERR_DUPLICATE_EMAIL    = "email already registered"
+	ERR_EXPIRED_INVITE     = "invitation code already expired"
+	ERR_CODE_NOT_FOUND     = "invite code does not found"
 )
 
 type Service struct {
@@ -34,55 +42,41 @@ func NewService(adminStore admin_repo.AdminRepository, inviteStore invitation_re
 }
 
 func (s *Service) Invite(username, email, defaultPassword, duration string) error {
-	d, err := utils.ParseStringDuration(duration)
-	if err != nil {
+	usernameHash := utils.Must(s.hash.Generate([]byte(username)))
+	if doesExists, err := s.adminStore.DoesUsernameExists(usernameHash); err != nil {
 		return err
-	}
-	expiryDate := time.Now().Add(d)
-
-	encryptedUsername, err := s.encrypt.EncryptString(username)
-	if err != nil {
-		return err
+	} else {
+		if doesExists {
+			return errors.New(ERR_DUPLICATE_USERNAME)
+		}
 	}
 
-	usernameHash, err := s.hash.Generate([]byte(username))
-	if err != nil {
+	emailHash := utils.Must(s.hash.Generate([]byte(email)))
+	if doesExists, err := s.adminStore.DoesEmailExists(emailHash); err != nil {
 		return err
-	}
-
-	encryptedEmail, err := s.encrypt.EncryptString(email)
-	if err != nil {
-		return err
-	}
-
-	emailHash, err := s.hash.Generate([]byte(email))
-	if err != nil {
-		return err
+	} else {
+		if doesExists {
+			return errors.New(ERR_DUPLICATE_EMAIL)
+		}
 	}
 
 	// NOTE: Password is encrypted with AES256 instead of BCrypt in order to
 	// decrypt it and send an email to the user
-	encryptedDefaultPassword, err := s.encrypt.EncryptString(defaultPassword)
+	encryptedDefaultPassword := utils.Must(s.encrypt.EncryptString(defaultPassword))
+
+	d, err := utils.StringDaysToDuration(duration)
 	if err != nil {
 		return err
 	}
-
+	expiryDate := time.Now().Add(d)
 	invitation := &models.InvitationModel{
-		Username:     encryptedUsername,
+		Username:     utils.Must(s.encrypt.EncryptString(username)),
 		UsernameHash: usernameHash,
-		Email:        encryptedEmail,
+		Email:        utils.Must(s.encrypt.EncryptString(email)),
 		EmailHash:    emailHash,
 		Code:         utils.GenerateId(),
 		Password:     encryptedDefaultPassword,
 		ExpiredAt:    utils.FormatDateTime(expiryDate),
-	}
-
-	doesExists, err := s.adminStore.DoesUsernameExists(usernameHash)
-	if err != nil {
-		return err
-	}
-	if doesExists {
-		return errors.New("duplicate username")
 	}
 
 	if _, err := s.inviteStore.Create(invitation); err != nil {
@@ -107,41 +101,29 @@ func (s *Service) Invite(username, email, defaultPassword, duration string) erro
 func (s *Service) Join(code string) error {
 	invitation, err := s.inviteStore.FindByCode(code)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New(ERR_CODE_NOT_FOUND)
+		}
+
 		return err
 	}
 
-	isExpired, err := s.inviteStore.IsExpired(invitation.Id)
-	if err != nil {
+	if isExpired, err := s.inviteStore.IsExpired(invitation.Id); err != nil {
 		return err
-	}
-
-	if isExpired {
-		return errors.New("invitation expired")
+	} else {
+		if isExpired {
+			return errors.New(ERR_EXPIRED_INVITE)
+		}
 	}
 
 	if err := s.inviteStore.Accept(invitation.Id); err != nil {
 		return err
 	}
 
-	username, err := s.encrypt.DecryptString(invitation.Username)
-	if err != nil {
-		return err
-	}
-
-	password, err := s.encrypt.DecryptString(invitation.Password)
-	if err != nil {
-		return err
-	}
-
-	email, err := s.encrypt.DecryptString(invitation.Email)
-	if err != nil {
-		return err
-	}
-
 	payload := &mailer.InviteAcceptedPayload{
-		Username:  username,
-		Password:  password,
-		Email:     email,
+		Username:  utils.Must(s.encrypt.DecryptString(invitation.Username)),
+		Password:  utils.Must(s.encrypt.DecryptString(invitation.Password)),
+		Email:     utils.Must(s.encrypt.DecryptString(invitation.Email)),
 		LoginLink: fmt.Sprintf("%s/auth/login", config.Instance.DOMAIN),
 	}
 
