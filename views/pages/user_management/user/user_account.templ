@@ -16,7 +16,7 @@ templ UserAccount(user models.AdminModel, data dto.UserAccountDetail, flash stri
 		@partials.ToastNotification()
 		<!-- main content -->
 		<div class="mx-auto max-w-4xl">
-			<div class="flex justify-between items-center">
+			<div class="flex items-center justify-between">
 				<!-- back button -->
 				@partials.BackButton()
 				@actions(data.User)
@@ -150,15 +150,15 @@ templ profile(data dto.UserAccountDetail) {
 	<div class="mt-4">
 		<h2 class="text-xl font-medium text-neutral-dark">Identification</h2>
 		@partials.Divider()
-		<div class="mt-2 flex items-center gap-2">
+		<div class="mt-2 flex items-center gap-2 text-sm">
 			<span class="font-medium text-neutral-dark">ID Type:</span>
 			<p>{ data.User.Identification.Type }</p>
 		</div>
-		<div class="mt-2 flex items-center gap-2">
+		<div class="mt-2 flex items-center gap-2 text-sm">
 			<span class="font-medium text-neutral-dark">ID:</span>
 			<p>{ data.User.Identification.IdNumber }</p>
 		</div>
-		<div class="flex max-h-44 gap-2 mt-2">
+		<div class="mt-4 flex max-h-44 gap-2">
 			@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.FrontImageURL))
 			@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.BackImageURL))
 		</div>
@@ -168,14 +168,21 @@ templ profile(data dto.UserAccountDetail) {
 		<span class="text-xl font-medium text-neutral-dark">Socials:</span>
 		@partials.Divider()
 		<div class="mt-1.5">
-			<table class="w-full border-collapse">
+			<table class="w-full border-collapse text-xs">
 				for _, social := range data.User.Socials {
-					<li class="text-neutral-gray">{ social.Title } </li>
-					<tr>
-						<td>{ social.Site }</td>
-						<td>{ social.Title }</td>
-						<td>
-							<a href={ templ.URL(social.URL) } target="_blank">open</a>
+					<tr class="cursor-pointer hover:bg-neutral-gray/10">
+						<td class="p-2">{ social.Site }</td>
+						<td class="p-2">
+							<a
+								href={ templ.URL(social.URL) }
+								target="_blank"
+								class="flex w-min cursor-pointer gap-2 rounded-sm bg-warning-light/25 px-2 py-1.5 whitespace-nowrap text-warning outline-1 outline-warning hover:opacity-75"
+							>
+								<p>open</p>
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
+								</svg>
+							</a>
 						</td>
 					</tr>
 				}
