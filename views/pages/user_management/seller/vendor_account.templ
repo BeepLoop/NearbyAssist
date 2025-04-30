@@ -183,9 +183,18 @@ templ profile(data dto.VendorAccountDetail) {
 		<span class="text-xl font-medium text-neutral-dark">Socials:</span>
 		@partials.Divider()
 		<div class="mt-1.5">
-			for _, social := range data.Vendor.Socials {
-				<li class="text-neutral-gray">{ social } </li>
-			}
+			<table class="w-full border-collapse">
+				for _, social := range data.Vendor.Socials {
+					<li class="text-neutral-gray">{ social.Title } </li>
+					<tr>
+						<td>{ social.Site }</td>
+						<td>{ social.Title }</td>
+						<td>
+							<a href={ templ.URL(social.URL) } target="_blank">open</a>
+						</td>
+					</tr>
+				}
+			</table>
 		</div>
 	</div>
 	<!-- Expertise -->

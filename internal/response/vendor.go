@@ -7,6 +7,6 @@ type Vendor struct {
 	ImageUrl  string   `json:"imageUrl"`
 	Phone     string   `json:"phone"`
 	Rating    string   `json:"rating"`
-	Socials   []string `json:"socials"`
+	Socials   []Social `json:"socials"`
 	Expertise []string `json:"expertise"`
 }

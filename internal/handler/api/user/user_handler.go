@@ -117,36 +117,24 @@ func (h *userHandler) AddSocial(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
-	if err := h.userService.AddSocial(bearerToken, req.Url); err != nil {
+	socialId, err := h.userService.AddSocial(bearerToken, req)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error adding social",
 			Error:   err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusCreated, nil)
+	return c.JSON(http.StatusCreated, utils.Mapper{
+		"id": socialId,
+	})
 }
 
 func (h *userHandler) DeleteSocial(c echo.Context) error {
-	req := new(request.DeleteSocialPayload)
-	if err := c.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Error binding request body",
-			Error:   err.Error(),
-		})
-	}
-
-	if err := c.Validate(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-			Message: "Error validating request body",
-			Error:   err.Error(),
-		})
-	}
-
+	id := c.Param("id")
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.userService.DeleteSocial(bearerToken, req.Url); err != nil {
+	if err := h.userService.DeleteSocial(bearerToken, id); err != nil {
 		if strings.Contains(err.Error(), "social not found") {
 			return echo.NewHTTPError(http.StatusNotFound, models.Error{
 				Message: "social does not exists",

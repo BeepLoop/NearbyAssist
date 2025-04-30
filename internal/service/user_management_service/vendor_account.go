@@ -42,9 +42,14 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 			Address:  utils.Try(s.encrypt.DecryptString(account.User.Address.Address)),
 			Phone:    utils.Try(s.encrypt.DecryptString(account.User.Phone)),
 			Socials: slices.AppendSeq(
-				make([]string, 0),
-				utils.Map(account.User.Socials, func(social string) string {
-					return utils.Must(s.encrypt.DecryptString(social))
+				make([]dto.Social, 0),
+				utils.Map(account.User.Socials, func(social models.SocialModel) dto.Social {
+					return dto.Social{
+						Id:    social.Id,
+						Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+						Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+						URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+					}
 				}),
 			),
 			Identification: dto.Identification{
@@ -124,9 +129,14 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 						Email:    utils.Must(s.encrypt.DecryptString(client.Email)),
 						ImageURL: client.ImageUrl,
 						Socials: slices.AppendSeq(
-							make([]string, 0),
-							utils.Map(client.Socials, func(social string) string {
-								return utils.Must(s.encrypt.DecryptString(social))
+							make([]dto.Social, 0),
+							utils.Map(client.Socials, func(social models.SocialModel) dto.Social {
+								return dto.Social{
+									Id:    social.Id,
+									Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+									Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+									URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+								}
 							}),
 						),
 						CreatedAt:    utils.FormatDate(client.CreatedAt),
@@ -140,9 +150,14 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 						Email:    utils.Must(s.encrypt.DecryptString(account.User.Email)),
 						ImageURL: account.User.ImageUrl,
 						Socials: slices.AppendSeq(
-							make([]string, 0),
-							utils.Map(account.User.Socials, func(social string) string {
-								return utils.Must(s.encrypt.DecryptString(social))
+							make([]dto.Social, 0),
+							utils.Map(account.User.Socials, func(social models.SocialModel) dto.Social {
+								return dto.Social{
+									Id:    social.Id,
+									Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+									Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+									URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+								}
 							}),
 						),
 						Rating:       account.Rating,
@@ -220,9 +235,14 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 						Email:    utils.Must(s.encrypt.DecryptString(client.Email)),
 						ImageURL: client.ImageUrl,
 						Socials: slices.AppendSeq(
-							make([]string, 0),
-							utils.Map(client.Socials, func(social string) string {
-								return utils.Must(s.encrypt.DecryptString(social))
+							make([]dto.Social, 0),
+							utils.Map(client.Socials, func(social models.SocialModel) dto.Social {
+								return dto.Social{
+									Id:    social.Id,
+									Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+									Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+									URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+								}
 							}),
 						),
 						CreatedAt:    utils.FormatDate(client.CreatedAt),
@@ -236,9 +256,14 @@ func (s *Service) GetVendorAccountDetail(userId string) (*dto.VendorAccountDetai
 						Email:    utils.Must(s.encrypt.DecryptString(account.User.Email)),
 						ImageURL: account.User.ImageUrl,
 						Socials: slices.AppendSeq(
-							make([]string, 0),
-							utils.Map(account.User.Socials, func(social string) string {
-								return utils.Must(s.encrypt.DecryptString(social))
+							make([]dto.Social, 0),
+							utils.Map(account.User.Socials, func(social models.SocialModel) dto.Social {
+								return dto.Social{
+									Id:    social.Id,
+									Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+									Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+									URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+								}
 							}),
 						),
 						Rating:       account.Rating,

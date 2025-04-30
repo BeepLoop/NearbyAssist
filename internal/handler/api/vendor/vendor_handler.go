@@ -56,7 +56,17 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		ImageUrl: vendor.User.ImageUrl,
 		Phone:    vendor.User.Phone,
 		Rating:   vendor.Rating,
-		Socials:  vendor.User.Socials,
+		Socials: slices.AppendSeq(
+			make([]response.Social, 0),
+			utils.Map(vendor.User.Socials, func(social models.SocialModel) response.Social {
+				return response.Social{
+					Id:    social.Id,
+					Site:  social.Site,
+					Title: social.Title,
+					URL:   social.Url,
+				}
+			}),
+		),
 		Expertise: slices.AppendSeq(
 			make([]string, 0),
 			utils.Map(vendor.Expertise, func(e models.ExpertiseModel) string { return e.Title }),
@@ -99,7 +109,17 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 			ImageUrl: vendor.User.ImageUrl,
 			Phone:    vendor.User.Phone,
 			Rating:   vendor.Rating,
-			Socials:  vendor.User.Socials,
+			Socials: slices.AppendSeq(
+				make([]response.Social, 0),
+				utils.Map(vendor.User.Socials, func(social models.SocialModel) response.Social {
+					return response.Social{
+						Id:    social.Id,
+						Site:  social.Site,
+						Title: social.Title,
+						URL:   social.Url,
+					}
+				}),
+			),
 			Expertise: slices.AppendSeq(
 				make([]string, 0),
 				utils.Map(vendor.Expertise, func(e models.ExpertiseModel) string { return e.Title }),

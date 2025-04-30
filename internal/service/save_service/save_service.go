@@ -145,7 +145,17 @@ func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServ
 				ImageUrl: vendor.User.ImageUrl,
 				Phone:    vendor.User.Phone,
 				Rating:   vendor.Rating,
-				Socials:  vendor.User.Socials,
+				Socials: slices.AppendSeq(
+					make([]response.Social, 0),
+					utils.Map(vendor.User.Socials, func(social models.SocialModel) response.Social {
+						return response.Social{
+							Id:    social.Id,
+							Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+							Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+							URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+						}
+					}),
+				),
 				Expertise: slices.AppendSeq(
 					make([]string, 0),
 					utils.Map(vendor.Expertise, func(e models.ExpertiseModel) string { return e.Title }),

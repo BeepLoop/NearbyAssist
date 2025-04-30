@@ -12,6 +12,7 @@ import (
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/utils"
+	"slices"
 )
 
 const (
@@ -51,69 +52,59 @@ func NewService(
 }
 
 func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse, error) {
-	emailHash, err := s.hash.Generate([]byte(req.Email))
-	if err != nil {
-		return nil, err
-	}
-
-	existingUser, err := s.userStore.FindByEmailHash(emailHash)
+	emailHash := utils.Must(s.hash.Generate([]byte(req.Email)))
+	user, err := s.userStore.FindByEmailHash(emailHash)
 	if err != nil {
 		return nil, errors.New(ERR_NOT_FOUND)
 	}
 
 	// Check if the user is banned
-	if existingUser.Banned {
+	if user.Banned {
 		return nil, errors.New(ERR_BANNED_USER)
 	}
-	existingUser.Name = utils.Must(s.encrypt.DecryptString(existingUser.Name))
-	existingUser.Email = utils.Must(s.encrypt.DecryptString(existingUser.Email))
-	existingUser.Address.Address = utils.Must(s.encrypt.DecryptString(existingUser.Address.Address))
-	existingUser.Phone = utils.Must(s.encrypt.DecryptString(existingUser.Phone))
 
-	isVendor, err := s.userStore.IsVendor(existingUser.Id)
+	isVendor, err := s.userStore.IsVendor(user.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	vendorExpertises := make([]response.Expertise, 0)
 	if isVendor {
-		expertises, err := s.userStore.GetExpertise(existingUser.Id)
+		expertises, err := s.userStore.GetExpertise(user.Id)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, expertise := range expertises {
-			expertiseTags := make([]response.Tag, 0)
-
-			for _, tag := range expertise.Tags {
-				expertiseTags = append(expertiseTags, response.Tag{
-					Id:    tag.Id,
-					Title: tag.Title,
-				})
-			}
-
-			vendorExpertises = append(vendorExpertises, response.Expertise{
-				Id:    expertise.Id,
-				Title: expertise.Title,
-				Tags:  expertiseTags,
-			})
-		}
+		slices.AppendSeq(
+			vendorExpertises,
+			utils.Map(expertises, func(expertise *models.ExpertiseModel) response.Expertise {
+				return response.Expertise{
+					Id:    expertise.Id,
+					Title: expertise.Title,
+					Tags: slices.AppendSeq(
+						make([]response.Tag, 0),
+						utils.Map(expertise.Tags, func(tag *models.TagModel) response.Tag {
+							return response.Tag{
+								Id:    tag.Id,
+								Title: tag.Title,
+							}
+						}),
+					),
+				}
+			}),
+		)
 	}
 
 	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
-		UserId: existingUser.Id,
-		Name:   existingUser.Name,
-		Email:  existingUser.Email,
+		UserId: user.Id,
+		Name:   user.Name,
+		Email:  user.Email,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := s.jwt.GenerateRefreshToken()
-	if err != nil {
-		return nil, err
-	}
-
+	refreshToken := utils.Must(s.jwt.GenerateRefreshToken())
 	session := models.NewSessionModel(refreshToken)
 	if err := s.userAuthStore.Login(session); err != nil {
 		return nil, err
@@ -123,18 +114,29 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		User: response.DetailedUser{
-			Id:           existingUser.Id,
-			Name:         existingUser.Name,
-			Email:        existingUser.Email,
-			ImageUrl:     existingUser.ImageUrl,
-			IsVerified:   existingUser.Verified,
-			IsVendor:     isVendor,
-			Address:      existingUser.Address.Address,
-			Phone:        existingUser.Phone,
-			Latitude:     existingUser.Address.Latitude,
-			Longitude:    existingUser.Address.Longitude,
-			Expertises:   vendorExpertises,
-			IsRestricted: existingUser.Restricted,
+			Id:         user.Id,
+			Name:       utils.Must(s.encrypt.DecryptString(user.Name)),
+			Email:      utils.Must(s.encrypt.DecryptString(user.Email)),
+			ImageUrl:   user.ImageUrl,
+			IsVerified: user.Verified,
+			IsVendor:   isVendor,
+			Address:    utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+			Phone:      utils.Must(s.encrypt.DecryptString(user.Phone)),
+			Latitude:   user.Address.Latitude,
+			Longitude:  user.Address.Longitude,
+			Expertises: vendorExpertises,
+			Socials: slices.AppendSeq(
+				make([]response.Social, 0),
+				utils.Map(user.Socials, func(social models.SocialModel) response.Social {
+					return response.Social{
+						Id:    social.Id,
+						Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+						Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+						URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+					}
+				}),
+			),
+			IsRestricted: user.Restricted,
 		},
 	}
 
@@ -239,12 +241,9 @@ func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.
 		return nil, err
 	}
 
-	refreshToken, err := s.jwt.GenerateRefreshToken()
-	if err != nil {
-		return nil, err
-	}
-
+	refreshToken := utils.Must(s.jwt.GenerateRefreshToken())
 	session := models.NewSessionModel(refreshToken)
+
 	if err := s.userAuthStore.Login(session); err != nil {
 		return nil, err
 	}
@@ -264,6 +263,7 @@ func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.
 			Latitude:     req.Latitude,
 			Longitude:    req.Longitude,
 			Expertises:   make([]response.Expertise, 0),
+			Socials:      make([]response.Social, 0),
 			IsRestricted: false,
 		},
 	}

@@ -292,9 +292,14 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				Email:    utils.Must(s.encrypt.DecryptString(reporter.Email)),
 				ImageURL: reporter.ImageUrl,
 				Socials: slices.AppendSeq(
-					make([]string, 0),
-					utils.Map(reporter.Socials, func(social string) string {
-						return utils.Must(s.encrypt.DecryptString(social))
+					make([]dto.Social, 0),
+					utils.Map(reporter.Socials, func(social models.SocialModel) dto.Social {
+						return dto.Social{
+							Id:    social.Id,
+							Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+							Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+							URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+						}
 					}),
 				),
 				CreatedAt:    utils.FormatDate(reporter.CreatedAt),
@@ -310,9 +315,14 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				Address:  utils.Try(s.encrypt.DecryptString(vendor.User.Address.Address)),
 				Phone:    utils.Try(s.encrypt.DecryptString(vendor.User.Phone)),
 				Socials: slices.AppendSeq(
-					make([]string, 0),
-					utils.Map(vendor.User.Socials, func(social string) string {
-						return utils.Must(s.encrypt.DecryptString(social))
+					make([]dto.Social, 0),
+					utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
+						return dto.Social{
+							Id:    social.Id,
+							Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+							Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+							URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+						}
 					}),
 				),
 				Rating:       vendor.Rating,
@@ -383,9 +393,14 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			Address:  utils.Must(s.encrypt.DecryptString(reporter.Address.Address)),
 			Phone:    utils.Must(s.encrypt.DecryptString(reporter.Phone)),
 			Socials: slices.AppendSeq(
-				make([]string, 0),
-				utils.Map(reported.Socials, func(social string) string {
-					return utils.Must(s.encrypt.DecryptString(social))
+				make([]dto.Social, 0),
+				utils.Map(reporter.Socials, func(social models.SocialModel) dto.Social {
+					return dto.Social{
+						Id:    social.Id,
+						Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+						Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+						URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+					}
 				}),
 			),
 			CreatedAt:    utils.FormatDate(reporter.CreatedAt),
@@ -401,9 +416,14 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			Address:  utils.Must(s.encrypt.DecryptString(reported.Address.Address)),
 			Phone:    utils.Must(s.encrypt.DecryptString(reported.Phone)),
 			Socials: slices.AppendSeq(
-				make([]string, 0),
-				utils.Map(reported.Socials, func(social string) string {
-					return utils.Must(s.encrypt.DecryptString(social))
+				make([]dto.Social, 0),
+				utils.Map(reported.Socials, func(social models.SocialModel) dto.Social {
+					return dto.Social{
+						Id:    social.Id,
+						Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+						Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+						URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+					}
 				}),
 			),
 			CreatedAt:    utils.FormatDate(reported.CreatedAt),

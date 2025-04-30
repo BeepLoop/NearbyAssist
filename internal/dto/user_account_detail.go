@@ -20,7 +20,7 @@ type User struct {
 	ImageURL       string
 	Address        string
 	Phone          string
-	Socials        []string
+	Socials        []Social
 	Identification Identification
 	CreatedAt      string
 	DateVerified   string
@@ -35,7 +35,7 @@ type Vendor struct {
 	ImageURL       string
 	Address        string
 	Phone          string
-	Socials        []string
+	Socials        []Social
 	Identification Identification
 	Rating         string
 	Expertise      []Expertise
@@ -103,4 +103,11 @@ type Address struct {
 	Address   string
 	Latitude  float64
 	Longitude float64
+}
+
+type Social struct {
+	Id    string
+	Site  string
+	Title string
+	URL   string
 }

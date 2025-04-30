@@ -9,6 +9,7 @@ import (
 	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
 	repository "nearbyassist/internal/repository/user"
 	vendor_repo "nearbyassist/internal/repository/vendor"
+	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
@@ -98,7 +99,17 @@ func (s *Service) GetAllBasicUsers(limit, offset int) ([]dto.User, error) {
 				ImageURL: account.ImageUrl,
 				Address:  utils.Must(s.encrypt.DecryptString(account.Address.Address)),
 				Phone:    utils.Must(s.encrypt.DecryptString(account.Phone)),
-				Socials:  account.Socials,
+				Socials: slices.AppendSeq(
+					make([]dto.Social, 0),
+					utils.Map(account.Socials, func(social models.SocialModel) dto.Social {
+						return dto.Social{
+							Id:    social.Id,
+							Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+							Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+							URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+						}
+					}),
+				),
 				Identification: dto.Identification{
 					Type:          account.Identification.Type,
 					IdNumber:      utils.Must(s.encrypt.DecryptString(account.Identification.ReferenceNumber)),
@@ -130,7 +141,17 @@ func (s *Service) FindByEmail(email string) (*dto.User, error) {
 		ImageURL: user.ImageUrl,
 		Address:  utils.Must(s.encrypt.DecryptString(user.Address.Address)),
 		Phone:    utils.Must(s.encrypt.DecryptString(user.Phone)),
-		Socials:  user.Socials,
+		Socials: slices.AppendSeq(
+			make([]dto.Social, 0),
+			utils.Map(user.Socials, func(social models.SocialModel) dto.Social {
+				return dto.Social{
+					Id:    social.Id,
+					Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+					Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+					URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+				}
+			}),
+		),
 		Identification: dto.Identification{
 			Type:          user.Identification.Type,
 			IdNumber:      utils.Must(s.encrypt.DecryptString(user.Identification.ReferenceNumber)),
@@ -171,17 +192,6 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		return nil, err
 	}
 
-	decryptedSocials := make([]string, 0)
-	for _, social := range user.Socials {
-		decrypted, err := s.encrypt.DecryptString(social)
-		if err != nil {
-			return nil, err
-		}
-
-		decryptedSocials = append(decryptedSocials, decrypted)
-	}
-	user.Socials = decryptedSocials
-
 	vendorExpertises := make([]response.Expertise, 0)
 	if isVendor {
 		expertises, err := s.userStore.GetExpertise(user.Id)
@@ -208,18 +218,28 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 	}
 
 	response := &response.DetailedUser{
-		Id:           user.Id,
-		Name:         utils.Must(s.encrypt.DecryptString(user.Name)),
-		Email:        utils.Must(s.encrypt.DecryptString(user.Email)),
-		ImageUrl:     user.ImageUrl,
-		IsVerified:   user.Verified,
-		IsVendor:     isVendor,
-		Address:      utils.Must(s.encrypt.DecryptString(user.Address.Address)),
-		Phone:        utils.Must(s.encrypt.DecryptString(user.Phone)),
-		Latitude:     user.Address.Latitude,
-		Longitude:    user.Address.Longitude,
-		Expertises:   vendorExpertises,
-		Socials:      user.Socials,
+		Id:         user.Id,
+		Name:       utils.Must(s.encrypt.DecryptString(user.Name)),
+		Email:      utils.Must(s.encrypt.DecryptString(user.Email)),
+		ImageUrl:   user.ImageUrl,
+		IsVerified: user.Verified,
+		IsVendor:   isVendor,
+		Address:    utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+		Phone:      utils.Must(s.encrypt.DecryptString(user.Phone)),
+		Latitude:   user.Address.Latitude,
+		Longitude:  user.Address.Longitude,
+		Expertises: vendorExpertises,
+		Socials: slices.AppendSeq(
+			make([]response.Social, 0),
+			utils.Map(user.Socials, func(social models.SocialModel) response.Social {
+				return response.Social{
+					Id:    social.Id,
+					Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+					Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+					URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+				}
+			}),
+		),
 		IsRestricted: isRestricted && !isRestrictionExpired,
 	}
 
@@ -240,56 +260,34 @@ func (s *Service) IsVerified(bearerToken string) (bool, error) {
 	return user.Verified, nil
 }
 
-func (s *Service) AddSocial(bearerToken, url string) error {
+func (s *Service) AddSocial(bearerToken string, req *request.AddSocialPayload) (string, error) {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	encrypted, err := s.encrypt.EncryptString(url)
+	social := &models.SocialModel{
+		UserId: userId,
+		Site:   utils.Must(s.encrypt.EncryptString(req.Site)),
+		Title:  utils.Must(s.encrypt.EncryptString(req.Title)),
+		Url:    utils.Must(s.encrypt.EncryptString(req.Url)),
+	}
+
+	id, err := s.userStore.AddSocial(social)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	social := new(models.SocialModel)
-	social.UserId = userId
-	social.Url = encrypted
-
-	if err := s.userStore.AddSocial(social); err != nil {
-		return err
-	}
-
-	return nil
+	return id, nil
 }
 
-func (s *Service) DeleteSocial(bearerToken, url string) error {
+func (s *Service) DeleteSocial(bearerToken, id string) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
 	}
 
-	socials, err := s.userStore.GetSocials(userId)
-	if err != nil {
-		return err
-	}
-
-	var socialId string
-	for _, social := range socials {
-		decrypted, err := s.encrypt.DecryptString(social.Url)
-		if err != nil {
-			return err
-		}
-
-		if decrypted == url {
-			socialId = social.Id
-		}
-	}
-
-	if socialId == "" {
-		return errors.New("social not found")
-	}
-
-	if err := s.userStore.DeleteSocial(userId, socialId); err != nil {
+	if err := s.userStore.DeleteSocial(userId, id); err != nil {
 		return err
 	}
 

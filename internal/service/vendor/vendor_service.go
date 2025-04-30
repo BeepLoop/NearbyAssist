@@ -52,9 +52,14 @@ func (s *Service) GetAll(limit, offset int) ([]dto.Vendor, error) {
 				Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
 				Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
 				Socials: slices.AppendSeq(
-					make([]string, 0),
-					utils.Map(vendor.User.Socials, func(social string) string {
-						return utils.Must(s.encrypt.DecryptString(social))
+					make([]dto.Social, 0),
+					utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
+						return dto.Social{
+							Id:    social.Id,
+							Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+							Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+							URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+						}
 					}),
 				),
 				Identification: dto.Identification{
@@ -93,9 +98,14 @@ func (s *Service) FindByEmail(email string) (*dto.Vendor, error) {
 		Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
 		Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
 		Socials: slices.AppendSeq(
-			make([]string, 0),
-			utils.Map(vendor.User.Socials, func(social string) string {
-				return utils.Must(s.encrypt.DecryptString(social))
+			make([]dto.Social, 0),
+			utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
+				return dto.Social{
+					Id:    social.Id,
+					Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+					Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+					URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+				}
 			}),
 		),
 		Identification: dto.Identification{
@@ -136,9 +146,14 @@ func (s *Service) FindById(id string) (*models.VendorModel, error) {
 			Banned:     vendor.User.Banned,
 			Restricted: vendor.User.Restricted,
 			Socials: slices.AppendSeq(
-				make([]string, 0),
-				utils.Map(vendor.User.Socials, func(social string) string {
-					return utils.Must(s.encrypt.DecryptString(social))
+				make([]models.SocialModel, 0),
+				utils.Map(vendor.User.Socials, func(social models.SocialModel) models.SocialModel {
+					return models.SocialModel{
+						Model: social.Model,
+						Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+						Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+						Url:   utils.Must(s.encrypt.DecryptString(social.Url)),
+					}
 				}),
 			),
 			Address: models.AddressModel{

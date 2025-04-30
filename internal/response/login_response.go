@@ -12,7 +12,7 @@ type DetailedUser struct {
 	Latitude     float64     `json:"latitude"`
 	Longitude    float64     `json:"longitude"`
 	Expertises   []Expertise `json:"expertises"`
-	Socials      []string    `json:"socials"`
+	Socials      []Social    `json:"socials"`
 	IsRestricted bool        `json:"isRestricted"`
 }
 
@@ -20,4 +20,11 @@ type LoginResponse struct {
 	AccessToken  string       `json:"accessToken"`
 	RefreshToken string       `json:"refreshToken"`
 	User         DetailedUser `json:"user"`
+}
+
+type Social struct {
+	Id    string `json:"id"`
+	Site  string `json:"site"`
+	Title string `json:"title"`
+	URL   string `json:"url"`
 }

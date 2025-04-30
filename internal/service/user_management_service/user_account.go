@@ -37,9 +37,14 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 			Address:  utils.Try(s.encrypt.DecryptString(user.Address.Address)),
 			Phone:    utils.Try(s.encrypt.DecryptString(user.Phone)),
 			Socials: slices.AppendSeq(
-				make([]string, 0),
-				utils.Map(user.Socials, func(social string) string {
-					return utils.Must(s.encrypt.DecryptString(social))
+				make([]dto.Social, 0),
+				utils.Map(user.Socials, func(social models.SocialModel) dto.Social {
+					return dto.Social{
+						Id:    social.Id,
+						Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+						Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+						URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+					}
 				}),
 			),
 			Identification: dto.Identification{
@@ -67,9 +72,14 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
 						ImageURL: user.ImageUrl,
 						Socials: slices.AppendSeq(
-							make([]string, 0),
-							utils.Map(vendor.User.Socials, func(social string) string {
-								return utils.Must(s.encrypt.DecryptString(social))
+							make([]dto.Social, 0),
+							utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
+								return dto.Social{
+									Id:    social.Id,
+									Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+									Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+									URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+								}
 							}),
 						),
 						CreatedAt:    utils.FormatDate(user.CreatedAt),
@@ -83,9 +93,14 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
 						ImageURL: vendor.User.ImageUrl,
 						Socials: slices.AppendSeq(
-							make([]string, 0),
-							utils.Map(vendor.User.Socials, func(social string) string {
-								return utils.Must(s.encrypt.DecryptString(social))
+							make([]dto.Social, 0),
+							utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
+								return dto.Social{
+									Id:    social.Id,
+									Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+									Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+									URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+								}
 							}),
 						),
 						Rating:       vendor.Rating,
@@ -161,9 +176,14 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
 						ImageURL: user.ImageUrl,
 						Socials: slices.AppendSeq(
-							make([]string, 0),
-							utils.Map(user.Socials, func(social string) string {
-								return utils.Must(s.encrypt.DecryptString(social))
+							make([]dto.Social, 0),
+							utils.Map(user.Socials, func(social models.SocialModel) dto.Social {
+								return dto.Social{
+									Id:    social.Id,
+									Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+									Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+									URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+								}
 							}),
 						),
 						CreatedAt:    utils.FormatDate(user.CreatedAt),
@@ -177,9 +197,14 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
 						ImageURL: vendor.User.ImageUrl,
 						Socials: slices.AppendSeq(
-							make([]string, 0),
-							utils.Map(vendor.User.Socials, func(social string) string {
-								return utils.Must(s.encrypt.DecryptString(social))
+							make([]dto.Social, 0),
+							utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
+								return dto.Social{
+									Id:    social.Id,
+									Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+									Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+									URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+								}
 							}),
 						),
 						Rating:       vendor.Rating,

@@ -216,9 +216,15 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 		return nil, err
 	} else {
 		user.Socials = slices.AppendSeq(
-			make([]string, 0),
-			utils.Map(socials, func(social *models.SocialModel) string {
-				return social.Url
+			make([]models.SocialModel, 0),
+			utils.Map(socials, func(social *models.SocialModel) models.SocialModel {
+				return models.SocialModel{
+					Model:  social.Model,
+					UserId: social.UserId,
+					Site:   social.Site,
+					Title:  social.Title,
+					Url:    social.Url,
+				}
 			}),
 		)
 	}
@@ -276,9 +282,15 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
 		return nil, err
 	} else {
 		user.Socials = slices.AppendSeq(
-			make([]string, 0),
-			utils.Map(socials, func(social *models.SocialModel) string {
-				return social.Url
+			make([]models.SocialModel, 0),
+			utils.Map(socials, func(social *models.SocialModel) models.SocialModel {
+				return models.SocialModel{
+					Model:  social.Model,
+					UserId: social.UserId,
+					Site:   social.Site,
+					Title:  social.Title,
+					Url:    social.Url,
+				}
 			}),
 		)
 	}
@@ -322,7 +334,7 @@ func (s *MysqlUserRepository) GetSocials(userId string) ([]*models.SocialModel, 
 
 	query := `
         SELECT
-            id, userId, url, createdAt
+            id, userId, site, title, url, createdAt
         FROM
             Social
         WHERE
@@ -437,28 +449,27 @@ func (s *MysqlUserRepository) GetExpertise(userId string) ([]*models.ExpertiseMo
 	return expertises, nil
 }
 
-func (s *MysqlUserRepository) AddSocial(data *models.SocialModel) error {
+func (s *MysqlUserRepository) AddSocial(data *models.SocialModel) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	addSocialQuery := `
         INSERT INTO
-            Social (id, userId, url)
+            Social (id, userId, site, title, url)
         VALUES
-            (:id, :userId, :url)
+            (:id, :userId, :site, :title, :url)
     `
 
 	data.Id = utils.GenerateId()
-
 	if _, err := s.db.NamedExecContext(ctx, addSocialQuery, data); err != nil {
-		return err
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
+		return "", context.DeadlineExceeded
 	}
 
-	return nil
+	return data.Id, nil
 }
 
 func (s *MysqlUserRepository) DeleteSocial(userId, id string) error {

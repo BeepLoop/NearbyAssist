@@ -81,9 +81,15 @@ func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.Vendo
 		return nil, err
 	} else {
 		vendor.User.Socials = slices.AppendSeq(
-			make([]string, 0),
-			utils.Map(socials, func(social *models.SocialModel) string {
-				return social.Url
+			make([]models.SocialModel, 0),
+			utils.Map(socials, func(social *models.SocialModel) models.SocialModel {
+				return models.SocialModel{
+					Model:  social.Model,
+					UserId: social.UserId,
+					Site:   social.Site,
+					Title:  social.Title,
+					Url:    social.Url,
+				}
 			}),
 		)
 	}
@@ -168,9 +174,15 @@ func (s *MysqlVendorRepository) FindById(vendorId string) (*models.VendorModel, 
 		return nil, err
 	} else {
 		vendor.User.Socials = slices.AppendSeq(
-			make([]string, 0),
-			utils.Map(socials, func(social *models.SocialModel) string {
-				return social.Url
+			make([]models.SocialModel, 0),
+			utils.Map(socials, func(social *models.SocialModel) models.SocialModel {
+				return models.SocialModel{
+					Model:  social.Model,
+					UserId: social.UserId,
+					Site:   social.Site,
+					Title:  social.Title,
+					Url:    social.Url,
+				}
 			}),
 		)
 	}
@@ -547,7 +559,7 @@ func (s *MysqlVendorRepository) getSocials(userId string) ([]*models.SocialModel
 
 	query := `
         SELECT
-            id, userId, url, createdAt
+            id, userId, site, title, url, createdAt
         FROM
             Social
         WHERE

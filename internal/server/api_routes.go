@@ -123,7 +123,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userRoute.GET("/verify", handler.CheckVerificationStatus)
 		userRoute.POST("/verify", handler.VerifyAccount)
 		userRoute.POST("/socials", handler.AddSocial)
-		userRoute.DELETE("/socials", handler.DeleteSocial)
+		userRoute.DELETE("/socials/:id", handler.DeleteSocial)
 		userRoute.POST("/addExpertise", handler.AddExpertise)
 	}
 
