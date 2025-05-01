@@ -1,8 +1,12 @@
 package models
 
+import "database/sql"
+
 type MessageModel struct {
 	Model
-	Sender   string `json:"sender" db:"sender"`
-	Receiver string `json:"receiver" db:"receiver"`
-	Content  string `json:"content" db:"content"`
+	Sender   string         `db:"sender"`
+	Receiver string         `db:"receiver"`
+	Content  string         `db:"content"`
+	Seen     bool           `db:"seen"`
+	SeenAt   sql.NullString `db:"seenAt"`
 }

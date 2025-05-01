@@ -298,12 +298,15 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		chatRoute.Use(middleware.CheckAuth(s.JWT))
 
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		messageStore := message_repo.NewMysqlChatRepository(s.DB)
-		messageService := message_service.NewService(messageStore, s.WS, s.Encrypt, s.JWT)
+
+		messageService := message_service.NewService(userStore, messageStore, s.WS, s.Encrypt, s.JWT)
 		handler := message.NewHandler(messageService)
 
 		chatRoute.POST("/send", handler.SendMessage)
 		chatRoute.GET("/messages/:otherUserId", handler.GetMessages)
+		chatRoute.PUT("/markSeen", handler.MarkSeen)
 		chatRoute.GET("/conversations", handler.GetConversationList)
 	}
 

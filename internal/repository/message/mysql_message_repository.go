@@ -39,13 +39,37 @@ func (s *MysqlMessageRepository) Create(data *models.MessageModel) (string, erro
 	return data.Id, nil
 }
 
+func (s *MysqlMessageRepository) FindById(messageId string) (*models.MessageModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            id, sender, receiver, content, seen, seenAt, createdAt
+        FROM
+            Message
+        WHERE
+            id = ?
+    `
+	message := new(models.MessageModel)
+	if err := s.db.GetContext(ctx, message, query, messageId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return message, nil
+}
+
 func (s *MysqlMessageRepository) GetMessages(user1, user2 string) ([]*models.MessageModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	query := `
         SELECT
-            id, sender, receiver, content, createdAt
+            id, sender, receiver, content, createdAt, seen, seenAt
         FROM
             Message
         WHERE
@@ -68,6 +92,42 @@ func (s *MysqlMessageRepository) GetMessages(user1, user2 string) ([]*models.Mes
 	return messages, nil
 }
 
+func (s *MysqlMessageRepository) MarkSeen(messageId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	query := `
+        UPDATE
+            Message
+        SET
+            seen = 1, seenAt = CURRENT_TIMESTAMP()
+        WHERE
+            id = ?
+    `
+	if _, err := tx.ExecContext(ctx, query, messageId); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlMessageRepository) GetConversations(userId string) ([]*models.ConversationModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -78,7 +138,9 @@ func (s *MysqlMessageRepository) GetConversations(userId string) ([]*models.Conv
             u.name,
             u.imageUrl,
             m.content AS lastMessage,
-            m.createdAt AS lastMessageDate
+            m.sender AS lastMessageSender,
+            m.createdAt AS lastMessageDate,
+            m.seen AS seenLastMessage
         FROM 
             User u
             JOIN (

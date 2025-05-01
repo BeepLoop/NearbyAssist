@@ -73,7 +73,9 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 		),
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"vendor": response,
+	})
 }
 
 func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
