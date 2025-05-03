@@ -21,7 +21,7 @@ type BookingRepository interface {
 	GetHistory(id, filter string) ([]*models.BookingModel, error)
 	GetReviewableBookings(userId string) ([]*models.BookingModel, error)
 
-	Cancel(bookingId, reason string) error
+	Cancel(bookingId, cancelledBy, reason string) error
 	Accept(bookingId, schedule string) error
 	Reject(bookingId, reason string) error
 	MarkComplete(bookingId string) error

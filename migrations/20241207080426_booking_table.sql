@@ -9,11 +9,13 @@ CREATE TABLE IF NOT EXISTS Booking (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     scheduledAt TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    cancelledBy VARCHAR(255),
     cancelReason TEXT,
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY(serviceId) REFERENCES Service(id) ON DELETE CASCADE,
     FOREIGN KEY(clientId) REFERENCES User(id),
+    FOREIGN KEY(cancelledBy) REFERENCES User(id),
     INDEX(id)
 );
 -- +goose StatementBegin

@@ -584,7 +584,7 @@ func (s *MysqlBookingRepository) GetReviewableBookings(userId string) ([]*models
 	return bookings, nil
 }
 
-func (s *MysqlBookingRepository) Cancel(bookingId, reason string) error {
+func (s *MysqlBookingRepository) Cancel(bookingId, cancelledBy, reason string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -592,11 +592,11 @@ func (s *MysqlBookingRepository) Cancel(bookingId, reason string) error {
         UPDATE 
             Booking 
         SET 
-            cancelReason = ?, status = 'cancelled'
+            cancelReason = ?, status = 'cancelled', cancelledBy = ?
         WHERE 
             id = ?
     `
-	if _, err := s.db.ExecContext(ctx, query, reason, bookingId); err != nil {
+	if _, err := s.db.ExecContext(ctx, query, reason, cancelledBy, bookingId); err != nil {
 		return err
 	}
 

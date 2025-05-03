@@ -148,7 +148,83 @@ func (s *Service) GetBooking(bookingId string) (*models.BookingModel, error) {
 	return booking, nil
 }
 
-func (s *Service) CancelBooking(bearerToken string, req *request.CancelRequestPayload) error {
+func (s *Service) VendorCancelBooking(bearerToken string, req *request.CancelBookingPayload) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	booking, err := s.bookingStore.FindById(req.BookingId)
+	if err != nil {
+		return err
+	}
+	if booking.VendorId != userId {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+	if booking.Status != models.BOOKING_STATUS_CONFIRMED {
+		return errors.New(ERR_DISALLOWED_ACTION)
+	}
+	if booking.Status == models.BOOKING_STATUS_DONE || booking.Status == models.BOOKING_STATUS_CANCELLED {
+		return errors.New(ERR_DISALLOWED_ACTION)
+	}
+
+	schedule, err := utils.StringToDateTime(booking.ScheduledAt.String)
+	if err != nil {
+		return err
+	}
+	now, err := utils.StringToDateTime(utils.CurrentTimeStamp())
+	if err != nil {
+		return err
+	}
+	if !now.After(schedule) {
+		return errors.New(ERR_DISALLOWED_ACTION)
+	}
+
+	encryptedReason := utils.Must(s.encrypt.EncryptString(req.Reason))
+	if err := s.bookingStore.Cancel(req.BookingId, userId, encryptedReason); err != nil {
+		return err
+	}
+
+	notificationHeading := "Booking Cancelled"
+	notificationContent := "Vendor cancelled your booking with them"
+
+	notification := &models.NotificationModel{
+		Recipient: booking.ClientId,
+		Type:      "fail",
+		Title:     "Scheduled booking cancelled",
+		Content:   fmt.Sprintf("The vendor cancelled your scheduled booking with them. Rason: %s", req.Reason),
+	}
+
+	encryptedNotification := &models.NotificationModel{
+		Recipient: booking.ClientId,
+		Type:      "fail",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
+	}
+
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
+		return err
+	} else {
+		notification.Id = notifId
+	}
+
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(booking.ClientId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: booking.ClientId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+
+	s.ws.Send(notifEvent)
+
+	return nil
+}
+
+func (s *Service) ClientCancelBooking(bearerToken string, req *request.CancelBookingPayload) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
@@ -172,8 +248,7 @@ func (s *Service) CancelBooking(bearerToken string, req *request.CancelRequestPa
 	}
 
 	encryptedReason := utils.Must(s.encrypt.EncryptString(req.Reason))
-
-	if err := s.bookingStore.Cancel(req.BookingId, encryptedReason); err != nil {
+	if err := s.bookingStore.Cancel(req.BookingId, userId, encryptedReason); err != nil {
 		return err
 	}
 
@@ -248,14 +323,14 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 	notificationContent := "Your booking request was accepted by the vendor"
 
 	notification := &models.NotificationModel{
-		Recipient: booking.VendorId,
+		Recipient: booking.ClientId,
 		Type:      "success",
 		Title:     "Booking Request Accepted",
 		Content:   "Your booking request has been accepted by the vendor",
 	}
 
 	encryptedNotification := &models.NotificationModel{
-		Recipient: booking.VendorId,
+		Recipient: booking.ClientId,
 		Type:      "success",
 		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
@@ -315,14 +390,14 @@ func (s *Service) RejectBookingRequest(bearerToken string, req *request.RejectRe
 	notificationContent := "Your booking request was rejected by the vendor"
 
 	notification := &models.NotificationModel{
-		Recipient: booking.VendorId,
+		Recipient: booking.ClientId,
 		Type:      "fail",
 		Title:     "Booking Request Rejected",
 		Content:   fmt.Sprintf("Your booking request was rejected by the vendor. Reason: %s", req.Reason),
 	}
 
 	encryptedNotification := &models.NotificationModel{
-		Recipient: booking.VendorId,
+		Recipient: booking.ClientId,
 		Type:      "fail",
 		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
 		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),

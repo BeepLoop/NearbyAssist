@@ -6,7 +6,7 @@ import (
 )
 
 func CurrentTimeStamp() string {
-	format := "2006-01-02 15:04:05"
+	format := "2006-01-02T15:04:05Z"
 
 	location, err := time.LoadLocation("Asia/Manila")
 	if err != nil {

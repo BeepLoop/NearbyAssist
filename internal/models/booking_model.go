@@ -23,6 +23,7 @@ type BookingModel struct {
 	IsReviewed   bool           `json:"isReviewed" db:"isReviewed"`
 	ScheduledAt  sql.NullString `json:"scheduledAt" db:"scheduledAt"`
 	CancelReason sql.NullString `json:"cancelReason" db:"cancelReason"`
+	CancelledBy  sql.NullString `db:"cancelledBy"`
 
 	// Additional fields for joins
 	Service *ServiceModel `json:"service,omitempty"`
