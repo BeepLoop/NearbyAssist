@@ -163,6 +163,8 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		savedServiceStore := saved_service_repo.NewMysqlSavedServiceRepository(s.DB)
 		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
+		reviewStore := review_repo.NewMysqlReviewRepository(s.DB)
 
 		serviceManager := service_service.NewService(
 			serviceStore,
@@ -176,8 +178,9 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		)
 		savedServiceService := save_service.NewService(savedServiceStore, serviceStore, vendorStore, s.JWT, s.Encrypt)
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+		reviewService := review_service.NewService(bookingStore, reviewStore, serviceStore, s.Encrypt, s.JWT)
 
-		handler := service.NewHandler(serviceManager, savedServiceService, resourceService)
+		handler := service.NewHandler(serviceManager, savedServiceService, reviewService, resourceService)
 
 		serviceRoute.POST("", handler.CreateService)
 		serviceRoute.GET("/search", handler.SearchService)
@@ -194,6 +197,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		serviceRoute.POST("/save", handler.SaveService)
 		serviceRoute.POST("/unsave", handler.UnsaveService)
 		serviceRoute.GET("/route/:serviceId", handler.FindServiceRoute)
+		serviceRoute.GET("/reviews/:serviceId", handler.GetReviews)
 	}
 
 	// ===== BOOKINGS =======
@@ -284,8 +288,9 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
 		reviewStore := review_repo.NewMysqlReviewRepository(s.DB)
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
 
-		reviewService := review_service.NewService(bookingStore, reviewStore, s.Encrypt, s.JWT)
+		reviewService := review_service.NewService(bookingStore, reviewStore, serviceStore, s.Encrypt, s.JWT)
 
 		handler := review.NewHandler(reviewService)
 

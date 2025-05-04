@@ -60,20 +60,3 @@ func (s *MysqlReviewRepository) FindById(id string) (*models.ReviewModel, error)
 
 	return review, nil
 }
-
-func (s *MysqlReviewRepository) FindByBookingId(id string) (*models.BookingModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	booking := new(models.BookingModel)
-	query := "SELECT * FROM Booking WHERE id = ?"
-	if err := s.db.GetContext(ctx, booking, query, id); err != nil {
-		return nil, err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return booking, nil
-}

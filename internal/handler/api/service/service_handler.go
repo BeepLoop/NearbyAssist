@@ -7,6 +7,7 @@ import (
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/cache"
 	resource_service "nearbyassist/internal/service/resource"
+	review_service "nearbyassist/internal/service/review"
 	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
 	"nearbyassist/internal/utils"
@@ -17,15 +18,22 @@ import (
 )
 
 type serviceHandler struct {
-	service_service *service_service.Service
-	save_service    *save_service.Service
+	serviceService  *service_service.Service
+	saveService     *save_service.Service
+	reviewService   *review_service.Service
 	resourceService *resource_service.Service
 }
 
-func NewHandler(service *service_service.Service, save_service *save_service.Service, resourceService *resource_service.Service) *serviceHandler {
+func NewHandler(
+	serviceService *service_service.Service,
+	saveService *save_service.Service,
+	reviewService *review_service.Service,
+	resourceService *resource_service.Service,
+) *serviceHandler {
 	return &serviceHandler{
-		service_service: service,
-		save_service:    save_service,
+		serviceService:  serviceService,
+		saveService:     saveService,
+		reviewService:   reviewService,
 		resourceService: resourceService,
 	}
 }
@@ -46,7 +54,7 @@ func (h *serviceHandler) CreateService(c echo.Context) error {
 		})
 	}
 
-	serviceId, err := h.service_service.CreateService(req)
+	serviceId, err := h.serviceService.CreateService(req)
 	if err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
@@ -68,7 +76,7 @@ func (h *serviceHandler) CreateService(c echo.Context) error {
 		})
 	}
 
-	service, err := h.service_service.GetService(serviceId)
+	service, err := h.serviceService.GetService(serviceId)
 	if err != nil {
 		// This should NOT happen
 		fmt.Println("Error get service after creating: ", err.Error())
@@ -94,7 +102,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 	var serviceDetail *response.DetailedServiceResponse
 
 	if params.Has("fresh") && params.Get("fresh") == "true" {
-		detail, err := h.service_service.GetService(serviceId)
+		detail, err := h.serviceService.GetService(serviceId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 				Message: "Error while retrieving service information",
@@ -109,7 +117,7 @@ func (h *serviceHandler) GetService(c echo.Context) error {
 		if exists {
 			serviceDetail = inCache.(*response.DetailedServiceResponse)
 		} else {
-			detail, err := h.service_service.GetService(serviceId)
+			detail, err := h.serviceService.GetService(serviceId)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 					Message: "Error while retrieving service information",
@@ -145,7 +153,7 @@ func (h *serviceHandler) UpdateService(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.service_service.UpdateService(bearerToken, req); err != nil {
+	if err := h.serviceService.UpdateService(bearerToken, req); err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not allowed to perform this action",
@@ -181,7 +189,7 @@ func (h *serviceHandler) AddImage(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	imageData, err := h.service_service.AddImage(bearerToken, serviceId, files)
+	imageData, err := h.serviceService.AddImage(bearerToken, serviceId, files)
 	if err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
@@ -212,7 +220,7 @@ func (h *serviceHandler) DeleteImage(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-	if err := h.service_service.DeleteImage(bearerToken, imageId); err != nil {
+	if err := h.serviceService.DeleteImage(bearerToken, imageId); err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_NOT_FOUND) {
 			return echo.NewHTTPError(http.StatusNotFound, models.Error{
 				Message: "Image not found",
@@ -246,7 +254,7 @@ func (h *serviceHandler) Disable(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-	return h.service_service.Disable(bearerToken, serviceId)
+	return h.serviceService.Disable(bearerToken, serviceId)
 }
 
 func (h *serviceHandler) Enable(c echo.Context) error {
@@ -259,7 +267,7 @@ func (h *serviceHandler) Enable(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-	return h.service_service.Enable(bearerToken, serviceId)
+	return h.serviceService.Enable(bearerToken, serviceId)
 }
 
 func (h *serviceHandler) AddExtra(c echo.Context) error {
@@ -280,7 +288,7 @@ func (h *serviceHandler) AddExtra(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	extraId, err := h.service_service.AddExtra(bearerToken, req)
+	extraId, err := h.serviceService.AddExtra(bearerToken, req)
 	if err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
@@ -318,7 +326,7 @@ func (h *serviceHandler) EditExtra(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.service_service.EditExtra(bearerToken, req); err != nil {
+	if err := h.serviceService.EditExtra(bearerToken, req); err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "you are not authorized to do this action",
@@ -346,7 +354,7 @@ func (h *serviceHandler) DeleteExtra(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.service_service.DeleteExtra(bearerToken, extraId); err != nil {
+	if err := h.serviceService.DeleteExtra(bearerToken, extraId); err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "You are not authorized to do this action",
@@ -388,7 +396,7 @@ func (h *serviceHandler) SaveService(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.save_service.SaveService(bearerToken, req.ServiceId); err != nil {
+	if err := h.saveService.SaveService(bearerToken, req.ServiceId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error saving service",
 			Error:   err.Error(),
@@ -416,7 +424,7 @@ func (h *serviceHandler) UnsaveService(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	if err := h.save_service.UnsaveService(bearerToken, req.ServiceId); err != nil {
+	if err := h.saveService.UnsaveService(bearerToken, req.ServiceId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error removing service from saves",
 			Error:   err.Error(),
@@ -429,7 +437,7 @@ func (h *serviceHandler) UnsaveService(c echo.Context) error {
 func (h *serviceHandler) GetSavedServices(c echo.Context) error {
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	services, err := h.save_service.GetSavedServices(bearerToken)
+	services, err := h.saveService.GetSavedServices(bearerToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error occurred while getting saved services",
@@ -445,7 +453,7 @@ func (h *serviceHandler) GetSavedServices(c echo.Context) error {
 func (h *serviceHandler) SearchService(c echo.Context) error {
 	params := utils.ParseQuery(c.QueryString())
 
-	services, err := h.service_service.SearchService(params)
+	services, err := h.serviceService.SearchService(params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error occurred while searching service",
@@ -469,7 +477,7 @@ func (h *serviceHandler) FindServiceRoute(c echo.Context) error {
 
 	origin := c.QueryParam("origin")
 
-	polyline, err := h.service_service.FindRoute(serviceId, origin)
+	polyline, err := h.serviceService.FindRoute(serviceId, origin)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error finding route to given destination",
@@ -479,5 +487,21 @@ func (h *serviceHandler) FindServiceRoute(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"polyline": polyline,
+	})
+}
+
+func (h *serviceHandler) GetReviews(c echo.Context) error {
+	serviceId := c.Param("serviceId")
+
+	reviews, err := h.reviewService.GetServiceReviews(serviceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error retrieving service reviews",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"reviews": reviews,
 	})
 }

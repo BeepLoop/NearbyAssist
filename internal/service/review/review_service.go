@@ -5,14 +5,18 @@ import (
 	"nearbyassist/internal/models"
 	booking_repo "nearbyassist/internal/repository/booking"
 	review_repo "nearbyassist/internal/repository/review"
+	service_repo "nearbyassist/internal/repository/service"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
+	"slices"
 )
 
 type Service struct {
 	bookingStore booking_repo.BookingRepository
 	reviewStore  review_repo.ReviewRepository
+	serviceStore service_repo.ServiceRepository
 	encrypt      core.Encryption
 	jwt          core.Authenticator
 }
@@ -20,12 +24,14 @@ type Service struct {
 func NewService(
 	bookingStore booking_repo.BookingRepository,
 	reviewStore review_repo.ReviewRepository,
+	serviceStore service_repo.ServiceRepository,
 	encrypt core.Encryption,
 	jwt core.Authenticator,
 ) *Service {
 	return &Service{
 		bookingStore: bookingStore,
 		reviewStore:  reviewStore,
+		serviceStore: serviceStore,
 		encrypt:      encrypt,
 		jwt:          jwt,
 	}
@@ -80,4 +86,28 @@ func (s *Service) GetReview(reviewId string) (*models.ReviewModel, error) {
 	}
 
 	return review, nil
+}
+
+func (s *Service) GetServiceReviews(serviceId string) ([]response.Review, error) {
+	reviews, err := s.serviceStore.GetReviews(serviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	response := slices.AppendSeq(
+		make([]response.Review, 0),
+		utils.Map(reviews, func(review *models.ReviewModel) response.Review {
+			return response.Review{
+				Id:               review.Id,
+				BookingId:        review.BookingId,
+				Rating:           review.Rating,
+				Text:             utils.Must(s.encrypt.DecryptString(review.Text)),
+				CreatedAt:        review.CreatedAt,
+				RevieweeName:     utils.Must(s.encrypt.DecryptString(review.Reviewee.Name)),
+				RevieweeImageUrl: review.Reviewee.ImageUrl,
+			}
+		}),
+	)
+
+	return response, nil
 }
