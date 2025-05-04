@@ -75,8 +75,8 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 			return nil, err
 		}
 
-		slices.AppendSeq(
-			vendorExpertises,
+		vendorExpertises = slices.AppendSeq(
+			make([]response.Expertise, 0),
 			utils.Map(expertises, func(expertise *models.ExpertiseModel) response.Expertise {
 				return response.Expertise{
 					Id:    expertise.Id,
