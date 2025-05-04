@@ -472,7 +472,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            t.vendorId = ? AND (t.status = 'done' OR t.status = 'cancelled')
+            t.vendorId = ? AND (t.status = 'done' OR t.status = 'cancelled' OR t.status = 'rejected')
         ORDER BY
             t.updatedAt DESC
     `
@@ -496,7 +496,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            t.clientId = ? AND (t.status = 'done' OR t.status = 'cancelled')
+            t.clientId = ? AND (t.status = 'done' OR t.status = 'cancelled' OR t.status = 'rejected')
         ORDER BY
             t.updatedAt DESC
     `
