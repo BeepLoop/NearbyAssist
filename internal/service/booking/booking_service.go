@@ -314,8 +314,8 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 		return errors.New(ERR_UNAUTHORIZED)
 	}
 
-	schedule := utils.FormatDate(req.Schedule)
-	if err := s.bookingStore.Accept(req.BookingId, schedule); err != nil {
+	bookingSchedule := utils.FormatDate(req.Schedule)
+	if err := s.bookingStore.Accept(req.BookingId, bookingSchedule); err != nil {
 		return err
 	}
 
@@ -352,8 +352,14 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 		Type:       websocket.EVT_NOTIF,
 		Payload:    notification,
 	}
+	bookingEvent := &websocket.EventModel{
+		ReceiverId: booking.ClientId,
+		Type:       websocket.EVT_BOOKING_CONFIRMED,
+		Payload:    utils.Mapper{"id": req.BookingId, "schedule": bookingSchedule},
+	}
 
 	s.ws.Send(notifEvent)
+	s.ws.Send(bookingEvent)
 
 	return nil
 }
@@ -419,8 +425,14 @@ func (s *Service) RejectBookingRequest(bearerToken string, req *request.RejectRe
 		Type:       websocket.EVT_NOTIF,
 		Payload:    notification,
 	}
+	bookingEvent := &websocket.EventModel{
+		ReceiverId: booking.ClientId,
+		Type:       websocket.EVT_BOOKING_REJECTED,
+		Payload:    utils.Mapper{"id": req.BookingId, "reason": req.Reason},
+	}
 
 	s.ws.Send(notifEvent)
+	s.ws.Send(bookingEvent)
 
 	return nil
 }
@@ -592,7 +604,8 @@ func (s *Service) CompleteBooking(bearerToken, bookingId string) error {
 		return err
 	}
 
-	if booking, err := s.bookingStore.FindById(bookingId); err != nil {
+	booking, err := s.bookingStore.FindById(bookingId)
+	if err != nil {
 		return err
 	} else {
 		if booking.VendorId != userId {
@@ -603,6 +616,51 @@ func (s *Service) CompleteBooking(bearerToken, bookingId string) error {
 	if err := s.bookingStore.MarkComplete(bookingId); err != nil {
 		return err
 	}
+
+	notificationHeading := "Booking complete"
+	notificationContent := fmt.Sprintf(
+		"Your booking with %s was completed",
+		utils.Must(s.encrypt.DecryptString(booking.Vendor)),
+	)
+
+	notification := &models.NotificationModel{
+		Recipient: booking.ClientId,
+		Type:      "success",
+		Title:     notificationHeading,
+		Content:   notificationContent,
+	}
+
+	encryptedNotification := &models.NotificationModel{
+		Recipient: booking.ClientId,
+		Type:      "success",
+		Title:     utils.Must(s.encrypt.EncryptString(notification.Title)),
+		Content:   utils.Must(s.encrypt.EncryptString(notification.Content)),
+	}
+
+	if notifId, err := s.notifStore.Create(encryptedNotification); err != nil {
+		return err
+	} else {
+		notification.Id = notifId
+	}
+
+	oneSignal := notification_service.MustGetInstance()
+	if err := oneSignal.NewUrgentNotification(booking.ClientId, notificationHeading, notificationContent); err != nil {
+		fmt.Println(err.Error())
+	}
+
+	notifEvent := &websocket.EventModel{
+		ReceiverId: booking.ClientId,
+		Type:       websocket.EVT_NOTIF,
+		Payload:    notification,
+	}
+	bookingEvent := &websocket.EventModel{
+		ReceiverId: booking.ClientId,
+		Type:       websocket.EVT_BOOKING_COMPLETE,
+		Payload:    booking.Id,
+	}
+
+	s.ws.Send(notifEvent)
+	s.ws.Send(bookingEvent)
 
 	return nil
 }

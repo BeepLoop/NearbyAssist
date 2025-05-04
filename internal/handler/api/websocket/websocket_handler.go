@@ -1,6 +1,7 @@
 package websocket_handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/core"
@@ -63,10 +64,20 @@ func (h *handler) Connect(c echo.Context) error {
 			return err
 		}
 
-		fmt.Println("received: ", string(msg))
-
 		if string(msg) == "ping" {
-			conn.WriteMessage(gorilla_ws.TextMessage, []byte("pong"))
+			evt := websocket.EventModel{
+				ReceiverId: userId,
+				Type:       websocket.EVT_PONG,
+				Payload:    nil,
+			}
+			b, err := json.Marshal(evt)
+			if err != nil {
+				fmt.Println("error marshal pong: ", err.Error())
+			}
+			if err := conn.WriteMessage(gorilla_ws.TextMessage, b); err != nil {
+				fmt.Println("error sending message: ", err.Error())
+			}
+
 			continue
 		}
 	}

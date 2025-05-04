@@ -329,12 +329,11 @@ func (s *MysqlVerificationRepository) AcceptRequest(id string) error {
         JOIN IdentityVerification iv ON u.id = iv.userId
         SET
             u.verified = 1,
-            u.verifiedAt = ?
+            u.verifiedAt = CURRENT_TIMESTAMP()
         WHERE
             iv.id = ?
     `
-	timestamp := utils.CurrentTimeStamp()
-	if _, err := tx.ExecContext(ctx, updateUser, timestamp, id); err != nil {
+	if _, err := tx.ExecContext(ctx, updateUser, id); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}

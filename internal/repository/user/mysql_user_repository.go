@@ -574,13 +574,13 @@ func (s *MysqlUserRepository) IsRestricted(userId string) (bool, bool, error) {
 	isRestrictionExpiredQuery := `
         SELECT
             CASE
-                WHEN (SELECT 1 FROM Restricted WHERE userId = ? AND endTime < ?)
+                WHEN (SELECT 1 FROM Restricted WHERE userId = ? AND endTime < CURRENT_TIMESTAMP())
                 THEN 1
                 ELSE 0
             END AS isExpired;
     `
 	isExpired := false
-	if err := s.db.GetContext(ctx, &isExpired, isRestrictionExpiredQuery, userId, utils.CurrentTimeStamp()); err != nil {
+	if err := s.db.GetContext(ctx, &isExpired, isRestrictionExpiredQuery, userId); err != nil {
 		return false, false, nil
 	}
 
@@ -620,8 +620,8 @@ func (s *MysqlUserRepository) LiftRestrictionIfExpired(userId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "DELETE FROM Restricted WHERE userId = ? AND endTime <= ?"
-	if _, err := s.db.ExecContext(ctx, query, userId, utils.CurrentTimeStamp()); err != nil {
+	query := "DELETE FROM Restricted WHERE userId = ? AND endTime <= CURRENT_TIMESTAMP()"
+	if _, err := s.db.ExecContext(ctx, query, userId); err != nil {
 		return err
 	}
 

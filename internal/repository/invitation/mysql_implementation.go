@@ -85,13 +85,13 @@ func (s *mysqlRepository) IsExpired(inviteId string) (bool, error) {
 
 	query := `
         SELECT CASE
-            WHEN (SELECT 1 FROM Invitation WHERE id = ? AND expiredAt < ?)
+            WHEN (SELECT 1 FROM Invitation WHERE id = ? AND expiredAt < CURRENT_TIMESTAMP())
             THEN 1
             ELSE 0
         END AS is_expired
     `
 	isExpired := false
-	if err := s.db.GetContext(ctx, &isExpired, query, inviteId, utils.CurrentTimeStamp()); err != nil {
+	if err := s.db.GetContext(ctx, &isExpired, query, inviteId); err != nil {
 		return false, err
 	}
 

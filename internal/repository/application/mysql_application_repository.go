@@ -171,18 +171,16 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 		return err
 	}
 
-	now := utils.CurrentTimeStamp()
-
 	updateApplicationStatusQuery := `
         UPDATE
             Application
         SET
             status = 'approved',
-            updatedAt = ?
+            updatedAt = CURRENT_TIMESTAMP()
         WHERE
             id = ?
     `
-	if _, err := tx.ExecContext(ctx, updateApplicationStatusQuery, now, applicationId); err != nil {
+	if _, err := tx.ExecContext(ctx, updateApplicationStatusQuery, applicationId); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}

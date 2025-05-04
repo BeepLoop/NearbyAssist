@@ -52,6 +52,7 @@ func (w *websocketImpl) StartListening() {
 		for {
 			select {
 			case evt := <-w.channel:
+				evt.JsonPrint()
 				if socket, ok := w.clients[evt.ReceiverId]; ok {
 					err := socket.WriteJSON(evt)
 					if err != nil {
