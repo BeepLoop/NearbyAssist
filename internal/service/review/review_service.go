@@ -1,6 +1,7 @@
 package review_service
 
 import (
+	"database/sql"
 	"errors"
 	"nearbyassist/internal/models"
 	booking_repo "nearbyassist/internal/repository/booking"
@@ -11,6 +12,10 @@ import (
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
 	"slices"
+)
+
+const (
+	ERR_NOT_FOUND = "not found"
 )
 
 type Service struct {
@@ -84,6 +89,22 @@ func (s *Service) GetReview(reviewId string) (*models.ReviewModel, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return review, nil
+}
+
+func (s *Service) GetReviewOnBooking(userId, bookingId string) (*models.ReviewModel, error) {
+	review, err := s.reviewStore.GetUserReviewOnBooking(userId, bookingId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New(ERR_NOT_FOUND)
+		}
+
+		return nil, err
+	}
+
+	review.Text = utils.Must(s.encrypt.DecryptString(review.Text))
+	review.Reviewee.Name = utils.Must(s.encrypt.DecryptString(review.Reviewee.Name))
 
 	return review, nil
 }

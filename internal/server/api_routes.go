@@ -296,6 +296,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		reviewRoute.POST("", handler.CreateReview)
 		reviewRoute.GET("/:reviewId", handler.GetReview)
+		reviewRoute.GET("/booking", handler.GetReviewOnBooking)
 	}
 
 	// ===== CHAT =======

@@ -3,6 +3,7 @@ package review
 import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	review_service "nearbyassist/internal/service/review"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -76,5 +77,39 @@ func (h *reviewHandler) GetReview(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.Mapper{
 		"review": review,
+	})
+}
+
+func (h *reviewHandler) GetReviewOnBooking(c echo.Context) error {
+	bookingId := c.QueryParam("bookingId")
+	userId := c.QueryParam("userId")
+
+	review, err := h.reviewService.GetReviewOnBooking(userId, bookingId)
+	if err != nil {
+		if strings.Contains(err.Error(), review_service.ERR_NOT_FOUND) {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "review not found",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error retrieving review on booking",
+			Error:   err.Error(),
+		})
+	}
+
+	resp := response.Review{
+		Id:               review.Id,
+		BookingId:        review.BookingId,
+		Rating:           review.Rating,
+		Text:             review.Text,
+		CreatedAt:        review.CreatedAt,
+		RevieweeName:     review.Reviewee.Name,
+		RevieweeImageUrl: review.Reviewee.ImageUrl,
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"review": resp,
 	})
 }

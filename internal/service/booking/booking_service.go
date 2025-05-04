@@ -135,7 +135,7 @@ func (s *Service) GetBooking(bookingId string) (*models.BookingModel, error) {
 	booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 	booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
-	if booking.Status == models.BOOKING_STATUS_CANCELLED {
+	if booking.Status == models.BOOKING_STATUS_CANCELLED || booking.Status == models.BOOKING_STATUS_REJECTED {
 		booking.CancelReason.String = utils.Must(s.encrypt.DecryptString(booking.CancelReason.String))
 		booking.CancelReason.Valid = true
 	}
@@ -584,7 +584,7 @@ func (s *Service) GetBookingHistory(bearerToken, filter string) ([]*models.Booki
 		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
-		if booking.Status == models.BOOKING_STATUS_CANCELLED {
+		if booking.Status == models.BOOKING_STATUS_CANCELLED || booking.Status == models.BOOKING_STATUS_REJECTED {
 			booking.CancelReason.String = utils.Must(s.encrypt.DecryptString(booking.CancelReason.String))
 			booking.CancelReason.Valid = true
 		}
