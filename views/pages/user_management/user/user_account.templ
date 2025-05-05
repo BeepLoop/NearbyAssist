@@ -18,7 +18,7 @@ templ UserAccount(user models.AdminModel, data dto.UserAccountDetail, flash stri
 		<div class="mx-auto max-w-4xl">
 			<div class="flex items-center justify-between">
 				<!-- back button -->
-				@partials.BackButton()
+				@partials.BackButton(partials.BackButtonProps{URL: "/admin/user-management/users"})
 				@actions(data.User)
 			</div>
 			<!-- Tabbed -->

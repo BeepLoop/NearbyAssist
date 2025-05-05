@@ -18,7 +18,7 @@ templ VendorAccount(user models.AdminModel, data dto.VendorAccountDetail, flash 
 		<div class="mx-auto max-w-4xl">
 			<div class="flex justify-between items-center">
 				<!-- back button -->
-				@partials.BackButton()
+				@partials.BackButton(partials.BackButtonProps{URL: "/admin/user-management/vendors"})
 				@actions(data.Vendor)
 			</div>
 			<!-- Tabbed -->

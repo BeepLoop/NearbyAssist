@@ -14,7 +14,7 @@ templ ReportedUser(user models.AdminModel, data dto.UserReportDetail) {
 	@layout.Layout(user) {
 		<!-- Actions -->
 		<div class="flex justify-between">
-			@partials.BackButton()
+			@partials.BackButton(partials.BackButtonProps{URL: "/admin/complaints/users"})
 		</div>
 		<div class="mx-auto max-w-3xl">
 			<div class="flex justify-end">

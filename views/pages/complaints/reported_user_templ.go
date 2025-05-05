@@ -55,7 +55,7 @@ func ReportedUser(user models.AdminModel, data dto.UserReportDetail) templ.Compo
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = partials.BackButton().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.BackButton(partials.BackButtonProps{URL: "/admin/complaints/users"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
