@@ -17,10 +17,11 @@ func (s *Service) GetRequestList() ([]dto.PasswordResetRequest, error) {
 		make([]dto.PasswordResetRequest, 0),
 		utils.Map(requests, func(req *models.PasswordResetRequestModel) dto.PasswordResetRequest {
 			return dto.PasswordResetRequest{
-				Id:       req.Id,
-				AdminId:  req.AdminId,
-				Username: utils.Must(s.encrypt.DecryptString(req.Username)),
-				Email:    utils.Must(s.encrypt.DecryptString(req.Email)),
+				Id:        req.Id,
+				AdminId:   req.AdminId,
+				Username:  utils.Must(s.encrypt.DecryptString(req.Username)),
+				Email:     utils.Must(s.encrypt.DecryptString(req.Email)),
+				CreatedAt: utils.FormatDate(req.CreatedAt),
 			}
 		}),
 	)
