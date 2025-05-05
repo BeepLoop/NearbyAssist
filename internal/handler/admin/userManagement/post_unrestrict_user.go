@@ -9,9 +9,11 @@ import (
 
 func (h *userManagementHandler) UnrestrictUser(c echo.Context) error {
 	redirectRoute := c.FormValue("redirectRoute")
+	password := c.FormValue("password")
 	userId := c.Param("userId")
 
-	if err := h.managementService.UnrestrictUser(userId); err != nil {
+	admin, _ := utils.GetAdminFromSession(c)
+	if err := h.managementService.UnrestrictUser(admin.Id, password, userId); err != nil {
 		if err := utils.SetFlashMessage(c, "error", err.Error()); err != nil {
 			return c.Redirect(http.StatusSeeOther, redirectRoute+"?error=unrestrict_error")
 		}

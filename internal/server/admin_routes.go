@@ -220,6 +220,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 			bookingStore,
 			serviceStore,
 			reportUserStore,
+			adminStore,
 			resourceService,
 			s.WS,
 			s.Encrypt,

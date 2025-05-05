@@ -8,7 +8,13 @@ package partials
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func UnrestrictUser(actionUrl string) templ.Component {
+type UnrestrictModalProps struct {
+	Title       string
+	ButtonLabel string
+	ActionURL   string
+}
+
+func UnrestrictUser(props UnrestrictModalProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,16 +35,75 @@ func UnrestrictUser(actionUrl string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div x-data=\"{unrestrictModalOpen: false}\"><!-- open button --><button type=\"button\" class=\"bg-danger/25 w-full rounded-sm p-2 text-danger text-center text-sm font-medium cursor-pointer transition hover:opacity-75\" x-on:click=\"unrestrictModalOpen = true\"><span class=\"flex gap-1 items-center text-xs\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>Unrestrict</p></span></button><!-- backdrop --><div x-cloak x-show=\"unrestrictModalOpen\" x-on:keydown.esc.window=\"unrestrictModalOpen = false\" x-on:click.self=\"unrestrictModalOpen = false\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 bg-neutral-gray/50 grid place-content-center\"><!-- modal content --><div x-show=\"unrestrictModalOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"outline-1 outline-pale-gray p-2 rounded-sm bg-white p-4\"><!-- Dialog Header --><div class=\"flex items-center justify-between\"><h3 id=\"defaultModalTitle\" class=\"font-semibold tracking-wide\">Lift restriction</h3><button x-on:click=\"unrestrictModalOpen = false\" aria-label=\"close modal\" class=\"cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.4\" class=\"w-5 h-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Dialog Body --><div class=\"mt-4\"><p class=\"text-neutral-dark\">Are you sure about this action?</p><p class=\"text-xs text-danger py-2\">This action forcefully lifts the user restriction regardless of the duration applied restriction.</p></div><!-- Dialog Footer --><div class=\"flex gap-2 justify-end mt-4\"><button x-on:click=\"unrestrictModalOpen = false\" type=\"button\" class=\"rounded-sm px-4 py-2 cursor-pointer font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75\">Cancel</button><form action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div x-data=\"{unrestrictModalOpen: false, loading: false}\"><!-- open button --><button type=\"button\" class=\"bg-danger/25 w-full rounded-sm p-2 text-danger text-center text-xs font-medium cursor-pointer transition hover:opacity-75\" x-on:click=\"unrestrictModalOpen = true\"><span class=\"flex gap-1 items-center text-xs\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 templ.SafeURL = templ.SafeURL(actionUrl)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var2)))
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.ButtonLabel)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/unrestrict_user_modal.templ`, Line: 21, Col: 26}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" method=\"POST\"><div><input type=\"hidden\" name=\"redirectRoute\" id=\"redirectRoute\"><script>\n                                (function() {\n                                    function closestSiblingWithId(el, id) {\n                                        let sibling = el.previousElementSibling;\n\n                                        while(sibling) {\n                                            if (sibling.id === id) {\n                                                return sibling;\n                                            }\n\n                                            sibling = sibling.previousElementSibling;\n                                        }\n\n                                        return null;\n                                    }\n\n                                     const script = document.currentScript;\n                                     const hiddenInput = closestSiblingWithId(script, \"redirectRoute\")\n                                     if (!hiddenInput) return;\n\n                                     hiddenInput.value = window.location.pathname;\n                                 })();\n                            </script></div><button x-on:click=\"unrestrictModalOpen = false\" type=\"submit\" class=\"rounded-sm bg-danger px-4 py-2 cursor-pointer text-white text-center text-sm font-medium hover:opacity-75\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>Lift restriction </p></span></button></form></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</p></span></button><!-- backdrop --><div x-cloak x-show=\"unrestrictModalOpen\" x-on:keydown.esc.window=\"unrestrictModalOpen = false\" x-on:click.self=\"unrestrictModalOpen = false\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 bg-neutral-gray/50 grid place-content-center\"><!-- modal content --><div x-show=\"unrestrictModalOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"outline-1 outline-pale-gray p-2 rounded-sm bg-white p-4 relative\"><!-- Spinner --><div x-show=\"loading\" class=\"absolute inset-0 grid place-items-center bg-neutral-gray/30 outline-none border-none\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = Spinner().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><!-- Dialog Header --><div class=\"flex items-center justify-between\"><h3 id=\"defaultModalTitle\" class=\"font-semibold tracking-wide\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/unrestrict_user_modal.templ`, Line: 52, Col: 81}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h3><button x-on:click=\"unrestrictModalOpen = false\" aria-label=\"close modal\" class=\"cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.4\" class=\"w-5 h-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Dialog Body --><div class=\"mt-4\"><p class=\"text-neutral-dark\">Are you sure about this action?</p><p class=\"text-xs text-danger py-2\">This action forcefully lifts the user restriction regardless of the duration applied restriction.</p></div><!-- Dialog Footer --><div class=\"mt-4\"><form action=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL(props.ActionURL)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" method=\"POST\" x-on:submit=\"loading = true\"><div><input type=\"hidden\" name=\"redirectRoute\" id=\"redirectRoute\"><script>\n                                (function() {\n                                    function closestSiblingWithId(el, id) {\n                                        let sibling = el.previousElementSibling;\n\n                                        while(sibling) {\n                                            if (sibling.id === id) {\n                                                return sibling;\n                                            }\n\n                                            sibling = sibling.previousElementSibling;\n                                        }\n\n                                        return null;\n                                    }\n\n                                     const script = document.currentScript;\n                                     const hiddenInput = closestSiblingWithId(script, \"redirectRoute\")\n                                     if (!hiddenInput) return;\n\n                                     hiddenInput.value = window.location.pathname;\n                                 })();\n                            </script></div><div class=\"mt-4 grid gap-2\"><!-- admin password --><div><label for=\"password\" class=\"font-medium text-neutral-dark\">Password</label>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = Password(PasswordProps{
+			Placeholder: "admin password",
+			Id:          "password",
+			Name:        "password",
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div><div class=\"flex -2 justify-end mt-4\"><!-- cancel button --><button x-on:click=\"unrestrictModalOpen = false\" type=\"button\" class=\"rounded-sm px-4 py-2 cursor-pointer font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75\">Cancel</button><!-- submit button --><button type=\"submit\" class=\"rounded-sm bg-danger px-4 py-2 cursor-pointer text-white text-center text-xs font-medium hover:opacity-75\"><span class=\"flex gap-1 items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636\"></path></svg><p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.ButtonLabel)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/unrestrict_user_modal.templ`, Line: 130, Col: 31}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p></span></button></div></form></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

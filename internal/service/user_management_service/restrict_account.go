@@ -1,15 +1,34 @@
 package user_management_service
 
 import (
+	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/core"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 	"time"
 )
 
-func (s *Service) RestrictUser(userId, reason, duration string) error {
+func (s *Service) RestrictUser(adminId, password, userId, reason, duration string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, password) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
+	if isRestricted, _, err := s.userStore.IsRestricted(userId); err != nil {
+		return err
+	} else {
+		if isRestricted {
+			return nil
+		}
+	}
+
 	d, err := utils.StringDaysToDuration(duration)
 	if err != nil {
 		return err
@@ -31,7 +50,7 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 	notification := &models.NotificationModel{
 		Recipient: userId,
 		Type:      "generic",
-		Title:     "Account Restricted " + stringifiedDuration,
+		Title:     "Account Suspended " + stringifiedDuration,
 		Content:   reason,
 	}
 
@@ -48,8 +67,8 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 		notification.Id = notifId
 	}
 
-	notificationHeading := "Account Restricted!"
-	notificationContent := "You commited a violation resulting to account restriction."
+	notificationHeading := "Account Suspended!"
+	notificationContent := "You commited a violation resulting to account suspension."
 
 	oneSignal := notification_service.MustGetInstance()
 	if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {
@@ -74,7 +93,24 @@ func (s *Service) RestrictUser(userId, reason, duration string) error {
 	return nil
 }
 
-func (s *Service) UnrestrictUser(userId string) error {
+func (s *Service) UnrestrictUser(adminId, password, userId string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, password) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
+	if isRestricted, _, err := s.userStore.IsRestricted(userId); err != nil {
+		return err
+	} else {
+		if !isRestricted {
+			return nil
+		}
+	}
+
 	if err := s.userStore.ForceLiftRestriction(userId); err != nil {
 		return err
 	}
@@ -82,8 +118,8 @@ func (s *Service) UnrestrictUser(userId string) error {
 	notification := &models.NotificationModel{
 		Recipient: userId,
 		Type:      "success",
-		Title:     "Restriction Lifted",
-		Content:   "Restriction to your account has been lifted. Avoid violations of community guidelines to prevent future restrictions.",
+		Title:     "Suspension Lifted",
+		Content:   "Suspension to your account has been lifted. Avoid violations of community guidelines to prevent future suspensions.",
 	}
 
 	encryptedNotification := &models.NotificationModel{
@@ -99,8 +135,8 @@ func (s *Service) UnrestrictUser(userId string) error {
 		notification.Id = notifId
 	}
 
-	notificationHeading := "Account Restriction Lifted!"
-	notificationContent := "Your account restriction has been lifted."
+	notificationHeading := "Account Suspension Lifted!"
+	notificationContent := "Your account suspension has been lifted."
 
 	oneSignal := notification_service.MustGetInstance()
 	if err := oneSignal.NewUrgentNotification(userId, notificationHeading, notificationContent); err != nil {

@@ -11,10 +11,16 @@ import (
 
 func (h *userManagementHandler) BanUser(c echo.Context) error {
 	redirectRoute := c.FormValue("redirectRoute")
+	password := c.FormValue("password")
 	userId := c.Param("userId")
 
-	if err := h.managementService.BanUser(userId); err != nil {
-		if strings.Contains(err.Error(), user_management_service.ERR_DID_NOT_MEET_BANNING_REQUIREMENT) {
+	admin, _ := utils.GetAdminFromSession(c)
+	if err := h.managementService.BanUser(admin.Id, password, userId); err != nil {
+		if strings.Contains(err.Error(), user_management_service.ERR_UNAUTHORIZED) {
+			if err := utils.SetFlashMessage(c, "error", err.Error()); err != nil {
+				return c.Redirect(http.StatusSeeOther, redirectRoute+"?error=ban_error")
+			}
+		} else if strings.Contains(err.Error(), user_management_service.ERR_DID_NOT_MEET_BANNING_REQUIREMENT) {
 			if err := utils.SetFlashMessage(c, "error", err.Error()); err != nil {
 				return c.Redirect(http.StatusSeeOther, redirectRoute+"?error=ban_error")
 			}

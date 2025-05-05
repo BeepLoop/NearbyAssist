@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/core"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
@@ -14,9 +15,19 @@ const (
 	MINIMUM_REPORTS_FOR_BANNING = 5
 
 	ERR_DID_NOT_MEET_BANNING_REQUIREMENT = "account did not meet minimum number of reports to ban"
+	ERR_UNAUTHORIZED                     = "unauthorized"
 )
 
-func (s *Service) BanUser(userId string) error {
+func (s *Service) BanUser(adminId, password, userId string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, password) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
 	reports, err := s.reportUserStore.GetAllReportedIs(userId)
 	if err != nil {
 		return err
@@ -82,7 +93,16 @@ func (s *Service) BanUser(userId string) error {
 	return nil
 }
 
-func (s *Service) UnbanUser(userId string) error {
+func (s *Service) UnbanUser(adminId, password, userId string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, password) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
 	if err := s.userStore.UnbanUser(userId); err != nil {
 		return err
 	}

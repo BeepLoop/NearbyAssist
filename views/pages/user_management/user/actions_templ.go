@@ -35,28 +35,46 @@ func actions(user dto.User) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Dropdown Container --><div x-data=\"{ userActionsOpen: false }\" x-on:keydown.esc.prevent.stop=\"userActionsOpen = false\" class=\"relative\"><!-- Dropdown Toggle Button --><button type=\"button\" class=\"fond-medium inline-flex cursor-pointer items-center gap-2 rounded-sm bg-danger/25 px-1 py-0.5 text-xs text-danger outline-1 outline-danger hover:opacity-75\" id=\"pm-dropdown\" aria-haspopup=\"true\" x-bind:aria-expanded=\"userActionsOpen\" x-on:click=\"userActionsOpen = true\"><span>Actions</span> <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\" data-slot=\"icon\" class=\"hi-micro hi-chevron-down inline-block size-5 opacity-50\" x-bind:class=\"{ &#39;rotate-180&#39;: userActionsOpen }\"><path fill-rule=\"evenodd\" d=\"M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\"></path></svg></button><!-- END Dropdown Toggle Button --><!-- Dropdown --><div x-cloak x-show=\"userActionsOpen\" x-transition:enter=\"transition ease-out duration-100\" x-transition:enter-start=\"opacity-0 -translate-y-3\" x-transition:enter-end=\"opacity-100 translate-y-0\" x-transition:leave=\"transition ease-in duration-75\" x-transition:leave-start=\"opacity-100 translate-y-0\" x-transition:leave-end=\"opacity-0 -translate-y-3\" x-on:click.outside=\"userActionsOpen = false\" role=\"menu\" aria-labelledby=\"pm-dropdown\" class=\"absolute end-0 z-10 mt-2 w-44\"><div class=\"rounded-sm bg-white shadow-xl outline-1 outline-pale-gray grid gap-1.5 p-1.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Dropdown Container --><div x-data=\"{ userActionsOpen: false }\" x-on:keydown.esc.prevent.stop=\"userActionsOpen = false\" class=\"relative\"><!-- Dropdown Toggle Button --><button type=\"button\" class=\"fond-medium inline-flex cursor-pointer items-center gap-2 rounded-sm bg-danger/25 px-1 py-0.5 text-xs text-danger outline-1 outline-danger hover:opacity-75\" id=\"pm-dropdown\" aria-haspopup=\"true\" x-bind:aria-expanded=\"userActionsOpen\" x-on:click=\"userActionsOpen = true\"><span>Actions</span> <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\" data-slot=\"icon\" class=\"hi-micro hi-chevron-down inline-block size-5 opacity-50\" x-bind:class=\"{ &#39;rotate-180&#39;: userActionsOpen }\"><path fill-rule=\"evenodd\" d=\"M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\"></path></svg></button><!-- END Dropdown Toggle Button --><!-- Dropdown --><div x-cloak x-show=\"userActionsOpen\" x-transition:enter=\"transition ease-out duration-100\" x-transition:enter-start=\"opacity-0 -translate-y-3\" x-transition:enter-end=\"opacity-100 translate-y-0\" x-transition:leave=\"transition ease-in duration-75\" x-transition:leave-start=\"opacity-100 translate-y-0\" x-transition:leave-end=\"opacity-0 -translate-y-3\" x-on:click.outside=\"userActionsOpen = false\" role=\"menu\" aria-labelledby=\"pm-dropdown\" class=\"absolute end-0 z-10 mt-2 w-44\"><div class=\"grid gap-1.5 rounded-sm bg-white p-1.5 text-xs shadow-xl outline-1 outline-pale-gray\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if user.IsBanned {
-			templ_7745c5c3_Err = partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", user.Id), user.IsBanned).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.BanUserModal(partials.BanModalProps{
+				Title:       "Unban account ",
+				ButtonLabel: "Unban account",
+				ActionURL:   fmt.Sprintf("/admin/user-management/unban/%s", user.Id),
+				IsBanned:    user.IsBanned,
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = partials.BanUserModal("Ban user", fmt.Sprintf("/admin/user-management/ban/%s", user.Id), user.IsBanned).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.BanUserModal(partials.BanModalProps{
+				Title:       "Ban account",
+				ButtonLabel: "Ban account",
+				ActionURL:   fmt.Sprintf("/admin/user-management/ban/%s", user.Id),
+				IsBanned:    user.IsBanned,
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if user.IsRestricted {
-			templ_7745c5c3_Err = partials.UnrestrictUser(fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.UnrestrictUser(partials.UnrestrictModalProps{
+				Title:       "Lift suspension",
+				ButtonLabel: "Lift suspension",
+				ActionURL:   fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id),
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = partials.RestrictUser(fmt.Sprintf("/admin/user-management/restrict/%s", user.Id)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.RestrictUser(partials.RestrictModalProps{
+				Title:       "Account suspension",
+				ButtonLabel: "Suspend account",
+				ActionURL:   fmt.Sprintf("/admin/user-management/restrict/%s", user.Id),
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

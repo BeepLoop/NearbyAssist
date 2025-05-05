@@ -56,14 +56,32 @@ templ actions(user dto.Vendor) {
 		>
 			<div class="rounded-sm bg-white shadow-xl outline-1 outline-pale-gray grid gap-1.5 p-1.5">
 				if user.IsBanned {
-					@partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", user.Id), user.IsBanned)
+					@partials.BanUserModal(partials.BanModalProps{
+						Title:       "Unban account",
+						ButtonLabel: "Unban account",
+						ActionURL:   fmt.Sprintf("/admin/user-management/unban/%s", user.Id),
+						IsBanned:    user.IsBanned,
+					})
 				} else {
-					@partials.BanUserModal("Ban user", fmt.Sprintf("/admin/user-management/ban/%s", user.Id), user.IsBanned)
+					@partials.BanUserModal(partials.BanModalProps{
+						Title:       "Ban account",
+						ButtonLabel: "Ban account",
+						ActionURL:   fmt.Sprintf("/admin/user-management/ban/%s", user.Id),
+						IsBanned:    user.IsBanned,
+					})
 				}
 				if user.IsRestricted {
-					@partials.UnrestrictUser(fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id))
+					@partials.UnrestrictUser(partials.UnrestrictModalProps{
+						Title:       "Lift suspension",
+						ButtonLabel: "Lift suspension",
+						ActionURL:   fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id),
+					})
 				} else {
-					@partials.RestrictUser(fmt.Sprintf("/admin/user-management/restrict/%s", user.Id))
+					@partials.RestrictUser(partials.RestrictModalProps{
+						Title:       "Account suspension",
+						ButtonLabel: "Suspend account",
+						ActionURL:   fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id),
+					})
 				}
 			</div>
 		</div>

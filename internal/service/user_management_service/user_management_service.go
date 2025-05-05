@@ -1,6 +1,7 @@
 package user_management_service
 
 import (
+	admin_repo "nearbyassist/internal/repository/admin"
 	booking_repo "nearbyassist/internal/repository/booking"
 	notification_repo "nearbyassist/internal/repository/notification"
 	report_user_repo "nearbyassist/internal/repository/report_user"
@@ -19,6 +20,7 @@ type Service struct {
 	bookingStore    booking_repo.BookingRepository
 	serviceStore    service_repo.ServiceRepository
 	reportUserStore report_user_repo.ReportUserRepository
+	adminStore      admin_repo.AdminRepository
 	resourceService *resource_service.Service
 	ws              websocket.Socket
 	encrypt         core.Encryption
@@ -32,6 +34,7 @@ func NewService(
 	bookingStore booking_repo.BookingRepository,
 	serviceStore service_repo.ServiceRepository,
 	reportUserStore report_user_repo.ReportUserRepository,
+	adminStore admin_repo.AdminRepository,
 	resourceService *resource_service.Service,
 	ws websocket.Socket,
 	encrypt core.Encryption,
@@ -44,6 +47,7 @@ func NewService(
 		bookingStore:    bookingStore,
 		serviceStore:    serviceStore,
 		reportUserStore: reportUserStore,
+		adminStore:      adminStore,
 		resourceService: resourceService,
 		ws:              ws,
 		encrypt:         encrypt,

@@ -40,23 +40,41 @@ func actions(user dto.Vendor) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if user.IsBanned {
-			templ_7745c5c3_Err = partials.BanUserModal("Unban user", fmt.Sprintf("/admin/user-management/unban/%s", user.Id), user.IsBanned).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.BanUserModal(partials.BanModalProps{
+				Title:       "Unban account",
+				ButtonLabel: "Unban account",
+				ActionURL:   fmt.Sprintf("/admin/user-management/unban/%s", user.Id),
+				IsBanned:    user.IsBanned,
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = partials.BanUserModal("Ban user", fmt.Sprintf("/admin/user-management/ban/%s", user.Id), user.IsBanned).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.BanUserModal(partials.BanModalProps{
+				Title:       "Ban account",
+				ButtonLabel: "Ban account",
+				ActionURL:   fmt.Sprintf("/admin/user-management/ban/%s", user.Id),
+				IsBanned:    user.IsBanned,
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if user.IsRestricted {
-			templ_7745c5c3_Err = partials.UnrestrictUser(fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.UnrestrictUser(partials.UnrestrictModalProps{
+				Title:       "Lift suspension",
+				ButtonLabel: "Lift suspension",
+				ActionURL:   fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id),
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = partials.RestrictUser(fmt.Sprintf("/admin/user-management/restrict/%s", user.Id)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.RestrictUser(partials.RestrictModalProps{
+				Title:       "Account suspension",
+				ButtonLabel: "Suspend account",
+				ActionURL:   fmt.Sprintf("/admin/user-management/unrestrict/%s", user.Id),
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
