@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS UserReport (
-    id VARCHAR(255) NOT NULL,
+    id INT AUTO_INCREMENT,
     reporterUserId VARCHAR(255) NOT NULL,
     reportedUserId VARCHAR(255) NOT NULL,
     category ENUM('misconduct', 'booking_related') NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS UserReport (
 
 CREATE TABLE IF NOT EXISTS UserReportImage (
     id VARCHAR(255) NOT NULL,
-    reportId VARCHAR(255) NOT NULL,
+    reportId INT,
     url VARCHAR(255) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(id),

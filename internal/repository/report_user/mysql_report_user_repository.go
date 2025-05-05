@@ -2,8 +2,6 @@ package report_user_repo
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"time"
@@ -21,35 +19,45 @@ func NewMysqlReportUserRepository(db *sqlx.DB) *MysqlReportUserRepository {
 	}
 }
 
-func (s *MysqlReportUserRepository) Create(data *models.UserReportModel) (string, error) {
+func (s *MysqlReportUserRepository) Create(data *models.UserReportModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	data.Id = utils.GenerateId()
+	input := struct {
+		ReporterUserId string  `db:"reporterUserId"`
+		ReportedUserId string  `db:"reportedUserId"`
+		Category       string  `db:"category"`
+		BookingId      *string `db:"bookingId"`
+		Reason         string  `db:"reason"`
+		Detail         string  `db:"detail"`
+	}{
+		ReporterUserId: data.ReporterUserId,
+		ReportedUserId: data.ReportedUserId,
+		Category:       string(data.Category),
+		BookingId:      utils.StringOrNil(data.BookingIdInput),
+		Reason:         data.Reason,
+		Detail:         data.Detail,
+	}
 
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	insertQuery := `
         INSERT INTO 
-            UserReport (id, reporterUserId, reportedUserId, category, bookingId, reason, detail)
+            UserReport (reporterUserId, reportedUserId, category, bookingId, reason, detail)
         VALUES
-            (?, ?, ?, ?, ?, ?, ?)
+            (:reporterUserId, :reportedUserId, :category, :bookingId, :reason, :detail)
     `
-	if _, err := tx.ExecContext(
-		ctx,
-		insertQuery,
-		data.Id,
-		data.ReporterUserId,
-		data.ReportedUserId,
-		data.Category,
-		utils.StringOrNil(data.BookingIdInput),
-		data.Reason,
-		data.Detail,
-	); err != nil {
-		return "", err
+	res, err := tx.NamedExecContext(ctx, insertQuery, input)
+	if err != nil {
+		return err
+	}
+
+	insertId, err := res.LastInsertId()
+	if err != nil {
+		return err
 	}
 
 	insertImage := `
@@ -60,48 +68,60 @@ func (s *MysqlReportUserRepository) Create(data *models.UserReportModel) (string
     `
 	for _, url := range data.Images {
 		imageId := utils.GenerateId()
-		if _, err := tx.ExecContext(ctx, insertImage, imageId, data.Id, url); err != nil {
-			return "", nil
+		if _, err := tx.ExecContext(ctx, insertImage, imageId, insertId, url); err != nil {
+			return nil
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return "", nil
+		return nil
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", context.DeadlineExceeded
+		return context.DeadlineExceeded
 	}
 
-	return data.Id, nil
+	return nil
 }
 
 func (s *MysqlReportUserRepository) GetAllWithStatus(status string, limit, offset int) ([]*models.UserReportModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := fmt.Sprintf(`
+	query := `
         SELECT
             *
         FROM
             UserReport
         WHERE
-            status = '%s'
+            status = ?
         ORDER BY
             createdAt DESC
-        LIMIT %d OFFSET %d
-    `, status, limit, offset)
+        LIMIT ? OFFSET ?
+    `
 
 	reports := make([]*models.UserReportModel, 0)
-	if err := s.db.SelectContext(ctx, &reports, query); err != nil {
+	if err := s.db.SelectContext(ctx, &reports, query, status, limit, offset); err != nil {
 		return nil, err
 	}
 
 	for _, report := range reports {
-		if res, err := s.GetImages(report.Id); err != nil {
+		if res, err := s.getImages(report.Id); err != nil {
 			return nil, err
 		} else {
 			report.Images = res
+		}
+
+		if reported, err := s.getUser(report.ReportedUserId); err != nil {
+			return nil, err
+		} else {
+			report.Reported = *reported
+		}
+
+		if reporter, err := s.getUser(report.ReporterUserId); err != nil {
+			return nil, err
+		} else {
+			report.Reporter = *reporter
 		}
 	}
 
@@ -112,32 +132,33 @@ func (s *MysqlReportUserRepository) GetAllWithStatus(status string, limit, offse
 	return reports, nil
 }
 
-func (s *MysqlReportUserRepository) FindById(id string) (*models.UserReportModel, error) {
+func (s *MysqlReportUserRepository) FindById(id int) (*models.UserReportModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getUserQuery := `
-        SELECT
-            *
-        FROM
-            UserReport
-        WHERE
-            id = ?
-    `
+	getUserQuery := "SELECT * FROM UserReport WHERE id = ?"
 
 	report := new(models.UserReportModel)
 	if err := s.db.GetContext(ctx, report, getUserQuery, id); err != nil {
 		return nil, err
 	}
 
-	if report.Id == "" {
-		return nil, errors.New("not found")
-	}
-
-	if res, err := s.GetImages(report.Id); err != nil {
+	if res, err := s.getImages(report.Id); err != nil {
 		return nil, err
 	} else {
 		report.Images = res
+	}
+
+	if reported, err := s.getUser(report.ReportedUserId); err != nil {
+		return nil, err
+	} else {
+		report.Reported = *reported
+	}
+
+	if reporter, err := s.getUser(report.ReporterUserId); err != nil {
+		return nil, err
+	} else {
+		report.Reporter = *reporter
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -170,10 +191,22 @@ func (s *MysqlReportUserRepository) GetAllReportedIs(userId string) ([]*models.U
 	for _, report := range reports {
 		report.Images = make([]string, 0)
 
-		if res, err := s.GetImages(report.Id); err != nil {
+		if res, err := s.getImages(report.Id); err != nil {
 			return nil, err
 		} else {
 			report.Images = res
+		}
+
+		if reported, err := s.getUser(report.ReportedUserId); err != nil {
+			return nil, err
+		} else {
+			report.Reported = *reported
+		}
+
+		if reporter, err := s.getUser(report.ReporterUserId); err != nil {
+			return nil, err
+		} else {
+			report.Reporter = *reporter
 		}
 	}
 
@@ -207,10 +240,22 @@ func (s *MysqlReportUserRepository) GetAllReportedBy(userId string) ([]*models.U
 	for _, report := range reports {
 		report.Images = make([]string, 0)
 
-		if res, err := s.GetImages(report.Id); err != nil {
+		if res, err := s.getImages(report.Id); err != nil {
 			return nil, err
 		} else {
 			report.Images = res
+		}
+
+		if reported, err := s.getUser(report.ReportedUserId); err != nil {
+			return nil, err
+		} else {
+			report.Reported = *reported
+		}
+
+		if reporter, err := s.getUser(report.ReporterUserId); err != nil {
+			return nil, err
+		} else {
+			report.Reporter = *reporter
 		}
 	}
 
@@ -221,7 +266,46 @@ func (s *MysqlReportUserRepository) GetAllReportedBy(userId string) ([]*models.U
 	return reports, nil
 }
 
-func (s *MysqlReportUserRepository) GetImages(reportId string) ([]string, error) {
+func (s *MysqlReportUserRepository) UpdateStatus(reportId int, status string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE UserReport SET status = ? WHERE id = ?"
+	if _, err := s.db.ExecContext(ctx, query, status, reportId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlReportUserRepository) Close(reportId int, action, adminId, note string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        UPDATE
+            UserReport
+        SET
+            status = ?, adminId = ?, adminNote = ?
+        WHERE
+            id = ?
+    `
+	if _, err := s.db.ExecContext(ctx, query, action, adminId, note, reportId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
+func (s *MysqlReportUserRepository) getImages(reportId int) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -246,41 +330,27 @@ func (s *MysqlReportUserRepository) GetImages(reportId string) ([]string, error)
 	return images, nil
 }
 
-func (s *MysqlReportUserRepository) UpdateStatus(reportId, status string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	query := "UPDATE UserReport SET status = ? WHERE id = ?"
-	if _, err := s.db.ExecContext(ctx, query, status, reportId); err != nil {
-		return err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	return nil
-}
-
-func (s *MysqlReportUserRepository) Close(reportId, action, adminId, note string) error {
+func (s *MysqlReportUserRepository) getUser(userId string) (*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := `
-        UPDATE
-            UserReport
-        SET
-            status = ?, adminId = ?, adminNote = ?
+        SELECT
+            id, name, email
+        FROM
+            User
         WHERE
             id = ?
     `
-	if _, err := s.db.ExecContext(ctx, query, action, adminId, note, reportId); err != nil {
-		return err
+
+	user := new(models.UserModel)
+	if err := s.db.GetContext(ctx, user, query, userId); err != nil {
+		return nil, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
+		return nil, context.DeadlineExceeded
 	}
 
-	return nil
+	return user, nil
 }

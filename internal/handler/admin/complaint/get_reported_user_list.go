@@ -20,7 +20,7 @@ func (h *complaintHandler) GetReportList(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
-	reports := make([]dto.UserReport, 0)
+	reports := make([]dto.ReportItem, 0)
 	if params.Has("query") {
 		// Perform a search
 	} else {
@@ -37,7 +37,7 @@ func (h *complaintHandler) GetReportList(c echo.Context) error {
 		data, err := h.complaintService.GetReportList(limit, offset)
 		if err != nil {
 			fmt.Println(err.Error())
-			page := pages.ReportedUserList(*admin, make([]dto.UserReport, 0), flash)
+			page := pages.ReportedUserList(*admin, make([]dto.ReportItem, 0), flash)
 			return page.Render(context.Background(), c.Response().Writer)
 		}
 		reports = data

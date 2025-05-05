@@ -134,10 +134,10 @@ func (s *Service) CompleteBug(bugId string) error {
 	return s.bugReportStore.CompleteBug(id)
 }
 
-func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload, files []*multipart.FileHeader) (string, error) {
+func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload, files []*multipart.FileHeader) error {
 	reporterId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	reportData := &models.UserReportModel{
@@ -161,34 +161,41 @@ func (s *Service) ReportUser(bearerToken string, req *request.ReportUserPayload,
 		}
 		url, err := s.fs.SaveFile(fileData)
 		if err != nil {
-			return "", err
+			return err
 		}
 
 		reportData.Images = append(reportData.Images, url)
 	}
 
-	reportId, err := s.reportUserStore.Create(reportData)
-	if err != nil {
-		return "", err
+	if err := s.reportUserStore.Create(reportData); err != nil {
+		return err
 	}
 
-	return reportId, nil
+	return nil
 }
 
-func (s *Service) GetReportList(limit, offset int) ([]dto.UserReport, error) {
+func (s *Service) GetReportList(limit, offset int) ([]dto.ReportItem, error) {
 	reports, err := s.reportUserStore.GetAllWithStatus("pending", limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
 	data := slices.AppendSeq(
-		make([]dto.UserReport, 0),
-		utils.Map(reports, func(report *models.UserReportModel) dto.UserReport {
-			return dto.UserReport{
-				Id:               report.Id,
-				ReportedUserId:   report.ReportedUserId,
-				ReportedByUserId: report.ReporterUserId,
-				CreatedAt:        report.CreatedAt,
+		make([]dto.ReportItem, 0),
+		utils.Map(reports, func(report *models.UserReportModel) dto.ReportItem {
+			return dto.ReportItem{
+				Id: utils.FormatReportID(report.Id),
+				Reported: dto.ReportUser{
+					Id:    report.Reported.Id,
+					Name:  utils.Must(s.encrypt.DecryptString(report.Reported.Name)),
+					Email: utils.Must(s.encrypt.DecryptString(report.Reported.Email)),
+				},
+				Reporter: dto.ReportUser{
+					Id:    report.Reporter.Id,
+					Name:  utils.Must(s.encrypt.DecryptString(report.Reporter.Name)),
+					Email: utils.Must(s.encrypt.DecryptString(report.Reporter.Email)),
+				},
+				CreatedAt: utils.FormatDate(report.CreatedAt),
 			}
 		}),
 	)
@@ -197,7 +204,12 @@ func (s *Service) GetReportList(limit, offset int) ([]dto.UserReport, error) {
 }
 
 func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
-	report, err := s.reportUserStore.FindById(reportId)
+	parsedId, err := utils.ParseReportID(reportId)
+	if err != nil {
+		return nil, err
+	}
+
+	report, err := s.reportUserStore.FindById(parsedId)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +260,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				admin, _ := s.adminStore.FindById(report.AdminId.String)
 
 				return dto.PreviousReport{
-					Id:               report.Id,
+					Id:               utils.FormatReportID(report.Id),
 					ReportedByUserId: report.ReporterUserId,
 					ReportedByName:   utils.Must(s.encrypt.DecryptString(reporter.Name)),
 					Category:         string(report.Category),
@@ -471,8 +483,8 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			JoinedVendorAt:   utils.FormatDate(vendor.JoinedAt),
 			Rating:           vendor.Rating,
 		},
-		Report: dto.Report{
-			Id:               report.Id,
+		Report: dto.ReportDetail{
+			Id:               utils.FormatReportID(report.Id),
 			ReportedByUserId: report.ReporterUserId,
 			ReportedUserId:   report.ReportedUserId,
 			Category:         string(report.Category),
@@ -502,10 +514,14 @@ func (s *Service) ActOnReport(reportId, action, adminId, note string) error {
 		return errors.New("invalid_action")
 	}
 
-	encryptedNote := utils.Must(s.encrypt.EncryptString(note))
+	parsedId, err := utils.ParseReportID(reportId)
+	if err != nil {
+		return err
+	}
 
 	// NOTE: action will serve as status. Refer to statuses, SHOULD MATCH
-	if err := s.reportUserStore.Close(reportId, action, adminId, encryptedNote); err != nil {
+	encryptedNote := utils.Must(s.encrypt.EncryptString(note))
+	if err := s.reportUserStore.Close(parsedId, action, adminId, encryptedNote); err != nil {
 		return err
 	}
 

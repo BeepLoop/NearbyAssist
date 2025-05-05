@@ -8,7 +8,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ ReportedUserList(user models.AdminModel, users []dto.UserReport, flash string) {
+templ ReportedUserList(user models.AdminModel, users []dto.ReportItem, flash string) {
 	@layout.Layout(user) {
 		<!-- toasy component -->
 		@templ.JSONScript("flash", flash)
@@ -19,30 +19,48 @@ templ ReportedUserList(user models.AdminModel, users []dto.UserReport, flash str
 	}
 }
 
-templ reportedUsersTable(users []dto.UserReport) {
+templ reportedUsersTable(reports []dto.ReportItem) {
 	<div class="w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="bg-primary-greener text-sm font-semibold text-white">
 				<tr>
-					<th scope="col" class="p-4">Complaint ID</th>
+					<th scope="col" class="p-4">Report ID</th>
+					<th scope="col" class="p-4">Reported</th>
+					<th scope="col" class="p-4">Reported By</th>
 					<th scope="col" class="p-4">Submitted On</th>
 					<th scope="col" class="p-4">Action</th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-300">
-				if len(users) < 1 {
+				if len(reports) < 1 {
 					<tr class="">
-						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable">Empty</td>
+						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="5" id="emptyTable">Empty</td>
 					</tr>
 				} else {
-					for _, user := range users {
+					for _, report := range reports {
 						<tr class="text-xs">
-							<td class="p-4">{ user.Id } </td>
-							<td class="p-4">{ user.CreatedAt }</td>
+							<td class="p-4">{ report.Id } </td>
+							<td class="p-4">
+								<div class="flex w-max items-center gap-2">
+									<div class="flex flex-col">
+										<span class="font-medium text-neutral-900">{ report.Reported.Name }</span>
+										<span class="text-neutral-600 opacity-85">{ report.Reported.Email }</span>
+									</div>
+								</div>
+							</td>
+							<td class="p-4">
+								<div class="flex w-max items-center gap-2">
+									<div class="flex flex-col">
+										<span class="font-medium text-neutral-900">{ report.Reporter.Name }</span>
+										<span class="text-neutral-600 opacity-85">{ report.Reporter.Email }</span>
+									</div>
+								</div>
+							</td>
+							<td class="p-4">{ report.CreatedAt }</td>
 							<td class="p-4">
 								<ul>
 									<a
-										href={ templ.SafeURL(fmt.Sprintf("/admin/complaints/users/%s", user.Id)) }
+										href={ templ.SafeURL(fmt.Sprintf("/admin/complaints/users/%s", report.Id)) }
 										class="w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75"
 									>
 										view report

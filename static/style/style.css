@@ -1877,27 +1877,6 @@
       }
     }
   }
-  .focus-visible\:outline-2 {
-    &:focus-visible {
-      outline-style: var(--tw-outline-style);
-      outline-width: 2px;
-    }
-  }
-  .focus-visible\:outline-offset-2 {
-    &:focus-visible {
-      outline-offset: 2px;
-    }
-  }
-  .active\:opacity-100 {
-    &:active {
-      opacity: 100%;
-    }
-  }
-  .active\:outline-offset-0 {
-    &:active {
-      outline-offset: 0px;
-    }
-  }
   .motion-reduce\:transition-opacity {
     @media (prefers-reduced-motion: reduce) {
       transition-property: opacity;

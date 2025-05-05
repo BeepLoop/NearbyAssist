@@ -15,8 +15,8 @@ var (
 )
 
 type UserReportModel struct {
-	Model
 	UpdateableModel
+	Id             int                `db:"id"`
 	ReporterUserId string             `db:"reporterUserId"`
 	ReportedUserId string             `db:"reportedUserId"`
 	Category       UserReportCategory `db:"category"`
@@ -26,7 +26,11 @@ type UserReportModel struct {
 	Status         UserReportStatus   `db:"status"`
 	AdminId        sql.NullString     `db:"adminId"`
 	AdminNote      sql.NullString     `db:"adminNote"`
+	CreatedAt      string             `db:"createdAt"`
 
 	Images         []string
 	BookingIdInput string
+
+	Reporter UserModel
+	Reported UserModel
 }

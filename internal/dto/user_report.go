@@ -1,10 +1,16 @@
 package dto
 
-type UserReport struct {
-	Id               string
-	ReportedUserId   string
-	ReportedByUserId string
-	CreatedAt        string
+type ReportItem struct {
+	Id        string
+	Reported  ReportUser
+	Reporter  ReportUser
+	CreatedAt string
+}
+
+type ReportUser struct {
+	Id    string
+	Name  string
+	Email string
 }
 
 type UserReportDetail struct {
@@ -12,7 +18,7 @@ type UserReportDetail struct {
 	Reported            User
 	ReporterHistory     ReporterHistory
 	ReportedUserHistory ReportedUserHistory
-	Report              Report
+	Report              ReportDetail
 	Booking             Booking
 }
 
@@ -34,7 +40,7 @@ type ReporterHistory struct {
 	AccountCreatedAt  string
 }
 
-type Report struct {
+type ReportDetail struct {
 	Id               string
 	ReportedUserId   string
 	ReportedByUserId string

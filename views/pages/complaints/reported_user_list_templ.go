@@ -16,7 +16,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-func ReportedUserList(user models.AdminModel, users []dto.UserReport, flash string) templ.Component {
+func ReportedUserList(user models.AdminModel, users []dto.ReportItem, flash string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -99,7 +99,7 @@ func ReportedUserList(user models.AdminModel, users []dto.UserReport, flash stri
 	})
 }
 
-func reportedUsersTable(users []dto.UserReport) templ.Component {
+func reportedUsersTable(reports []dto.ReportItem) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -120,59 +120,111 @@ func reportedUsersTable(users []dto.UserReport) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">Complaint ID</th><th scope=\"col\" class=\"p-4\">Submitted On</th><th scope=\"col\" class=\"p-4\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">Report ID</th><th scope=\"col\" class=\"p-4\">Reported</th><th scope=\"col\" class=\"p-4\">Reported By</th><th scope=\"col\" class=\"p-4\">Submitted On</th><th scope=\"col\" class=\"p-4\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(users) < 1 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<tr class=\"\"><td class=\"px-6 py-4 text-neutral-dark\" align=\"center\" colspan=\"4\" id=\"emptyTable\">Empty</td></tr>")
+		if len(reports) < 1 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<tr class=\"\"><td class=\"px-6 py-4 text-neutral-dark\" align=\"center\" colspan=\"5\" id=\"emptyTable\">Empty</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			for _, user := range users {
+			for _, report := range reports {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<tr class=\"text-xs\"><td class=\"p-4\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Id)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(report.Id)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user_list.templ`, Line: 40, Col: 32}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user_list.templ`, Line: 42, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</td><td class=\"p-4\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</td><td class=\"p-4\"><div class=\"flex w-max items-center gap-2\"><div class=\"flex flex-col\"><span class=\"font-medium text-neutral-900\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.CreatedAt)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(report.Reported.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user_list.templ`, Line: 41, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user_list.templ`, Line: 46, Col: 75}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</td><td class=\"p-4\"><ul><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span> <span class=\"text-neutral-600 opacity-85\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var6 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/complaints/users/%s", user.Id))
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(report.Reported.Email)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user_list.templ`, Line: 47, Col: 75}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75\">view report</a></ul></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span></div></div></td><td class=\"p-4\"><div class=\"flex w-max items-center gap-2\"><div class=\"flex flex-col\"><span class=\"font-medium text-neutral-900\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(report.Reporter.Name)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user_list.templ`, Line: 54, Col: 75}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span> <span class=\"text-neutral-600 opacity-85\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var8 string
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(report.Reporter.Email)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user_list.templ`, Line: 55, Col: 75}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span></div></div></td><td class=\"p-4\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(report.CreatedAt)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/reported_user_list.templ`, Line: 59, Col: 41}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</td><td class=\"p-4\"><ul><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var10 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/admin/complaints/users/%s", report.Id))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var10)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75\">view report</a></ul></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</tbody></table></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</tbody></table></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

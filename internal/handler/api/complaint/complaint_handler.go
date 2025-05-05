@@ -83,15 +83,12 @@ func (h *complaintHandler) ReportUser(c echo.Context) error {
 
 	bearerToken := utils.BearerTokenFromHeader(c)
 
-	reportId, err := h.complaintService.ReportUser(bearerToken, req, files)
-	if err != nil {
+	if err := h.complaintService.ReportUser(bearerToken, req, files); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error reporting user",
 			Error:   err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusCreated, utils.Mapper{
-		"reportId": reportId,
-	})
+	return c.JSON(http.StatusNoContent, nil)
 }
