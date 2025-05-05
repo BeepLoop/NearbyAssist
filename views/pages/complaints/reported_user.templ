@@ -222,7 +222,7 @@ templ booking(data dto.UserReportDetail) {
 		</div>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Rate:</span>
-			<p class="text-neutral-gray">₱ { utils.FloatToString(data.Booking.Service.Rate) }</p>
+			<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Service.Rate) }</p>
 		</div>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Created At:</span>
@@ -237,18 +237,15 @@ templ booking(data dto.UserReportDetail) {
 	<div class="mt-4">
 		@partials.Divider()
 		<h1 class="mt-2 text-xl font-medium">Included Add-ons</h1>
-		<div>
-			<table>
-				<tbody>
-					for _, extra := range data.Booking.Extras {
-						<tr>
-							<td>{ extra.Title }</td>
-							<td>{ extra.Description }</td>
-							<td>{ utils.FloatToString(extra.Price) }</td>
-						</tr>
-					}
-				</tbody>
-			</table>
+		<div class="mt-2">
+			for _, extra := range data.Booking.Extras {
+				@partials.Collapsable(partials.CollapsableProps{
+					Title:    extra.Title,
+					EndText:  utils.FormatCurrency(extra.Price),
+					Content:  extra.Description,
+					Expanded: true,
+				})
+			}
 		</div>
 	</div>
 }

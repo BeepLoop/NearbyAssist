@@ -1728,10 +1728,10 @@
       }
     }
   }
-  .hover\:bg-neutral-gray-lighter\/50 {
+  .hover\:bg-neutral-gray-lighter\/40 {
     &:hover {
       @media (hover: hover) {
-        background-color: color-mix(in oklab, var(--color-neutral-gray-lighter) 50%, transparent);
+        background-color: color-mix(in oklab, var(--color-neutral-gray-lighter) 40%, transparent);
       }
     }
   }

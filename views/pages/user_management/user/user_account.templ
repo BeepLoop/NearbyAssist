@@ -347,7 +347,7 @@ templ offCanvasBookingData(booking dto.Booking) {
 		</div>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Rate:</span>
-			<p class="text-neutral-gray">₱ { utils.FloatToString(booking.Service.Rate) }</p>
+			<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Service.Rate) }</p>
 		</div>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Created At:</span>
@@ -364,7 +364,12 @@ templ offCanvasBookingData(booking dto.Booking) {
 		@partials.Divider()
 		<div>
 			for _, extra := range booking.Extras {
-				@collapsableExtra(extra)
+				@partials.Collapsable(partials.CollapsableProps{
+					Title:    extra.Title,
+					EndText:  utils.FormatCurrency(extra.Price),
+					Content:  extra.Description,
+					Expanded: true,
+				})
 			}
 		</div>
 	</div>
