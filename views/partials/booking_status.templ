@@ -1,0 +1,14 @@
+package partials
+
+templ BookingStatus(status string) {
+	switch (status) {
+		case "done":
+			@DefaultBadgeSuccess("completed")
+		case "cancelled":
+			@DefaultBadgeDanger("cancelled")
+		case "rejected":
+			@DefaultBadgeDanger("rejected")
+		case "confirmed":
+			@DefaultBadgeSuccess("on-going")
+	}
+}

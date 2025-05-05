@@ -51,7 +51,7 @@ templ VendorApplicationDetails(user models.AdminModel, application models.Applic
 				</div>
 				<div class="flex gap-2">
 					<h3 class="font-medium text-neutral-dark">Status:</h3>
-					@partials.SoftBadgeWarning(application.Status)
+					@partials.BookingStatus(application.Status)
 				</div>
 			</div>
 			@partials.Divider()

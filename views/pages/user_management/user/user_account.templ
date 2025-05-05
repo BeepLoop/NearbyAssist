@@ -292,17 +292,7 @@ templ offCanvasBookingData(booking dto.Booking) {
 		</div>
 		<div class="mt-2 flex items-center gap-2">
 			<span class="font-medium text-neutral-dark">Status:</span>
-			if booking.Status == "done" {
-				@partials.DefaultBadgeSuccess("completed")
-			} else if booking.Status == "cancelled" {
-				@partials.DefaultBadgeDanger("cancelled")
-			} else if booking.Status == "rejected" {
-				@partials.DefaultBadgeDanger("rejected")
-			} else if booking.Status == "pending" {
-				@partials.DefaultBadgeWarning("pending")
-			} else if booking.Status == "confirmed" {
-				@partials.DefaultBadgeProcessing("confirmed")
-			}
+			@partials.BookingStatus(booking.Status)
 		</div>
 		if booking.Status != "done" {
 			<div class="mt-2 flex gap-2">
@@ -370,7 +360,7 @@ templ offCanvasBookingData(booking dto.Booking) {
 	</div>
 	<!-- Extras -->
 	<div class="mt-4">
-		<h1 class="text-xl font-medium">Included Extras</h1>
+		<h1 class="text-xl font-medium">Included Add-ons</h1>
 		@partials.Divider()
 		<div>
 			for _, extra := range booking.Extras {

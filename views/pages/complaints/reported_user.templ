@@ -42,19 +42,6 @@ templ ReportedUser(user models.AdminModel, data dto.UserReportDetail) {
 						role="tab"
 						aria-controls="tabpanelOverview"
 					>Overview</button>
-					<!-- booking button -->
-					if data.Report.Category == "booking_related" {
-						<button
-							x-on:click="changeTab('booking')"
-							x-bind:aria-selected="selectedTab === 'booking'"
-							x-bind:tabindex="selectedTab === 'booking' ? '0' : '-1'"
-							x-bind:class="selectedTab === 'booking' ? 'font-bold text-primary border-b-2 border-primary' : 'text-neutral-gray hover:border-b-2 hover:border-b-primary hover:text-neutral-dark'"
-							class="h-min px-4 py-2 text-sm"
-							type="button"
-							role="tab"
-							aria-controls="tabpanelBooking"
-						>Booking</button>
-					}
 					<!-- reported button -->
 					<button
 						x-on:click="changeTab('reported')"
@@ -84,12 +71,6 @@ templ ReportedUser(user models.AdminModel, data dto.UserReportDetail) {
 					<div x-cloak x-show="selectedTab === 'overview'" id="tabpanelOverview" role="tabpanel" aria-label="overview">
 						@overview(data)
 					</div>
-					<!-- booking content -->
-					if data.Report.Category == "booking_related" {
-						<div x-cloak x-show="selectedTab === 'booking'" id="tabpanelBooking" role="tabpanel" aria-label="booking">
-							@booking(data)
-						</div>
-					}
 					<!-- reported content -->
 					<div x-cloak x-show="selectedTab === 'reported'" id="tabpanelReported" role="tabpanel" aria-label="reported">
 						@reported(data)
@@ -149,9 +130,14 @@ templ overview(data dto.UserReportDetail) {
 			<span class="font-medium text-neutral-dark">Detail:</span>
 			<p class="text-neutral-gray">{ data.Report.Detail }</p>
 		</div>
+		<!-- Booking details -->
+		if data.Report.Category == "booking_related" {
+			@booking(data)
+		}
 		<!-- Images -->
 		<div class="mt-4">
-			<h4 class="font-bold text-neutral-dark">Images</h4>
+			@partials.Divider()
+			<h1 class="mt-2 text-xl font-medium">Report Attachments</h1>
 			<div class="mt-2 grid grid-cols-3 gap-2">
 				for _, image := range data.Report.Images {
 					@partials.ImageViewer("", fmt.Sprintf("/api/v1/resource/%s", image))
@@ -162,9 +148,9 @@ templ overview(data dto.UserReportDetail) {
 }
 
 templ booking(data dto.UserReportDetail) {
-	<div class="">
-		<h1 class="text-xl font-medium">Booking</h1>
+	<div class="mt-4">
 		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">Booking</h1>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">ID:</span>
 			<p class="text-neutral-gray">{ data.Booking.Id }</p>
@@ -175,13 +161,7 @@ templ booking(data dto.UserReportDetail) {
 		</div>
 		<div class="mt-2 flex items-center gap-2">
 			<span class="font-medium text-neutral-dark">Status:</span>
-			if data.Booking.Status == "done" {
-				@partials.DefaultBadgeSuccess("completed")
-			} else if data.Booking.Status == "cancelled" {
-				@partials.DefaultBadgeDanger("cancelled")
-			} else if data.Booking.Status == "rejected" {
-				@partials.DefaultBadgeDanger("rejected")
-			}
+			@partials.BookingStatus(data.Booking.Status)
 		</div>
 		if data.Booking.Status != "done" {
 			<div class="mt-2 flex gap-2">
@@ -216,14 +196,14 @@ templ booking(data dto.UserReportDetail) {
 	</div>
 	<!-- Service -->
 	<div class="mt-4">
-		<div class="flex justify-between">
+		@partials.Divider()
+		<div class="mt-2 flex justify-between">
 			<h1 class="text-xl font-medium">Service</h1>
 			<a
 				href={ templ.URL(fmt.Sprintf("/admin/user-management/vendors/%s?tab=services&offCanvas=%s", data.Booking.Vendor.Id, data.Booking.Service.Id)) }
 				class="cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs text-white hover:opacity-75"
 			>view</a>
 		</div>
-		@partials.Divider()
 		<div class="mt-2">
 			<span class="font-medium text-neutral-dark">Title:</span>
 			<p class="text-neutral-gray">{ data.Booking.Service.Title }</p>
@@ -255,8 +235,8 @@ templ booking(data dto.UserReportDetail) {
 	</div>
 	<!-- Extras -->
 	<div class="mt-4">
-		<h1 class="text-xl font-medium">Included Extras</h1>
 		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">Included Add-ons</h1>
 		<div>
 			<table>
 				<tbody>
@@ -277,7 +257,6 @@ templ reported(data dto.UserReportDetail) {
 	<!-- Information -->
 	<div class="">
 		<h1 class="text-xl font-medium">Information</h1>
-		@partials.Divider()
 		<div>
 			<div class="mt-2 flex justify-between">
 				<img
@@ -288,7 +267,7 @@ templ reported(data dto.UserReportDetail) {
 				<div>
 					<a
 						href={ templ.URL(fmt.Sprintf("/admin/user-management/vendors/%s", data.Reported.Id)) }
-						class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 text-white hover:opacity-75"
+						class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 text-xs text-white hover:opacity-75"
 					>View Profile</a>
 				</div>
 			</div>
@@ -320,8 +299,8 @@ templ reported(data dto.UserReportDetail) {
 	</div>
 	<!-- History -->
 	<div class="mt-4">
-		<h1 class="text-xl font-medium">History</h1>
 		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">History</h1>
 		<div>
 			<div class="mt-2 grid grid-cols-2 text-left">
 				<div class="mt-2 flex items-center gap-2">
@@ -397,7 +376,6 @@ templ reporter(data dto.UserReportDetail) {
 	<!-- Information -->
 	<div class="">
 		<h1 class="text-xl font-medium">Information</h1>
-		@partials.Divider()
 		<div>
 			<div class="mt-2 flex justify-between">
 				<img
@@ -408,7 +386,7 @@ templ reporter(data dto.UserReportDetail) {
 				<div>
 					<a
 						href={ templ.URL(fmt.Sprintf("/admin/user-management/users/%s", data.Reporter.Id)) }
-						class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 text-white hover:opacity-75"
+						class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 text-xs text-white hover:opacity-75"
 					>View Profile</a>
 				</div>
 			</div>
@@ -440,8 +418,8 @@ templ reporter(data dto.UserReportDetail) {
 	</div>
 	<!-- History -->
 	<div class="mt-4">
-		<h1 class="text-xl font-medium">History</h1>
 		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">History</h1>
 		<div>
 			<div class="mt-2 grid grid-cols-2 text-left">
 				<div class="mt-2 flex gap-2">
