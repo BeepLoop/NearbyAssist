@@ -20,9 +20,9 @@ templ ReportedUserList(user models.AdminModel, users []dto.UserReport, flash str
 }
 
 templ reportedUsersTable(users []dto.UserReport) {
-	<div class="overflow-hidden w-full overflow-x-auto rounded-sm outline-1 outline-gray-300">
+	<div class="w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
-			<thead class="text-white text-sm font-semibold bg-primary-greener">
+			<thead class="bg-primary-greener text-sm font-semibold text-white">
 				<tr>
 					<th scope="col" class="p-4">Complaint ID</th>
 					<th scope="col" class="p-4">Submitted On</th>
@@ -37,15 +37,13 @@ templ reportedUsersTable(users []dto.UserReport) {
 				} else {
 					for _, user := range users {
 						<tr class="text-xs">
-							<td class="p-4">
-								{ user.Id }
-							</td>
+							<td class="p-4">{ user.Id } </td>
 							<td class="p-4">{ user.CreatedAt }</td>
 							<td class="p-4">
 								<ul>
 									<a
 										href={ templ.SafeURL(fmt.Sprintf("/admin/complaints/users/%s", user.Id)) }
-										class="whitespace-nowrap w-min rounded-sm text-neutral-gray p-1 font-semibold outline-1 outline-neutral-gray hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0"
+										class="w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75"
 									>
 										view report
 									</a>
