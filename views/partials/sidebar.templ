@@ -33,6 +33,8 @@ templ Sidebar(user models.AdminModel) {
                  const prr = document.getElementById("sidebar_prr")
 
                  function updateIndicator(parentElement, value) {
+                     if (!parentElement) return;
+
                      const indicator = parentElement.querySelector('[data-indicator]');
                      if (value === 0) {
                          indicator.parentNode.classList.remove("grid");
@@ -49,6 +51,7 @@ templ Sidebar(user models.AdminModel) {
 
                  sse.onmessage = function(event) {
                      const data = JSON.parse(event.data);
+                     console.log("SSE data: ", data);
 
                      updateIndicator(verification, data.verification);
                      updateIndicator(application, data.application);

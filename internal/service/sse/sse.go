@@ -3,6 +3,7 @@ package sse
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -33,10 +34,14 @@ func (s *SSE) GetMarshalled() ([]byte, error) {
 }
 
 func (s *SSE) SetValues(db *sqlx.DB) {
+	fmt.Println("setting values of sse")
+
 	s.Verification = s.queryVerificationCount(db)
 	s.Application = s.queryApplicationCount(db)
 	s.Report = s.queryReportedUserCount(db)
 	s.PasswordResetRequest = s.queryPasswordResetRequestCount(db)
+
+	fmt.Println("setting values complete")
 }
 
 func (s *SSE) queryVerificationCount(db *sqlx.DB) int {
@@ -46,6 +51,7 @@ func (s *SSE) queryVerificationCount(db *sqlx.DB) int {
 	query := "SELECT COUNT(id) FROM IdentityVerification WHERE status = 'pending'"
 	count := 0
 	if err := db.GetContext(ctx, &count, query); err != nil {
+		fmt.Println("error retrieving verification count: ", err.Error())
 		return 0
 	}
 
@@ -63,6 +69,7 @@ func (s *SSE) queryApplicationCount(db *sqlx.DB) int {
 	query := "SELECT COUNT(id) FROM Application WHERE status = 'pending'"
 	count := 0
 	if err := db.GetContext(ctx, &count, query); err != nil {
+		fmt.Println("error retrieving application count: ", err.Error())
 		return 0
 	}
 
@@ -80,6 +87,7 @@ func (s *SSE) queryReportedUserCount(db *sqlx.DB) int {
 	query := "SELECT COUNT(id) FROM UserReport WHERE status = 'pending'"
 	count := 0
 	if err := db.GetContext(ctx, &count, query); err != nil {
+		fmt.Println("error retrieving user report count: ", err.Error())
 		return 0
 	}
 
@@ -97,6 +105,7 @@ func (s *SSE) queryPasswordResetRequestCount(db *sqlx.DB) int {
 	query := "SELECT COUNT(id) FROM PasswordResetRequest"
 	count := 0
 	if err := db.GetContext(ctx, &count, query); err != nil {
+		fmt.Println("error retrieving password reset request count: ", err.Error())
 		return 0
 	}
 

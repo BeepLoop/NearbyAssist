@@ -3,6 +3,7 @@ package ssehandler
 import (
 	"fmt"
 	"nearbyassist/internal/service/sse"
+	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -23,6 +24,11 @@ func (h *handler) Listen(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
 	c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
 
+	f, ok := c.Response().Writer.(http.Flusher)
+	if !ok {
+		return fmt.Errorf("streaming unsupported")
+	}
+
 	ticker := time.NewTicker(time.Second * 1)
 	defer ticker.Stop()
 
@@ -38,10 +44,8 @@ func (h *handler) Listen(c echo.Context) error {
 				return err
 			}
 
-			data := fmt.Sprintf("data: %s\n\n", b)
-
-			c.Response().Writer.Write([]byte(data))
-			c.Response().Flush()
+			fmt.Fprintf(c.Response().Writer, "data: %s\n\n", b)
+			f.Flush()
 		}
 	}
 }
