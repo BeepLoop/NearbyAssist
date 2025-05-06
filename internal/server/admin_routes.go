@@ -319,5 +319,6 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		settingRoute.GET("", handler.GetSettingsPage)
 		settingRoute.GET("/resetSSE", handler.ResetSSE)
+		settingRoute.GET("/remind", handler.RemindScheduled)
 	}
 }

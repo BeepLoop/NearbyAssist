@@ -1,10 +1,15 @@
 package settingshandler
 
 import (
+	"context"
+	"fmt"
+	"nearbyassist/internal/models"
+	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/settings"
 	"net/http"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -34,6 +39,52 @@ func (h *handler) ResetSSE(c echo.Context) error {
 	sse.New().SetValues(h.db)
 
 	utils.SetFlashMessage(c, "success", "Server Sent Events (SSE) data reset")
+
+	return c.Redirect(http.StatusSeeOther, "/admin/settings")
+}
+
+func (h *handler) RemindScheduled(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            *
+        FROM
+            Booking
+        WHERE
+            scheduledAt IS NULL AND DATE(scheduledAt) = CURDATE() + INTERVAL 1 DAY
+    `
+	bookings := make([]*models.BookingModel, 0)
+	if err := h.db.SelectContext(ctx, &bookings, query); err != nil {
+		fmt.Println("error retrieving tomorrows' bookings: ", err.Error())
+		utils.SetFlashMessage(c, "error", "Error occurred while retrieving bookings scheduled for tomorrow")
+		return c.Redirect(http.StatusSeeOther, "/admin/settings")
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		utils.SetFlashMessage(c, "error", "Database took too long to respond")
+		return c.Redirect(http.StatusSeeOther, "/admin/settings")
+	}
+
+	sent := 0
+
+	oneSignal := notification_service.MustGetInstance()
+	for _, booking := range bookings {
+		heading := "Upcoming Booking Tomorrow"
+		content := "You have a booking scheduled for tomorrow. Get ready to deliver your service on time."
+
+		if err := oneSignal.NewUrgentNotification(booking.VendorId, heading, content); err != nil {
+			fmt.Println("error notifying vendor %s, error: ", booking.VendorId, err.Error())
+			continue
+		}
+
+		sent++
+	}
+
+	if err := utils.SetFlashMessage(c, "success", fmt.Sprintf("Sent reminder to %d vendors", sent)); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/settings?error=sent_remined_to_vendors")
+	}
 
 	return c.Redirect(http.StatusSeeOther, "/admin/settings")
 }
