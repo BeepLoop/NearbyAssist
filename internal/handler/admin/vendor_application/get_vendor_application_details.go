@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/cache"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/vendor_application"
 	"net/http"
@@ -103,6 +104,8 @@ func (h *applicationHandler) AcceptRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
 
+	sse.New().Application--
+
 	return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications")
 }
 
@@ -132,6 +135,8 @@ func (h *applicationHandler) RejectRequest(c echo.Context) error {
 
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
+
+	sse.New().Application--
 
 	return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications")
 }

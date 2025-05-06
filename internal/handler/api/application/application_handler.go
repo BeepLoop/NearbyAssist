@@ -3,6 +3,7 @@ package application
 import (
 	"nearbyassist/internal/models"
 	application_service "nearbyassist/internal/service/application"
+	"nearbyassist/internal/service/sse"
 	user_service "nearbyassist/internal/service/user"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -60,6 +61,8 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 			Error:   err.Error(),
 		})
 	}
+
+	sse.New().Application++
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"application": applicationId,

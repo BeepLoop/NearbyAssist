@@ -2,6 +2,7 @@ package passwordreset_handler
 
 import (
 	passwordreset_service "nearbyassist/internal/service/password_reset"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"net/http"
 	"strings"
@@ -29,6 +30,8 @@ func (h *passwordResetHandler) RequestPasswordReset(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "Request submitted"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/?success=request_submitted")
 	}
+
+	sse.New().PasswordResetRequest++
 
 	return c.Redirect(http.StatusSeeOther, "/")
 }

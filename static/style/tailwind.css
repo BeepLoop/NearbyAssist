@@ -27,6 +27,10 @@
     display: none !important;
 }
 
+[na-hidden] {
+    display: none !important;
+}
+
 .active {
     background-color: var(--color-primary);
     opacity: 0.75;

@@ -1,6 +1,7 @@
 package verification
 
 import (
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -25,6 +26,8 @@ func (h *verificationHandler) AcceptRequest(c echo.Context) error {
 
 		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId)
 	}
+
+	sse.New().Verification--
 
 	return c.Redirect(http.StatusSeeOther, "/admin/verification-requests")
 }

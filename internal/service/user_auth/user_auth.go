@@ -11,6 +11,7 @@ import (
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"slices"
 )
@@ -231,6 +232,8 @@ func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.
 	if _, err := s.verificationStore.CreateLink(userId); err != nil {
 		return nil, err
 	}
+
+	sse.New().Verification++
 
 	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
 		UserId: userId,

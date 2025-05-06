@@ -1,0 +1,43 @@
+package nav
+
+import "fmt"
+
+templ NavWithSubItem(title string) {
+	<a
+		href="#"
+		class="flex items-center gap-2 rounded-md px-3 py-2 text-sm underline-offset-2"
+	>
+		<span class="text-xs">{ title }</span>
+	</a>
+	<ul class="pl-4">
+		{ children... }
+	</ul>
+}
+
+templ SubItem(props NavItemProps) {
+	<li class="border-l border-pale-gray py-0.5 pl-2">
+		<a
+			href={ templ.URL(props.Path) }
+			data-path={ props.Path }
+			id={ fmt.Sprintf("sidebar_%s", props.ID) }
+			class="flex items-center gap-3 rounded-l-3xl px-3 py-2 hover:bg-primary hover:opacity-75"
+		>
+			<p>{ props.Label }</p>
+			<div
+				class="hidden rounded-full bg-danger font-bold text-white aspect-square w-4 h-4 place-items-center mt-[-1rem]"
+			>
+				<p data-indicator></p>
+			</div>
+			<script>
+                (() => {
+                     let currentScript = document.currentScript;
+                     let parent = currentScript.closest("a");
+                     const path = parent.getAttribute("data-path");
+                     if (location.pathname.includes(path)) {
+                         parent.classList.add("active");
+                     }
+                 })()
+            </script>
+		</a>
+	</li>
+}

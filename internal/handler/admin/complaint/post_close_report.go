@@ -1,6 +1,7 @@
 package complaint
 
 import (
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -28,6 +29,8 @@ func (h *complaintHandler) Close(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "resolved report"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/complaints/users?success=resolved_report")
 	}
+
+	sse.New().Report--
 
 	return c.Redirect(http.StatusSeeOther, "/admin/complaints/users")
 }

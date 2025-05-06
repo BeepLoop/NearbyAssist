@@ -4,6 +4,7 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	complaint_service "nearbyassist/internal/service/complaint"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -89,6 +90,8 @@ func (h *complaintHandler) ReportUser(c echo.Context) error {
 			Error:   err.Error(),
 		})
 	}
+
+	sse.New().Report++
 
 	return c.JSON(http.StatusNoContent, nil)
 }

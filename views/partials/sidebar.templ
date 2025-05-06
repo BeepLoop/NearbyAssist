@@ -1,6 +1,9 @@
 package partials
 
-import "nearbyassist/internal/models"
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/views/partials/nav"
+)
 
 templ Sidebar(user models.AdminModel) {
 	<div class="h-screen flex flex-col outline-1 outline-pale-gray justify-between bg-white">
@@ -22,6 +25,43 @@ templ Sidebar(user models.AdminModel) {
 				</button>
 			</form>
 		</div>
+		<script>
+            (function() {
+                 const verification = document.getElementById("sidebar_verification")
+                 const application = document.getElementById("sidebar_application")
+                 const report = document.getElementById("sidebar_report")
+                 const prr = document.getElementById("sidebar_prr")
+
+                 function updateIndicator(parentElement, value) {
+                     const indicator = parentElement.querySelector('[data-indicator]');
+                     if (value === 0) {
+                         indicator.parentNode.classList.remove("grid");
+                         indicator.parentNode.classList.add("hidden");
+                         return;
+                     }
+
+                     indicator.innerText = value;
+                     indicator.parentNode.classList.remove("hidden");
+                     indicator.parentNode.classList.add("grid");
+                 }
+
+                 const sse = new EventSource("/admin/sse");
+
+                 sse.onmessage = function(event) {
+                     const data = JSON.parse(event.data);
+                     console.log(data);
+
+                     updateIndicator(verification, data.verification);
+                     updateIndicator(application, data.application);
+                     updateIndicator(report, data.report);
+                     updateIndicator(prr, data.prr);
+                 }
+
+                 sse.onerror = function(error) {
+                     console.error(error);
+                 }
+             })();
+        </script>
 	</div>
 }
 
@@ -109,89 +149,69 @@ templ navlist(user models.AdminModel) {
 	<div class="pl-3 text-xs">
 		<ul class="">
 			if user.Role == "admin" {
-				@navItem("/admin/dashboard", "Dashboard")
+				@nav.NavItem(nav.NavItemProps{
+					Path:  "/admin/dashboard",
+					Label: "Dashboard",
+				})
 			}
-			@navItem("/admin/map", "Map")
+			@nav.NavItem(nav.NavItemProps{
+				Path:  "/admin/map",
+				Label: "Map",
+			})
 			if user.Role == "admin" {
-				@navItem("/admin/expertise", "Expertise")
+				@nav.NavItem(nav.NavItemProps{
+					Path:  "/admin/expertise",
+					Label: "Expertise",
+				})
 			}
-			@navWithSubItem("Requests") {
-				@subNavItem("/admin/verification-requests", "Identity verification")
-				@subNavItem("/admin/vendor-applications", "Vendor applications")
+			@nav.NavWithSubItem("Requests") {
+				@nav.SubItem(nav.NavItemProps{
+					ID:    "verification",
+					Path:  "/admin/verification-requests",
+					Label: "Identity verification",
+				})
+				@nav.SubItem(nav.NavItemProps{
+					ID:    "application",
+					Path:  "/admin/vendor-applications",
+					Label: "Vendor applications",
+				})
 			}
-			@navWithSubItem("User Management") {
-				@subNavItem("/admin/user-management/users", "Basic users")
-				@subNavItem("/admin/user-management/vendors", "Vendors")
+			@nav.NavWithSubItem("User Management") {
+				@nav.SubItem(nav.NavItemProps{
+					Path:  "/admin/user-management/users",
+					Label: "Basic users",
+				})
+				@nav.SubItem(nav.NavItemProps{
+					Path:  "/admin/user-management/vendors",
+					Label: "Vendors",
+				})
 			}
-			@navWithSubItem("Reports") {
-				@subNavItem("/admin/complaints/users", "Reported users")
+			@nav.NavWithSubItem("Reports") {
+				@nav.SubItem(nav.NavItemProps{
+					ID:    "report",
+					Path:  "/admin/complaints/users",
+					Label: "Reported users",
+				})
 				<!--
-				f user.Role == "admin" {
-					@subNavItem("/admin/complaints/bugs", "Bug reports")
-				}
+				@nav.SubItem(nav.NavItemProps{
+					Path:  "/admin/complaints/bugs",
+					Label: "Bugs",
+				})
                 -->
 			}
 			if user.Role == "admin" {
-				@navWithSubItem("Account Management") {
-					@subNavItem("/admin/account-management/accounts", "Accounts")
-					@subNavItem("/admin/account-management/reset", "Password reset")
+				@nav.NavWithSubItem("Account Manangement") {
+					@nav.SubItem(nav.NavItemProps{
+						Path:  "/admin/account-management/accounts",
+						Label: "Accounts",
+					})
+					@nav.SubItem(nav.NavItemProps{
+						ID:    "prr",
+						Path:  "/admin/account-management/reset",
+						Label: "Password reset",
+					})
 				}
 			}
 		</ul>
 	</div>
-}
-
-templ navItem(path, title string) {
-	<a
-		href={ templ.URL(path) }
-		data-path={ path }
-		class="flex gap-3 rounded-l-3xl px-3 py-2 items-center hover:bg-primary hover:opacity-75"
-	>
-		{ children... }
-		<span>{ title }</span>
-		<script>
-            (() => {
-                 let currentScript = document.currentScript;
-                 let parent = currentScript.closest("a");
-                 const path = parent.getAttribute("data-path");
-                 if (location.pathname.includes(path)) {
-                     parent.classList.add("active");
-                 }
-             })()
-        </script>
-	</a>
-}
-
-templ navWithSubItem(title string) {
-	<a
-		href="#"
-		class="flex items-center gap-2 px-3 py-2 text-sm rounded-md underline-offset-2"
-	>
-		<span class="text-xs">{ title }</span>
-	</a>
-	<ul class="pl-4">
-		{ children... }
-	</ul>
-}
-
-templ subNavItem(path, title string) {
-	<li class="border-l pl-2 py-0.5 border-pale-gray">
-		<a
-			href={ templ.URL(path) }
-			data-path={ path }
-			class="flex gap-3 rounded-l-3xl px-3 py-2 items-center hover:bg-primary hover:opacity-75"
-		>
-			<span>{ title }</span>
-			<script>
-                (() => {
-                     let currentScript = document.currentScript;
-                     let parent = currentScript.closest("a");
-                     const path = parent.getAttribute("data-path");
-                     if (location.pathname.includes(path)) {
-                         parent.classList.add("active");
-                     }
-                 })()
-            </script>
-		</a>
-	</li>
 }

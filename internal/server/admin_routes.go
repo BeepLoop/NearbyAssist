@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/handler/admin/invitation"
 	map_handler "nearbyassist/internal/handler/admin/map"
 	passwordreset_handler "nearbyassist/internal/handler/admin/password_reset"
+	"nearbyassist/internal/handler/admin/ssehandler"
 	"nearbyassist/internal/handler/admin/userManagement"
 	application "nearbyassist/internal/handler/admin/vendor_application"
 	"nearbyassist/internal/handler/admin/verification"
@@ -47,6 +48,13 @@ import (
 )
 
 func (s *Server) adminRoutes(r *echo.Group) {
+	sseRoute := r.Group("/sse")
+	{
+		handler := ssehandler.NewHandler()
+
+		sseRoute.GET("", handler.Listen)
+	}
+
 	resetRoute := r.Group("/reset")
 	{
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)

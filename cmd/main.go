@@ -12,6 +12,7 @@ import (
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/route_engine"
 	searchhistory "nearbyassist/internal/service/search_history"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/service/websocket"
 
@@ -71,6 +72,9 @@ func main() {
 		log.Fatal(err)
 	}
 	defer mysql.Close()
+
+	// Initialize sse values and query db for initial data
+	sse.New().SetValues(mysql)
 
 	ws := websocket.NewWebsocket()
 

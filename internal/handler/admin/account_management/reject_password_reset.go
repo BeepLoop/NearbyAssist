@@ -1,6 +1,7 @@
 package accountmanagement
 
 import (
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -22,6 +23,8 @@ func (h *accountManagementHandler) RejectResetRequest(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "Reject success"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?success=reject_success")
 	}
+
+	sse.New().PasswordResetRequest--
 
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
 }

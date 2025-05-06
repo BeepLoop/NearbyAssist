@@ -1,0 +1,30 @@
+package nav
+
+import "fmt"
+
+type NavItemProps struct {
+	ID    string
+	Path  string
+	Label string
+}
+
+templ NavItem(props NavItemProps) {
+	<a
+		href={ templ.URL(props.Path) }
+		data-path={ props.Path }
+		id={ fmt.Sprintf("sidebar_%s", props.ID) }
+		class="flex gap-3 rounded-l-3xl px-3 py-2 items-center hover:bg-primary hover:opacity-75"
+	>
+		<span>{ props.Label }</span>
+		<script>
+            (() => {
+                 let currentScript = document.currentScript;
+                 let parent = currentScript.closest("a");
+                 const path = parent.getAttribute("data-path");
+                 if (location.pathname.includes(path)) {
+                     parent.classList.add("active");
+                 }
+             })()
+        </script>
+	</a>
+}

@@ -2,6 +2,7 @@ package accountmanagement
 
 import (
 	passwordreset_service "nearbyassist/internal/service/password_reset"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"net/http"
 	"strings"
@@ -53,6 +54,8 @@ func (h *accountManagementHandler) FufillResetRequest(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "Request success"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?success=password_change_success")
 	}
+
+	sse.New().PasswordResetRequest--
 
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
 }
