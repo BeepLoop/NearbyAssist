@@ -1,0 +1,27 @@
+package settings
+
+import (
+	"nearbyassist/internal/models"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+)
+
+templ Settings(admin models.AdminModel, flash string) {
+	@layout.Layout(admin) {
+		<!-- toast -->
+		@templ.JSONScript("flash", flash)
+		@partials.ToastNotification()
+		<!-- banner -->
+		@partials.PageBanner("Settings", "")
+		<!-- main content -->
+		<div class="mx-auto max-w-3xl">
+			<div class="flex justify-between border-b border-pale-gray items-center p-2">
+				<p class="text-xs text-neutral-dark font-medium">Server Sent Events(SSE) data reset</p>
+				<a
+					href="/admin/settings/resetSSE"
+					class="cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs text-white hover:opacity-75"
+				>Reset</a>
+			</div>
+		</div>
+	}
+}
