@@ -34,3 +34,12 @@ func DateMonth(date string) string {
 
 	return t.Format("January 2")
 }
+
+func CurrentMonthYear() string {
+	format := "January 2006"
+
+	location, _ := time.LoadLocation("Asia/Manila")
+	now := time.Now().In(location)
+
+	return now.Format(format)
+}
