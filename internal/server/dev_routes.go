@@ -2,8 +2,10 @@ package server
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -34,4 +36,10 @@ func (s *Server) devRoutes(r *echo.Group) {
 			return nil
 		})
 	}
+
+	r.GET("/setSSEData", func(c echo.Context) error {
+		sse.New().SetValues(s.DB)
+
+		return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
+	})
 }

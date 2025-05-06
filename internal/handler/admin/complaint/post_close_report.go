@@ -30,7 +30,7 @@ func (h *complaintHandler) Close(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/complaints/users?success=resolved_report")
 	}
 
-	sse.New().Report--
+	sse.New().DecreaseReport()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/complaints/users")
 }

@@ -36,7 +36,7 @@ func (h *verificationHandler) RejectRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId)
 	}
 
-	sse.New().Verification--
+	sse.New().DecreaseVerification()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/verification-requests")
 }

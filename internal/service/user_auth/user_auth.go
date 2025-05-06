@@ -233,7 +233,7 @@ func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.
 		return nil, err
 	}
 
-	sse.New().Verification++
+	sse.New().IncreaseVerification()
 
 	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
 		UserId: userId,

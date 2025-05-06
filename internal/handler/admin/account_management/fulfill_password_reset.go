@@ -55,7 +55,7 @@ func (h *accountManagementHandler) FufillResetRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?success=password_change_success")
 	}
 
-	sse.New().PasswordResetRequest--
+	sse.New().DecreasePasswordResetRequest()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
 }

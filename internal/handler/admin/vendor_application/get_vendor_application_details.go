@@ -104,7 +104,7 @@ func (h *applicationHandler) AcceptRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
 
-	sse.New().Application--
+	sse.New().DecreaseApplication()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications")
 }
@@ -136,7 +136,7 @@ func (h *applicationHandler) RejectRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
 
-	sse.New().Application--
+	sse.New().DecreaseApplication()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications")
 }

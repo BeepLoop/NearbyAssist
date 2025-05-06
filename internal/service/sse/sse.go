@@ -14,10 +14,10 @@ var (
 )
 
 type SSE struct {
-	Verification         int `json:"verification"`
-	Application          int `json:"application"`
-	Report               int `json:"report"`
-	PasswordResetRequest int `json:"prr"`
+	verification         int
+	application          int
+	report               int
+	passwordResetRequest int
 }
 
 func New() *SSE {
@@ -25,21 +25,86 @@ func New() *SSE {
 		return instance
 	}
 
-	instance = &SSE{}
+	instance = &SSE{
+		verification:         0,
+		application:          0,
+		report:               0,
+		passwordResetRequest: 0,
+	}
 	return instance
 }
 
+func (s *SSE) DecreaseVerification() {
+	if s.verification <= 0 {
+		return
+	}
+
+	s.verification--
+}
+
+func (s *SSE) IncreaseVerification() {
+	s.verification++
+}
+
+func (s *SSE) DecreaseApplication() {
+	if s.application <= 0 {
+		return
+	}
+
+	s.application--
+}
+
+func (s *SSE) IncreaseApplication() {
+	s.application++
+}
+
+func (s *SSE) DecreaseReport() {
+	if s.report <= 0 {
+		return
+	}
+
+	s.report--
+}
+
+func (s *SSE) IncreaseReport() {
+	s.report++
+}
+
+func (s *SSE) DecreasePasswordResetRequest() {
+	if s.passwordResetRequest <= 0 {
+		return
+	}
+
+	s.passwordResetRequest--
+}
+
+func (s *SSE) IncreasePasswordResetRequest() {
+	s.passwordResetRequest++
+}
+
 func (s *SSE) GetMarshalled() ([]byte, error) {
-	return json.Marshal(s)
+	data := struct {
+		Verification         int `json:"verification"`
+		Application          int `json:"application"`
+		Report               int `json:"report"`
+		PasswordResetRequest int `json:"prr"`
+	}{
+		Verification:         s.verification,
+		Application:          s.application,
+		Report:               s.report,
+		PasswordResetRequest: s.passwordResetRequest,
+	}
+
+	return json.Marshal(data)
 }
 
 func (s *SSE) SetValues(db *sqlx.DB) {
 	fmt.Println("setting values of sse")
 
-	s.Verification = s.queryVerificationCount(db)
-	s.Application = s.queryApplicationCount(db)
-	s.Report = s.queryReportedUserCount(db)
-	s.PasswordResetRequest = s.queryPasswordResetRequestCount(db)
+	s.verification = s.queryVerificationCount(db)
+	s.application = s.queryApplicationCount(db)
+	s.report = s.queryReportedUserCount(db)
+	s.passwordResetRequest = s.queryPasswordResetRequestCount(db)
 
 	fmt.Println("setting values complete")
 }

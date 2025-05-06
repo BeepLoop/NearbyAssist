@@ -24,7 +24,7 @@ func (h *accountManagementHandler) RejectResetRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?success=reject_success")
 	}
 
-	sse.New().PasswordResetRequest--
+	sse.New().DecreasePasswordResetRequest()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")
 }

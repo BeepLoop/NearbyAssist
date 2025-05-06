@@ -31,7 +31,7 @@ func (h *passwordResetHandler) RequestPasswordReset(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/?success=request_submitted")
 	}
 
-	sse.New().PasswordResetRequest++
+	sse.New().IncreasePasswordResetRequest()
 
 	return c.Redirect(http.StatusSeeOther, "/")
 }

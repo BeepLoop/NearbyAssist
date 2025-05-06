@@ -91,7 +91,7 @@ func (h *complaintHandler) ReportUser(c echo.Context) error {
 		})
 	}
 
-	sse.New().Report++
+	sse.New().IncreaseReport()
 
 	return c.JSON(http.StatusNoContent, nil)
 }

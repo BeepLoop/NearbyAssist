@@ -62,7 +62,7 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 		})
 	}
 
-	sse.New().Application++
+	sse.New().IncreaseApplication()
 
 	return c.JSON(http.StatusCreated, utils.Mapper{
 		"application": applicationId,
