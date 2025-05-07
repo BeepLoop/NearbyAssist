@@ -139,16 +139,11 @@ templ fulfillRequest(request dto.PasswordResetRequest) {
 										</span>
 									</p>
 								</div>
-								<input
-									type="password"
-									name="password"
-									id="password"
-									autofocus
-									autocomplete="off"
-									required
-									placeholder="new password"
-									class="mt-1.5 w-full rounded-md border border-neutral-gray-lighter p-2 focus:border-primary focus:outline-none"
-								/>
+								@partials.Password(partials.PasswordProps{
+									Id:          "password",
+									Name:        "password",
+									Placeholder: "new password",
+								})
 							</div>
 							<div class="">
 								<label for="username" class="font-medium">Admin Username</label>
@@ -165,16 +160,11 @@ templ fulfillRequest(request dto.PasswordResetRequest) {
 							</div>
 							<div class="">
 								<label for="confirmation" class="font-medium">Admin Password</label>
-								<input
-									type="password"
-									name="confirmationPassword"
-									id="confirmation"
-									placeholder="admin password"
-									autofocus
-									autocomplete="off"
-									required
-									class="mt-1.5 w-full rounded-md border border-neutral-gray-lighter p-2 focus:border-primary focus:outline-none"
-								/>
+								@partials.Password(partials.PasswordProps{
+									Id:          "confirmation",
+									Name:        "confirmationPassword",
+									Placeholder: "admin password",
+								})
 							</div>
 							<div class="flex justify-end">
 								<button
