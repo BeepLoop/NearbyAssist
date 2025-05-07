@@ -6,7 +6,7 @@ import (
 	"nearbyassist/internal/handler/admin/dashboard"
 	"nearbyassist/internal/handler/admin/expertise"
 	"nearbyassist/internal/handler/admin/invitation"
-	"nearbyassist/internal/handler/admin/logs"
+	log_handler "nearbyassist/internal/handler/admin/logHandler"
 	map_handler "nearbyassist/internal/handler/admin/map"
 	passwordreset_handler "nearbyassist/internal/handler/admin/password_reset"
 	"nearbyassist/internal/handler/admin/settingshandler"
@@ -331,7 +331,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		logsRoute.Use(middleware.CheckSession)
 		logsRoute.Use(middleware.CheckMustChangePass(adminStore))
 
-		handler := logs.NewHandler()
+		handler := log_handler.NewHandler()
 
 		logsRoute.GET("", handler.GetLogs)
 	}
