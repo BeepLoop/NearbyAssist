@@ -1,6 +1,7 @@
 package invitation
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/service/invite_service"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -44,6 +45,14 @@ func (h *handler) SendInvite(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "Invitation send"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts?success=invitation_sent")
 	}
+
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_SENT_INVITE,
+	}
+	activitylog.MustGetInstance().Create(activity)
 
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/accounts")
 }

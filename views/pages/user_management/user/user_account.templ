@@ -140,7 +140,7 @@ templ profile(data dto.UserAccountDetail) {
 					</div>
 				} else if data.User.IsRestricted {
 					<div class="mt-2 flex gap-2">
-						@partials.DefaultBadgeWarning("restricted")
+						@partials.DefaultBadgeWarning("suspended")
 					</div>
 				}
 			</div>

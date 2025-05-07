@@ -1,6 +1,7 @@
 package passwordreset_handler
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -36,6 +37,16 @@ func (h *passwordResetHandler) PostChangePassword(c echo.Context) error {
 
 		return c.Redirect(http.StatusSeeOther, "/admin/reset/cp")
 	}
+
+	admin, _ := h.passwordResetService.GetAdminFromUsername(username)
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_PASSWORD_CHANGE,
+		TargetType: "admin",
+		TargetId:   admin.Id,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 
 	return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 }

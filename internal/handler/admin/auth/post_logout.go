@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -10,6 +11,11 @@ import (
 )
 
 func (h *authHandler) PostLogout(c echo.Context) error {
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
 	sess, err := session.Get("session", c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/dashboard?error=session_error")
@@ -26,6 +32,12 @@ func (h *authHandler) PostLogout(c echo.Context) error {
 	}
 
 	_ = utils.SetFlashMessage(c, "success", "Logged out")
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_LOGOUT,
+	}
+	activitylog.MustGetInstance().Create(activity)
 
 	return c.Redirect(http.StatusSeeOther, "/auth/login")
 }

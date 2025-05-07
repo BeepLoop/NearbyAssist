@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/config"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/server"
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/service/cache"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
@@ -75,6 +76,7 @@ func main() {
 
 	// Initialize sse values and query db for initial data
 	sse.New().SetValues(mysql)
+	activitylog.NewActivityLogService(mysql, encrypt)
 
 	ws := websocket.NewWebsocket()
 

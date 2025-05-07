@@ -186,7 +186,7 @@ func userTable(accounts []dto.User) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				} else if account.IsRestricted {
-					templ_7745c5c3_Err = partials.SoftBadgeWarning("Restricted").Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = partials.SoftBadgeWarning("Suspended").Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

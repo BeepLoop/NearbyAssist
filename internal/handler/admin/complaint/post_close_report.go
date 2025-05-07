@@ -1,6 +1,7 @@
 package complaint
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -29,6 +30,14 @@ func (h *complaintHandler) Close(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "resolved report"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/complaints/users?success=resolved_report")
 	}
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     utils.Ternary(action == "resolved", activitylog.ACTION_RESOLVED_REPORT, activitylog.ACTION_DISMISSED_REPORT),
+		TargetType: "other",
+		TargetId:   reportId,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 
 	sse.New().DecreaseReport()
 

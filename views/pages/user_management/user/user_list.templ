@@ -86,7 +86,7 @@ templ userTable(accounts []dto.User) {
 								if account.IsBanned {
 									@partials.SoftBadgeDanger("Banned")
 								} else if account.IsRestricted {
-									@partials.SoftBadgeWarning("Restricted")
+									@partials.SoftBadgeWarning("Suspended")
 								} else if account.DateVerified == "" {
 									@partials.SoftBadgeWarning("Unverified")
 								} else {

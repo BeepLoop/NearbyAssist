@@ -1,6 +1,7 @@
 package userManagement
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -24,6 +25,14 @@ func (h *userManagementHandler) UnbanUser(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "unbanned user: "+userId); err != nil {
 		return c.Redirect(http.StatusSeeOther, redirectRoute+"?success=unban_success")
 	}
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_UNBANNED_USER,
+		TargetType: "user",
+		TargetId:   userId,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 
 	return c.Redirect(http.StatusSeeOther, redirectRoute)
 }

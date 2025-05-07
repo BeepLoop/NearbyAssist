@@ -3,6 +3,7 @@ package expertise
 import (
 	"context"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/activitylog"
 	expertise_service "nearbyassist/internal/service/expertise"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/expertise"
@@ -88,6 +89,14 @@ func (h *expertiseHandler) CreateExpertise(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/expertise")
 	}
 
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_CREATED_EXPERTISE,
+	}
+	activitylog.MustGetInstance().Create(activity)
+
 	return c.Redirect(http.StatusSeeOther, "/admin/expertise")
 }
 
@@ -106,6 +115,14 @@ func (h *expertiseHandler) AddTagToExpertise(c echo.Context) error {
 
 		return c.Redirect(http.StatusSeeOther, "/admin/expertise")
 	}
+
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_ADDED_EXPERTISE_TAG,
+	}
+	activitylog.MustGetInstance().Create(activity)
 
 	return c.Redirect(http.StatusSeeOther, "/admin/expertise")
 }

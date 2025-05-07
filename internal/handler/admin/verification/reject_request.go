@@ -1,6 +1,7 @@
 package verification
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/service/sse"
 	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
@@ -22,6 +23,8 @@ func (h *verificationHandler) RejectRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId)
 	}
 
+	user, _ := h.verificationService.GetUserWithRequest(requestId)
+
 	if err := h.verificationService.RejectRequest(requestId, reason); err != nil {
 		if strings.Contains(err.Error(), verification_service.ERR_INVALID_REASON) {
 			if err := utils.SetFlashMessage(c, "error", "Invalid reason"); err != nil {
@@ -36,6 +39,15 @@ func (h *verificationHandler) RejectRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId)
 	}
 
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_REJECTED_VERIFICATION,
+		TargetType: "user",
+		TargetId:   user.Id,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 	sse.New().DecreaseVerification()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/verification-requests")

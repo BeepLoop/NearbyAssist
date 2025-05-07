@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -49,6 +50,12 @@ func (h *authHandler) PostLogin(c echo.Context) error {
 	if admin.Role != "admin" {
 		return c.Redirect(http.StatusSeeOther, "/admin/map")
 	}
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_LOGIN,
+	}
+	activitylog.MustGetInstance().Create(activity)
 
 	return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/dto"
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/user_management/seller"
 	"net/http"
@@ -24,6 +25,14 @@ func (h *userManagementHandler) GetVendor(c echo.Context) error {
 		page := pages.VendorAccount(*admin, dto.VendorAccountDetail{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_VIEWED_VENDOR,
+		TargetType: "user",
+		TargetId:   data.Vendor.Id,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 
 	page := pages.VendorAccount(*admin, *data, flash)
 	return page.Render(context.Background(), c.Response().Writer)

@@ -1,6 +1,7 @@
 package userManagement
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/service/user_management_service"
 	"nearbyassist/internal/utils"
 	"net/http"
@@ -36,6 +37,14 @@ func (h *userManagementHandler) BanUser(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "banned user: "+userId); err != nil {
 		return c.Redirect(http.StatusSeeOther, redirectRoute+"?success=ban_success")
 	}
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_BANNED_USER,
+		TargetType: "user",
+		TargetId:   userId,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 
 	return c.Redirect(http.StatusSeeOther, redirectRoute)
 }

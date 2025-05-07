@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/service/cache"
 	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
@@ -96,6 +97,8 @@ func (h *applicationHandler) AcceptRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
 
+	application, _ := h.applicationService.GetApplicationDetail(applicationId)
+
 	if err := h.applicationService.AcceptRequest(applicationId); err != nil {
 		if err := utils.SetFlashMessage(c, "error", "Request accept failed"); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=accept_error")
@@ -104,6 +107,15 @@ func (h *applicationHandler) AcceptRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
 
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_APPROVED_APPLICATION,
+		TargetType: "user",
+		TargetId:   application.ApplicantId,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 	sse.New().DecreaseApplication()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications")
@@ -121,6 +133,8 @@ func (h *applicationHandler) RejectRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
 
+	application, _ := h.applicationService.GetApplicationDetail(applicationId)
+
 	if err := h.applicationService.RejectRequest(applicationId, reason); err != nil {
 		fmt.Println(err.Error())
 		if strings.Contains(err.Error(), "invalid reason") {
@@ -136,6 +150,15 @@ func (h *applicationHandler) RejectRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
 
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_REJECTED_APPLICATION,
+		TargetType: "user",
+		TargetId:   application.ApplicantId,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 	sse.New().DecreaseApplication()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications")

@@ -1,6 +1,7 @@
 package userManagement
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	"nearbyassist/internal/utils"
 	"net/http"
 
@@ -26,6 +27,14 @@ func (h *userManagementHandler) RestrictUser(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", "restricted user: "+userId); err != nil {
 		return c.Redirect(http.StatusSeeOther, redirectRoute+"?success=restrict_success")
 	}
+
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_SUSPENDED_USER,
+		TargetType: "user",
+		TargetId:   userId,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 
 	return c.Redirect(http.StatusSeeOther, redirectRoute)
 }

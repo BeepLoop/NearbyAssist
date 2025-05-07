@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/service/activitylog"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
@@ -39,6 +40,14 @@ func (h *handler) ResetSSE(c echo.Context) error {
 	sse.New().SetValues(h.db)
 
 	utils.SetFlashMessage(c, "success", "Server Sent Events (SSE) data reset")
+
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_RESETTED_SSE,
+	}
+	activitylog.MustGetInstance().Create(activity)
 
 	return c.Redirect(http.StatusSeeOther, "/admin/settings")
 }
@@ -85,6 +94,14 @@ func (h *handler) RemindScheduled(c echo.Context) error {
 	if err := utils.SetFlashMessage(c, "success", fmt.Sprintf("Sent reminder to %d vendors", sent)); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/settings?error=sent_remined_to_vendors")
 	}
+
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_NOTIFIED_VENDORS,
+	}
+	activitylog.MustGetInstance().Create(activity)
 
 	return c.Redirect(http.StatusSeeOther, "/admin/settings")
 }

@@ -250,7 +250,7 @@ func profile(data dto.UserAccountDetail) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = partials.DefaultBadgeWarning("restricted").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.DefaultBadgeWarning("suspended").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

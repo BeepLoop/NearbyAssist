@@ -1,6 +1,7 @@
 package accountmanagement
 
 import (
+	"nearbyassist/internal/service/activitylog"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
@@ -29,6 +30,8 @@ func (h *accountManagementHandler) FufillResetRequest(c echo.Context) error {
 		ConfirmationPassword: confirmationPassword,
 	}
 
+	target, _ := h.passwordResetService.GetAdminFromRequestId(input.RequestId)
+
 	if err := h.passwordResetService.FulfillResetPassword(input); err != nil {
 		if strings.Contains(err.Error(), passwordreset_service.ERR_SELF_RESETTING_PASSWORD) {
 			if err := utils.SetFlashMessage(c, "error", "Resetting own password not allowed"); err != nil {
@@ -55,6 +58,13 @@ func (h *accountManagementHandler) FufillResetRequest(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset?success=password_change_success")
 	}
 
+	activity := activitylog.Input{
+		AdminId:    admin.Id,
+		Action:     activitylog.ACTION_FULFILLED_PASSWORD_RESET,
+		TargetType: "admin",
+		TargetId:   target.Id,
+	}
+	activitylog.MustGetInstance().CreateWithTarget(activity)
 	sse.New().DecreasePasswordResetRequest()
 
 	return c.Redirect(http.StatusSeeOther, "/admin/account-management/reset")

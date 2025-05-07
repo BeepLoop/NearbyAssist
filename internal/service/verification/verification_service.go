@@ -167,6 +167,19 @@ func (s *Service) UpdateVerificationRequest(bearerToken string, payload *request
 	return nil
 }
 
+func (s *Service) GetUserWithRequest(requestId string) (*models.UserModel, error) {
+	request, err := s.verificationStore.FindById(requestId)
+	if err != nil {
+		return nil, err
+	}
+
+	user := &models.UserModel{
+		Model: models.Model{Id: request.UserId},
+	}
+
+	return user, nil
+}
+
 func (s *Service) GetRequestList() ([]dto.VerificationRequest, error) {
 	requests, err := s.verificationStore.GetAll(models.IDENTITY_VERIF_STATUS_PENDING)
 	if err != nil {
