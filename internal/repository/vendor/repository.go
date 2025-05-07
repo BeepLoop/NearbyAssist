@@ -13,4 +13,6 @@ type VendorRepository interface {
 	CompletedBookingCountOfService(vendorId, serviceId string) (int, error)
 	HasExpertise(vendorId, expertiseId string) (bool, error)
 	GetPoliceClearance(vendorId string) (*models.PoliceClearanceModel, error)
+	IsFullyBookedAt(vendorId, schedule string) (bool, error)
+	SetDBL(vendorId string, dbl int) error
 }

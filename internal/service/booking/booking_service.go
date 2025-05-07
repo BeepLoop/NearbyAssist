@@ -7,6 +7,7 @@ import (
 	booking_repo "nearbyassist/internal/repository/booking"
 	notification_repo "nearbyassist/internal/repository/notification"
 	service_repo "nearbyassist/internal/repository/service"
+	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/service/core"
 	notification_service "nearbyassist/internal/service/notification"
@@ -21,10 +22,12 @@ const (
 	ERR_DISALLOWED_ACTION        = "invalid action performed"
 	ERR_UNAUTHORIZED             = "unauthorized"
 	ERR_SCHEDULE_OVERLAP         = "schedule overlap"
+	ERR_FULLY_BOOKED             = "vendor is fully booked on the given schedule"
 )
 
 type Service struct {
 	serviceStore service_repo.ServiceRepository
+	vendorStore  vendor_repo.VendorRepository
 	notifStore   notification_repo.NotificationRepository
 	bookingStore booking_repo.BookingRepository
 	ws           websocket.Socket
@@ -34,6 +37,7 @@ type Service struct {
 
 func NewService(
 	serviceStore service_repo.ServiceRepository,
+	vendorStore vendor_repo.VendorRepository,
 	notifStore notification_repo.NotificationRepository,
 	bookingStore booking_repo.BookingRepository,
 	ws websocket.Socket,
@@ -42,6 +46,7 @@ func NewService(
 ) *Service {
 	return &Service{
 		serviceStore: serviceStore,
+		vendorStore:  vendorStore,
 		notifStore:   notifStore,
 		bookingStore: bookingStore,
 		ws:           ws,
@@ -314,8 +319,18 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 		return errors.New(ERR_UNAUTHORIZED)
 	}
 
-	bookingSchedule := utils.FormatDate(req.Schedule)
-	if err := s.bookingStore.Accept(req.BookingId, bookingSchedule); err != nil {
+	// Check overbooking
+	schedule := utils.FormatDate(req.Schedule)
+
+	if fullyBooked, err := s.vendorStore.IsFullyBookedAt(booking.VendorId, schedule); err != nil {
+		return err
+	} else {
+		if fullyBooked {
+			return errors.New(ERR_FULLY_BOOKED)
+		}
+	}
+
+	if err := s.bookingStore.Accept(req.BookingId, schedule); err != nil {
 		return err
 	}
 
@@ -355,7 +370,7 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 	bookingEvent := &websocket.EventModel{
 		ReceiverId: booking.ClientId,
 		Type:       websocket.EVT_BOOKING_CONFIRMED,
-		Payload:    utils.Mapper{"id": req.BookingId, "schedule": bookingSchedule},
+		Payload:    utils.Mapper{"id": req.BookingId, "schedule": schedule},
 	}
 
 	s.ws.Send(notifEvent)

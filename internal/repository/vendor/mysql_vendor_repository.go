@@ -29,7 +29,7 @@ func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.Vendo
 	vendor := new(models.VendorModel)
 	findVendorQuery := `
         SELECT  
-            v.vendorId, v.joinedAt, v.rating
+            v.vendorId, v.dbl, v.joinedAt, v.rating
         FROM 
             Vendor  v
             JOIN User u ON u.id = v.vendorId
@@ -59,7 +59,7 @@ func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.Vendo
 		vendor.User.Identification = *identification
 	}
 
-	if banned, err := s.IsBanned(vendor.User.Id); err != nil {
+	if banned, err := s.isBanned(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
 		vendor.User.Banned = banned
@@ -122,7 +122,7 @@ func (s *MysqlVendorRepository) FindById(vendorId string) (*models.VendorModel, 
 	vendor := new(models.VendorModel)
 	findVendorQuery := `
         SELECT  
-            v.vendorId, v.joinedAt, v.rating
+            v.vendorId, v.dbl, v.joinedAt, v.rating
         FROM 
             Vendor  v
             JOIN User u ON u.id = v.vendorId
@@ -152,7 +152,7 @@ func (s *MysqlVendorRepository) FindById(vendorId string) (*models.VendorModel, 
 		vendor.User.Identification = *identification
 	}
 
-	if banned, err := s.IsBanned(vendor.User.Id); err != nil {
+	if banned, err := s.isBanned(vendor.User.Id); err != nil {
 		return nil, err
 	} else {
 		vendor.User.Banned = banned
@@ -219,7 +219,7 @@ func (s *MysqlVendorRepository) GetAll(limit, offset int) ([]*models.VendorModel
 
 	query := `
         SELECT  
-            v.vendorId, v.rating, v.joinedAt
+            v.vendorId, v.dbl, v.rating, v.joinedAt
         FROM 
             Vendor  v
             JOIN User u ON u.id = v.vendorId
@@ -446,7 +446,7 @@ func (s *MysqlVendorRepository) IsRestricted(userId string) (bool, bool, error) 
 	return isRestricted, isExpired, nil
 }
 
-func (s *MysqlVendorRepository) IsBanned(userId string) (bool, error) {
+func (s *MysqlVendorRepository) isBanned(userId string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -711,4 +711,52 @@ func (s *MysqlVendorRepository) GetPoliceClearance(vendorId string) (*models.Pol
 	}
 
 	return clearance, nil
+}
+
+func (s *MysqlVendorRepository) IsFullyBookedAt(vendorId, schedule string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT CASE
+            WHEN (
+                SELECT COUNT(*)
+                FROM Booking b
+                WHERE b.vendorId = ? AND DATE(b.scheduledAt) = DATE(?)
+            ) >= (
+                SELECT v.dbl
+                FROM Vendor v
+                WHERE v.vendorId = ?
+            )
+            THEN 1
+            ELSE 0
+        END AS fully_booked
+    `
+
+	fullyBooked := false
+	if err := s.db.GetContext(ctx, &fullyBooked, query, vendorId, schedule, vendorId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return fullyBooked, nil
+}
+
+func (s *MysqlVendorRepository) SetDBL(vendorId string, value int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE Vendor SET dbl = ? WHERE vendorId = ?"
+	if _, err := s.db.ExecContext(ctx, query, value, vendorId); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
 }

@@ -16,12 +16,14 @@ import (
 	resource_service "nearbyassist/internal/service/resource"
 	"nearbyassist/internal/utils"
 	"slices"
+	"strconv"
 )
 
 const (
 	ERR_FORBIDDEN             = "forbidden action"
 	ERR_DUPLICATE_EXPERTISE   = "already have expertise"
 	ERR_DUPLICATE_APPLICATION = "already have pending application for the expertise"
+	ERR_INVALID_DBL           = "invalid dbl value"
 )
 
 type Service struct {
@@ -183,17 +185,19 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		return nil, err
 	}
 
-	isRestricted, isRestrictionExpired, err := s.userStore.IsRestricted(user.Id)
-	if err != nil {
-		return nil, err
-	}
-
 	if err := s.userStore.LiftRestrictionIfExpired(user.Id); err != nil {
 		return nil, err
 	}
 
+	dailyBookingLimit := 0
 	vendorExpertises := make([]response.Expertise, 0)
 	if isVendor {
+		if vendor, err := s.vendorStore.FindById(user.Id); err != nil {
+			return nil, err
+		} else {
+			dailyBookingLimit = vendor.DBL
+		}
+
 		expertises, err := s.userStore.GetExpertise(user.Id)
 		if err != nil {
 			return nil, err
@@ -240,7 +244,8 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 				}
 			}),
 		),
-		IsRestricted: isRestricted && !isRestrictionExpired,
+		IsRestricted: user.Restricted,
+		DBL:          dailyBookingLimit,
 	}
 
 	return response, nil
@@ -356,6 +361,31 @@ func (s *Service) AddUserExpertise(bearerToken, expertiseId string, file *multip
 		PoliceClearance:    policeClearance.Id,
 	}
 	if _, err := s.applicationStore.Create(application); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) SetDBL(bearerToken, value string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	if value == "" {
+		return errors.New(ERR_INVALID_DBL)
+	}
+
+	dbl, err := strconv.Atoi(value)
+	if err != nil {
+		return err
+	}
+	if dbl <= 0 {
+		return errors.New(ERR_INVALID_DBL)
+	}
+
+	if err := s.vendorStore.SetDBL(userId, dbl); err != nil {
 		return err
 	}
 

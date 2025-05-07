@@ -6,6 +6,7 @@ import (
 	"nearbyassist/internal/models"
 	user_repo "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/repository/userauth"
+	vendor_repo "nearbyassist/internal/repository/vendor"
 	verification_repo "nearbyassist/internal/repository/verification"
 	"nearbyassist/internal/request"
 	"nearbyassist/internal/response"
@@ -24,6 +25,7 @@ const (
 
 type Service struct {
 	userStore         user_repo.UserRepository
+	vendorStore       vendor_repo.VendorRepository
 	userAuthStore     userauth.Repository
 	verificationStore verification_repo.VerificationRepository
 	fs                fs.FileStorage
@@ -34,6 +36,7 @@ type Service struct {
 
 func NewService(
 	userStore user_repo.UserRepository,
+	vendorStore vendor_repo.VendorRepository,
 	userAuthStore userauth.Repository,
 	verificationStore verification_repo.VerificationRepository,
 	fs fs.FileStorage,
@@ -43,6 +46,7 @@ func NewService(
 ) *Service {
 	return &Service{
 		userStore:         userStore,
+		vendorStore:       vendorStore,
 		userAuthStore:     userAuthStore,
 		verificationStore: verificationStore,
 		fs:                fs,
@@ -69,8 +73,15 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 		return nil, err
 	}
 
+	dailyBookingLimit := 0
 	vendorExpertises := make([]response.Expertise, 0)
 	if isVendor {
+		if vendor, err := s.vendorStore.FindById(user.Id); err != nil {
+			return nil, err
+		} else {
+			dailyBookingLimit = vendor.DBL
+		}
+
 		expertises, err := s.userStore.GetExpertise(user.Id)
 		if err != nil {
 			return nil, err
@@ -138,6 +149,7 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 				}),
 			),
 			IsRestricted: user.Restricted,
+			DBL:          dailyBookingLimit,
 		},
 	}
 
@@ -268,6 +280,7 @@ func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.
 			Expertises:   make([]response.Expertise, 0),
 			Socials:      make([]response.Social, 0),
 			IsRestricted: false,
+			DBL:          0,
 		},
 	}
 

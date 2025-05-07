@@ -199,3 +199,24 @@ func (h *userHandler) AddExpertise(c echo.Context) error {
 
 	return c.JSON(http.StatusNoContent, nil)
 }
+
+func (h *userHandler) SetDBL(c echo.Context) error {
+	value := c.Param("value")
+
+	bearerToken := utils.BearerTokenFromHeader(c)
+	if err := h.userService.SetDBL(bearerToken, value); err != nil {
+		if strings.Contains(err.Error(), user_service.ERR_INVALID_DBL) {
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
+				Message: "Provided Daily Booking Limit value invalid",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error encountered while setting Daily Booking Limit",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}

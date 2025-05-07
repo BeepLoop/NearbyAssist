@@ -298,6 +298,13 @@ func (h *bookingHandler) Accept(c echo.Context) error {
 			})
 		}
 
+		if strings.Contains(err.Error(), booking_service.ERR_FULLY_BOOKED) {
+			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+				Message: "You are fully booked on the given schedule",
+				Error:   err.Error(),
+			})
+		}
+
 		if strings.Contains(err.Error(), booking_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "You are not authorized to performed this action",

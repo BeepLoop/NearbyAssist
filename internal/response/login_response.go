@@ -14,6 +14,7 @@ type DetailedUser struct {
 	Expertises   []Expertise `json:"expertises"`
 	Socials      []Social    `json:"socials"`
 	IsRestricted bool        `json:"isRestricted"`
+	DBL          int         `json:"dbl"`
 }
 
 type LoginResponse struct {

@@ -82,8 +82,9 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		userAuthStore := userauth.NewMysqlUserAuthRepository(s.DB)
 		verificationStore := verification_repo.NewMysqlVerificationRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 
-		authService := userauth_service.NewService(userStore, userAuthStore, verificationStore, s.FS, s.Encrypt, s.Hash, s.JWT)
+		authService := userauth_service.NewService(userStore, vendorStore, userAuthStore, verificationStore, s.FS, s.Encrypt, s.Hash, s.JWT)
 		handler := userauth_handler.NewHandler(authService)
 
 		authRoute.POST("/login", handler.Login)
@@ -125,6 +126,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userRoute.POST("/socials", handler.AddSocial)
 		userRoute.DELETE("/socials/:id", handler.DeleteSocial)
 		userRoute.POST("/addExpertise", handler.AddExpertise)
+		userRoute.POST("/dbl/:value", handler.SetDBL)
 	}
 
 	// ===== TAGS =======
@@ -227,6 +229,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		)
 		bookingService := booking_service.NewService(
 			serviceStore,
+			vendorStore,
 			notifStore,
 			bookingStore,
 			s.WS,
