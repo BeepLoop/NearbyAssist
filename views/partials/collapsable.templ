@@ -1,7 +1,5 @@
 package partials
 
-import "nearbyassist/internal/utils"
-
 type CollapsableProps struct {
 	Title    string
 	EndText  string
@@ -52,22 +50,91 @@ templ Collapsable(props CollapsableProps) {
 			</div>
 		</div>
 	</div>
-	<div data-expanded={ utils.Ternary(props.Expanded, "true", "false") }>
+	if props.Expanded {
 		<script>
             (function() {
-                const script = document.currentScript;
-                const parent = script.parentNode;
-
                 document.addEventListener("alpine:init", () => {
                     Alpine.data("collapsable", () => ({
-                        expanded: false,
-                        init() {
-                            const propValue = parent.getAttribute("data-expanded");
-                            this.expanded = propValue;
-                        },
+                        expanded: true,
                     }));
                 });
              })();
         </script>
+	} else {
+		<script>
+            (function() {
+                document.addEventListener("alpine:init", () => {
+                    Alpine.data("collapsable", () => ({
+                        expanded: false,
+                    }));
+                });
+             })();
+        </script>
+	}
+}
+
+templ CollapsableWithBody(props CollapsableProps) {
+	<div x-data="collapsableWithBody">
+		<button
+			id="controlsAccordionItemOne"
+			type="button"
+			class="flex w-full items-center justify-between gap-4 text-left underline-offset-2 px-2 cursor-pointer outline-1 outline-pale-gray hover:bg-neutral-gray-lighter/40 focus-visible:bg-neutral-gray-lighter/50 focus-visible:underline focus-visible:outline-hidden"
+			aria-controls="accordionItemOne"
+			x-on:click="expanded = ! expanded"
+			x-bind:class="expanded ? 'text-neutral-dark font-medium'  : 'text-neutral-dark font-bold'"
+			x-bind:aria-expanded="expanded ? 'true' : 'false'"
+		>
+			<div class="flex flex-1 items-center justify-between gap-2">
+				<p class="text-neutral-dark">{ props.Title }</p>
+				<p class="p-2 font-medium text-neutral-dark">{ props.EndText }</p>
+			</div>
+			<div>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke-width="2"
+					stroke="currentColor"
+					class="size-5 shrink-0 transition"
+					aria-hidden="true"
+					x-bind:class="expanded  ?  'rotate-180'  :  ''"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+				</svg>
+			</div>
+		</button>
+		<div
+			x-cloak
+			x-show="expanded"
+			id="accordionItemOne"
+			role="region"
+			aria-labelledby="controlsAccordionItemOne"
+			x-collapse
+		>
+			<div class="p-2 text-xs text-pretty bg-neutral-gray-lighter/40">
+				{ children... }
+			</div>
+		</div>
 	</div>
+	if props.Expanded {
+		<script>
+            (function() {
+                document.addEventListener("alpine:init", () => {
+                    Alpine.data("collapsableWithBody", () => ({
+                        expanded: true,
+                    }));
+                });
+             })();
+        </script>
+	} else {
+		<script>
+            (function() {
+                document.addEventListener("alpine:init", () => {
+                    Alpine.data("collapsableWithBody", () => ({
+                        expanded: false,
+                    }));
+                });
+             })();
+        </script>
+	}
 }

@@ -592,3 +592,41 @@ func (s *MysqlDashboardRepository) GetBookingData() (*dto.WeeklyBookingData, err
 
 	return data, nil
 }
+
+func (s *MysqlDashboardRepository) GetBookingsThisWeek() ([]*models.BookingModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            t.id,
+            t.vendorId,
+            t.clientId,
+            t.serviceId,
+            t.status,
+            FORMAT(t.cost, 2) AS cost,
+            t.createdAt,
+            t.updatedAt,
+            t.scheduledAt,
+            t.cancelReason,
+            uVendor.name AS vendor,
+            uClient.name AS client
+        FROM 
+            Booking t
+            JOIN User uVendor ON uVendor.id = t.vendorId
+            JOIN User uClient ON uClient.id = t.clientId
+        WHERE
+            DATE(t.createdAt) >= CURDATE() - INTERVAL 7 DAY
+    `
+
+	bookings := make([]*models.BookingModel, 0)
+	if err := s.db.SelectContext(ctx, &bookings, query); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return bookings, nil
+}

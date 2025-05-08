@@ -44,4 +44,5 @@ type DashboardRepository interface {
 	TotalActiveReports() (int, error)
 
 	GetBookingData() (*dto.WeeklyBookingData, error)
+	GetBookingsThisWeek() ([]*models.BookingModel, error)
 }

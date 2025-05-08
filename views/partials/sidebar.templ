@@ -51,7 +51,6 @@ templ Sidebar(user models.AdminModel) {
 
                  sse.onmessage = function(event) {
                      const data = JSON.parse(event.data);
-                     console.log("SSE data: ", data);
 
                      updateIndicator(verification, data.verification);
                      updateIndicator(application, data.application);

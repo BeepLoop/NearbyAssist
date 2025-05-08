@@ -79,7 +79,12 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		dashboardRoute.Use(middleware.CheckMustChangePass(adminStore))
 
 		dashboardStore := dashboard_repo.NewMysqlDashboardRepository(s.DB)
-		dashboardService := dashboard_service.NewService(dashboardStore, s.Encrypt)
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
+		bookingStore := booking_repo.NewMysqlBookingRepository(s.DB)
+		userStore := user_repo.NewMysqlUserRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+
+		dashboardService := dashboard_service.NewService(dashboardStore, serviceStore, bookingStore, userStore, vendorStore, s.Encrypt)
 		dashboardHandler := dashboard.NewHandler(dashboardService)
 
 		dashboardRoute.GET("", dashboardHandler.GetDashboard)

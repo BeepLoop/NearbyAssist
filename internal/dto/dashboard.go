@@ -30,6 +30,7 @@ type WeeklyBookingData struct {
 	Total      int                `json:"total"`
 	Daily      []DailyBookingData `json:"daily"`
 	Difference int                `json:"difference"`
+	Bookings   []Booking          `json:"bookings"`
 }
 
 type DailyBookingData struct {

@@ -8,8 +8,6 @@ package partials
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "nearbyassist/internal/utils"
-
 type CollapsableProps struct {
 	Title    string
 	EndText  string
@@ -45,7 +43,7 @@ func Collapsable(props CollapsableProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 24, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 22, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -58,7 +56,7 @@ func Collapsable(props CollapsableProps) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.EndText)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 25, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 23, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -71,28 +69,100 @@ func Collapsable(props CollapsableProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 51, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 49, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</p></div></div></div><div data-expanded=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</p></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(utils.Ternary(props.Expanded, "true", "false"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 55, Col: 68}
+		if props.Expanded {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<script>\n            (function() {\n                document.addEventListener(\"alpine:init\", () => {\n                    Alpine.data(\"collapsable\", () => ({\n                        expanded: true,\n                    }));\n                });\n             })();\n        </script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<script>\n            (function() {\n                document.addEventListener(\"alpine:init\", () => {\n                    Alpine.data(\"collapsable\", () => ({\n                        expanded: false,\n                    }));\n                });\n             })();\n        </script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		return nil
+	})
+}
+
+func CollapsableWithBody(props CollapsableProps) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div x-data=\"collapsableWithBody\"><button id=\"controlsAccordionItemOne\" type=\"button\" class=\"flex w-full items-center justify-between gap-4 text-left underline-offset-2 px-2 cursor-pointer outline-1 outline-pale-gray hover:bg-neutral-gray-lighter/40 focus-visible:bg-neutral-gray-lighter/50 focus-visible:underline focus-visible:outline-hidden\" aria-controls=\"accordionItemOne\" x-on:click=\"expanded = ! expanded\" x-bind:class=\"expanded ? &#39;text-neutral-dark font-medium&#39;  : &#39;text-neutral-dark font-bold&#39;\" x-bind:aria-expanded=\"expanded ? &#39;true&#39; : &#39;false&#39;\"><div class=\"flex flex-1 items-center justify-between gap-2\"><p class=\"text-neutral-dark\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><script>\n            (function() {\n                const script = document.currentScript;\n                const parent = script.parentNode;\n\n                document.addEventListener(\"alpine:init\", () => {\n                    Alpine.data(\"collapsable\", () => ({\n                        expanded: false,\n                        init() {\n                            const propValue = parent.getAttribute(\"data-expanded\");\n                            this.expanded = propValue;\n                        },\n                    }));\n                });\n             })();\n        </script></div>")
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 88, Col: 46}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p><p class=\"p-2 font-medium text-neutral-dark\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.EndText)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/collapsable.templ`, Line: 89, Col: 64}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</p></div><div><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"2\" stroke=\"currentColor\" class=\"size-5 shrink-0 transition\" aria-hidden=\"true\" x-bind:class=\"expanded  ?  &#39;rotate-180&#39;  :  &#39;&#39;\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19.5 8.25l-7.5 7.5-7.5-7.5\"></path></svg></div></button><div x-cloak x-show=\"expanded\" id=\"accordionItemOne\" role=\"region\" aria-labelledby=\"controlsAccordionItemOne\" x-collapse><div class=\"p-2 text-xs text-pretty bg-neutral-gray-lighter/40\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var5.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if props.Expanded {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<script>\n            (function() {\n                document.addEventListener(\"alpine:init\", () => {\n                    Alpine.data(\"collapsableWithBody\", () => ({\n                        expanded: true,\n                    }));\n                });\n             })();\n        </script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<script>\n            (function() {\n                document.addEventListener(\"alpine:init\", () => {\n                    Alpine.data(\"collapsableWithBody\", () => ({\n                        expanded: false,\n                    }));\n                });\n             })();\n        </script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		return nil
 	})
