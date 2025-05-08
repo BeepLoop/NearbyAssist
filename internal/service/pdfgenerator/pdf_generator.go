@@ -2,6 +2,7 @@ package pdfgenerator
 
 import (
 	"context"
+	"nearbyassist/internal/config"
 	"time"
 
 	"github.com/chromedp/cdproto/page"
@@ -15,6 +16,7 @@ func GeneratePDF(url string) ([]byte, error) {
 		chromedp.Flag("headless", true),
 		chromedp.Flag("no-sandbox", true),
 		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("ignore-certificate-errors", true),
 	)
 
 	alloc, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
@@ -23,7 +25,7 @@ func GeneratePDF(url string) ([]byte, error) {
 	ctx, cancel := chromedp.NewContext(alloc)
 	defer cancel()
 
-	ctx, cancel = context.WithTimeout(ctx, time.Second*30)
+	ctx, cancel = context.WithTimeout(ctx, time.Second*time.Duration(config.Instance.PDF_GENERATION_TIMEOUT))
 	defer cancel()
 
 	var pdfbuf []byte

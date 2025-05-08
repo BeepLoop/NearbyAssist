@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"nearbyassist/internal/utils"
 	"os"
 	"strconv"
 	"strings"
@@ -45,6 +46,8 @@ type Config struct {
 	FACE_IMG_DIR          string
 	BUG_REPORT_DIR        string
 	REPORT_USER_DIR       string
+
+	PDF_GENERATION_TIMEOUT int
 }
 
 func GetConfig() *Config {
@@ -97,6 +100,8 @@ func initialize() *Config {
 
 		ONE_SIGNAL_APP_ID:  MustGetEnv("ONE_SIGNAL_APP_ID"),
 		ONE_SIGNAL_API_KEY: MustGetEnv("ONE_SIGNAL_API_KEY"),
+
+		PDF_GENERATION_TIMEOUT: utils.Must(strconv.Atoi(GetEnv("PDF_GENERATION_TIMEOUT", "120"))),
 	}
 }
 
