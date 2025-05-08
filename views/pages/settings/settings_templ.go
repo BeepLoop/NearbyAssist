@@ -104,7 +104,7 @@ func Settings(admin models.AdminModel, flash string, searchBehavior string) temp
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" required autocomplete=\"off\" class=\"rounded-sm p-1 text-xs outline-1 outline-pale-gray focus:border-none focus:outline-none\"> <datalist id=\"search_behaviors\"><option value=\"exact_match\"></option> <option value=\"fuzzy_match\"></option></datalist> <button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-2 py-1 text-xs font-medium text-white hover:opacity-75\">save</button></form></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" required autocomplete=\"off\" class=\"rounded-sm p-1 text-xs outline-1 outline-pale-gray focus:outline-primary\"> <datalist id=\"search_behaviors\"><option value=\"exact_match\"></option> <option value=\"fuzzy_match\"></option></datalist> <button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs font-medium text-white hover:opacity-75\">save</button></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

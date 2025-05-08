@@ -123,5 +123,13 @@ func (h *handler) UpdateSeachBehavior(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/settings?success=search_behavior_changed")
 	}
 
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_UPDATED_SEARCH_BEHAVIOR,
+	}
+	activitylog.MustGetInstance().Create(activity)
+
 	return c.Redirect(http.StatusSeeOther, "/admin/settings")
 }

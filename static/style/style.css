@@ -1867,6 +1867,11 @@
       border-color: var(--color-primary);
     }
   }
+  .focus\:outline-primary {
+    &:focus {
+      outline-color: var(--color-primary);
+    }
+  }
   .focus\:outline-none {
     &:focus {
       --tw-outline-style: none;
