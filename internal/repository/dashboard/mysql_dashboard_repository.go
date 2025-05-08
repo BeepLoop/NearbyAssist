@@ -534,7 +534,7 @@ func (s *MysqlDashboardRepository) GetBookingData() (*dto.WeeklyBookingData, err
 
 	bookingCountLastWeekQuery := `
         WITH date_series AS (
-            SELECT CURDATE() - INTERVAL n DAY AS reportDate
+            SELECT CURDATE() - INTERVAL (7 + n) DAY AS reportDate
             FROM (
                 SELECT 0 AS n UNION ALL
                 SELECT 1 UNION ALL
@@ -616,7 +616,7 @@ func (s *MysqlDashboardRepository) GetBookingsThisWeek() ([]*models.BookingModel
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            DATE(t.createdAt) >= CURDATE() - INTERVAL 7 DAY
+            DATE(t.createdAt) >= CURDATE() - INTERVAL 6 DAY
     `
 
 	bookings := make([]*models.BookingModel, 0)

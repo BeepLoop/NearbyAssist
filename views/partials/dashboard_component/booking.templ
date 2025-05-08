@@ -41,7 +41,7 @@ templ Booking(data dto.WeeklyBookingData) {
 			</span>
 			<!-- Count -->
 			<div class="flex items-baseline gap-2">
-				if data.Difference > 0 {
+				if data.Difference >= 0 {
 					@partials.TrendUp()
 				} else {
 					@partials.TrendDown()

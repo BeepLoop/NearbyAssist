@@ -117,7 +117,7 @@ func Booking(data dto.WeeklyBookingData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if data.Difference > 0 {
+		if data.Difference >= 0 {
 			templ_7745c5c3_Err = partials.TrendUp().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
