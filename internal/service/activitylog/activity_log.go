@@ -5,6 +5,7 @@ import (
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/utils"
+	"slices"
 	"strings"
 	"time"
 
@@ -120,14 +121,62 @@ func (a *activityLog) CreateWithTarget(input Input) error {
 	return nil
 }
 
-func (a *activityLog) GetAll(limit, offset int, query string) ([]*models.ActivityLogModel, error) {
+func (a *activityLog) GetAll(limit, offset int, rangeFilter string) ([]*models.ActivityLogModel, error) {
+	validRangeFilters := []string{"all_time", "today", "yesterday", "last_week", "last_month"}
+	if rangeFilter == "" {
+		rangeFilter = "all_time"
+	}
+	if rangeFilter != "" {
+		if !slices.Contains(validRangeFilters, rangeFilter) {
+			rangeFilter = "all_time"
+		}
+	}
+
+	base := "SELECT * FROM ActivityLog"
+	order := " ORDER BY createdAt DESC"
+	limitOffset := " LIMIT ? OFFSET ?"
+	finalQuery := ""
+	args := make([]interface{}, 0)
+
+	switch rangeFilter {
+	case "all_time":
+		finalQuery = base + order + limitOffset
+		args = append(args, limit, offset)
+
+	case "today":
+		condition := " WHERE DATE(createdAt) = CURDATE()"
+		finalQuery = base + condition + order + limitOffset
+		args = append(args, limit, offset)
+
+	case "yesterday":
+		condition := " WHERE DATE(createdAt) = CURDATE() - INTERVAL 1 DAY"
+		finalQuery = base + condition + order + limitOffset
+		args = append(args, limit, offset)
+
+	case "last_week":
+		condition := `
+		WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+		AND createdAt < CURDATE() + INTERVAL 1 DAY`
+		finalQuery = base + condition + order + limitOffset
+		args = append(args, limit, offset)
+
+	case "last_month":
+		condition := `
+		WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+		AND createdAt < CURDATE() + INTERVAL 1 DAY`
+		finalQuery = base + condition + order + limitOffset
+		args = append(args, limit, offset)
+	}
+
+	return a.getAll(finalQuery, args)
+}
+
+func (a *activityLog) getAll(query string, args []interface{}) ([]*models.ActivityLogModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getLogs := "SELECT * FROM ActivityLog ORDER BY createdAt DESC LIMIT ? OFFSET ?"
-
 	logs := make([]*models.ActivityLogModel, 0)
-	if err := a.db.SelectContext(ctx, &logs, getLogs, limit, offset); err != nil {
+	if err := a.db.SelectContext(ctx, &logs, query, args...); err != nil {
 		return nil, err
 	}
 

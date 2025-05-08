@@ -44,7 +44,7 @@ func (h *logHandler) GetLogs(c echo.Context) error {
 		offset = DEFAULT_OFFSET
 	}
 
-	logs, err := activitylog.MustGetInstance().GetAll(limit, offset, params.Get("query"))
+	logs, err := activitylog.MustGetInstance().GetAll(limit, offset, params.Get("range"))
 	if err != nil {
 		fmt.Println(err.Error())
 		page := logspage.Logs(*admin, make([]dto.ActivityLog, 0))

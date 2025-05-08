@@ -52,93 +52,105 @@ func Logs(admin models.AdminModel, logs []dto.ActivityLog) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <!-- content --> <div class=\"w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300\"><table class=\"w-full text-left text-sm\"><thead class=\"bg-primary-greener text-sm font-semibold text-white\"><tr><th scope=\"col\" class=\"p-4\">Log ID</th><th scope=\"col\" class=\"p-4\">Admin Username</th><th scope=\"col\" class=\"p-4\">Action</th><th scope=\"col\" class=\"p-4\">Target</th><th scope=\"col\" class=\"p-4\">Date</th></tr></thead> <tbody class=\"divide-y divide-gray-300\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <!-- content --> <div class=\"flex justify-end\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = rangeFilter().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"w-full overflow-hidden overflow-x-auto mt-2\"><table class=\"w-full text-left text-sm text-xs text-neutral-gray\"><thead class=\"font-medium bg-primary text-white rounded-sm\"><tr><th scope=\"col\" class=\"p-1.5\">Log ID</th><th scope=\"col\" class=\"p-1.5\">Admin Username</th><th scope=\"col\" class=\"p-1.5\">Action</th><th scope=\"col\" class=\"p-1.5\">Target</th><th scope=\"col\" class=\"p-1.5\">Date</th></tr></thead> <tbody class=\"\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(logs) < 1 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<tr class=\"\"><td class=\"px-6 py-4 text-neutral-dark\" align=\"center\" colspan=\"5\" id=\"emptyTable\">Empty</td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<tr class=\"\"><td class=\"px-6 py-4 text-neutral-dark\" align=\"center\" colspan=\"5\" id=\"emptyTable\">No recorded logs</td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
 				for _, log := range logs {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<tr class=\"text-xs text-neutral-dark\"><td class=\"p-4\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<tr class=\"\"><td class=\"p-1.5\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var3 string
 					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(log.ID)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 33, Col: 32}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 36, Col: 34}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</td><td class=\"p-4\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</td><td class=\"p-1.5\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(log.AdminUsername)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 34, Col: 43}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 37, Col: 45}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</td><td class=\"p-4 font-bold\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</td><td class=\"p-1.5 font-bold\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(log.Action)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 35, Col: 46}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 38, Col: 48}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</td><td class=\"p-4\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</td><td class=\"p-1.5\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(log.TargetEmail)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 36, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 39, Col: 43}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</td><td class=\"p-4\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</td><td class=\"p-1.5\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(log.CreatedAt)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 37, Col: 39}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 40, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</td></tr>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</td></tr>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</tbody></table></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</tbody></table></div><div class=\"mt-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = pagination().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -173,7 +185,115 @@ func pagination() templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<nav aria-label=\"pagination\"><ul class=\"flex shrink-0 items-center gap-2 text-sm font-medium\"><button type=\"button\" class=\"flex items-center rounded-sm p-1 cursor-pointer text-xs text-neutral-gray hover:text-black\" onClick=\"prevPage()\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\" class=\"size-6\"><path fill-rule=\"evenodd\" d=\"M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z\" clip-rule=\"evenodd\"></path></svg> Prev</button><li><p id=\"pageNumber\">1</p></li><button type=\"button\" class=\"flex items-center rounded-sm p-1 cursor-pointer text-xs text-neutral-gray hover:text-black\" onClick=\"nextPage()\">Next <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\" class=\"size-6\"><path fill-rule=\"evenodd\" d=\"M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\"></path></svg></button></ul><script>\n            const DEFAULT_LIMIT = 20;\n\n            function getCurrentPage() {\n              const MIN_PAGE = 1;\n\n              const queryParams = window.location.search;\n              if (queryParams === \"\") {\n                return MIN_PAGE;\n              }\n\n              const urlParams = new URLSearchParams(window.location.search);\n              let offset = urlParams.get(\"offset\");\n              if (!offset) {\n                return MIN_PAGE;\n              } else {\n                offset = parseInt(offset);\n              }\n\n              let limit = urlParams.get(\"limit\");\n              if (!limit) {\n                limit = DEFAULT_LIMIT;\n              } else {\n                limit = parseInt(limit);\n              }\n\n              return offset / parseInt(limit) + 1;\n            }\n\n            function computeOffset(pageNumber) {\n              return DEFAULT_LIMIT * (pageNumber - 1);\n            }\n\n            function nextPage() {\n              const emptyTable = document.getElementById(\"emptyTable\");\n              if (emptyTable) return;\n\n              const currPage = getCurrentPage();\n              const offset = computeOffset(currPage + 1);\n\n              const path = window.location.pathname;\n              window.location.href = `${path}?limit=${DEFAULT_LIMIT}&offset=${offset}`;\n            }\n\n            function prevPage() {\n              const currPage = getCurrentPage();\n              if (currPage <= 1) return;\n\n              const offset = computeOffset(currPage - 1);\n\n              const path = window.location.pathname;\n              window.location.href = `${path}?limit=${DEFAULT_LIMIT}&offset=${offset}`;\n            }\n\n            const pageNumber = document.getElementById(\"pageNumber\");\n            if (pageNumber) {\n              pageNumber.innerText = getCurrentPage();\n            }\n        </script></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<nav aria-label=\"pagination\"><ul class=\"flex shrink-0 items-center gap-2 text-sm font-medium\"><button type=\"button\" class=\"flex cursor-pointer items-center rounded-sm p-1 text-xs text-neutral-gray hover:text-black\" onClick=\"prevPage()\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\" class=\"size-6\"><path fill-rule=\"evenodd\" d=\"M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z\" clip-rule=\"evenodd\"></path></svg> Prev</button><li><p id=\"pageNumber\">1</p></li><button type=\"button\" class=\"flex cursor-pointer items-center rounded-sm p-1 text-xs text-neutral-gray hover:text-black\" onClick=\"nextPage()\">Next <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\" class=\"size-6\"><path fill-rule=\"evenodd\" d=\"M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\"></path></svg></button></ul><script>\n            const DEFAULT_LIMIT = 20;\n\n            function getCurrentPage() {\n              const MIN_PAGE = 1;\n\n              const queryParams = window.location.search;\n              if (queryParams === \"\") {\n                return MIN_PAGE;\n              }\n\n              const urlParams = new URLSearchParams(window.location.search);\n              let offset = urlParams.get(\"offset\");\n              if (!offset) {\n                return MIN_PAGE;\n              } else {\n                offset = parseInt(offset);\n              }\n\n              let limit = urlParams.get(\"limit\");\n              if (!limit) {\n                limit = DEFAULT_LIMIT;\n              } else {\n                limit = parseInt(limit);\n              }\n\n              return offset / parseInt(limit) + 1;\n            }\n\n            function computeOffset(pageNumber) {\n              return DEFAULT_LIMIT * (pageNumber - 1);\n            }\n\n            function nextPage() {\n              const emptyTable = document.getElementById(\"emptyTable\");\n              if (emptyTable) return;\n\n              const currPage = getCurrentPage();\n              const offset = computeOffset(currPage + 1);\n\n              const path = window.location.pathname;\n              const params = new URLSearchParams(window.location.search);\n              const range = params.get(\"range\")\n\n              if (range) {\n                window.location.href = `${path}?range=${range}&limit=${DEFAULT_LIMIT}&offset=${offset}`;\n              } else {\n                window.location.href = `${path}?limit=${DEFAULT_LIMIT}&offset=${offset}`;\n              }\n            }\n\n            function prevPage() {\n              const currPage = getCurrentPage();\n              if (currPage <= 1) return;\n\n              const offset = computeOffset(currPage - 1);\n\n              const path = window.location.pathname;\n              const params = new URLSearchParams(window.location.search);\n              const range = params.get(\"range\")\n\n              if (range) {\n                window.location.href = `${path}?range=${range}&limit=${DEFAULT_LIMIT}&offset=${offset}`;\n              } else {\n                window.location.href = `${path}?limit=${DEFAULT_LIMIT}&offset=${offset}`;\n              }\n            }\n\n            const pageNumber = document.getElementById(\"pageNumber\");\n            if (pageNumber) {\n              pageNumber.innerText = getCurrentPage();\n            }\n        </script></nav>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func rangeFilter() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div x-data=\"{ rangeFilterOpen: false }\" x-on:keydown.esc.prevent.stop=\"rangeFilterOpen = false\" class=\"relative\"><!-- Dropdown Toggle Button --><button type=\"button\" class=\"fond-medium x-1 inline-flex cursor-pointer items-center gap-2 py-0.5 text-xs text-neutral-dark hover:opacity-75\" id=\"pm-dropdown\" aria-haspopup=\"true\" x-bind:aria-expanded=\"rangeFilterOpen\" x-on:click=\"rangeFilterOpen = true\"><!-- selected range label --><span id=\"selected_range\" class=\"font-medium\"></span> <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\" data-slot=\"icon\" class=\"hi-micro hi-chevron-down inline-block size-5 opacity-50\" x-bind:class=\"{ &#39;rotate-180&#39;: rangeFilterOpen }\"><path fill-rule=\"evenodd\" d=\"M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\"></path></svg></button><!-- END Dropdown Toggle Button --><!-- Dropdown --><div x-cloak x-show=\"rangeFilterOpen\" x-transition:enter=\"transition ease-out duration-100\" x-transition:enter-start=\"opacity-0 -translate-y-3\" x-transition:enter-end=\"opacity-100 translate-y-0\" x-transition:leave=\"transition ease-in duration-75\" x-transition:leave-start=\"opacity-100 translate-y-0\" x-transition:leave-end=\"opacity-0 -translate-y-3\" x-on:click.outside=\"rangeFilterOpen = false\" role=\"menu\" aria-labelledby=\"pm-dropdown\" class=\"absolute end-0 z-10 mt-2 w-44\"><div class=\"rounded-sm bg-white text-xs shadow-xl outline-1 outline-pale-gray\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = rangeFilterItem("all_time", "All time").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = rangeFilterItem("today", "Today").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = rangeFilterItem("yesterday", "Yesterday").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = rangeFilterItem("last_week", "Last 7 days").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = rangeFilterItem("last_month", "Last 30 days").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div></div><!-- END Dropdown --><script>\n            (function() {\n                const selectedRange = document.getElementById(\"selected_range\");\n                const params = new URLSearchParams(location.search);\n\n                switch (params.get(\"range\")) {\n                    case \"all_time\":\n                        selectedRange.innerText = \"All time\";\n                        break;\n                    case \"today\":\n                        selectedRange.innerText = \"Today\";\n                        break;\n                    case \"yesterday\":\n                        selectedRange.innerText = \"Yesterday\";\n                        break;\n                    case \"last_week\":\n                        selectedRange.innerText = \"Last 7 days\";\n                        break;\n                    case \"last_month\":\n                        selectedRange.innerText = \"Last 30 days\";\n                        break;\n                    default:\n                        selectedRange.innerText = \"All time\";\n                }\n             })();\n        </script></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func rangeFilterItem(value, label string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<form action=\"/admin/logs\" method=\"GET\"><input hidden name=\"range\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(value)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 244, Col: 42}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"> <button type=\"submit\" class=\"w-full cursor-pointer p-1.5 text-left text-xs text-neutral-dark hover:bg-neutral-gray/25\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(label)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/logspage/logs_page.templ`, Line: 248, Col: 10}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
