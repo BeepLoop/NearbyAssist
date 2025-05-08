@@ -277,8 +277,8 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 					AdminId:       report.AdminId.String,
 					AdminUsername: utils.Must(s.encrypt.DecryptString(admin.Username)),
 					AdminNote:     utils.Must(s.encrypt.DecryptString(report.AdminNote.String)),
-					CreatedAt:     utils.FormatDate(report.CreatedAt),
-					CompletedAt:   utils.FormatDate(report.UpdatedAt),
+					CreatedAt:     utils.FormatDMY(report.CreatedAt),
+					CompletedAt:   utils.FormatDMY(report.UpdatedAt),
 				}
 			},
 		),

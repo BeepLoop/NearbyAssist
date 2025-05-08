@@ -1,4 +1,4 @@
-FROM golang:1.23-bookworm AS build-stage
+FROM golang:1.24-bookworm AS build-stage
 
 # Set the Current Working Directory inside the container
 WORKDIR /build

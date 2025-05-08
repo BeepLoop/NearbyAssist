@@ -140,19 +140,19 @@ templ report(data dto.UserReportDetail) {
 			<div class="mt-6">
 				<table class="w-full table-auto border-collapse text-left text-xs">
 					<thead class="bg-primary-greener text-xs text-white">
+						<th class="p-1.5">Report ID</th>
+						<th class="p-1.5">Reason</th>
 						<th class="p-1.5">Date Reported</th>
 						<th class="p-1.5">Date Handled</th>
 						<th class="p-1.5">Action Taken</th>
 					</thead>
 					<tbody class="divide-y divide-neutral-gray-lighter">
 						for _, report := range data.ReportedUserHistory.PreviousReports {
-							<tr>
-								<td class="p-2">
-									<p class="text-neutral-gray">{ report.CreatedAt }</p>
-								</td>
-								<td class="p-2">
-									<p class="text-neutral-gray">{ report.CompletedAt }</p>
-								</td>
+							<tr class="text-neutral-gray text-xs">
+								<td class="p-2">{ report.Id }</td>
+								<td class="p-2">{ report.Reason }</td>
+								<td class="p-2">{ report.CreatedAt }</td>
+								<td class="p-2">{ report.CompletedAt } </td>
 								<td class="p-2">
 									if report.Status == "resolved" {
 										@partials.DefaultBadgeSuccess(report.Status)
