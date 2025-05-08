@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -238,6 +239,53 @@ func (s *MysqlServiceRepository) GetAllWithTag(tag string) ([]*models.ServiceMod
     `
 	ids := make([]string, 0)
 	if err := s.db.SelectContext(ctx, &ids, query, tag); err != nil {
+		return nil, err
+	}
+
+	services := make([]*models.ServiceModel, 0)
+	for _, id := range ids {
+		service, err := s.FindById(id)
+		if err != nil {
+			return nil, err
+		}
+
+		services = append(services, service)
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return services, nil
+}
+
+func (s *MysqlServiceRepository) GetAllWithTagAny(tags []string) ([]*models.ServiceModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	base := `
+        SELECT
+            s.id
+        FROM 
+            ServiceTag st
+            JOIN Service s ON s.id = st.serviceId
+            JOIN Tag t ON t.id = st.tagId
+        WHERE
+            s.disabled = 0 AND
+    `
+	args := make([]interface{}, 0)
+	query := base + " t.title IN ("
+
+	placeholders := make([]string, 0)
+	for i, tag := range tags {
+		placeholders[i] = "?"
+		args = append(args, tag)
+	}
+
+	query += strings.Join(placeholders, ", ") + ")"
+
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, query, args...); err != nil {
 		return nil, err
 	}
 

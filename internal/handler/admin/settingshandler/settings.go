@@ -3,6 +3,7 @@ package settingshandler
 import (
 	"context"
 	"fmt"
+	"nearbyassist/internal/config/setting"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/activitylog"
 	notification_service "nearbyassist/internal/service/notification"
@@ -32,7 +33,9 @@ func (h *handler) GetSettingsPage(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
-	page := settings.Settings(*admin, flash)
+	behavior := setting.New().Values.SearchBehavior
+
+	page := settings.Settings(*admin, flash, string(behavior))
 	return page.Render(c.Request().Context(), c.Response().Writer)
 }
 
@@ -102,6 +105,23 @@ func (h *handler) RemindScheduled(c echo.Context) error {
 		Action:  activitylog.ACTION_NOTIFIED_VENDORS,
 	}
 	activitylog.MustGetInstance().Create(activity)
+
+	return c.Redirect(http.StatusSeeOther, "/admin/settings")
+}
+
+func (h *handler) UpdateSeachBehavior(c echo.Context) error {
+	behavior := c.FormValue("behavior")
+
+	if !setting.IsValidSearchBehavior(behavior) {
+		utils.SetFlashMessage(c, "error", "Invalid search behavior provided")
+		return c.Redirect(http.StatusSeeOther, "/admin/settings")
+	}
+
+	setting.New().Values.SearchBehavior = setting.SearchBehavior(behavior)
+
+	if err := utils.SetFlashMessage(c, "success", "search behavior updated"); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/settings?success=search_behavior_changed")
+	}
 
 	return c.Redirect(http.StatusSeeOther, "/admin/settings")
 }

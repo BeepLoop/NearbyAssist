@@ -10,6 +10,7 @@ type ServiceRepository interface {
 	FindBySignature(signature string) (*models.ServiceModel, error)
 	GetAll(limit, offset int) ([]*models.ServiceModel, error)
 	GetAllWithTag(tag string) ([]*models.ServiceModel, error)
+	GetAllWithTagAny(tags []string) ([]*models.ServiceModel, error)
 	FuzzyMatchTags(tags []string) ([]*models.ServiceModel, error)
 
 	Update(data *models.ServiceModel) error

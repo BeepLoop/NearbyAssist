@@ -6,7 +6,7 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ Settings(admin models.AdminModel, flash string) {
+templ Settings(admin models.AdminModel, flash string, searchBehavior string) {
 	@layout.Layout(admin) {
 		<!-- toast -->
 		@templ.JSONScript("flash", flash)
@@ -25,6 +25,27 @@ templ Settings(admin models.AdminModel, flash string) {
 				ButtonLabel: "Notify",
 				ActionURL:   "/admin/settings/remind",
 			})
+			<div class="flex items-center justify-between border-b border-pale-gray p-2">
+				<p class="text-xs font-medium text-neutral-dark">Search behavior</p>
+				<form class="flex items-center gap-2" action="/admin/settings/searchBehavior" method="POST">
+					<input
+						list="search_behaviors"
+						name="behavior"
+						value={ searchBehavior }
+						required
+						autocomplete="off"
+						class="rounded-sm p-1 text-xs outline-1 outline-pale-gray focus:border-none focus:outline-none"
+					/>
+					<datalist id="search_behaviors">
+						<option value="exact_match"></option>
+						<option value="fuzzy_match"></option>
+					</datalist>
+					<button
+						type="submit"
+						class="cursor-pointer rounded-sm bg-primary px-2 py-1 text-xs font-medium text-white hover:opacity-75"
+					>save</button>
+				</form>
+			</div>
 		</div>
 	}
 }
@@ -36,8 +57,8 @@ type settingItemProps struct {
 }
 
 templ settingItem(props settingItemProps) {
-	<div class="flex justify-between border-b border-pale-gray items-center p-2">
-		<p class="text-xs text-neutral-dark font-medium">{ props.Title }</p>
+	<div class="flex items-center justify-between border-b border-pale-gray p-2">
+		<p class="text-xs font-medium text-neutral-dark">{ props.Title }</p>
 		<a
 			href={ templ.URL(props.ActionURL) }
 			class="cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs text-white hover:opacity-75"

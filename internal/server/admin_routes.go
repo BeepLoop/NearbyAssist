@@ -324,6 +324,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		settingRoute.GET("", handler.GetSettingsPage)
 		settingRoute.GET("/resetSSE", handler.ResetSSE)
 		settingRoute.GET("/remind", handler.RemindScheduled)
+		settingRoute.POST("/searchBehavior", handler.UpdateSeachBehavior)
 	}
 
 	logsRoute := r.Group("/logs")

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"nearbyassist/internal/config"
+	"nearbyassist/internal/config/setting"
 	"nearbyassist/internal/db"
 	"nearbyassist/internal/server"
 	"nearbyassist/internal/service/activitylog"
@@ -26,6 +27,9 @@ func main() {
 
 	// Init search history tracker
 	searchhistory.New()
+
+	// Init Global settings
+	setting.New()
 
 	// Init cache
 	cache.NewGoCache()

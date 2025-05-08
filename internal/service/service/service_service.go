@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 	"mime/multipart"
+	"nearbyassist/internal/config/setting"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	service_repo "nearbyassist/internal/repository/service"
@@ -492,9 +493,26 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		slices.AppendSeq(tags, cleaned)
 	}
 
-	matchedServices, err := s.serviceStore.FuzzyMatchTags(tags)
-	if err != nil {
-		return nil, err
+	matchedServices := make([]*models.ServiceModel, 0)
+	searchBehavior := setting.New().Values.SearchBehavior
+	if searchBehavior == setting.EXACT_MATCH {
+		if res, err := s.serviceStore.GetAllWithTagAny(tags); err != nil {
+			return nil, err
+		} else {
+			matchedServices = res
+		}
+	} else if searchBehavior == setting.FUZZY_MATCH {
+		if res, err := s.serviceStore.FuzzyMatchTags(tags); err != nil {
+			return nil, err
+		} else {
+			matchedServices = res
+		}
+	} else {
+		if res, err := s.serviceStore.GetAllWithTagAny(tags); err != nil {
+			return nil, err
+		} else {
+			matchedServices = res
+		}
 	}
 
 	// Filter out services where vendor is banned or restricted
