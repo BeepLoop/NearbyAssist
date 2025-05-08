@@ -1,0 +1,328 @@
+package pdftemplate
+
+import (
+	"fmt"
+	"nearbyassist/internal/config"
+	"nearbyassist/internal/dto"
+	"nearbyassist/internal/utils"
+	"nearbyassist/views/partials"
+	"strconv"
+)
+
+templ ReportUserTemplate(data dto.UserReportDetail) {
+	@layout() {
+		@report(data)
+	}
+}
+
+templ report(data dto.UserReportDetail) {
+	<div>
+		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">Overview</h1>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Report ID:</span>
+			<p class="text-neutral-gray">{ data.Report.Id }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Category:</span>
+			<p class="text-neutral-gray">{ data.Report.Category }</p>
+		</div>
+		if data.Report.Category == "booking_related" {
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Booking ID:</span>
+				<p class="text-neutral-gray">{ data.Report.BookingId }</p>
+			</div>
+		}
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Reason:</span>
+			<p class="text-neutral-gray">{ data.Report.Reason }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Detail:</span>
+			<p class="text-neutral-gray">{ data.Report.Detail }</p>
+		</div>
+		<!-- Booking details -->
+		if data.Report.Category == "booking_related" {
+			@booking(data)
+		}
+		<!-- Images -->
+		<div class="mt-10">
+			@partials.Divider()
+			<h1 class="mt-2 text-xl font-medium">Attachments</h1>
+			<div class="mt-2 grid grid-cols-3 gap-2">
+				for _, image := range data.Report.Images {
+					<div class="outline-1 outline-pale-gray">
+						<img
+							src={ fmt.Sprintf("%s/api/v1/resource/%s", config.Instance.DOMAIN, image) }
+							alt="report attachment"
+							class="mx-auto max-h-44 object-contain"
+						/>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+	<!-- Information -->
+	<div class="mt-10">
+		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">Reported User</h1>
+		<div>
+			<div class="mt-2 flex justify-between">
+				<img
+					src={ data.Reported.ImageURL }
+					alt="User Profile Image"
+					class="aspect-square h-44 w-44 outline-1 outline-pale-gray"
+				/>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Name:</span>
+				<p class="text-neutral-gray">{ data.Reported.Name }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Email:</span>
+				<p class="text-neutral-gray">{ data.Reported.Email }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Address:</span>
+				<p class="text-neutral-gray">{ data.Reported.Address }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Phone:</span>
+				<p class="text-neutral-gray">{ data.Reported.Phone }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Account Created At:</span>
+				<p class="text-neutral-gray">{ data.Reported.CreatedAt }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Account Verified At:</span>
+				<p class="text-neutral-gray">{ data.Reported.DateVerified }</p>
+			</div>
+		</div>
+	</div>
+	<!-- History -->
+	<div class="mt-10">
+		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">History</h1>
+		<div>
+			<div class="mt-2 grid grid-cols-2 text-left">
+				<div class="mt-2 flex items-center gap-2">
+					<span class="font-medium text-neutral-dark">Vendor Rating:</span>
+					<span class="flex gap-2 text-warning">
+						<p class="font-medium">{ data.ReportedUserHistory.Rating }</p>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+							<path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"></path>
+						</svg>
+					</span>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Previous Reports:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(len(data.ReportedUserHistory.PreviousReports)) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Total Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.Bookings) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Active Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.ActiveBookings) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Completed Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.CompletedBookings) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Rejected Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReportedUserHistory.RejectedBookings) }</p>
+				</div>
+			</div>
+			<!-- Previous reports -->
+			<div class="mt-6">
+				<table class="w-full table-auto border-collapse text-left text-xs">
+					<thead class="bg-primary-greener text-xs text-white">
+						<th class="p-1.5">Date Reported</th>
+						<th class="p-1.5">Date Handled</th>
+						<th class="p-1.5">Action Taken</th>
+					</thead>
+					<tbody class="divide-y divide-neutral-gray-lighter">
+						for _, report := range data.ReportedUserHistory.PreviousReports {
+							<tr>
+								<td class="p-2">
+									<p class="text-neutral-gray">{ report.CreatedAt }</p>
+								</td>
+								<td class="p-2">
+									<p class="text-neutral-gray">{ report.CompletedAt }</p>
+								</td>
+								<td class="p-2">
+									if report.Status == "resolved" {
+										@partials.DefaultBadgeSuccess(report.Status)
+									} else {
+										@partials.DefaultBadgeDanger(report.Status)
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<!-- Information -->
+	<div class="mt-10">
+		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">Reporter</h1>
+		<div>
+			<div class="mt-2 flex justify-between">
+				<img
+					src={ data.Reporter.ImageURL }
+					alt="User Profile Image"
+					class="aspect-square h-44 w-44 outline-1 outline-pale-gray"
+				/>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Name:</span>
+				<p class="text-neutral-gray">{ data.Reporter.Name }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Email:</span>
+				<p class="text-neutral-gray">{ data.Reporter.Email }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Address:</span>
+				<p class="text-neutral-gray">{ data.Reporter.Address }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Phone:</span>
+				<p class="text-neutral-gray">{ data.Reporter.Phone }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Account Created At:</span>
+				<p class="text-neutral-gray">{ data.Reporter.CreatedAt }</p>
+			</div>
+			<div class="mt-2 flex gap-2">
+				<span class="font-medium text-neutral-dark">Date Verified:</span>
+				<p class="text-neutral-gray">{ data.Reporter.DateVerified }</p>
+			</div>
+		</div>
+	</div>
+	<!-- History -->
+	<div class="mt-10">
+		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">History</h1>
+		<div>
+			<div class="mt-2 grid grid-cols-2 text-left">
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Reports Filed:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.ReportsFiled) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">False Reports:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.FalseReports) }</p>
+				</div>
+				<div class="mt-2 flex gap-2">
+					<span class="font-medium text-neutral-dark">Cancelled Bookings:</span>
+					<p class="text-neutral-gray">{ strconv.Itoa(data.ReporterHistory.CancelledBookings) }</p>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ booking(data dto.UserReportDetail) {
+	<div class="mt-10">
+		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">Booking</h1>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">ID:</span>
+			<p class="text-neutral-gray">{ data.Booking.Id }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Total:</span>
+			<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Cost) }</p>
+		</div>
+		<div class="mt-2 flex items-center gap-2">
+			<span class="font-medium text-neutral-dark">Status:</span>
+			@partials.BookingStatus(data.Booking.Status)
+		</div>
+		if data.Booking.Status != "done" {
+			<div class="mt-2 flex gap-2">
+				if data.Booking.Status == "cancelled" {
+					<span class="font-medium text-neutral-dark">Cancel Reason:</span>
+				} else if data.Booking.Status == "rejected" {
+					<span class="font-medium text-neutral-dark">Reject Reason:</span>
+				}
+				<p class="text-neutral-gray">{ data.Booking.CancelReason }</p>
+			</div>
+		}
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Date Booked:</span>
+			<p class="text-neutral-gray">{ data.Booking.CreatedAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Date Scheduled:</span>
+			<p class="text-neutral-gray">{ data.Booking.ScheduledAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			if data.Booking.Status == "cancelled" {
+				<span class="font-medium text-neutral-dark">Date Cancelled:</span>
+			} else if data.Booking.Status == "rejected" {
+				<span class="font-medium text-neutral-dark">Date Rejected:</span>
+			} else if data.Booking.Status == "confirmed" {
+				<span class="font-medium text-neutral-dark">Date Confirmed:</span>
+			} else if data.Booking.Status == "done" {
+				<span class="font-medium text-neutral-dark">Date Completed:</span>
+			}
+			<p class="text-neutral-gray">{ data.Booking.UpdatedAt }</p>
+		</div>
+	</div>
+	<!-- Service -->
+	<div class="mt-10">
+		@partials.Divider()
+		<div class="mt-2 flex justify-between">
+			<h1 class="text-xl font-medium">Service</h1>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Title:</span>
+			<p class="text-neutral-gray">{ data.Booking.Service.Title }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Description:</span>
+			<p class="text-neutral-gray">{ data.Booking.Service.Description }</p>
+		</div>
+		<div class="mt-2">
+			<span class="font-medium text-neutral-dark">Tags:</span>
+			<div class="mt-1.5 flex gap-2">
+				for _, tag := range data.Booking.Service.Tags {
+					@partials.DefaultBadgeSuccess(tag)
+				}
+			</div>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Rate:</span>
+			<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Service.Rate) }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Created At:</span>
+			<p class="text-neutral-gray">{ data.Booking.Service.CreatedAt }</p>
+		</div>
+		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Last Modified:</span>
+			<p class="text-neutral-gray">{ data.Booking.Service.UpdatedAt }</p>
+		</div>
+	</div>
+	<!-- Extras -->
+	<div class="mt-10">
+		@partials.Divider()
+		<h1 class="mt-2 text-xl font-medium">Included Add-ons</h1>
+		<div class="mt-2">
+			for _, extra := range data.Booking.Extras {
+				@partials.Collapsable(partials.CollapsableProps{
+					Title:    extra.Title,
+					EndText:  utils.FormatCurrency(extra.Price),
+					Content:  extra.Description,
+					Expanded: true,
+				})
+			}
+		</div>
+	</div>
+}

@@ -17,7 +17,11 @@ templ ReportedUser(user models.AdminModel, data dto.UserReportDetail) {
 			@partials.BackButton(partials.BackButtonProps{URL: "/admin/complaints/users"})
 		</div>
 		<div class="mx-auto max-w-3xl">
-			<div class="flex justify-end">
+			<div class="flex justify-end gap-2">
+				@partials.DownloadButton(partials.DownloadButtonProps{
+					Label: "Download",
+					Link:  fmt.Sprintf("/admin/complaints/users/%s/download", data.Report.Id),
+				})
 				@closeReport() {
 					@addressReportContent(data.Report.Id)
 				}

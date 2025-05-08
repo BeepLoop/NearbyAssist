@@ -1,0 +1,23 @@
+package pdftemplate
+
+import (
+	"fmt"
+	"nearbyassist/internal/config"
+)
+
+templ layout() {
+	<html>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>NearbyAssist</title>
+			<link rel="icon" type="image/x-icon" href="/public/logo.ico"/>
+			<link rel="stylesheet" href={ fmt.Sprintf("%s/static/style/style.css", config.Instance.DOMAIN) }/>
+		</head>
+		<body class="pt-10 print:pt-10">
+			<main class="text-xs">
+				{ children... }
+			</main>
+		</body>
+	</html>
+}

@@ -36,3 +36,12 @@
     opacity: 0.75;
     color: var(--color-white);
 }
+
+@media print {
+  @page {
+    margin-top: 20mm;
+    margin-bottom: 20mm;
+    margin-left: 15mm;
+    margin-right: 15mm;
+  }
+}

@@ -109,10 +109,6 @@ func (s *Server) adminRoutes(r *echo.Group) {
 	complaintRoute := r.Group("/complaints")
 	{
 		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
-
-		complaintRoute.Use(middleware.CheckSession)
-		complaintRoute.Use(middleware.CheckMustChangePass(adminStore))
-
 		reportUserStore := report_user_repo.NewMysqlReportUserRepository(s.DB)
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
@@ -140,12 +136,14 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		complaintHandler := complaint.NewHandler(complaintService, resourceService)
 
-		complaintRoute.GET("/users", complaintHandler.GetReportList)
-		complaintRoute.GET("/users/:reportId", complaintHandler.GetReport)
-		complaintRoute.POST("/users/close", complaintHandler.Close)
+		complaintRoute.GET("/users", complaintHandler.GetReportList, middleware.CheckSession, middleware.CheckMustChangePass(adminStore))
+		complaintRoute.GET("/users/:reportId", complaintHandler.GetReport, middleware.CheckSession, middleware.CheckMustChangePass(adminStore))
+		complaintRoute.GET("/users/:reportId/pdf", complaintHandler.RenderReportPDF)
+		complaintRoute.GET("/users/:reportId/download", complaintHandler.DownloadPDF, middleware.CheckSession, middleware.CheckMustChangePass(adminStore))
+		complaintRoute.POST("/users/close", complaintHandler.Close, middleware.CheckSession, middleware.CheckMustChangePass(adminStore))
 
-		complaintRoute.GET("/bugs", complaintHandler.GetBugReports, middleware.EnsureAdmin)
-		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug, middleware.EnsureAdmin)
+		complaintRoute.GET("/bugs", complaintHandler.GetBugReports, middleware.CheckSession, middleware.CheckMustChangePass(adminStore), middleware.EnsureAdmin)
+		complaintRoute.POST("/bugs/complete", complaintHandler.CompleteBug, middleware.CheckSession, middleware.CheckMustChangePass(adminStore), middleware.EnsureAdmin)
 	}
 
 	applicationRoute := r.Group("/vendor-applications")
