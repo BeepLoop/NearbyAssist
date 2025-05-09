@@ -490,7 +490,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		cleaned := utils.Map(strings.Split(q, ","), func(tag string) string {
 			return strings.ReplaceAll(tag, "_", " ")
 		})
-		slices.AppendSeq(tags, cleaned)
+		tags = slices.AppendSeq(make([]string, 0), cleaned)
 	}
 
 	matchedServices := make([]*models.ServiceModel, 0)

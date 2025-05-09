@@ -277,12 +277,13 @@ func (s *MysqlServiceRepository) GetAllWithTagAny(tags []string) ([]*models.Serv
 	query := base + " t.title IN ("
 
 	placeholders := make([]string, 0)
-	for i, tag := range tags {
-		placeholders[i] = "?"
+	for _, tag := range tags {
+		placeholders = append(placeholders, "?")
 		args = append(args, tag)
 	}
 
 	query += strings.Join(placeholders, ", ") + ")"
+	fmt.Println(query)
 
 	ids := make([]string, 0)
 	if err := s.db.SelectContext(ctx, &ids, query, args...); err != nil {
