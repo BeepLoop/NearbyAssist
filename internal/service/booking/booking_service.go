@@ -135,8 +135,8 @@ func (s *Service) GetBooking(bookingId string) (*models.BookingModel, error) {
 		return nil, err
 	}
 
-	booking.Vendor = utils.Must(s.encrypt.DecryptString(booking.Vendor))
-	booking.Client = utils.Must(s.encrypt.DecryptString(booking.Client))
+	booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
+	booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
 	booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 	booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
@@ -464,8 +464,8 @@ func (s *Service) GetBookingUserSent(bearerToken string) ([]*models.BookingModel
 	}
 
 	for _, booking := range bookings {
-		booking.Vendor = utils.Must(s.encrypt.DecryptString(booking.Vendor))
-		booking.Client = utils.Must(s.encrypt.DecryptString(booking.Client))
+		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
+		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
 		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
@@ -490,8 +490,8 @@ func (s *Service) GetBookingUserReceived(bearerToken string) ([]*models.BookingM
 	}
 
 	for _, booking := range bookings {
-		booking.Vendor = utils.Must(s.encrypt.DecryptString(booking.Vendor))
-		booking.Client = utils.Must(s.encrypt.DecryptString(booking.Client))
+		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
+		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
 		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
@@ -516,8 +516,8 @@ func (s *Service) GetRecentBookings(bearerToken string) ([]*models.BookingModel,
 	}
 
 	for _, booking := range bookings {
-		booking.Vendor = utils.Must(s.encrypt.DecryptString(booking.Vendor))
-		booking.Client = utils.Must(s.encrypt.DecryptString(booking.Client))
+		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
+		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
 		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
@@ -542,8 +542,8 @@ func (s *Service) GetConfirmedBookings(bearerToken, filter string) ([]*models.Bo
 	}
 
 	for _, booking := range bookings {
-		booking.Vendor = utils.Must(s.encrypt.DecryptString(booking.Vendor))
-		booking.Client = utils.Must(s.encrypt.DecryptString(booking.Client))
+		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
+		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
 		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
@@ -568,8 +568,8 @@ func (s *Service) GetReviewableBookings(bearerToken string) ([]*models.BookingMo
 	}
 
 	for _, reviewable := range reviewables {
-		reviewable.Vendor = utils.Must(s.encrypt.DecryptString(reviewable.Vendor))
-		reviewable.Client = utils.Must(s.encrypt.DecryptString(reviewable.Client))
+		reviewable.Vendor.Name = utils.Must(s.encrypt.DecryptString(reviewable.Vendor.Name))
+		reviewable.Client.Name = utils.Must(s.encrypt.DecryptString(reviewable.Client.Name))
 		reviewable.Service.Title = utils.Must(s.encrypt.DecryptString(reviewable.Service.Title))
 		reviewable.Service.Description = utils.Must(s.encrypt.DecryptString(reviewable.Service.Description))
 
@@ -594,8 +594,8 @@ func (s *Service) GetBookingHistory(bearerToken, filter string) ([]*models.Booki
 	}
 
 	for _, booking := range bookings {
-		booking.Vendor = utils.Must(s.encrypt.DecryptString(booking.Vendor))
-		booking.Client = utils.Must(s.encrypt.DecryptString(booking.Client))
+		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
+		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
 		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
 		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
 
@@ -635,7 +635,7 @@ func (s *Service) CompleteBooking(bearerToken, bookingId string) error {
 	notificationHeading := "Booking complete"
 	notificationContent := fmt.Sprintf(
 		"Your booking with %s was completed",
-		utils.Must(s.encrypt.DecryptString(booking.Vendor)),
+		utils.Must(s.encrypt.DecryptString(booking.Vendor.Name)),
 	)
 
 	notification := &models.NotificationModel{
@@ -721,7 +721,7 @@ func (s *Service) Reschedule(bearerToken string, req *request.RescheduleBookingP
 		Title:     "Booking has been rescheduled",
 		Content: fmt.Sprintf(
 			"Your booking with the vendor: %s, has been rescheduled to %s",
-			utils.Must(s.encrypt.DecryptString(booking.Vendor)),
+			utils.Must(s.encrypt.DecryptString(booking.Vendor.Name)),
 			schedule,
 		),
 	}

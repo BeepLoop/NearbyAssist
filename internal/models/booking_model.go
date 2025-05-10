@@ -27,7 +27,7 @@ type BookingModel struct {
 
 	// Additional fields for joins
 	Service *ServiceModel `json:"service,omitempty"`
-	Vendor  string        `json:"vendor,omitempty" db:"vendor"` // Vendor name
-	Client  string        `json:"client,omitempty" db:"client"` // Client name
+	Vendor  UserModel     `json:"vendor" db:"vendor"` // Vendor name
+	Client  UserModel     `json:"client" db:"client"` // Client name
 	Extras  []*ExtraModel `json:"extras" db:"extras"`
 }

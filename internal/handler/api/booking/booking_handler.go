@@ -90,12 +90,14 @@ func (h *bookingHandler) CreateBooking(c echo.Context) error {
 	response := response.Booking{
 		Id: booking.Id,
 		Vendor: response.User{
-			Id:   booking.VendorId,
-			Name: booking.Vendor,
+			Id:       booking.VendorId,
+			Name:     booking.Vendor.Name,
+			ImageURL: booking.Vendor.ImageUrl,
 		},
 		Client: response.User{
-			Id:   booking.ClientId,
-			Name: booking.Client,
+			Id:       booking.ClientId,
+			Name:     booking.Client.Name,
+			ImageURL: booking.Client.ImageUrl,
 		},
 		Cost: booking.Cost,
 		Extras: slices.AppendSeq(
@@ -171,12 +173,14 @@ func (h *bookingHandler) GetBooking(c echo.Context) error {
 	response := response.Booking{
 		Id: booking.Id,
 		Vendor: response.User{
-			Id:   booking.VendorId,
-			Name: booking.Vendor,
+			Id:       booking.VendorId,
+			Name:     booking.Vendor.Name,
+			ImageURL: booking.Vendor.ImageUrl,
 		},
 		Client: response.User{
-			Id:   booking.ClientId,
-			Name: booking.Client,
+			Id:       booking.ClientId,
+			Name:     booking.Client.Name,
+			ImageURL: booking.Client.ImageUrl,
 		},
 		Cost: booking.Cost,
 		Extras: slices.AppendSeq(
@@ -394,12 +398,14 @@ func (h *bookingHandler) GetUserBookingList(c echo.Context) error {
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
-				Id:   booking.VendorId,
-				Name: booking.Vendor,
+				Id:       booking.VendorId,
+				Name:     booking.Vendor.Name,
+				ImageURL: booking.Vendor.ImageUrl,
 			},
 			Client: response.User{
-				Id:   booking.ClientId,
-				Name: booking.Client,
+				Id:       booking.ClientId,
+				Name:     booking.Client.Name,
+				ImageURL: booking.Client.ImageUrl,
 			},
 			Cost: booking.Cost,
 			Extras: slices.AppendSeq(
@@ -464,12 +470,14 @@ func (h *bookingHandler) GetRecentBookings(c echo.Context) error {
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
-				Id:   booking.VendorId,
-				Name: booking.Vendor,
+				Id:       booking.VendorId,
+				Name:     booking.Vendor.Name,
+				ImageURL: booking.Vendor.ImageUrl,
 			},
 			Client: response.User{
-				Id:   booking.ClientId,
-				Name: booking.Client,
+				Id:       booking.ClientId,
+				Name:     booking.Client.Name,
+				ImageURL: booking.Client.ImageUrl,
 			},
 			Cost: booking.Cost,
 			Extras: slices.AppendSeq(
@@ -535,12 +543,14 @@ func (h *bookingHandler) GetConfirmedBookings(c echo.Context) error {
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
-				Id:   booking.VendorId,
-				Name: booking.Vendor,
+				Id:       booking.VendorId,
+				Name:     booking.Vendor.Name,
+				ImageURL: booking.Vendor.ImageUrl,
 			},
 			Client: response.User{
-				Id:   booking.ClientId,
-				Name: booking.Client,
+				Id:       booking.ClientId,
+				Name:     booking.Client.Name,
+				ImageURL: booking.Client.ImageUrl,
 			},
 			Cost: booking.Cost,
 			Extras: slices.AppendSeq(
@@ -605,12 +615,14 @@ func (h *bookingHandler) GetReviewableBookings(c echo.Context) error {
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
-				Id:   booking.VendorId,
-				Name: booking.Vendor,
+				Id:       booking.VendorId,
+				Name:     booking.Vendor.Name,
+				ImageURL: booking.Vendor.ImageUrl,
 			},
 			Client: response.User{
-				Id:   booking.ClientId,
-				Name: booking.Client,
+				Id:       booking.ClientId,
+				Name:     booking.Client.Name,
+				ImageURL: booking.Client.ImageUrl,
 			},
 			Cost: booking.Cost,
 			Extras: slices.AppendSeq(
@@ -676,12 +688,14 @@ func (h *bookingHandler) GetBookingHistory(c echo.Context) error {
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
-				Id:   booking.VendorId,
-				Name: booking.Vendor,
+				Id:       booking.VendorId,
+				Name:     booking.Vendor.Name,
+				ImageURL: booking.Vendor.ImageUrl,
 			},
 			Client: response.User{
-				Id:   booking.ClientId,
-				Name: booking.Client,
+				Id:       booking.ClientId,
+				Name:     booking.Client.Name,
+				ImageURL: booking.Client.ImageUrl,
 			},
 			Cost: booking.Cost,
 			Extras: slices.AppendSeq(

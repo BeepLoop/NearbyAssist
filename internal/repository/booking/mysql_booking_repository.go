@@ -89,9 +89,7 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
             t.updatedAt,
             t.scheduledAt,
             t.cancelReason,
-            t.cancelledBy,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            t.cancelledBy
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -104,6 +102,18 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
 	if err := s.db.GetContext(ctx, booking, bookingQuery, id); err != nil {
 		fmt.Println("error get booking by id: ", err.Error())
 		return nil, err
+	}
+
+	if client, err := s.getClient(booking.Id); err != nil {
+		return nil, err
+	} else {
+		booking.Client = *client
+	}
+
+	if vendor, err := s.getVendor(booking.Id); err != nil {
+		return nil, err
+	} else {
+		booking.Vendor = *vendor
 	}
 
 	if isReviewed, err := s.IsReviewed(booking.Id); err != nil {
@@ -230,9 +240,7 @@ func (s *MysqlBookingRepository) GetBookingSent(id string) ([]*models.BookingMod
             FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
-            t.scheduledAt,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            t.scheduledAt
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -278,9 +286,7 @@ func (s *MysqlBookingRepository) GetBookingReceived(id string) ([]*models.Bookin
             FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
-            t.scheduledAt,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            t.scheduledAt
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -323,9 +329,7 @@ func (s *MysqlBookingRepository) GetRecent(userId string) ([]*models.BookingMode
             t.clientId,
             t.serviceId,
             t.status,
-            FORMAT(t.cost, 2) AS cost,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            FORMAT(t.cost, 2) AS cost
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -378,9 +382,7 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
             FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
-            t.scheduledAt,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            t.scheduledAt
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -401,9 +403,7 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
             FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
-            t.scheduledAt,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            t.scheduledAt
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -466,9 +466,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.updatedAt,
             t.scheduledAt,
             t.cancelReason,
-            t.cancelledBy,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            t.cancelledBy
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -491,9 +489,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.updatedAt,
             t.scheduledAt,
             t.cancelReason,
-            t.cancelledBy,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            t.cancelledBy
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -549,9 +545,7 @@ func (s *MysqlBookingRepository) GetReviewableBookings(userId string) ([]*models
             FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,
-            t.scheduledAt,
-            uVendor.name AS vendor,
-            uClient.name AS client
+            t.scheduledAt
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -901,4 +895,56 @@ func (s *MysqlBookingRepository) getExtras(serviceId string) ([]*models.ExtraMod
 	}
 
 	return extras, nil
+}
+
+func (s *MysqlBookingRepository) getClient(bookingId string) (*models.UserModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            u.id, u.name, u.email, u.imageUrl
+        FROM
+            User u
+            JOIN Booking b ON b.clientId = u.id
+        WHERE
+            b.id = ?
+    `
+
+	user := new(models.UserModel)
+	if err := s.db.GetContext(ctx, user, query, bookingId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return user, nil
+}
+
+func (s *MysqlBookingRepository) getVendor(bookingId string) (*models.UserModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            u.id, u.name, u.email, u.imageUrl
+        FROM
+            User u
+            JOIN Booking b ON b.vendorId = u.id
+        WHERE
+            b.id = ?
+    `
+
+	user := new(models.UserModel)
+	if err := s.db.GetContext(ctx, user, query, bookingId); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return user, nil
 }

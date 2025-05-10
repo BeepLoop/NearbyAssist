@@ -17,8 +17,9 @@ type Booking struct {
 }
 
 type User struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	ImageURL string `json:"imageUrl"`
 }
 
 type ServiceBareInfo struct {
