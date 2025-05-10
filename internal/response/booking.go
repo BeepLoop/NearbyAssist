@@ -12,6 +12,7 @@ type Booking struct {
 	UpdatedAt    string          `json:"updatedAt"`
 	ScheduledAt  string          `json:"scheduledAt"`
 	CancelReason string          `json:"cancelReason"`
+	CancelledBy  string          `json:"cancelledById"`
 	QRSignature  string          `json:"qrSignature"`
 }
 

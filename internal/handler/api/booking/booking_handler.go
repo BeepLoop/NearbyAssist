@@ -709,6 +709,7 @@ func (h *bookingHandler) GetBookingHistory(c echo.Context) error {
 			UpdatedAt:    booking.UpdatedAt,
 			ScheduledAt:  booking.ScheduledAt.String,
 			CancelReason: booking.CancelReason.String,
+			CancelledBy:  booking.CancelledBy.String,
 			QRSignature: utils.Must(h.qrService.SignData(&request.QRSignatureInput{
 				ClientID:  booking.ClientId,
 				VendorID:  booking.VendorId,

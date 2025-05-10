@@ -89,6 +89,7 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
             t.updatedAt,
             t.scheduledAt,
             t.cancelReason,
+            t.cancelledBy,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -465,6 +466,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.updatedAt,
             t.scheduledAt,
             t.cancelReason,
+            t.cancelledBy,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
@@ -489,6 +491,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.updatedAt,
             t.scheduledAt,
             t.cancelReason,
+            t.cancelledBy,
             uVendor.name AS vendor,
             uClient.name AS client
         FROM 
