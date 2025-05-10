@@ -595,6 +595,41 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 				Latitude:          service.Vendor.User.Address.Latitude,
 				Longitude:         service.Vendor.User.Address.Longitude,
 				CompletedBookings: suggestionOpsInput[index].CompletedBookings,
+				Service: response.Service{
+					Id:          service.Id,
+					VendorId:    service.VendorId,
+					Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
+					Description: utils.Must(s.encrypt.DecryptString(service.Description)),
+					Rate:        service.Rate,
+					Tags: slices.AppendSeq(
+						make([]response.Tag, 0),
+						utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
+							return response.Tag{Id: t.Id, Title: t.Title}
+						}),
+					),
+					Extras: slices.AppendSeq(
+						make([]response.Extra, 0),
+						utils.Map(service.Extras, func(x *models.ExtraModel) response.Extra {
+							return response.Extra{
+								Id:          x.Id,
+								Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
+								Description: utils.Must(s.encrypt.DecryptString(x.Description)),
+								Price:       x.Price,
+							}
+						}),
+					),
+					Images: slices.AppendSeq(
+						make([]response.Image, 0),
+						utils.Map(service.Images, func(i *models.ServicePhotoModel) response.Image {
+							return response.Image{Id: i.Id, Url: i.Url}
+						}),
+					),
+					Location: response.Location{
+						Latitude:  service.Address.Latitude,
+						Longitude: service.Address.Longitude,
+					},
+					Disabled: service.Disabled,
+				},
 			}
 		}),
 	)

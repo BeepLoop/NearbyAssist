@@ -10,4 +10,5 @@ type ServiceSearchResult struct {
 	Longitude         float64 `json:"longitude"`
 	CompletedBookings float32 `json:"completedBookings"`
 	Distance          float32 `json:"distance"`
+	Service           Service `json:"service"`
 }

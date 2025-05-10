@@ -63,9 +63,9 @@ func (w *weightedScoring) calculateScore(service dto.GeospatialOperation) (float
 
 func (w *weightedScoring) getTopScores(services []dto.GeospatialOperation) {
 	var lowestPrice float32 = math.MaxFloat32
-	var highestRating float32 = 1.0
+	var highestRating float32 = math.SmallestNonzeroFloat32
 	var shortestDistance float32 = math.MaxFloat32
-	var mostBookings float32 = 1.0
+	var mostBookings float32 = math.SmallestNonzeroFloat32
 
 	for _, service := range services {
 		if service.Rate < lowestPrice {
@@ -102,5 +102,10 @@ func (w *weightedScoring) minimize(score, minScore float32) float32 {
 	if score == 0 {
 		return 0
 	}
+
+	if score == 0 && minScore == 0 {
+		return 1
+	}
+
 	return minScore / score
 }

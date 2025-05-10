@@ -15,7 +15,7 @@ func New() *globalSetting {
 
 	instance = &globalSetting{
 		Values: &settingValues{
-			SearchBehavior: EXACT_MATCH,
+			SearchBehavior: FUZZY_MATCH,
 		},
 	}
 	return instance
