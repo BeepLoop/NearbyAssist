@@ -127,6 +127,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userRoute.DELETE("/socials/:id", handler.DeleteSocial)
 		userRoute.POST("/addExpertise", handler.AddExpertise)
 		userRoute.POST("/dbl/:value", handler.SetDBL)
+		userRoute.PUT("/address", handler.ChangeAddress)
 	}
 
 	// ===== TAGS =======

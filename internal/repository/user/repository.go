@@ -4,6 +4,7 @@ import "nearbyassist/internal/models"
 
 type UserRepository interface {
 	CreateUser(user *models.UserModel) (string, error)
+	ChangeAddress(userId string, address *models.AddressModel) error
 	FindById(id string) (*models.UserModel, error)
 	FindByEmailHash(emailHash string) (*models.UserModel, error)
 

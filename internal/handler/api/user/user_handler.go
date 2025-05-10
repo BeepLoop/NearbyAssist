@@ -220,3 +220,30 @@ func (h *userHandler) SetDBL(c echo.Context) error {
 
 	return c.JSON(http.StatusNoContent, nil)
 }
+
+func (h *userHandler) ChangeAddress(c echo.Context) error {
+	req := new(request.ChangeAddressPayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	bearerToken := utils.BearerTokenFromHeader(c)
+	if err := h.userService.ChangeAddress(bearerToken, req); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error updating address",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}

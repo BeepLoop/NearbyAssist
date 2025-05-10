@@ -96,6 +96,48 @@ func (s *MysqlUserRepository) CreateUser(user *models.UserModel) (string, error)
 	return user.Id, nil
 }
 
+func (s *MysqlUserRepository) ChangeAddress(userId string, address *models.AddressModel) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	getAddressId := "SELECT addressId from UserAddress WHERE userId = ?"
+	var addressId string
+	if err := tx.GetContext(ctx, &addressId, getAddressId, userId); err != nil {
+		return err
+	}
+
+	updateAddress := `
+        UPDATE
+            Address
+        SET
+            address = ?, latitude = ?, longitude = ?
+        WHERE
+            id = ?
+    `
+	if _, err := tx.ExecContext(ctx, updateAddress, address.Address, address.Latitude, address.Longitude, addressId); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

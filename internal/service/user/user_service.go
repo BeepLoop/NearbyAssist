@@ -391,3 +391,18 @@ func (s *Service) SetDBL(bearerToken, value string) error {
 
 	return nil
 }
+
+func (s *Service) ChangeAddress(bearerToken string, req *request.ChangeAddressPayload) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	address := &models.AddressModel{
+		Address:   utils.Must(s.encrypt.EncryptString(req.Address)),
+		Latitude:  req.Location.Latitude,
+		Longitude: req.Location.Longitude,
+	}
+
+	return s.userStore.ChangeAddress(userId, address)
+}
