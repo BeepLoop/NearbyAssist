@@ -39,7 +39,7 @@ func (s *MysqlVerificationRepository) CreateLink(userId string) (string, error) 
 	return id, nil
 }
 
-func (s *MysqlVerificationRepository) UpdateUserInfo(updated *models.IdentityVerificationModel, newTimestamp bool) error {
+func (s *MysqlVerificationRepository) UpdateUserInfo(input *models.IdentityVerificationModel, newTimestamp bool) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -57,7 +57,7 @@ func (s *MysqlVerificationRepository) UpdateUserInfo(updated *models.IdentityVer
         WHERE
             id = ?
     `
-	if _, err := tx.ExecContext(ctx, updateUser, updated.User.Name, updated.User.Phone, updated.User.Id); err != nil {
+	if _, err := tx.ExecContext(ctx, updateUser, input.User.Name, input.User.Phone, input.User.Id); err != nil {
 		return err
 	}
 
@@ -73,53 +73,34 @@ func (s *MysqlVerificationRepository) UpdateUserInfo(updated *models.IdentityVer
 	if _, err := tx.ExecContext(
 		ctx,
 		updateAddress,
-		updated.User.Address.Address,
-		updated.User.Address.Latitude,
-		updated.User.Address.Longitude,
-		updated.User.Address.Id,
+		input.User.Address.Address,
+		input.User.Address.Latitude,
+		input.User.Address.Longitude,
+		input.User.Address.Id,
 	); err != nil {
 		return err
 	}
 
 	// Update Identification
-	updateIdentification := `
-        UPDATE
-            Identification
-        SET
-            type = ?,
-            referenceNumber = ?,
-            frontImageUrl = ?,
-            backImageUrl = ?,
-            selfieImageUrl = ?
-        WHERE
-            id = ?
+	createIdentification := `
+        INSERT INTO
+            Identification (id, type, referenceNumber, frontImageUrl, backImageUrl, selfieImageUrl)
+        VALUES
+            (:id, :type, :referenceNumber, :frontImageUrl, :backImageUrl, :selfieImageUrl)
     `
-	if _, err := tx.ExecContext(
-		ctx,
-		updateIdentification,
-		updated.User.Identification.Type,
-		updated.User.Identification.ReferenceNumber,
-		updated.User.Identification.FrontImageUrl,
-		updated.User.Identification.BackImageUrl,
-		updated.User.Identification.SelfieImageUrl,
-		updated.User.Identification.Id,
-	); err != nil {
+	input.User.Identification.Id = utils.GenerateId()
+	if _, err := tx.NamedExecContext(ctx, createIdentification, input.User.Identification); err != nil {
 		return err
 	}
 
-	// Update updatedAt timestamp
-	updateTimestamp := `
-        UPDATE
-            IdentityVerification
-        SET
-            updatedAt = CURRENT_TIMESTAMP()
-        WHERE
-            id = ?
+	createIdentificationRelation := `
+        INSERT INTO
+            UserIdentification (userId, identificationId)
+        VALUES
+            (?, ?)
     `
-	if newTimestamp {
-		if _, err := tx.ExecContext(ctx, updateTimestamp, updated.Id); err != nil {
-			return err
-		}
+	if _, err := tx.ExecContext(ctx, createIdentificationRelation, input.User.Id, input.User.Identification.Id); err != nil {
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {

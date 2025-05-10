@@ -12,7 +12,7 @@ import (
 func GeneratePDF(url string) ([]byte, error) {
 	opts := append(
 		chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.ExecPath("/usr/bin/google-chrome"),
+		chromedp.ExecPath("/usr/bin/chromium"),
 		chromedp.Flag("headless", true),
 		chromedp.Flag("no-sandbox", true),
 		chromedp.Flag("disable-gpu", true),

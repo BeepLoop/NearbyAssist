@@ -1,7 +1,6 @@
 package userauth_handler
 
 import (
-	"encoding/json"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
 	userauth_service "nearbyassist/internal/service/user_auth"
@@ -64,11 +63,10 @@ func (h *userAuthHandler) Login(c echo.Context) error {
 }
 
 func (h *userAuthHandler) Register(c echo.Context) error {
-	user := c.FormValue("user")
 	req := new(request.UserRegisterPayload)
-	if err := json.Unmarshal([]byte(user), req); err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
-			Message: "Invalid payload",
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
 			Error:   err.Error(),
 		})
 	}
@@ -80,15 +78,7 @@ func (h *userAuthHandler) Register(c echo.Context) error {
 		})
 	}
 
-	files, err := utils.FormParser(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error parsing form",
-			Error:   err.Error(),
-		})
-	}
-
-	response, err := h.authService.Register(req, files)
+	response, err := h.authService.Register(req)
 	if err != nil {
 		if strings.Contains(err.Error(), userauth_service.ERR_EMAIL_EXISTS) {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
@@ -123,7 +113,6 @@ func (h *userAuthHandler) Refresh(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	accessToken, err := h.authService.Refresh(bearerToken, req.RefreshToken)
 	if err != nil {
 		if strings.Contains(err.Error(), userauth_service.ERR_BANNED_USER) {

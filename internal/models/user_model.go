@@ -25,7 +25,8 @@ type UserModel struct {
 	VerifiedAt sql.NullString `db:"verifiedAt"`
 
 	// Socials
-	Socials        []SocialModel
-	Address        AddressModel
-	Identification IdentificationModel
+	Socials                    []SocialModel
+	Address                    AddressModel
+	Identification             IdentificationModel
+	HasSubmittedIdentification bool
 }

@@ -12,15 +12,13 @@ type UserLoginPayload struct {
 }
 
 type UserRegisterPayload struct {
-	Name            string  `json:"name" validate:"required"`
-	Email           string  `json:"email" validate:"required"`
-	ImageURL        string  `json:"imageUrl" validate:"required"`
-	Phone           string  `json:"phone" validate:"required"`
-	Address         string  `json:"address" validate:"required"`
-	Latitude        float64 `json:"latitude" validate:"required"`
-	Longitude       float64 `json:"longitude" validate:"required"`
-	IDType          string  `json:"idType" validate:"required"`
-	ReferenceNumber string  `json:"referenceNumber" validate:"required"`
+	Name      string  `json:"name" validate:"required"`
+	Email     string  `json:"email" validate:"required"`
+	ImageURL  string  `json:"imageUrl" validate:"required"`
+	Phone     string  `json:"phone" validate:"required"`
+	Address   string  `json:"address" validate:"required"`
+	Latitude  float64 `json:"latitude" validate:"required"`
+	Longitude float64 `json:"longitude" validate:"required"`
 }
 
 type TokenRefreshPayload struct {

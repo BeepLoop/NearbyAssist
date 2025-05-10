@@ -13,9 +13,14 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 		return nil, err
 	}
 
-	identification, err := s.userStore.GetIdentification(user.Id)
-	if err != nil {
-		return nil, err
+	identification := dto.Identification{}
+	if user.HasSubmittedIdentification {
+		identification = dto.Identification{
+			Type:          user.Identification.Type,
+			IdNumber:      utils.Must(s.encrypt.DecryptString(user.Identification.ReferenceNumber)),
+			FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.FrontImageUrl)),
+			BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.BackImageUrl)),
+		}
 	}
 
 	bookings, err := s.bookingStore.GetConfirmed(userId, "client")
@@ -47,16 +52,12 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 					}
 				}),
 			),
-			Identification: dto.Identification{
-				Type:          identification.Type,
-				IdNumber:      utils.Must(s.encrypt.DecryptString(identification.ReferenceNumber)),
-				FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(identification.FrontImageUrl)),
-				BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(identification.BackImageUrl)),
-			},
-			CreatedAt:    utils.FormatDate(user.CreatedAt),
-			DateVerified: utils.FormatDate(user.VerifiedAt.String),
-			IsRestricted: user.Restricted,
-			IsBanned:     user.Banned,
+			Identification:             identification,
+			CreatedAt:                  utils.FormatDate(user.CreatedAt),
+			DateVerified:               utils.FormatDate(user.VerifiedAt.String),
+			IsRestricted:               user.Restricted,
+			IsBanned:                   user.Banned,
+			HasSubmittedIdentification: user.HasSubmittedIdentification,
 		},
 		ActiveBookings: slices.AppendSeq(
 			make([]dto.Booking, 0),

@@ -2,7 +2,6 @@ package userauth_service
 
 import (
 	"errors"
-	"mime/multipart"
 	"nearbyassist/internal/models"
 	user_repo "nearbyassist/internal/repository/user"
 	"nearbyassist/internal/repository/userauth"
@@ -12,7 +11,6 @@ import (
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
-	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"slices"
 )
@@ -156,12 +154,8 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 	return response, nil
 }
 
-func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.FileHeader) (*response.LoginResponse, error) {
-	emailHash, err := s.hash.Generate([]byte(req.Email))
-	if err != nil {
-		return nil, err
-	}
-
+func (s *Service) Register(req *request.UserRegisterPayload) (*response.LoginResponse, error) {
+	emailHash := utils.Must(s.hash.Generate([]byte(req.Email)))
 	existing, _ := s.userStore.FindByEmailHash(emailHash)
 	if existing != nil {
 		return nil, errors.New(ERR_EMAIL_EXISTS)
@@ -173,10 +167,6 @@ func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.
 		ImageUrl:  req.ImageURL,
 		EmailHash: emailHash,
 		Phone:     utils.Must(s.encrypt.EncryptString(req.Phone)),
-		Identification: models.IdentificationModel{
-			Type:            req.IDType,
-			ReferenceNumber: utils.Must(s.encrypt.EncryptString(req.ReferenceNumber)),
-		},
 		Address: models.AddressModel{
 			Address:   utils.Must(s.encrypt.EncryptString(req.Address)),
 			Latitude:  req.Latitude,
@@ -184,68 +174,10 @@ func (s *Service) Register(req *request.UserRegisterPayload, files []*multipart.
 		},
 	}
 
-	for _, file := range files {
-		// Read bytes
-		bytes, err := utils.FileToBytes(file)
-		if err != nil {
-			return nil, err
-		}
-
-		// Encrypt the file
-		cipher, err := s.encrypt.EncryptFile(bytes)
-		if err != nil {
-			return nil, err
-		}
-
-		switch file.Filename {
-		case "frontId":
-			fileData := fs.File{
-				Data:     cipher,
-				Category: fs.ID_FRONT,
-			}
-			if url, err := s.fs.SaveFile(fileData); err != nil {
-				return nil, err
-			} else {
-				user.Identification.FrontImageUrl = url
-			}
-
-		case "backId":
-			fileData := fs.File{
-				Data:     cipher,
-				Category: fs.ID_BACK,
-			}
-			if url, err := s.fs.SaveFile(fileData); err != nil {
-				return nil, err
-			} else {
-				user.Identification.BackImageUrl = url
-			}
-
-		case "face":
-			fileData := fs.File{
-				Data:     cipher,
-				Category: fs.FACE,
-			}
-			if url, err := s.fs.SaveFile(fileData); err != nil {
-				return nil, err
-			} else {
-				user.Identification.SelfieImageUrl = url
-			}
-
-		default:
-			return nil, err
-		}
-	}
-
 	userId, err := s.userStore.CreateUser(user)
 	if err != nil {
 		return nil, err
 	}
-
-	if _, err := s.verificationStore.CreateLink(userId); err != nil {
-		return nil, err
-	}
-
-	sse.New().IncreaseVerification()
 
 	accessToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
 		UserId: userId,
@@ -313,22 +245,10 @@ func (s *Service) Refresh(bearerToken, refreshToken string) (string, error) {
 		return "", errors.New(ERR_BANNED_USER)
 	}
 
-	if plain, err := s.encrypt.DecryptString(user.Name); err != nil {
-		return "", err
-	} else {
-		user.Name = plain
-	}
-
-	if plain, err := s.encrypt.DecryptString(user.Email); err != nil {
-		return "", err
-	} else {
-		user.Email = plain
-	}
-
 	newToken, err := s.jwt.GenerateAccessToken(models.JWTClaims{
 		UserId: user.Id,
-		Name:   user.Name,
-		Email:  user.Email,
+		Name:   utils.Must(s.encrypt.DecryptString(user.Name)),
+		Email:  utils.Must(s.encrypt.DecryptString(user.Email)),
 	})
 	if err != nil {
 		return "", err

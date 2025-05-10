@@ -94,6 +94,16 @@ func (s *Service) GetAllBasicUsers(limit, offset int) ([]dto.User, error) {
 	data := slices.AppendSeq(
 		make([]dto.User, 0),
 		utils.Map(accounts, func(account *models.UserModel) dto.User {
+			identification := dto.Identification{}
+			if account.HasSubmittedIdentification {
+				identification = dto.Identification{
+					Type:          account.Identification.Type,
+					IdNumber:      utils.Must(s.encrypt.DecryptString(account.Identification.ReferenceNumber)),
+					FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(account.Identification.FrontImageUrl)),
+					BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(account.Identification.BackImageUrl)),
+				}
+			}
+
 			return dto.User{
 				Id:       account.Id,
 				Name:     utils.Must(s.encrypt.DecryptString(account.Name)),
@@ -112,16 +122,12 @@ func (s *Service) GetAllBasicUsers(limit, offset int) ([]dto.User, error) {
 						}
 					}),
 				),
-				Identification: dto.Identification{
-					Type:          account.Identification.Type,
-					IdNumber:      utils.Must(s.encrypt.DecryptString(account.Identification.ReferenceNumber)),
-					FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(account.Identification.FrontImageUrl)),
-					BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(account.Identification.BackImageUrl)),
-				},
-				CreatedAt:    utils.FormatDate(account.CreatedAt),
-				DateVerified: utils.FormatDate(account.VerifiedAt.String),
-				IsRestricted: account.Restricted,
-				IsBanned:     account.Banned,
+				Identification:             identification,
+				CreatedAt:                  utils.FormatDate(account.CreatedAt),
+				DateVerified:               utils.FormatDate(account.VerifiedAt.String),
+				IsRestricted:               account.Restricted,
+				IsBanned:                   account.Banned,
+				HasSubmittedIdentification: account.HasSubmittedIdentification,
 			}
 		}),
 	)
@@ -134,6 +140,16 @@ func (s *Service) FindByEmail(email string) (*dto.User, error) {
 	user, err := s.userStore.FindByEmailHash(emailHash)
 	if err != nil {
 		return nil, err
+	}
+
+	identification := dto.Identification{}
+	if user.HasSubmittedIdentification {
+		identification = dto.Identification{
+			Type:          user.Identification.Type,
+			IdNumber:      utils.Must(s.encrypt.DecryptString(user.Identification.ReferenceNumber)),
+			FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.FrontImageUrl)),
+			BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.BackImageUrl)),
+		}
 	}
 
 	data := &dto.User{
@@ -154,16 +170,12 @@ func (s *Service) FindByEmail(email string) (*dto.User, error) {
 				}
 			}),
 		),
-		Identification: dto.Identification{
-			Type:          user.Identification.Type,
-			IdNumber:      utils.Must(s.encrypt.DecryptString(user.Identification.ReferenceNumber)),
-			FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.FrontImageUrl)),
-			BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.BackImageUrl)),
-		},
-		CreatedAt:    utils.FormatDate(user.CreatedAt),
-		DateVerified: utils.FormatDate(user.VerifiedAt.String),
-		IsRestricted: user.Restricted,
-		IsBanned:     user.Banned,
+		Identification:             identification,
+		CreatedAt:                  utils.FormatDate(user.CreatedAt),
+		DateVerified:               utils.FormatDate(user.VerifiedAt.String),
+		IsRestricted:               user.Restricted,
+		IsBanned:                   user.Banned,
+		HasSubmittedIdentification: user.HasSubmittedIdentification,
 	}
 
 	return data, nil

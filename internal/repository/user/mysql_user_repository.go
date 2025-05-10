@@ -2,6 +2,7 @@ package user_repo
 
 import (
 	"context"
+	"database/sql"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"slices"
@@ -57,27 +58,6 @@ func (s *MysqlUserRepository) CreateUser(user *models.UserModel) (string, error)
             (?, ?)
     `
 	if _, err := tx.ExecContext(ctx, createAddressRelation, user.Id, user.Address.Id); err != nil {
-		return "", err
-	}
-
-	createIdentification := `
-        INSERT INTO
-            Identification (id, type, referenceNumber, frontImageUrl, backImageUrl, selfieImageUrl)
-        VALUES
-            (:id, :type, :referenceNumber, :frontImageUrl, :backImageUrl, :selfieImageUrl)
-    `
-	user.Identification.Id = utils.GenerateId()
-	if _, err := tx.NamedExecContext(ctx, createIdentification, user.Identification); err != nil {
-		return "", err
-	}
-
-	createIdentificationRelation := `
-        INSERT INTO
-            UserIdentification (userId, identificationId)
-        VALUES
-            (?, ?)
-    `
-	if _, err := tx.ExecContext(ctx, createIdentificationRelation, user.Id, user.Identification.Id); err != nil {
 		return "", err
 	}
 
@@ -248,10 +228,18 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 		user.Address = *address
 	}
 
-	if identification, err := s.GetIdentification(user.Id); err != nil {
+	if submitted, err := s.HasSubmittedIdentification(user.Id); err != nil {
 		return nil, err
 	} else {
-		user.Identification = *identification
+		user.HasSubmittedIdentification = submitted
+	}
+
+	if user.HasSubmittedIdentification {
+		if identification, err := s.GetIdentification(user.Id); err != nil {
+			return nil, err
+		} else {
+			user.Identification = *identification
+		}
 	}
 
 	if socials, err := s.GetSocials(user.Id); err != nil {
@@ -314,10 +302,18 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
 		user.Address = *address
 	}
 
-	if identification, err := s.GetIdentification(user.Id); err != nil {
+	if submitted, err := s.HasSubmittedIdentification(user.Id); err != nil {
 		return nil, err
 	} else {
-		user.Identification = *identification
+		user.HasSubmittedIdentification = submitted
+	}
+
+	if user.HasSubmittedIdentification {
+		if identification, err := s.GetIdentification(user.Id); err != nil {
+			return nil, err
+		} else {
+			user.Identification = *identification
+		}
 	}
 
 	if socials, err := s.GetSocials(user.Id); err != nil {
@@ -395,6 +391,31 @@ func (s *MysqlUserRepository) GetSocials(userId string) ([]*models.SocialModel, 
 	return socials, nil
 }
 
+func (s *MysqlUserRepository) HasSubmittedIdentification(userId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT CASE
+            WHEN (SELECT 1 FROM UserIdentification WHERE userId = ?)
+            THEN 1
+            ELSE 0
+        END AS submitted
+    `
+
+	submitted := false
+	if err := s.db.GetContext(ctx, &submitted, query, userId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return submitted, nil
+
+}
+
 func (s *MysqlUserRepository) GetIdentification(userId string) (*models.IdentificationModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -415,6 +436,10 @@ func (s *MysqlUserRepository) GetIdentification(userId string) (*models.Identifi
 
 	identification := new(models.IdentificationModel)
 	if err := s.db.GetContext(ctx, identification, query, userId); err != nil {
+		if err == sql.ErrNoRows {
+			return identification, nil
+		}
+
 		return nil, err
 	}
 

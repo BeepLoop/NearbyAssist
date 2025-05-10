@@ -142,6 +142,10 @@ templ profile(data dto.UserAccountDetail) {
 					<div class="mt-2 flex gap-2">
 						@partials.DefaultBadgeWarning("suspended")
 					</div>
+				} else if data.User.DateVerified == "" {
+					<div class="mt-2 flex gap-2">
+						@partials.DefaultBadgeWarning("unverified")
+					</div>
 				}
 			</div>
 		</div>
@@ -150,18 +154,24 @@ templ profile(data dto.UserAccountDetail) {
 	<div class="mt-4">
 		<h2 class="text-xl font-medium text-neutral-dark">Identification</h2>
 		@partials.Divider()
-		<div class="mt-2 flex items-center gap-2 text-sm">
-			<span class="font-medium text-neutral-dark">ID Type:</span>
-			<p>{ data.User.Identification.Type }</p>
-		</div>
-		<div class="mt-2 flex items-center gap-2 text-sm">
-			<span class="font-medium text-neutral-dark">ID:</span>
-			<p>{ data.User.Identification.IdNumber }</p>
-		</div>
-		<div class="mt-4 flex max-h-44 gap-2">
-			@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.FrontImageURL))
-			@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.BackImageURL))
-		</div>
+		if data.User.HasSubmittedIdentification {
+			<div class="mt-2 flex items-center gap-2 text-sm">
+				<span class="font-medium text-neutral-dark">ID Type:</span>
+				<p>{ data.User.Identification.Type }</p>
+			</div>
+			<div class="mt-2 flex items-center gap-2 text-sm">
+				<span class="font-medium text-neutral-dark">ID:</span>
+				<p>{ data.User.Identification.IdNumber }</p>
+			</div>
+			<div class="mt-4 flex max-h-44 gap-2">
+				@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.FrontImageURL))
+				@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.BackImageURL))
+			</div>
+		} else {
+			<div class="mt-2 grid place-content-center">
+				<p class="my-4 text-xs text-neutral-dark">Not yet submitted</p>
+			</div>
+		}
 	</div>
 	<!-- Socials -->
 	<div class="mt-4">

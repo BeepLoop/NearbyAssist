@@ -14,6 +14,7 @@ import (
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
 	resource_service "nearbyassist/internal/service/resource"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 	"slices"
@@ -57,7 +58,7 @@ func NewService(
 	}
 }
 
-func (s *Service) UpdateVerificationRequest(bearerToken string, payload *request.VerifyAccountPayload, files []*multipart.FileHeader) error {
+func (s *Service) VerifyAccount(bearerToken string, payload *request.VerifyAccountPayload, files []*multipart.FileHeader) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
@@ -71,26 +72,19 @@ func (s *Service) UpdateVerificationRequest(bearerToken string, payload *request
 		return errors.New(ERR_ALREADY_VERIFIED)
 	}
 
-	previousRequest, err := s.verificationStore.FindByUserId(userId)
-	if err != nil {
-		return err
-	}
-
-	updatedRequest := &models.IdentityVerificationModel{
-		Id:     previousRequest.Id,
-		UserId: previousRequest.UserId,
+	verificationRequest := &models.IdentityVerificationModel{
+		UserId: user.Id,
 		User: models.UserModel{
-			Model: previousRequest.User.Model,
+			Model: user.Model,
 			Name:  utils.Must(s.encrypt.EncryptString(payload.Name)),
 			Phone: utils.Must(s.encrypt.EncryptString(payload.Phone)),
 			Address: models.AddressModel{
-				Id:        previousRequest.User.Address.Id,
+				Id:        user.Address.Id,
 				Address:   utils.Must(s.encrypt.EncryptString(payload.Address)),
 				Latitude:  payload.Latitude,
 				Longitude: payload.Longitude,
 			},
 			Identification: models.IdentificationModel{
-				Id:              previousRequest.User.Identification.Id,
 				Type:            payload.IdType,
 				ReferenceNumber: utils.Must(s.encrypt.EncryptString(payload.ReferenceNumber)),
 			},
@@ -119,7 +113,7 @@ func (s *Service) UpdateVerificationRequest(bearerToken string, payload *request
 			if url, err := s.fs.SaveFile(fileData); err != nil {
 				return err
 			} else {
-				updatedRequest.User.Identification.FrontImageUrl = url
+				verificationRequest.User.Identification.FrontImageUrl = url
 			}
 
 		case "backId":
@@ -130,7 +124,7 @@ func (s *Service) UpdateVerificationRequest(bearerToken string, payload *request
 			if url, err := s.fs.SaveFile(fileData); err != nil {
 				return err
 			} else {
-				updatedRequest.User.Identification.BackImageUrl = url
+				verificationRequest.User.Identification.BackImageUrl = url
 			}
 
 		case "face":
@@ -141,7 +135,7 @@ func (s *Service) UpdateVerificationRequest(bearerToken string, payload *request
 			if url, err := s.fs.SaveFile(fileData); err != nil {
 				return err
 			} else {
-				updatedRequest.User.Identification.SelfieImageUrl = url
+				verificationRequest.User.Identification.SelfieImageUrl = url
 			}
 
 		default:
@@ -149,20 +143,15 @@ func (s *Service) UpdateVerificationRequest(bearerToken string, payload *request
 		}
 	}
 
-	if previousRequest.Status == models.IDENTITY_VERIF_STATUS_REJECTED {
-		// Update user data and create new request if previous is rejected
-		if err := s.verificationStore.UpdateUserInfo(updatedRequest, false); err != nil {
-			return err
-		}
-
-		if _, err := s.verificationStore.CreateLink(updatedRequest.UserId); err != nil {
-			return err
-		}
-	} else {
-		if err := s.verificationStore.UpdateUserInfo(updatedRequest, true); err != nil {
-			return err
-		}
+	if err := s.verificationStore.UpdateUserInfo(verificationRequest, false); err != nil {
+		return err
 	}
+
+	if _, err := s.verificationStore.CreateLink(verificationRequest.UserId); err != nil {
+		return err
+	}
+
+	sse.New().IncreaseVerification()
 
 	return nil
 }

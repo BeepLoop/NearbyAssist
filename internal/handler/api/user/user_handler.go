@@ -67,7 +67,7 @@ func (h *userHandler) VerifyAccount(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-	if err := h.userVerificationService.UpdateVerificationRequest(bearerToken, req, files); err != nil {
+	if err := h.userVerificationService.VerifyAccount(bearerToken, req, files); err != nil {
 		if strings.Contains(err.Error(), verification_service.ERR_ALREADY_VERIFIED) {
 			return echo.NewHTTPError(http.StatusForbidden, models.Error{
 				Message: "Account already verified",

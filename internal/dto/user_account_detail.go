@@ -14,18 +14,19 @@ type VendorAccountDetail struct {
 }
 
 type User struct {
-	Id             string
-	Name           string
-	Email          string
-	ImageURL       string
-	Address        string
-	Phone          string
-	Socials        []Social
-	Identification Identification
-	CreatedAt      string
-	DateVerified   string
-	IsRestricted   bool
-	IsBanned       bool
+	Id                         string
+	Name                       string
+	Email                      string
+	ImageURL                   string
+	Address                    string
+	Phone                      string
+	Socials                    []Social
+	Identification             Identification
+	CreatedAt                  string
+	DateVerified               string
+	IsRestricted               bool
+	IsBanned                   bool
+	HasSubmittedIdentification bool
 }
 
 type Vendor struct {
