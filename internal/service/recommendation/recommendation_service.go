@@ -23,8 +23,8 @@ func NewService(serviceStore service_repo.ServiceRepository, vendorStore vendor_
 	}
 }
 
-func (s *Service) GetRecommendations(limit, offset int) (*response.Recommendation, error) {
-	services, err := s.serviceStore.GetAll(limit, offset)
+func (s *Service) GetRecommendations(limit int) (*response.Recommendation, error) {
+	services, err := s.serviceStore.GetAllTopRated(limit)
 	if err != nil {
 		return nil, err
 	}

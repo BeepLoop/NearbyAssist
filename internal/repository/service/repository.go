@@ -12,6 +12,7 @@ type ServiceRepository interface {
 	GetAllWithTag(tag string) ([]*models.ServiceModel, error)
 	GetAllWithTagAny(tags []string) ([]*models.ServiceModel, error)
 	FuzzyMatchTags(tags []string) ([]*models.ServiceModel, error)
+	GetAllTopRated(limit int) ([]*models.ServiceModel, error)
 
 	Update(data *models.ServiceModel) error
 

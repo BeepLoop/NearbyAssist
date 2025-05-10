@@ -347,6 +347,43 @@ func (s *MysqlServiceRepository) FuzzyMatchTags(tags []string) ([]*models.Servic
 	return services, nil
 }
 
+func (s *MysqlServiceRepository) GetAllTopRated(limit int) ([]*models.ServiceModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            s.id
+        FROM
+            Service s
+            JOIN Vendor v ON v.vendorId = s.vendorId
+        ORDER BY
+            v.rating DESC
+        LIMIT ?
+    `
+
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, query, limit); err != nil {
+		return nil, err
+	}
+
+	services := make([]*models.ServiceModel, 0)
+	for _, id := range ids {
+		service, err := s.FindById(id)
+		if err != nil {
+			return nil, err
+		}
+
+		services = append(services, service)
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return services, nil
+}
+
 func (s *MysqlServiceRepository) IsVendor(vendorId string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

@@ -26,7 +26,6 @@ func (h *handler) GetRecommendations(c echo.Context) error {
 	params := c.QueryParams()
 
 	limit := 10
-	offset := 0
 
 	if params.Has("limit") {
 		if parsedLimit, err := strconv.Atoi(params.Get("limit")); err != nil {
@@ -39,18 +38,7 @@ func (h *handler) GetRecommendations(c echo.Context) error {
 		}
 	}
 
-	if params.Has("offset") {
-		if parsedOffset, err := strconv.Atoi(params.Get("offset")); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-				Message: "Invalid offset",
-				Error:   err.Error(),
-			})
-		} else {
-			offset = parsedOffset
-		}
-	}
-
-	recommendation, err := h.recommendationService.GetRecommendations(limit, offset)
+	recommendation, err := h.recommendationService.GetRecommendations(limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error retrieving recommendations",
