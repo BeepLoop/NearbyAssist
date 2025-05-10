@@ -9,4 +9,5 @@ type Vendor struct {
 	Rating    string   `json:"rating"`
 	Socials   []Social `json:"socials"`
 	Expertise []string `json:"expertise"`
+	Address   string   `json:"address"`
 }

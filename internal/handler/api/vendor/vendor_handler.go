@@ -126,6 +126,7 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 				make([]string, 0),
 				utils.Map(vendor.Expertise, func(e models.ExpertiseModel) string { return e.Title }),
 			),
+			Address: vendor.User.Address.Address,
 		},
 		Servics: slices.AppendSeq(
 			make([]response.Service, 0),

@@ -186,6 +186,7 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 				make([]string, 0),
 				utils.Map(vendor.Expertise, func(e models.ExpertiseModel) string { return e.Title }),
 			),
+			Address: vendor.User.Address.Address,
 		},
 		Reviews: slices.AppendSeq(
 			make([]response.Review, 0),
