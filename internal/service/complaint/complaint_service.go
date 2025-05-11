@@ -377,8 +377,9 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				CreatedAt: utils.FormatDate(service.CreatedAt),
 				UpdatedAt: utils.FormatDate(service.UpdatedAt),
 			},
-			Cost:   utils.StringToFloat64ElseZero(res.Cost),
-			Status: string(res.Status),
+			Quantity: res.Quantity,
+			Cost:     utils.StringToFloat64ElseZero(res.Cost),
+			Status:   string(res.Status),
 			Extras: slices.AppendSeq(
 				make([]dto.Extra, 0),
 				utils.Map(res.Extras, func(x *models.ExtraModel) dto.Extra {

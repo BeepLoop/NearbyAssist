@@ -7,6 +7,7 @@ import (
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
+	"strconv"
 )
 
 templ VendorAccount(user models.AdminModel, data dto.VendorAccountDetail, flash string) {
@@ -445,8 +446,26 @@ templ offCanvasBookingData(booking dto.Booking) {
 			<p class="text-neutral-gray">{ booking.Id }</p>
 		</div>
 		<div class="mt-2 flex gap-2">
+			<span class="font-medium text-neutral-dark">Booked for:</span>
+			switch (booking.Service.PricingType) {
+				case "fixed":
+					<p class="text-neutral-gray">{ strconv.Itoa(booking.Quantity) } (fixed rate session)</p>
+				case "per_hour":
+					<p class="text-neutral-gray">{ strconv.Itoa(booking.Quantity) } hour/s</p>
+				case "per_day":
+					<p class="text-neutral-gray">{ strconv.Itoa(booking.Quantity) } day/s</p>
+			}
+		</div>
+		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Total:</span>
-			<p class="text-neutral-gray">₱ { utils.FloatToString(booking.Cost) }</p>
+			switch (booking.Service.PricingType) {
+				case "fixed":
+					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Cost) }</p>
+				case "per_hour":
+					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Cost) }</p>
+				case "per_day":
+					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Cost) }</p>
+			}
 		</div>
 		<div class="mt-2 flex items-center gap-2">
 			<span class="font-medium text-neutral-dark">Status:</span>

@@ -35,9 +35,9 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
 
 	query := `
         INSERT INTO
-            Booking (id, vendorId, clientId, serviceId, cost)
+            Booking (id, vendorId, clientId, serviceId, quantity, cost)
         VALUES
-            (:id, :vendorId, :clientId, :serviceId, :cost)
+            (:id, :vendorId, :clientId, :serviceId, :quantity, :cost)
     `
 
 	if _, err := tx.NamedExecContext(ctx, query, data); err != nil {
@@ -84,6 +84,7 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
             t.clientId,
             t.serviceId,
             t.status,
+            t.quantity,
             FORMAT(t.cost, 2) AS cost,
             t.createdAt,
             t.updatedAt,

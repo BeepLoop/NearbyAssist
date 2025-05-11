@@ -15,19 +15,20 @@ const (
 type BookingModel struct {
 	Model
 	UpdateableModel
-	VendorId     string         `json:"vendorId" db:"vendorId" validate:"required"`
-	ClientId     string         `json:"clientId" db:"clientId" validate:"required"`
-	ServiceId    string         `json:"serviceId" db:"serviceId" validate:"required"`
-	Cost         string         `json:"cost" db:"cost" validate:"required"`
-	Status       BookingStatus  `json:"status" db:"status"`
-	IsReviewed   bool           `json:"isReviewed" db:"isReviewed"`
-	ScheduledAt  sql.NullString `json:"scheduledAt" db:"scheduledAt"`
-	CancelReason sql.NullString `json:"cancelReason" db:"cancelReason"`
+	VendorId     string         `db:"vendorId"`
+	ClientId     string         `db:"clientId"`
+	ServiceId    string         `db:"serviceId"`
+	Status       BookingStatus  `db:"status"`
+	Quantity     int            `db:"quantity"`
+	Cost         string         `db:"cost"`
+	IsReviewed   bool           `db:"isReviewed"`
+	ScheduledAt  sql.NullString `db:"scheduledAt"`
+	CancelReason sql.NullString `db:"cancelReason"`
 	CancelledBy  sql.NullString `db:"cancelledBy"`
 
 	// Additional fields for joins
 	Service *ServiceModel `json:"service,omitempty"`
-	Vendor  UserModel     `json:"vendor" db:"vendor"` // Vendor name
-	Client  UserModel     `json:"client" db:"client"` // Client name
+	Vendor  UserModel     `json:"vendor" db:"vendor"`
+	Client  UserModel     `json:"client" db:"client"`
 	Extras  []*ExtraModel `json:"extras" db:"extras"`
 }

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS Booking (
     clientId VARCHAR(255) NOT NULL,
     serviceId VARCHAR(255) NOT NULL,
     status Enum('pending', 'confirmed', 'rejected', 'done', 'cancelled') NOT NULL DEFAULT 'pending',
+    quantity INT NOT NULL DEFAULT 1, -- for fixed price service
     cost DOUBLE NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     scheduledAt TIMESTAMP,

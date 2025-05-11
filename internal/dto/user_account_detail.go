@@ -51,6 +51,7 @@ type Booking struct {
 	Client       User
 	Vendor       Vendor
 	Service      Service
+	Quantity     int
 	Cost         float64
 	Status       string
 	Extras       []Extra

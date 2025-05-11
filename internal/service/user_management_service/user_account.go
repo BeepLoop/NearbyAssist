@@ -144,8 +144,9 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
-					Cost:   utils.StringToFloat64ElseZero(booking.Cost),
-					Status: string(booking.Status),
+					Quantity: booking.Quantity,
+					Cost:     utils.StringToFloat64ElseZero(booking.Cost),
+					Status:   string(booking.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),
 						utils.Map(booking.Extras, func(x *models.ExtraModel) dto.Extra {
@@ -249,8 +250,9 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
-					Cost:   utils.StringToFloat64ElseZero(h.Cost),
-					Status: string(h.Status),
+					Quantity: h.Quantity,
+					Cost:     utils.StringToFloat64ElseZero(h.Cost),
+					Status:   string(h.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),
 						utils.Map(h.Extras, func(x *models.ExtraModel) dto.Extra {

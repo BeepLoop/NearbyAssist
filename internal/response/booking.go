@@ -6,6 +6,7 @@ type Booking struct {
 	Client       User            `json:"client"`
 	Service      ServiceBareInfo `json:"service"`
 	Extras       []Extra         `json:"extras"`
+	Quantity     int             `json:"quantity"`
 	Cost         string          `json:"cost"`
 	Status       string          `json:"status"`
 	CreatedAt    string          `json:"createdAt"`

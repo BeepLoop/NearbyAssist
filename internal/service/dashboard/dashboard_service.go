@@ -158,8 +158,9 @@ func (s *Service) GetDashbaordData() (*dto.Dashboard, error) {
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
-					Cost:   utils.StringToFloat64ElseZero(booking.Cost),
-					Status: string(booking.Status),
+					Quantity: booking.Quantity,
+					Cost:     utils.StringToFloat64ElseZero(booking.Cost),
+					Status:   string(booking.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),
 						utils.Map(booking.Extras, func(x *models.ExtraModel) dto.Extra {

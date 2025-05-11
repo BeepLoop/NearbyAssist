@@ -99,7 +99,8 @@ func (h *bookingHandler) CreateBooking(c echo.Context) error {
 			Name:     booking.Client.Name,
 			ImageURL: booking.Client.ImageUrl,
 		},
-		Cost: booking.Cost,
+		Quantity: booking.Quantity,
+		Cost:     booking.Cost,
 		Extras: slices.AppendSeq(
 			make([]response.Extra, 0),
 			utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
@@ -183,7 +184,8 @@ func (h *bookingHandler) GetBooking(c echo.Context) error {
 			Name:     booking.Client.Name,
 			ImageURL: booking.Client.ImageUrl,
 		},
-		Cost: booking.Cost,
+		Quantity: booking.Quantity,
+		Cost:     booking.Cost,
 		Extras: slices.AppendSeq(
 			make([]response.Extra, 0),
 			utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
@@ -409,7 +411,8 @@ func (h *bookingHandler) GetUserBookingList(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Cost: booking.Cost,
+			Quantity: booking.Quantity,
+			Cost:     booking.Cost,
 			Extras: slices.AppendSeq(
 				make([]response.Extra, 0),
 				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
@@ -482,7 +485,8 @@ func (h *bookingHandler) GetRecentBookings(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Cost: booking.Cost,
+			Quantity: booking.Quantity,
+			Cost:     booking.Cost,
 			Extras: slices.AppendSeq(
 				make([]response.Extra, 0),
 				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
@@ -556,7 +560,8 @@ func (h *bookingHandler) GetConfirmedBookings(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Cost: booking.Cost,
+			Quantity: booking.Quantity,
+			Cost:     booking.Cost,
 			Extras: slices.AppendSeq(
 				make([]response.Extra, 0),
 				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
@@ -629,7 +634,8 @@ func (h *bookingHandler) GetReviewableBookings(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Cost: booking.Cost,
+			Quantity: booking.Quantity,
+			Cost:     booking.Cost,
 			Extras: slices.AppendSeq(
 				make([]response.Extra, 0),
 				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
@@ -703,7 +709,8 @@ func (h *bookingHandler) GetBookingHistory(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Cost: booking.Cost,
+			Quantity: booking.Quantity,
+			Cost:     booking.Cost,
 			Extras: slices.AppendSeq(
 				make([]response.Extra, 0),
 				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {

@@ -23,6 +23,7 @@ const (
 	ERR_UNAUTHORIZED             = "unauthorized"
 	ERR_SCHEDULE_OVERLAP         = "schedule overlap"
 	ERR_FULLY_BOOKED             = "vendor is fully booked on the given schedule"
+	ERR_INVALID_DATA             = "invalid data submitted"
 )
 
 type Service struct {
@@ -64,10 +65,20 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 		return "", errors.New(ERR_DISABLED_SERVICE)
 	}
 
+	if req.Quantity < 1 {
+		return "", errors.New(ERR_INVALID_DATA)
+	}
+
+	if service.PricingType != models.FIXED_PRICING {
+		cost := float64(req.Quantity) * utils.StringToFloat64ElseZero(service.Price)
+		req.Cost = utils.Float64ToString(cost)
+	}
+
 	booking := &models.BookingModel{
 		ClientId:  req.ClientId,
 		VendorId:  req.VendorId,
 		ServiceId: req.ServiceId,
+		Quantity:  req.Quantity,
 		Cost:      req.Cost,
 		Extras: slices.AppendSeq(
 			make([]*models.ExtraModel, 0),
