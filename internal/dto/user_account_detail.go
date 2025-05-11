@@ -72,7 +72,8 @@ type Service struct {
 	VendorId    string
 	Title       string
 	Description string
-	Rate        float64
+	Price       float64
+	PricingType string
 	Tags        []string
 	Extras      []Extra
 	Images      []Image

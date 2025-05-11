@@ -136,7 +136,8 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 					VendorId:    s.VendorId,
 					Title:       s.Title,
 					Description: s.Description,
-					Rate:        s.Rate,
+					Price:       s.Price,
+					PricingType: string(s.PricingType),
 					Tags: slices.AppendSeq(
 						make([]response.Tag, 0),
 						utils.Map(s.Tags, func(t *models.TagModel) response.Tag {

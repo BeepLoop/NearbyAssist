@@ -5,6 +5,7 @@ type UpdateServicePayload struct {
 	VendorId    string   `json:"vendorId" validate:"required"`
 	Title       string   `json:"title" validate:"required"`
 	Description string   `json:"description" validate:"required"`
-	Rate        string   `json:"rate" validate:"required"`
+	Price       string   `json:"price" validate:"required"`
+	PricingType string   `json:"pricingType" validate:"required"`
 	Tags        []string `json:"tags" validate:"required"`
 }

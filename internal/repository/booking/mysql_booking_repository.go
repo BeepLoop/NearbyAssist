@@ -754,7 +754,7 @@ func (s *MysqlBookingRepository) getService(serviceId string) (*models.ServiceMo
             vendorId,
             title,
             description,
-            FORMAT(rate, 2) AS rate,
+            FORMAT(price, 2) AS price,
             createdAt,
             updatedAt,
             disabled

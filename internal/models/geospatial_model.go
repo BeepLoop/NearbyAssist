@@ -42,7 +42,7 @@ type GeoSpatialSearchResult struct {
 	Id                string  `db:"id"`
 	VendorId          string  `db:"vendorId"`
 	VendorName        string  `db:"vendorName"`
-	Rate              float32 `db:"rate"`   // For price
+	Price             float32 `db:"rate"`   // For price
 	Rating            float32 `db:"rating"` // For rating
 	Latitude          float64 `db:"latitude"`
 	Longitude         float64 `db:"longitude"`

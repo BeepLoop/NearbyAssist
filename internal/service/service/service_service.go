@@ -41,7 +41,16 @@ type Service struct {
 	fs           fs.FileStorage
 }
 
-func NewService(serviceStore service_repo.ServiceRepository, vendorStore vendor_repo.VendorRepository, encrypt core.Encryption, hash core.Hash, jwt core.Authenticator, suggest suggestion_engine.Engine, route route_engine.Engine, fs fs.FileStorage) *Service {
+func NewService(
+	serviceStore service_repo.ServiceRepository,
+	vendorStore vendor_repo.VendorRepository,
+	encrypt core.Encryption,
+	hash core.Hash,
+	jwt core.Authenticator,
+	suggest suggestion_engine.Engine,
+	route route_engine.Engine,
+	fs fs.FileStorage,
+) *Service {
 	return &Service{
 		serviceStore: serviceStore,
 		vendorStore:  vendorStore,
@@ -64,7 +73,7 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 	}
 
 	// Compute signature
-	signature := computeSignature(req.VendorId, req.Title, req.Description, s.hash.Generate)
+	signature := computeSignature(req.VendorId, req.Title, req.Description, req.PricingType, s.hash.Generate)
 
 	service, err := s.serviceStore.FindBySignature(signature)
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
@@ -78,7 +87,8 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 		VendorId:     req.VendorId,
 		Title:        utils.Must(s.encrypt.EncryptString(req.Title)),
 		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
-		Rate:         req.Rate,
+		Price:        req.Price,
+		PricingType:  models.PricingType(req.PricingType),
 		TagsAsString: req.Tags,
 		Extras: slices.AppendSeq(
 			make([]*models.ExtraModel, 0),
@@ -93,7 +103,11 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 		Signature: signature,
 	}
 
-	return s.serviceStore.Create(newService)
+	if newService.PricingType == models.FIXED_PRICING {
+		return s.serviceStore.Create(newService)
+	}
+
+	return s.serviceStore.CreateWithPricingType(newService)
 }
 
 func (s *Service) GetService(serviceId string) (*response.DetailedServiceResponse, error) {
@@ -134,7 +148,8 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 			VendorId:    service.VendorId,
 			Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 			Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-			Rate:        service.Rate,
+			Price:       service.Price,
+			PricingType: string(service.PricingType),
 			Tags: slices.AppendSeq(
 				make([]response.Tag, 0),
 				utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
@@ -223,14 +238,23 @@ func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePa
 		return errors.New(ERR_UNAUTHORIZED)
 	}
 
+	if hasBooking, err := s.serviceStore.HasActiveBookingWithThisService(req.Id); err != nil {
+		return err
+	} else {
+		if hasBooking {
+			return errors.New(ERR_ACTIVELY_USED)
+		}
+	}
+
 	updatedService := &models.ServiceModel{
 		Model:        models.Model{Id: req.Id},
 		VendorId:     req.VendorId,
 		Title:        utils.Must(s.encrypt.EncryptString(req.Title)),
 		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
-		Rate:         req.Rate,
+		Price:        req.Price,
+		PricingType:  models.PricingType(req.PricingType),
 		TagsAsString: req.Tags,
-		Signature:    computeSignature(req.VendorId, req.Title, req.Description, s.hash.Generate),
+		Signature:    computeSignature(req.VendorId, req.Title, req.Description, req.PricingType, s.hash.Generate),
 	}
 
 	if err := s.serviceStore.Update(updatedService); err != nil {
@@ -564,7 +588,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 
 		suggestionOpsInput = append(suggestionOpsInput, dto.GeospatialOperation{
 			Id:                 service.Id,
-			Rate:               utils.StringToFloat32ElseZero(service.Rate),
+			Price:              utils.StringToFloat32ElseZero(service.Price),
 			Rating:             utils.StringToFloat32ElseZero(service.Vendor.Rating),
 			Latitude:           float32(service.Vendor.User.Address.Latitude),
 			Longitude:          float32(service.Vendor.User.Address.Longitude),
@@ -591,7 +615,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 				Id:                service.Id,
 				VendorName:        utils.Must(s.encrypt.DecryptString(service.Vendor.User.Name)),
 				SuggestionScore:   float32(serviceScores[service.Id]),
-				Rate:              float32(utils.StringToFloat64ElseZero(service.Rate)),
+				Price:             float32(utils.StringToFloat64ElseZero(service.Price)),
 				Rating:            float32(utils.StringToFloat64ElseZero(service.Vendor.Rating)),
 				Latitude:          service.Vendor.User.Address.Latitude,
 				Longitude:         service.Vendor.User.Address.Longitude,
@@ -601,7 +625,8 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 					VendorId:    service.VendorId,
 					Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 					Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-					Rate:        service.Rate,
+					Price:       service.Price,
+					PricingType: string(service.PricingType),
 					Tags: slices.AppendSeq(
 						make([]response.Tag, 0),
 						utils.Map(service.Tags, func(t *models.TagModel) response.Tag {

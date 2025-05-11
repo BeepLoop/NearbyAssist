@@ -127,7 +127,8 @@ func (s *Service) GetDashbaordData() (*dto.Dashboard, error) {
 						VendorId:    service.VendorId,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-						Rate:        utils.StringToFloat64ElseZero(service.Rate),
+						Price:       utils.StringToFloat64ElseZero(service.Price),
+						PricingType: string(service.PricingType),
 						Tags: slices.AppendSeq(
 							make([]string, 0),
 							utils.Map(service.Tags, func(t *models.TagModel) string { return t.Title }),

@@ -6,6 +6,7 @@ import (
 
 type ServiceRepository interface {
 	Create(data *models.ServiceModel) (string, error)
+	CreateWithPricingType(data *models.ServiceModel) (string, error)
 	FindById(id string) (*models.ServiceModel, error)
 	FindBySignature(signature string) (*models.ServiceModel, error)
 	GetAll(limit, offset int) ([]*models.ServiceModel, error)
@@ -37,4 +38,5 @@ type ServiceRepository interface {
 	Enable(serviceId string) error
 
 	HasActiveBookingWithThisExtra(extraId string) (bool, error)
+	HasActiveBookingWithThisService(serviceId string) (bool, error)
 }

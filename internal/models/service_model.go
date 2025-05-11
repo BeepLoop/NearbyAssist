@@ -5,15 +5,24 @@ type ServiceSearchResult struct {
 	Vendor string `json:"vendor" db:"vendor"`
 }
 
+type PricingType string
+
+const (
+	FIXED_PRICING  PricingType = "fixed"
+	HOURLY_PRICING PricingType = "per_hour"
+	DAILY_PRICING  PricingType = "per_day"
+)
+
 type ServiceModel struct {
 	Model
 	UpdateableModel
-	VendorId    string `json:"vendorId" db:"vendorId" validate:"required"`
-	Title       string `json:"title" db:"title"`
-	Description string `json:"description" db:"description" validate:"required"`
-	Rate        string `json:"rate" db:"rate" validate:"required"`
-	Signature   string `db:"signature" json:"-"`
-	Disabled    bool   `db:"disabled"`
+	VendorId    string      `db:"vendorId"`
+	Title       string      `db:"title"`
+	Description string      `db:"description"`
+	Price       string      `db:"price"`
+	PricingType PricingType `db:"pricingType"`
+	Signature   string      `db:"signature"`
+	Disabled    bool        `db:"disabled"`
 	Address     AddressModel
 
 	// Additional fields for joins

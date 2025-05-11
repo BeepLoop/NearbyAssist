@@ -2,7 +2,7 @@ package dto
 
 type GeospatialOperation struct {
 	Id                 string
-	Rate               float32
+	Price              float32
 	Rating             float32
 	Latitude           float32
 	Longitude          float32

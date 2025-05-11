@@ -152,7 +152,6 @@ func (h *serviceHandler) UpdateService(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	if err := h.serviceService.UpdateService(bearerToken, req); err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
@@ -188,7 +187,6 @@ func (h *serviceHandler) AddImage(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	imageData, err := h.serviceService.AddImage(bearerToken, serviceId, files)
 	if err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
@@ -287,7 +285,6 @@ func (h *serviceHandler) AddExtra(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	extraId, err := h.serviceService.AddExtra(bearerToken, req)
 	if err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
@@ -325,7 +322,6 @@ func (h *serviceHandler) EditExtra(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	if err := h.serviceService.EditExtra(bearerToken, req); err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
@@ -353,7 +349,6 @@ func (h *serviceHandler) DeleteExtra(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	if err := h.serviceService.DeleteExtra(bearerToken, extraId); err != nil {
 		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
@@ -395,7 +390,6 @@ func (h *serviceHandler) SaveService(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	if err := h.saveService.SaveService(bearerToken, req.ServiceId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error saving service",
@@ -423,7 +417,6 @@ func (h *serviceHandler) UnsaveService(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-
 	if err := h.saveService.UnsaveService(bearerToken, req.ServiceId); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error removing service from saves",

@@ -52,7 +52,7 @@ func (w *weightedScoring) GenerateSuggestions(services []dto.GeospatialOperation
 }
 
 func (w *weightedScoring) calculateScore(service dto.GeospatialOperation) (float32, error) {
-	priceScore := w.minimize(service.Rate, w.lowestPrice)
+	priceScore := w.minimize(service.Price, w.lowestPrice)
 	ratingScore := w.maximize(service.Rating, w.highestRating)
 	distanceScore := w.minimize(service.DistanceFromOrigin, w.shortestDistance)
 	bookingsScore := w.maximize(service.CompletedBookings, w.mostBookings)
@@ -68,8 +68,8 @@ func (w *weightedScoring) getTopScores(services []dto.GeospatialOperation) {
 	var mostBookings float32 = math.SmallestNonzeroFloat32
 
 	for _, service := range services {
-		if service.Rate < lowestPrice {
-			lowestPrice = service.Rate
+		if service.Price < lowestPrice {
+			lowestPrice = service.Price
 		}
 
 		if service.Rating > highestRating {

@@ -5,8 +5,8 @@ import (
 	"nearbyassist/internal/utils"
 )
 
-func computeSignature(vendorId, title, description string, hashFunc func([]byte) (string, error)) string {
-	rawStr := fmt.Sprintf("%s_%s_%s", vendorId, title, description)
+func computeSignature(vendorId, title, description, pricingType string, hashFunc func([]byte) (string, error)) string {
+	rawStr := fmt.Sprintf("%s_%s_%s_%s", vendorId, title, description, pricingType)
 	signature := utils.Must(hashFunc([]byte(rawStr)))
 	return signature
 }

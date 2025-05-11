@@ -108,7 +108,8 @@ func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServ
 				VendorId:    service.VendorId,
 				Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 				Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-				Rate:        service.Rate,
+				Price:       service.Price,
+				PricingType: string(service.PricingType),
 				Tags: slices.AppendSeq(
 					make([]response.Tag, 0),
 					utils.Map(service.Tags, func(t *models.TagModel) response.Tag {

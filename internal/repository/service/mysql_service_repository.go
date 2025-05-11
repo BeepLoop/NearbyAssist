@@ -33,9 +33,95 @@ func (s *MysqlServiceRepository) Create(service *models.ServiceModel) (string, e
 
 	createService := `
 	        INSERT INTO
-	            Service (id, vendorId, title, description, rate, signature)
+	            Service (id, vendorId, title, description, price, signature)
 	        VALUES 
-                (:id, :vendorId, :title, :description, :rate, :signature)
+                (:id, :vendorId, :title, :description, :price, :signature)
+    `
+	service.Id = utils.GenerateId()
+	if _, err := tx.NamedExecContext(ctx, createService, service); err != nil {
+		return "", err
+	}
+
+	serviceAddressRelation := `
+        INSERT INTO
+            ServiceAddress (serviceId, addressId)
+        SELECT
+            ?, addressId
+        FROM
+            UserAddress
+        WHERE
+            userId = ?
+            
+    `
+	if _, err := tx.ExecContext(ctx, serviceAddressRelation, service.Id, service.VendorId); err != nil {
+		return "", err
+	}
+
+	registerTag := `
+        INSERT INTO 
+            ServiceTag (id, serviceId, tagId)
+        SELECT
+            ?, ?, t.id
+        FROM
+            Tag t
+        WHERE
+            t.title = ?
+    `
+	for _, tag := range service.TagsAsString {
+		tagId := utils.GenerateId()
+		if _, err := tx.ExecContext(ctx, registerTag, tagId, service.Id, tag); err != nil {
+			return "", err
+		}
+	}
+
+	registerExtra := `
+        INSERT INTO
+            Extra (id, title, description, price, serviceId)
+        VALUES 
+            (?, ?, ?, ?, ?)
+    `
+	registerServiceExtra := `
+        INSERT INTO 
+            ServiceExtra (serviceId, extraId)
+        VALUES
+            (?, ?)
+    `
+	for _, extra := range service.Extras {
+		extraId := utils.GenerateId()
+		if _, err := tx.ExecContext(ctx, registerExtra, extraId, extra.Title, extra.Description, extra.Price, service.Id); err != nil {
+			return "", err
+		}
+
+		if _, err := tx.ExecContext(ctx, registerServiceExtra, service.Id, extraId); err != nil {
+			return "", err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return "", err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return "", context.DeadlineExceeded
+	}
+
+	return service.Id, nil
+}
+
+func (s *MysqlServiceRepository) CreateWithPricingType(service *models.ServiceModel) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return "", err
+	}
+
+	createService := `
+	        INSERT INTO
+	            Service (id, vendorId, title, description, price, pricingType, signature)
+	        VALUES 
+                (:id, :vendorId, :title, :description, :price, :pricingType, :signature)
     `
 	service.Id = utils.GenerateId()
 	if _, err := tx.NamedExecContext(ctx, createService, service); err != nil {
@@ -120,7 +206,8 @@ func (s *MysqlServiceRepository) FindById(serviceId string) (*models.ServiceMode
             vendorId,
             title,
             description,
-            format(rate, 2) as rate,
+            format(price, 2) AS price,
+            pricingType,
             createdAt,
             updatedAt,
             disabled
@@ -468,30 +555,9 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	// Start booking
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
-	}
-
-	checkIfHasActiveBookingsQuery := `
-        SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.cost
-        FROM
-            Booking t
-        WHERE
-            t.id = ? AND (t.status = 'pending' OR t.status = 'confirmed')
-    `
-	activeBookings := make([]*models.BookingModel, 0)
-	if err := tx.SelectContext(ctx, &activeBookings, checkIfHasActiveBookingsQuery, updatedService.Id); err != nil {
-		return err
-	}
-
-	if len(activeBookings) != 0 {
-		return errors.New("This service is actively in use")
 	}
 
 	updateService := `
@@ -500,7 +566,8 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
         SET
             title = :title,
             description = :description,
-            rate = :rate
+            price = :price,
+            pricingType = :pricingType
         WHERE
             id = :id
     `
@@ -898,6 +965,27 @@ func (s *MysqlServiceRepository) HasActiveBookingWithThisExtra(extraId string) (
 
 	hasBooking := false
 	if err := s.db.GetContext(ctx, &hasBooking, query, extraId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return hasBooking, nil
+}
+
+func (s *MysqlServiceRepository) HasActiveBookingWithThisService(serviceId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT EXISTS
+            (SELECT 1 FROM Booking WHERE id = ? AND (status = 'pending' OR status = 'confirmed'))
+        AS has_booking
+    `
+	hasBooking := false
+	if err := s.db.GetContext(ctx, &hasBooking, query, serviceId); err != nil {
 		return false, err
 	}
 

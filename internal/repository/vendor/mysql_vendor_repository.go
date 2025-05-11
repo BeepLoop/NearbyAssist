@@ -257,7 +257,8 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
             vendorId,
             title,
             description,
-            FORMAT(rate, 2) AS rate,
+            FORMAT(price, 2) AS price,
+            pricingType,
             createdAt,
             disabled
         FROM 

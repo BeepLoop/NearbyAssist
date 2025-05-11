@@ -27,7 +27,8 @@ type ServiceBareInfo struct {
 	VendorId    string   `json:"vendorId"`
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
-	Rate        string   `json:"rate"`
+	Price       string   `json:"price"`
+	PricingType string   `json:"pricingType"`
 	Tags        []Tag    `json:"tags"`
 	Location    Location `json:"location"`
 }
@@ -37,7 +38,8 @@ type Service struct {
 	VendorId    string   `json:"vendorId"`
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
-	Rate        string   `json:"rate"`
+	Price       string   `json:"price"`
+	PricingType string   `json:"pricingType"`
 	Tags        []Tag    `json:"tags"`
 	Extras      []Extra  `json:"extras"`
 	Images      []Image  `json:"images"`

@@ -15,6 +15,7 @@ type ServiceRecommendation struct {
 	Title       string             `json:"title"`
 	Description string             `json:"description"`
 	Rating      string             `json:"rating"`
-	Rate        string             `json:"rate"`
+	Price       string             `json:"price"`
+	PricingType string             `json:"pricingType"`
 	Tags        []*models.TagModel `json:"tags"`
 }

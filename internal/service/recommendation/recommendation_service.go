@@ -50,7 +50,8 @@ func (s *Service) GetRecommendations(limit int) (*response.Recommendation, error
 			Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 			Description: utils.Must(s.encrypt.DecryptString(service.Description)),
 			Rating:      vendor.Rating,
-			Rate:        service.Rate,
+			Price:       service.Price,
+			PricingType: string(service.PricingType),
 			Tags:        service.Tags,
 		})
 	}
