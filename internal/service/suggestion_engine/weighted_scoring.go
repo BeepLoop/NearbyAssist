@@ -5,12 +5,9 @@ import (
 	"nearbyassist/internal/dto"
 )
 
-type criteria struct {
-	priceWeight    float32
-	ratingWeight   float32
-	distanceWeight float32
-	bookingsWeight float32
-}
+var (
+	weightedScoringInstance *weightedScoring
+)
 
 type score struct {
 	lowestPrice      float32
@@ -20,19 +17,32 @@ type score struct {
 }
 
 type weightedScoring struct {
-	criteria
+	Weights
 	score
 }
 
 func NewWeightedScoring() *weightedScoring {
-	return &weightedScoring{
-		criteria: criteria{
-			priceWeight:    0.4,
-			ratingWeight:   0.3,
-			distanceWeight: 0.2,
-			bookingsWeight: 0.1,
+	if weightedScoringInstance != nil {
+		return weightedScoringInstance
+	}
+
+	weightedScoringInstance = &weightedScoring{
+		Weights: Weights{
+			PriceWeight:             0.4,
+			RatingWeight:            0.3,
+			DistanceWeight:          0.2,
+			BookingsCompletedWeight: 0.1,
 		},
 	}
+	return weightedScoringInstance
+}
+
+func (w *weightedScoring) SetWeights(weights Weights) {
+	w.Weights = weights
+}
+
+func (w *weightedScoring) GetValues() Weights {
+	return w.Weights
 }
 
 func (w *weightedScoring) GenerateSuggestions(services []dto.GeospatialOperation) (map[string]float32, error) {
@@ -57,7 +67,7 @@ func (w *weightedScoring) calculateScore(service dto.GeospatialOperation) (float
 	distanceScore := w.minimize(service.DistanceFromOrigin, w.shortestDistance)
 	bookingsScore := w.maximize(service.CompletedBookings, w.mostBookings)
 
-	score := (w.priceWeight * priceScore) + (w.ratingWeight * ratingScore) + (w.distanceWeight * distanceScore) + (w.bookingsWeight * bookingsScore)
+	score := (w.PriceWeight * priceScore) + (w.RatingWeight * ratingScore) + (w.DistanceWeight * distanceScore) + (w.BookingsCompletedWeight * bookingsScore)
 	return score, nil
 }
 

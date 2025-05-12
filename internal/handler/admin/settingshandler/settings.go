@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/service/activitylog"
 	notification_service "nearbyassist/internal/service/notification"
 	"nearbyassist/internal/service/sse"
+	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/utils"
 	"nearbyassist/views/pages/settings"
 	"net/http"
@@ -34,8 +35,9 @@ func (h *handler) GetSettingsPage(c echo.Context) error {
 	}
 
 	behavior := setting.New().Values.SearchBehavior
+	weights := suggestion_engine.NewWeightedScoring().GetValues()
 
-	page := settings.Settings(*admin, flash, string(behavior))
+	page := settings.Settings(*admin, flash, string(behavior), weights)
 	return page.Render(c.Request().Context(), c.Response().Writer)
 }
 
@@ -128,6 +130,35 @@ func (h *handler) UpdateSeachBehavior(c echo.Context) error {
 	activity := activitylog.Input{
 		AdminId: admin.Id,
 		Action:  activitylog.ACTION_UPDATED_SEARCH_BEHAVIOR,
+	}
+	activitylog.MustGetInstance().Create(activity)
+
+	return c.Redirect(http.StatusSeeOther, "/admin/settings")
+}
+
+func (h *handler) ConfigureWeights(c echo.Context) error {
+	price := c.FormValue("price")
+	rating := c.FormValue("rating")
+	distance := c.FormValue("distance")
+	completedBookings := c.FormValue("completedBookings")
+
+	weights := suggestion_engine.NewWeightsFromStrings(price, rating, distance, completedBookings)
+	if err := weights.Validate(); err != nil {
+		utils.SetFlashMessage(c, "error", "Invalid weights provided")
+		return c.Redirect(http.StatusSeeOther, "/admin/settings")
+	}
+
+	suggestion_engine.NewWeightedScoring().SetWeights(*weights)
+
+	if err := utils.SetFlashMessage(c, "success", "reconfigured weights"); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/settings?success=reconfigured_weights")
+	}
+
+	admin, _ := utils.GetAdminFromSession(c)
+
+	activity := activitylog.Input{
+		AdminId: admin.Id,
+		Action:  activitylog.ACTION_RECONFIGURE_WEIGHTS,
 	}
 	activitylog.MustGetInstance().Create(activity)
 

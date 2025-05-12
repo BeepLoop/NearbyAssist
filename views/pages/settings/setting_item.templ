@@ -1,0 +1,17 @@
+package settings
+
+type settingItemProps struct {
+	Title       string
+	ButtonLabel string
+	ActionURL   string
+}
+
+templ settingItem(props settingItemProps) {
+	<div class="flex items-center justify-between border-b border-pale-gray p-2">
+		<p class="text-xs font-medium text-neutral-dark">{ props.Title }</p>
+		<a
+			href={ templ.URL(props.ActionURL) }
+			class="cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs text-white hover:opacity-75"
+		>{ props.ButtonLabel }</a>
+	</div>
+}

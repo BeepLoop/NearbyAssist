@@ -1152,6 +1152,9 @@
   .bg-danger {
     background-color: var(--color-danger);
   }
+  .bg-danger-light\/25 {
+    background-color: color-mix(in oklab, var(--color-danger-light) 25%, transparent);
+  }
   .bg-danger\/10 {
     background-color: color-mix(in oklab, var(--color-danger) 10%, transparent);
   }
