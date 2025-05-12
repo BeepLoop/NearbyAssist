@@ -6,16 +6,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReportIDFormatter(t *testing.T) {
-	t.Run("test report id formatter", func(t *testing.T) {
+func TestFormatReportID(t *testing.T) {
+	t.Run("test format report ID", func(t *testing.T) {
 		tests := []struct {
 			input    int
 			expected string
 		}{
-			{input: 1, expected: "RP-00001"},
-			{input: 12, expected: "RP-00012"},
-			{input: 12345, expected: "RP-12345"},
-			{input: 123456, expected: "RP-123456"},
+			{input: 1, expected: "REP-00001"},
+			{input: 12, expected: "REP-00012"},
+			{input: 12345, expected: "REP-12345"},
+			{input: 123456, expected: "REP-123456"},
 		}
 
 		for _, test := range tests {
@@ -31,10 +31,10 @@ func TestReportIDFormatter(t *testing.T) {
 			expected  int
 			shouldErr bool
 		}{
-			{input: "RP-00001", expected: 1, shouldErr: false},
-			{input: "RP-01234", expected: 1234, shouldErr: false},
+			{input: "REP-00001", expected: 1, shouldErr: false},
+			{input: "REP-01234", expected: 1234, shouldErr: false},
 			{input: "01234", expected: 0, shouldErr: true},
-			{input: "RP-123456", expected: 123456, shouldErr: false},
+			{input: "REP-123456", expected: 123456, shouldErr: false},
 		}
 
 		for _, test := range tests {

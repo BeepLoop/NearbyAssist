@@ -96,7 +96,7 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 				return &models.ExtraModel{
 					Title:       utils.Must(s.encrypt.EncryptString(x.Title)),
 					Description: utils.Must(s.encrypt.EncryptString(x.Description)),
-					Price:       x.Price,
+					Price:       utils.Float64ToString(x.Price),
 				}
 			}),
 		),
@@ -391,7 +391,7 @@ func (s *Service) AddExtra(bearerToken string, input *request.AddExtraPayload) (
 	data := &models.ExtraModel{
 		Title:       input.Title,
 		Description: input.Description,
-		Price:       input.Price,
+		Price:       utils.Float64ToString(input.Price),
 		ServiceId:   input.ServiceId,
 	}
 
@@ -439,7 +439,7 @@ func (s *Service) EditExtra(bearerToken string, data *request.EditExtraPayload) 
 		Model:       models.Model{Id: data.Id},
 		Title:       data.Title,
 		Description: data.Description,
-		Price:       data.Price,
+		Price:       utils.Float64ToString(data.Price),
 	}
 
 	if encrypted, err := s.encrypt.EncryptString(updatedExtra.Title); err != nil {

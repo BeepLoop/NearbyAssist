@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"database/sql"
-	"nearbyassist/internal/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,36 +8,54 @@ import (
 
 func TestHasScheduleOverlap(t *testing.T) {
 	tests := []struct {
-		input     string
-		schedules []*models.BookingModel
+		input     Schedule
+		schedules []Schedule
 		expected  bool
 	}{
 		{
-			input: "2025-04-3",
-			schedules: []*models.BookingModel{
-				{ScheduledAt: sql.NullString{String: "2025-04-2", Valid: true}},
-				{ScheduledAt: sql.NullString{String: "2025-04-3", Valid: true}},
-				{ScheduledAt: sql.NullString{String: "2025-04-4", Valid: true}},
-				{ScheduledAt: sql.NullString{String: "2025-04-5", Valid: true}},
-				{ScheduledAt: sql.NullString{String: "2025-04-6", Valid: true}},
+			input: Schedule{Start: "2025-05-02", End: "2025-05-04"},
+			schedules: []Schedule{
+				{Start: "2025-05-05", End: "2025-05-06"},
+				{Start: "2025-05-01", End: "2025-05-01"},
+			},
+			expected: false,
+		},
+		{
+			input: Schedule{Start: "2025-05-02", End: "2025-05-02"},
+			schedules: []Schedule{
+				{Start: "2025-05-05", End: "2025-05-06"},
+				{Start: "2025-05-01", End: "2025-05-01"},
+			},
+			expected: false,
+		},
+		{
+			input: Schedule{Start: "2025-05-02", End: "2025-05-04"},
+			schedules: []Schedule{
+				{Start: "2025-05-04", End: "2025-05-06"},
+				{Start: "2025-05-01", End: "2025-05-01"},
 			},
 			expected: true,
 		},
 		{
-			input: "2025-04-3",
-			schedules: []*models.BookingModel{
-				{ScheduledAt: sql.NullString{String: "2025-04-2", Valid: true}},
-				{ScheduledAt: sql.NullString{String: "2025-04-4", Valid: true}},
-				{ScheduledAt: sql.NullString{String: "2025-04-5", Valid: true}},
-				{ScheduledAt: sql.NullString{String: "2025-04-6", Valid: true}},
+			input: Schedule{Start: "2025-05-02", End: "2025-05-04"},
+			schedules: []Schedule{
+				{Start: "2025-05-01", End: "2025-05-06"},
 			},
-			expected: false,
+			expected: true,
+		},
+		{
+			input: Schedule{Start: "2025-05-06", End: "2025-05-07"},
+			schedules: []Schedule{
+				{Start: "2025-05-01", End: "2025-05-06"},
+			},
+			expected: true,
 		},
 	}
 
 	for _, test := range tests {
-		hasOverlap := HasScheduleOverlap(test.input, test.schedules)
+		hasOverlap, err := HasScheduleOverlap(test.input, test.schedules)
 
+		assert.NoError(t, err)
 		assert.Equal(t, test.expected, hasOverlap)
 	}
 }

@@ -47,25 +47,26 @@ type Vendor struct {
 }
 
 type Booking struct {
-	Id           string
-	Client       User
-	Vendor       Vendor
-	Service      Service
-	Quantity     int
-	Cost         float64
-	Status       string
-	Extras       []Extra
-	CancelReason string
-	CreatedAt    string
-	ScheduledAt  string
-	UpdatedAt    string
+	Id            string
+	Client        User
+	Vendor        Vendor
+	Service       Service
+	Quantity      int
+	Cost          string
+	Status        string
+	Extras        []Extra
+	CancelReason  string
+	CreatedAt     string
+	ScheduleStart string
+	ScheduleEnd   string
+	UpdatedAt     string
 }
 
 type Extra struct {
 	Id          string
 	Title       string
 	Description string
-	Price       float64
+	Price       string
 }
 
 type Service struct {
@@ -73,7 +74,7 @@ type Service struct {
 	VendorId    string
 	Title       string
 	Description string
-	Price       float64
+	Price       string
 	PricingType string
 	Tags        []string
 	Extras      []Extra

@@ -1,20 +1,21 @@
 package response
 
 type Booking struct {
-	Id           string          `json:"id"`
-	Vendor       User            `json:"vendor"`
-	Client       User            `json:"client"`
-	Service      ServiceBareInfo `json:"service"`
-	Extras       []Extra         `json:"extras"`
-	Quantity     int             `json:"quantity"`
-	Cost         string          `json:"cost"`
-	Status       string          `json:"status"`
-	CreatedAt    string          `json:"createdAt"`
-	UpdatedAt    string          `json:"updatedAt"`
-	ScheduledAt  string          `json:"scheduledAt"`
-	CancelReason string          `json:"cancelReason"`
-	CancelledBy  string          `json:"cancelledById"`
-	QRSignature  string          `json:"qrSignature"`
+	Id            string          `json:"id"`
+	Vendor        User            `json:"vendor"`
+	Client        User            `json:"client"`
+	Service       ServiceBareInfo `json:"service"`
+	Extras        []Extra         `json:"extras"`
+	Quantity      int             `json:"quantity"`
+	Cost          string          `json:"cost"`
+	Status        string          `json:"status"`
+	CreatedAt     string          `json:"createdAt"`
+	UpdatedAt     string          `json:"updatedAt"`
+	ScheduleStart string          `json:"scheduleStart"`
+	ScheduleEnd   string          `json:"scheduleEnd"`
+	CancelReason  string          `json:"cancelReason"`
+	CancelledBy   string          `json:"cancelledById"`
+	QRSignature   string          `json:"qrSignature"`
 }
 
 type User struct {
@@ -49,10 +50,10 @@ type Service struct {
 }
 
 type Extra struct {
-	Id          string  `json:"id"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	Id          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
 }
 
 type Image struct {

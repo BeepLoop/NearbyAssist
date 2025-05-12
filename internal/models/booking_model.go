@@ -15,16 +15,17 @@ const (
 type BookingModel struct {
 	Model
 	UpdateableModel
-	VendorId     string         `db:"vendorId"`
-	ClientId     string         `db:"clientId"`
-	ServiceId    string         `db:"serviceId"`
-	Status       BookingStatus  `db:"status"`
-	Quantity     int            `db:"quantity"`
-	Cost         string         `db:"cost"`
-	IsReviewed   bool           `db:"isReviewed"`
-	ScheduledAt  sql.NullString `db:"scheduledAt"`
-	CancelReason sql.NullString `db:"cancelReason"`
-	CancelledBy  sql.NullString `db:"cancelledBy"`
+	VendorId      string         `db:"vendorId"`
+	ClientId      string         `db:"clientId"`
+	ServiceId     string         `db:"serviceId"`
+	Status        BookingStatus  `db:"status"`
+	Quantity      int            `db:"quantity"`
+	Cost          string         `db:"cost"`
+	IsReviewed    bool           `db:"isReviewed"`
+	ScheduleStart sql.NullString `db:"scheduleStart"`
+	ScheduleEnd   sql.NullString `db:"scheduleEnd"`
+	CancelReason  sql.NullString `db:"cancelReason"`
+	CancelledBy   sql.NullString `db:"cancelledBy"`
 
 	// Additional fields for joins
 	Service *ServiceModel `json:"service,omitempty"`

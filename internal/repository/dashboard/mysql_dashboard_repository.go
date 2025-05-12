@@ -605,10 +605,11 @@ func (s *MysqlDashboardRepository) GetBookingsThisWeek() ([]*models.BookingModel
             t.serviceId,
             t.status,
             t.quantity,
-            FORMAT(t.cost, 2) AS cost,
+            t.cost,
             t.createdAt,
             t.updatedAt,
-            t.scheduledAt,
+            t.scheduleStart,
+            t.scheduleEnd,
             t.cancelReason
         FROM 
             Booking t

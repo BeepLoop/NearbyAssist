@@ -346,7 +346,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				VendorId:    service.VendorId,
 				Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 				Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-				Price:       utils.StringToFloat64ElseZero(service.Price),
+				Price:       service.Price,
 				PricingType: string(service.PricingType),
 				Tags: slices.AppendSeq(
 					make([]string, 0),
@@ -378,7 +378,7 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				UpdatedAt: utils.FormatDate(service.UpdatedAt),
 			},
 			Quantity: res.Quantity,
-			Cost:     utils.StringToFloat64ElseZero(res.Cost),
+			Cost:     res.Cost,
 			Status:   string(res.Status),
 			Extras: slices.AppendSeq(
 				make([]dto.Extra, 0),
@@ -391,10 +391,11 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 					}
 				}),
 			),
-			CreatedAt:    utils.FormatDate(res.CreatedAt),
-			ScheduledAt:  utils.FormatDate(res.ScheduledAt.String),
-			UpdatedAt:    utils.FormatDate(res.UpdatedAt),
-			CancelReason: utils.Try(s.encrypt.DecryptString(res.CancelReason.String)),
+			CreatedAt:     utils.FormatDate(res.CreatedAt),
+			ScheduleStart: utils.FormatDate(res.ScheduleStart.String),
+			ScheduleEnd:   utils.FormatDate(res.ScheduleEnd.String),
+			UpdatedAt:     utils.FormatDate(res.UpdatedAt),
+			CancelReason:  utils.Try(s.encrypt.DecryptString(res.CancelReason.String)),
 		}
 	}
 

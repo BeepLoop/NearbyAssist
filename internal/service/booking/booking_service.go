@@ -184,7 +184,7 @@ func (s *Service) VendorCancelBooking(bearerToken string, req *request.CancelBoo
 		return errors.New(ERR_DISALLOWED_ACTION)
 	}
 
-	schedule, err := utils.StringToDateTime(booking.ScheduledAt.String)
+	schedule, err := utils.StringToDateTime(booking.ScheduleStart.String)
 	if err != nil {
 		return err
 	}
@@ -330,18 +330,29 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 		return errors.New(ERR_UNAUTHORIZED)
 	}
 
-	// Check overbooking
-	schedule := utils.FormatDate(req.Schedule)
+	scheduleStart, err := utils.ParseDateString(req.ScheduleStart)
+	if err != nil {
+		return err
+	}
 
-	if fullyBooked, err := s.vendorStore.IsFullyBookedAt(booking.VendorId, schedule); err != nil {
+	scheduleEnd, err := utils.ParseDateString(req.ScheduleEnd)
+	if err != nil {
+		return err
+	}
+
+	if err := utils.ValidateDateRange(scheduleStart, scheduleEnd); err != nil {
+		return err
+	}
+
+	if available, err := s.vendorStore.IsDateAvailable(booking.VendorId, scheduleStart, scheduleEnd); err != nil {
 		return err
 	} else {
-		if fullyBooked {
+		if !available {
 			return errors.New(ERR_FULLY_BOOKED)
 		}
 	}
 
-	if err := s.bookingStore.Accept(req.BookingId, schedule); err != nil {
+	if err := s.bookingStore.Accept(req.BookingId, scheduleStart, scheduleEnd); err != nil {
 		return err
 	}
 
@@ -381,7 +392,11 @@ func (s *Service) AcceptBookingRequest(bearerToken string, req *request.AcceptBo
 	bookingEvent := &websocket.EventModel{
 		ReceiverId: booking.ClientId,
 		Type:       websocket.EVT_BOOKING_CONFIRMED,
-		Payload:    utils.Mapper{"id": req.BookingId, "schedule": schedule},
+		Payload: utils.Mapper{
+			"id":            req.BookingId,
+			"scheduleStart": utils.FormatDateTime(scheduleStart),
+			"scheduleEnd":   utils.FormatDateTime(scheduleEnd),
+		},
 	}
 
 	s.ws.Send(notifEvent)
@@ -710,16 +725,29 @@ func (s *Service) Reschedule(bearerToken string, req *request.RescheduleBookingP
 		return errors.New(ERR_DISALLOWED_ACTION)
 	}
 
-	confirmedBookings, err := s.bookingStore.GetConfirmedBookingsOfVendor(userId)
+	scheduleStart, err := utils.ParseDateString(req.ScheduleStart)
 	if err != nil {
 		return err
 	}
-	if utils.HasScheduleOverlap(req.Schedule, confirmedBookings) {
-		return errors.New(ERR_SCHEDULE_OVERLAP)
+
+	scheduleEnd, err := utils.ParseDateString(req.ScheduleEnd)
+	if err != nil {
+		return err
 	}
 
-	schedule := utils.FormatDate(req.Schedule)
-	if err := s.bookingStore.Reschedule(req.BookingId, schedule); err != nil {
+	if err := utils.ValidateDateRange(scheduleStart, scheduleEnd); err != nil {
+		return err
+	}
+
+	if available, err := s.vendorStore.IsDateAvailable(booking.VendorId, scheduleStart, scheduleEnd); err != nil {
+		return err
+	} else {
+		if !available {
+			return errors.New(ERR_FULLY_BOOKED)
+		}
+	}
+
+	if err := s.bookingStore.Reschedule(req.BookingId, scheduleStart, scheduleEnd); err != nil {
 		return err
 	}
 
@@ -731,9 +759,10 @@ func (s *Service) Reschedule(bearerToken string, req *request.RescheduleBookingP
 		Type:      "generic",
 		Title:     "Booking has been rescheduled",
 		Content: fmt.Sprintf(
-			"Your booking with the vendor: %s, has been rescheduled to %s",
+			"Your booking with the vendor: %s, has been rescheduled to %s - %s",
 			utils.Must(s.encrypt.DecryptString(booking.Vendor.Name)),
-			schedule,
+			utils.FormatDateTime(scheduleStart),
+			utils.FormatDateTime(scheduleEnd),
 		),
 	}
 
@@ -760,8 +789,18 @@ func (s *Service) Reschedule(bearerToken string, req *request.RescheduleBookingP
 		Type:       websocket.EVT_NOTIF,
 		Payload:    notification,
 	}
+	reschedEvent := &websocket.EventModel{
+		ReceiverId: booking.ClientId,
+		Type:       websocket.EVT_BOOKING_RESCHEDULED,
+		Payload: utils.Mapper{
+			"id":            req.BookingId,
+			"scheduleStart": utils.FormatDateTime(scheduleStart),
+			"scheduleEnd":   utils.FormatDateTime(scheduleEnd),
+		},
+	}
 
 	s.ws.Send(notifEvent)
+	s.ws.Send(reschedEvent)
 
 	return nil
 }

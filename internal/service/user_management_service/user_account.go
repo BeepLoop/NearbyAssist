@@ -113,7 +113,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						VendorId:    service.VendorId,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-						Price:       utils.StringToFloat64ElseZero(service.Price),
+						Price:       service.Price,
 						PricingType: string(service.PricingType),
 						Tags: slices.AppendSeq(
 							make([]string, 0),
@@ -145,7 +145,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
 					Quantity: booking.Quantity,
-					Cost:     utils.StringToFloat64ElseZero(booking.Cost),
+					Cost:     booking.Cost,
 					Status:   string(booking.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),
@@ -158,10 +158,11 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 							}
 						}),
 					),
-					CreatedAt:    utils.FormatDate(booking.CreatedAt),
-					ScheduledAt:  utils.FormatDate(booking.ScheduledAt.String),
-					UpdatedAt:    utils.FormatDate(booking.UpdatedAt),
-					CancelReason: utils.Try(s.encrypt.DecryptString(booking.CancelReason.String)),
+					CreatedAt:     utils.FormatDate(booking.CreatedAt),
+					ScheduleStart: utils.FormatDate(booking.ScheduleStart.String),
+					ScheduleEnd:   utils.FormatDate(booking.ScheduleEnd.String),
+					UpdatedAt:     utils.FormatDate(booking.UpdatedAt),
+					CancelReason:  utils.Try(s.encrypt.DecryptString(booking.CancelReason.String)),
 				}
 			}),
 		),
@@ -219,7 +220,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						VendorId:    service.VendorId,
 						Title:       utils.Must(s.encrypt.DecryptString(service.Title)),
 						Description: utils.Must(s.encrypt.DecryptString(service.Description)),
-						Price:       utils.StringToFloat64ElseZero(service.Price),
+						Price:       service.Price,
 						PricingType: string(service.PricingType),
 						Tags: slices.AppendSeq(
 							make([]string, 0),
@@ -251,7 +252,7 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
 					Quantity: h.Quantity,
-					Cost:     utils.StringToFloat64ElseZero(h.Cost),
+					Cost:     h.Cost,
 					Status:   string(h.Status),
 					Extras: slices.AppendSeq(
 						make([]dto.Extra, 0),
@@ -264,10 +265,11 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 							}
 						}),
 					),
-					CreatedAt:    utils.FormatDate(h.CreatedAt),
-					ScheduledAt:  utils.FormatDate(h.ScheduledAt.String),
-					UpdatedAt:    utils.FormatDate(h.UpdatedAt),
-					CancelReason: utils.Try(s.encrypt.DecryptString(h.CancelReason.String)),
+					CreatedAt:     utils.FormatDate(h.CreatedAt),
+					ScheduleStart: utils.FormatDate(h.ScheduleStart.String),
+					ScheduleEnd:   utils.FormatDate(h.ScheduleEnd.String),
+					UpdatedAt:     utils.FormatDate(h.UpdatedAt),
+					CancelReason:  utils.Try(s.encrypt.DecryptString(h.CancelReason.String)),
 				}
 			}),
 		),

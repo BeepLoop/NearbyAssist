@@ -1,6 +1,9 @@
 package vendor_repo
 
-import "nearbyassist/internal/models"
+import (
+	"nearbyassist/internal/models"
+	"time"
+)
 
 type VendorRepository interface {
 	GetAll(limit, offset int) ([]*models.VendorModel, error)
@@ -13,6 +16,6 @@ type VendorRepository interface {
 	CompletedBookingCountOfService(vendorId, serviceId string) (int, error)
 	HasExpertise(vendorId, expertiseId string) (bool, error)
 	GetPoliceClearance(vendorId string) (*models.PoliceClearanceModel, error)
-	IsFullyBookedAt(vendorId, schedule string) (bool, error)
+	IsDateAvailable(vendorId string, startDate, endDate time.Time) (bool, error)
 	SetDBL(vendorId string, dbl int) error
 }

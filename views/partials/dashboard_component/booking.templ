@@ -160,11 +160,11 @@ templ offCanvasBookingData(booking dto.Booking) {
 			<span class="font-medium text-neutral-dark">Total:</span>
 			switch (booking.Service.PricingType) {
 				case "fixed":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Cost) }</p>
+					<p class="text-neutral-gray font-medium">{ utils.FormatCurrency(booking.Cost) }</p>
 				case "per_hour":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Cost) }</p>
+					<p class="text-neutral-gray font-medium">{ utils.FormatCurrency(booking.Cost) }</p>
 				case "per_day":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Cost) }</p>
+					<p class="text-neutral-gray font-medium">{ utils.FormatCurrency(booking.Cost) }</p>
 			}
 		</div>
 		<div class="mt-2 flex items-center gap-2">
@@ -187,19 +187,26 @@ templ offCanvasBookingData(booking dto.Booking) {
 		</div>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Date Scheduled:</span>
-			<p class="text-neutral-gray">{ booking.ScheduledAt }</p>
+			if booking.ScheduleStart == booking.ScheduleEnd {
+				<p class="text-neutral-gray">{ utils.DateMonth(booking.ScheduleStart) }</p>
+			} else {
+				<p class="text-neutral-gray">{ utils.DateMonth(booking.ScheduleStart) } - { utils.DateMonth(booking.ScheduleEnd) }</p>
+			}
 		</div>
 		<div class="mt-2 flex gap-2">
 			if booking.Status == "cancelled" {
 				<span class="font-medium text-neutral-dark">Date Cancelled:</span>
+				<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 			} else if booking.Status == "rejected" {
 				<span class="font-medium text-neutral-dark">Date Rejected:</span>
+				<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 			} else if booking.Status == "confirmed" {
 				<span class="font-medium text-neutral-dark">Date Confirmed:</span>
+				<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 			} else if booking.Status == "done" {
 				<span class="font-medium text-neutral-dark">Date Completed:</span>
+				<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 			}
-			<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 		</div>
 	</div>
 	<!-- Service -->
@@ -232,11 +239,11 @@ templ offCanvasBookingData(booking dto.Booking) {
 			<span class="font-medium text-neutral-dark">Rate:</span>
 			switch (booking.Service.PricingType) {
 				case "fixed":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Service.Price) } (fixed)</p>
+					<p class="text-neutral-gray font-medium">{ utils.FormatCurrency(booking.Service.Price) } (fixed)</p>
 				case "per_hour":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Service.Price) } / hour</p>
+					<p class="text-neutral-gray font-medium">{ utils.FormatCurrency(booking.Service.Price) } / hour</p>
 				case "per_day":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(booking.Service.Price) } / day</p>
+					<p class="text-neutral-gray font-medium">{ utils.FormatCurrency(booking.Service.Price) } / day</p>
 			}
 		</div>
 		<div class="mt-2 flex gap-2">

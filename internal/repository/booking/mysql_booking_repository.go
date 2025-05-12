@@ -32,6 +32,7 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
 	if err != nil {
 		return "", err
 	}
+	defer tx.Rollback()
 
 	query := `
         INSERT INTO
@@ -52,17 +53,11 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
     `
 	for _, extra := range data.Extras {
 		if _, err := tx.ExecContext(ctx, insertBookingExtras, data.Id, extra.Id); err != nil {
-			fmt.Println("extra: ", extra)
-			fmt.Println("error: ", err.Error())
 			return "", err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return "", err
-		}
-
 		return "", err
 	}
 
@@ -85,10 +80,11 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
             t.serviceId,
             t.status,
             t.quantity,
-            FORMAT(t.cost, 2) AS cost,
+            t.cost,
             t.createdAt,
             t.updatedAt,
-            t.scheduledAt,
+            t.scheduleStart,
+            t.scheduleEnd,
             t.cancelReason,
             t.cancelledBy
         FROM 
@@ -233,15 +229,7 @@ func (s *MysqlBookingRepository) GetBookingSent(id string) ([]*models.BookingMod
 
 	query := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            FORMAT(t.cost, 2) AS cost,
-            t.createdAt,
-            t.updatedAt,
-            t.scheduledAt
+            t.id
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -251,14 +239,14 @@ func (s *MysqlBookingRepository) GetBookingSent(id string) ([]*models.BookingMod
         ORDER BY
             t.updatedAt DESC
     `
-	sent := make([]*models.BookingModel, 0)
-	if err := s.db.SelectContext(ctx, &sent, query, id); err != nil {
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, query, id); err != nil {
 		return nil, err
 	}
 
 	bookings := make([]*models.BookingModel, 0)
-	for _, b := range sent {
-		booking, err := s.FindById(b.Id)
+	for _, id := range ids {
+		booking, err := s.FindById(id)
 		if err != nil {
 			return nil, err
 		}
@@ -279,15 +267,7 @@ func (s *MysqlBookingRepository) GetBookingReceived(id string) ([]*models.Bookin
 
 	bookingQuery := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            FORMAT(t.cost, 2) AS cost,
-            t.createdAt,
-            t.updatedAt,
-            t.scheduledAt
+            t.id
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -297,14 +277,14 @@ func (s *MysqlBookingRepository) GetBookingReceived(id string) ([]*models.Bookin
         ORDER BY
             t.updatedAt DESC
     `
-	received := make([]*models.BookingModel, 0)
-	if err := s.db.SelectContext(ctx, &received, bookingQuery, id); err != nil {
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, bookingQuery, id); err != nil {
 		return nil, err
 	}
 
 	bookings := make([]*models.BookingModel, 0)
-	for _, b := range received {
-		booking, err := s.FindById(b.Id)
+	for _, id := range ids {
+		booking, err := s.FindById(id)
 		if err != nil {
 			return nil, err
 		}
@@ -325,12 +305,7 @@ func (s *MysqlBookingRepository) GetRecent(userId string) ([]*models.BookingMode
 
 	bookingQuery := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            FORMAT(t.cost, 2) AS cost
+            t.id
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -342,14 +317,14 @@ func (s *MysqlBookingRepository) GetRecent(userId string) ([]*models.BookingMode
         LIMIT
             10
     `
-	recents := make([]*models.BookingModel, 0)
-	if err := s.db.SelectContext(ctx, &recents, bookingQuery, userId, userId); err != nil {
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, bookingQuery, userId, userId); err != nil {
 		return nil, err
 	}
 
 	bookings := make([]*models.BookingModel, 0)
-	for _, b := range recents {
-		booking, err := s.FindById(b.Id)
+	for _, id := range ids {
+		booking, err := s.FindById(id)
 		if err != nil {
 			return nil, err
 		}
@@ -375,15 +350,7 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
 
 	queryForVendor := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            FORMAT(t.cost, 2) AS cost,
-            t.createdAt,
-            t.updatedAt,
-            t.scheduledAt
+            t.id
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -396,15 +363,7 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
 
 	queryForClient := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            FORMAT(t.cost, 2) AS cost,
-            t.createdAt,
-            t.updatedAt,
-            t.scheduledAt
+            t.id
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -415,23 +374,21 @@ func (s *MysqlBookingRepository) GetConfirmed(id, filter string) ([]*models.Book
             t.updatedAt DESC
     `
 
-	confirmedBookings := make([]*models.BookingModel, 0)
+	ids := make([]string, 0)
 	switch filter {
 	case "vendor":
-		err := s.db.SelectContext(ctx, &confirmedBookings, queryForVendor, id)
-		if err != nil {
+		if err := s.db.SelectContext(ctx, &ids, queryForVendor, id); err != nil {
 			return nil, err
 		}
 	case "client":
-		err := s.db.SelectContext(ctx, &confirmedBookings, queryForClient, id)
-		if err != nil {
+		if err := s.db.SelectContext(ctx, &ids, queryForClient, id); err != nil {
 			return nil, err
 		}
 	}
 
 	bookings := make([]*models.BookingModel, 0)
-	for _, b := range confirmedBookings {
-		booking, err := s.FindById(b.Id)
+	for _, id := range ids {
+		booking, err := s.FindById(id)
 		if err != nil {
 			return nil, err
 		}
@@ -457,17 +414,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
 
 	queryForVendor := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            FORMAT(t.cost, 2) AS cost,
-            t.createdAt,
-            t.updatedAt,
-            t.scheduledAt,
-            t.cancelReason,
-            t.cancelledBy
+            t.id
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -480,17 +427,7 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
 
 	queryForClient := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            FORMAT(t.cost, 2) AS cost,
-            t.createdAt,
-            t.updatedAt,
-            t.scheduledAt,
-            t.cancelReason,
-            t.cancelledBy
+            t.id
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -501,23 +438,21 @@ func (s *MysqlBookingRepository) GetHistory(id, filter string) ([]*models.Bookin
             t.updatedAt DESC
     `
 
-	history := make([]*models.BookingModel, 0)
+	ids := make([]string, 0)
 	switch filter {
 	case "vendor":
-		err := s.db.SelectContext(ctx, &history, queryForVendor, id)
-		if err != nil {
+		if err := s.db.SelectContext(ctx, &ids, queryForVendor, id); err != nil {
 			return nil, err
 		}
 	case "client":
-		err := s.db.SelectContext(ctx, &history, queryForClient, id)
-		if err != nil {
+		if err := s.db.SelectContext(ctx, &ids, queryForClient, id); err != nil {
 			return nil, err
 		}
 	}
 
 	bookings := make([]*models.BookingModel, 0)
-	for _, b := range history {
-		booking, err := s.FindById(b.Id)
+	for _, id := range ids {
+		booking, err := s.FindById(id)
 		if err != nil {
 			return nil, err
 		}
@@ -538,15 +473,7 @@ func (s *MysqlBookingRepository) GetReviewableBookings(userId string) ([]*models
 
 	bookingQuery := `
         SELECT
-            t.id,
-            t.vendorId,
-            t.clientId,
-            t.serviceId,
-            t.status,
-            FORMAT(t.cost, 2) AS cost,
-            t.createdAt,
-            t.updatedAt,
-            t.scheduledAt
+            t.id
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId
@@ -559,15 +486,15 @@ func (s *MysqlBookingRepository) GetReviewableBookings(userId string) ([]*models
             t.updatedAt DESC
     `
 
-	reviewables := make([]*models.BookingModel, 0)
-	err := s.db.SelectContext(ctx, &reviewables, bookingQuery, userId)
+	ids := make([]string, 0)
+	err := s.db.SelectContext(ctx, &ids, bookingQuery, userId)
 	if err != nil {
 		return nil, err
 	}
 
 	bookings := make([]*models.BookingModel, 0)
-	for _, b := range reviewables {
-		booking, err := s.FindById(b.Id)
+	for _, id := range ids {
+		booking, err := s.FindById(id)
 		if err != nil {
 			return nil, err
 		}
@@ -605,7 +532,7 @@ func (s *MysqlBookingRepository) Cancel(bookingId, cancelledBy, reason string) e
 	return nil
 }
 
-func (s *MysqlBookingRepository) Accept(bookingId, schedule string) error {
+func (s *MysqlBookingRepository) Accept(bookingId string, scheduleStart, scheduleEnd time.Time) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -613,11 +540,11 @@ func (s *MysqlBookingRepository) Accept(bookingId, schedule string) error {
         UPDATE
             Booking
         SET
-            scheduledAt = ?, status = 'confirmed'
+            scheduleStart = ?, scheduleEnd = ?, status = 'confirmed'
         WHERE
             id = ?
     `
-	if _, err := s.db.ExecContext(ctx, query, schedule, bookingId); err != nil {
+	if _, err := s.db.ExecContext(ctx, query, scheduleStart, scheduleEnd, bookingId); err != nil {
 		return err
 	}
 
@@ -656,7 +583,7 @@ func (s *MysqlBookingRepository) MarkComplete(bookingId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	query := "UPDATE Booking SET status = 'done' WHERE id = ?"
+	query := "UPDATE Booking SET status = 'done', updatedAt = CURRENT_TIMESTAMP() WHERE id = ?"
 	if _, err := s.db.ExecContext(ctx, query, bookingId); err != nil {
 		return err
 	}
@@ -668,7 +595,7 @@ func (s *MysqlBookingRepository) MarkComplete(bookingId string) error {
 	return nil
 }
 
-func (s *MysqlBookingRepository) Reschedule(bookingId, schedule string) error {
+func (s *MysqlBookingRepository) Reschedule(bookingId string, scheduleStart, scheduleEnd time.Time) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -676,11 +603,11 @@ func (s *MysqlBookingRepository) Reschedule(bookingId, schedule string) error {
         UPDATE
             Booking
         SET
-            scheduledAt = ?
+            scheduleStart = ?, scheduleEnd = ?
         WHERE
             id = ?
     `
-	if _, err := s.db.ExecContext(ctx, query, schedule, bookingId); err != nil {
+	if _, err := s.db.ExecContext(ctx, query, scheduleStart, scheduleEnd, bookingId); err != nil {
 		return err
 	}
 

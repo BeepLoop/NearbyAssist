@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS Service (
     vendorId VARCHAR(255) NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    price Double NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
     pricingType ENUM('fixed', 'per_hour', 'per_day') NOT NULL DEFAULT 'fixed',
     signature VARCHAR(64) NOT NULL,
     disabled BOOLEAN DEFAULT FALSE,

@@ -65,7 +65,7 @@ func (h *handler) RemindScheduled(c echo.Context) error {
         FROM
             Booking
         WHERE
-            scheduledAt IS NULL AND DATE(scheduledAt) = CURDATE() + INTERVAL 1 DAY
+            scheduleStart IS NOT NULL AND DATE(scheduleStart) = CURDATE() + INTERVAL 1 DAY
     `
 	bookings := make([]*models.BookingModel, 0)
 	if err := h.db.SelectContext(ctx, &bookings, query); err != nil {

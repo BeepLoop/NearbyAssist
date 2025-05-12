@@ -8,13 +8,14 @@ import (
 type Event string
 
 const (
-	EVT_PONG              Event = "pong"
-	EVT_MSSG              Event = "message"
-	EVT_NOTIF             Event = "notification"
-	EVT_SYNC              Event = "sync"
-	EVT_BOOKING_COMPLETE  Event = "bookingComplete"
-	EVT_BOOKING_CONFIRMED Event = "bookingConfirmed"
-	EVT_BOOKING_REJECTED  Event = "bookingRejected"
+	EVT_PONG                Event = "pong"
+	EVT_MSSG                Event = "message"
+	EVT_NOTIF               Event = "notification"
+	EVT_SYNC                Event = "sync"
+	EVT_BOOKING_COMPLETE    Event = "bookingComplete"
+	EVT_BOOKING_CONFIRMED   Event = "bookingConfirmed"
+	EVT_BOOKING_RESCHEDULED Event = "bookingRescheduled"
+	EVT_BOOKING_REJECTED    Event = "bookingRejected"
 )
 
 type EventModel struct {

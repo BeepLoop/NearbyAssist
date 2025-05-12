@@ -10,5 +10,7 @@ templ BookingStatus(status string) {
 			@DefaultBadgeDanger("rejected")
 		case "confirmed":
 			@DefaultBadgeSuccess("on-going")
+		case "pending":
+			@DefaultBadgeWarning("pending")
 	}
 }

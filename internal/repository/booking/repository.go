@@ -2,6 +2,7 @@ package booking_repo
 
 import (
 	"nearbyassist/internal/models"
+	"time"
 )
 
 type BookingRepository interface {
@@ -22,10 +23,10 @@ type BookingRepository interface {
 	GetReviewableBookings(userId string) ([]*models.BookingModel, error)
 
 	Cancel(bookingId, cancelledBy, reason string) error
-	Accept(bookingId, schedule string) error
+	Accept(bookingId string, scheduleStart, scheduleEnd time.Time) error
 	Reject(bookingId, reason string) error
 	MarkComplete(bookingId string) error
-	Reschedule(bookingId, schedule string) error
+	Reschedule(bookingId string, scheduleStart, scheduleEnd time.Time) error
 
 	IsReviewed(bookingId string) (bool, error)
 }

@@ -714,28 +714,50 @@ func (s *MysqlVendorRepository) GetPoliceClearance(vendorId string) (*models.Pol
 	return clearance, nil
 }
 
-func (s *MysqlVendorRepository) IsFullyBookedAt(vendorId, schedule string) (bool, error) {
+func (s *MysqlVendorRepository) IsDateAvailable(vendorId string, startDate, endDate time.Time) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := `
-        SELECT CASE
-            WHEN (
-                SELECT COUNT(*)
-                FROM Booking b
-                WHERE b.vendorId = ? AND DATE(b.scheduledAt) = DATE(?)
-            ) >= (
-                SELECT v.dbl
-                FROM Vendor v
-                WHERE v.vendorId = ?
+        SELECT NOT EXISTS
+            (
+                WITH RECURSIVE dates AS (
+                    SELECT DATE(?) AS day
+                    UNION ALL
+                    SELECT
+                        day + INTERVAL 1 DAY
+                    FROM
+                        dates
+                    WHERE day + INTERVAL 1 DAY <= ?
+                ),
+                vendor_dbl AS (
+                    SELECT dbl FROM Vendor WHERE vendorId = ?
+                ),
+                booked_counts AS (
+                    SELECT
+                        d.day, COUNT(b.id) AS booking_count, vd.dbl
+                    FROM
+                        dates d
+                        CROSS JOIN vendor_dbl vd
+                        LEFT JOIN Booking b ON b.status = 'confirmed'
+                        AND d.day BETWEEN DATE(b.scheduleStart) AND DATE(b.scheduleEnd)
+                        AND b.vendorId = ?
+                    GROUP BY
+                        d.day, vd.dbl
+                )
+                SELECT
+                    1
+                FROM
+                    booked_counts
+                WHERE
+                    booking_count >= dbl LIMIT 1
             )
-            THEN 1
-            ELSE 0
-        END AS fully_booked
+        AS is_date_available
     `
+	args := []interface{}{startDate, endDate, vendorId, vendorId}
 
-	fullyBooked := false
-	if err := s.db.GetContext(ctx, &fullyBooked, query, vendorId, schedule, vendorId); err != nil {
+	isDateAvailable := false
+	if err := s.db.GetContext(ctx, &isDateAvailable, query, args...); err != nil {
 		return false, err
 	}
 
@@ -743,7 +765,7 @@ func (s *MysqlVendorRepository) IsFullyBookedAt(vendorId, schedule string) (bool
 		return false, context.DeadlineExceeded
 	}
 
-	return fullyBooked, nil
+	return isDateAvailable, nil
 }
 
 func (s *MysqlVendorRepository) SetDBL(vendorId string, value int) error {

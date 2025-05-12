@@ -1,6 +1,9 @@
 package utils
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 func FormatDate(date string) string {
 	if date == "" {
@@ -40,13 +43,12 @@ func DateMonth(date string) string {
 		return ""
 	}
 
-	layout := "2006-01-02T15:04:05Z"
-	t, err := time.Parse(layout, date)
+	t, err := time.Parse(time.RFC1123, date)
 	if err != nil {
 		return date
 	}
 
-	return t.Format("January 2")
+	return fmt.Sprintf("%s %d", t.Month(), t.Day())
 }
 
 func CurrentMonthYear() string {

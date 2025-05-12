@@ -2,11 +2,13 @@ package utils
 
 import (
 	"fmt"
-	"strconv"
+
+	"github.com/dustin/go-humanize"
 )
 
-func FormatCurrency(input float64) string {
-	amount := strconv.FormatFloat(input, 'f', -1, 64)
+func FormatCurrency(input string) string {
+	amount := StringToFloat64ElseZero(input)
+	withComma := humanize.Commaf(amount)
 
-	return fmt.Sprintf("₱ %s", amount)
+	return fmt.Sprintf("₱ %s", withComma)
 }
