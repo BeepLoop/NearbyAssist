@@ -158,16 +158,21 @@ func (s *Service) GetDashbaordData() (*dto.Dashboard, error) {
 						CreatedAt: utils.FormatDate(service.CreatedAt),
 						UpdatedAt: utils.FormatDate(service.UpdatedAt),
 					},
-					Quantity: booking.Quantity,
-					Cost:     booking.Cost,
-					Status:   string(booking.Status),
+					ServiceId:          booking.ServiceId,
+					ServiceTitle:       utils.Must(s.encrypt.DecryptString(booking.ServiceTitle)),
+					ServiceDescription: utils.Must(s.encrypt.DecryptString(booking.ServiceDescription)),
+					Price:              booking.Price,
+					PricingType:        string(booking.PricingType),
+					Quantity:           booking.Quantity,
+					Cost:               booking.Cost,
+					Status:             string(booking.Status),
 					Extras: slices.AppendSeq(
-						make([]dto.Extra, 0),
-						utils.Map(booking.Extras, func(x *models.ExtraModel) dto.Extra {
-							return dto.Extra{
-								Id:          x.Id,
-								Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
-								Description: utils.Must(s.encrypt.DecryptString(x.Description)),
+						make([]dto.BookingExtra, 0),
+						utils.Map(booking.Extras, func(x *models.BookingExtraModel) dto.BookingExtra {
+							return dto.BookingExtra{
+								BookingId:   x.BookingId,
+								Title:       utils.Must(s.encrypt.DecryptString(x.ExtraTitle)),
+								Description: utils.Must(s.encrypt.DecryptString(x.ExtraDescription)),
 								Price:       x.Price,
 							}
 						}),

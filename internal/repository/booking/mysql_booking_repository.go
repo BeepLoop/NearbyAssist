@@ -26,8 +26,6 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	data.Id = utils.GenerateId()
-
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return "", err
@@ -36,23 +34,25 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
 
 	query := `
         INSERT INTO
-            Booking (id, vendorId, clientId, serviceId, quantity, cost)
+            Booking (id, vendorId, clientId, serviceId, serviceTitle, serviceDescription, price, pricingType, quantity, cost)
         VALUES
-            (:id, :vendorId, :clientId, :serviceId, :quantity, :cost)
+            (:id, :vendorId, :clientId, :serviceId, :serviceTitle, :serviceDescription, :price, :pricingType, :quantity, :cost)
     `
 
+	data.Id = utils.GenerateId()
 	if _, err := tx.NamedExecContext(ctx, query, data); err != nil {
 		return "", err
 	}
 
 	insertBookingExtras := `
         INSERT INTO
-            BookingExtra (bookingId, extraId)
+            BookingExtra (bookingId, extraTitle, extraDescription, price)
         VALUES 
-            (?, ?)
+            (:bookingId, :extraTitle, :extraDescription, :price)
     `
 	for _, extra := range data.Extras {
-		if _, err := tx.ExecContext(ctx, insertBookingExtras, data.Id, extra.Id); err != nil {
+		extra.BookingId = data.Id
+		if _, err := tx.NamedExecContext(ctx, insertBookingExtras, extra); err != nil {
 			return "", err
 		}
 	}
@@ -78,6 +78,10 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
             t.vendorId,
             t.clientId,
             t.serviceId,
+            t.serviceTitle,
+            t.serviceDescription,
+            t.price,
+            t.pricingType,
             t.status,
             t.quantity,
             t.cost,
@@ -117,12 +121,6 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
 		return nil, err
 	} else {
 		booking.IsReviewed = isReviewed
-	}
-
-	if service, err := s.getService(booking.ServiceId); err != nil {
-		return nil, err
-	} else {
-		booking.Service = service
 	}
 
 	if extras, err := s.getBookingExtras(booking.Id); err != nil {
@@ -235,7 +233,7 @@ func (s *MysqlBookingRepository) GetBookingSent(id string) ([]*models.BookingMod
             JOIN User uVendor ON uVendor.id = t.vendorId
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
-            t.clientId = ? AND (t.status = 'pending' OR t.status = 'confirmed')
+            t.clientId = ? AND t.status = 'pending'
         ORDER BY
             t.updatedAt DESC
     `
@@ -642,23 +640,19 @@ func (s *MysqlBookingRepository) IsReviewed(bookingId string) (bool, error) {
 	return isReviewed, nil
 }
 
-func (s *MysqlBookingRepository) getBookingExtras(bookingId string) ([]*models.ExtraModel, error) {
+func (s *MysqlBookingRepository) getBookingExtras(bookingId string) ([]*models.BookingExtraModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	extrasQuery := `
         SELECT
-            e.id,
-            e.title,
-            e.description,
-            e.price
+            bookingId, extraTitle, extraDescription, price
         FROM 
-            BookingExtra te
-            JOIN Extra e ON e.id = te.extraId
+            BookingExtra
         WHERE
-            te.bookingId = ?
+            bookingId = ?
     `
-	extras := make([]*models.ExtraModel, 0)
+	extras := make([]*models.BookingExtraModel, 0)
 	if err := s.db.SelectContext(ctx, &extras, extrasQuery, bookingId); err != nil {
 		return nil, err
 	}
@@ -670,6 +664,7 @@ func (s *MysqlBookingRepository) getBookingExtras(bookingId string) ([]*models.E
 	return extras, nil
 }
 
+// Deprecated: service info is now copied to the booking for snapshot
 func (s *MysqlBookingRepository) getService(serviceId string) (*models.ServiceModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

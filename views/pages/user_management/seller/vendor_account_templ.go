@@ -1403,9 +1403,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var65 string
-		templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Title)
+		templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ServiceTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 519, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 519, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 		if templ_7745c5c3_Err != nil {
@@ -1416,9 +1416,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var66 string
-		templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Description)
+		templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ServiceDescription)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 523, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 523, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 		if templ_7745c5c3_Err != nil {
@@ -1438,16 +1438,16 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		switch booking.Service.PricingType {
+		switch booking.PricingType {
 		case "fixed":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 134, "<p class=\"text-neutral-gray\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var67 string
-			templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 537, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 537, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 			if templ_7745c5c3_Err != nil {
@@ -1463,9 +1463,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var68 string
-			templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 539, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 539, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 			if templ_7745c5c3_Err != nil {
@@ -1481,9 +1481,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var69 string
-			templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 541, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/seller/vendor_account.templ`, Line: 541, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 			if templ_7745c5c3_Err != nil {

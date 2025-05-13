@@ -161,7 +161,7 @@ templ booking(data dto.UserReportDetail) {
 		</div>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Booked for:</span>
-			switch (data.Booking.Service.PricingType) {
+			switch (data.Booking.PricingType) {
 				case "fixed":
 					<p class="text-neutral-gray">{ strconv.Itoa(data.Booking.Quantity) } (fixed rate session)</p>
 				case "per_hour":
@@ -172,7 +172,7 @@ templ booking(data dto.UserReportDetail) {
 		</div>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Total:</span>
-			switch (data.Booking.Service.PricingType) {
+			switch (data.Booking.PricingType) {
 				case "fixed":
 					<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Cost) }</p>
 				case "per_hour":
@@ -232,11 +232,11 @@ templ booking(data dto.UserReportDetail) {
 		</div>
 		<div class="mt-2">
 			<span class="font-medium text-neutral-dark">Title:</span>
-			<p class="text-neutral-gray">{ data.Booking.Service.Title }</p>
+			<p class="text-neutral-gray">{ data.Booking.ServiceTitle }</p>
 		</div>
 		<div class="mt-2">
 			<span class="font-medium text-neutral-dark">Description:</span>
-			<p class="text-neutral-gray">{ data.Booking.Service.Description }</p>
+			<p class="text-neutral-gray">{ data.Booking.ServiceDescription }</p>
 		</div>
 		<div class="mt-2">
 			<span class="font-medium text-neutral-dark">Tags:</span>
@@ -248,13 +248,13 @@ templ booking(data dto.UserReportDetail) {
 		</div>
 		<div class="mt-2 flex gap-2">
 			<span class="font-medium text-neutral-dark">Rate:</span>
-			switch (data.Booking.Service.PricingType) {
+			switch (data.Booking.PricingType) {
 				case "fixed":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Service.Price) } (fixed)</p>
+					<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Price) } (fixed)</p>
 				case "per_hour":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Service.Price) } / hour</p>
+					<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Price) } / hour</p>
 				case "per_day":
-					<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Service.Price) } / day</p>
+					<p class="text-neutral-gray">{ utils.FormatCurrency(data.Booking.Price) } / day</p>
 			}
 		</div>
 		<div class="mt-2 flex gap-2">

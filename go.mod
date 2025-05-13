@@ -4,6 +4,7 @@ go 1.24.2
 
 require (
 	github.com/a-h/templ v0.3.857
+	github.com/beeploop/simple-additive-weighting v1.0.0
 	github.com/chromedp/cdproto v0.0.0-20250429231605-6ed5b53462d4
 	github.com/chromedp/chromedp v0.13.6
 	github.com/dustin/go-humanize v1.0.1
@@ -26,7 +27,6 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/beeploop/simple-additive-weighting v1.0.0 // indirect
 	github.com/chromedp/sysutil v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1 // indirect

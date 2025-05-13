@@ -271,7 +271,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		switch booking.Service.PricingType {
+		switch booking.PricingType {
 		case "fixed":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<p class=\"text-neutral-gray\">")
 			if templ_7745c5c3_Err != nil {
@@ -331,7 +331,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		switch booking.Service.PricingType {
+		switch booking.PricingType {
 		case "fixed":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<p class=\"text-neutral-gray font-medium\">")
 			if templ_7745c5c3_Err != nil {
@@ -599,9 +599,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var26 string
-		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Title)
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ServiceTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 224, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 224, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -612,9 +612,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Description)
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ServiceDescription)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 228, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 228, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -634,16 +634,16 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		switch booking.Service.PricingType {
+		switch booking.PricingType {
 		case "fixed":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "<p class=\"text-neutral-gray font-medium\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 242, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 242, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -659,9 +659,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var29 string
-			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 244, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 244, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -677,9 +677,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var30 string
-			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 246, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/partials/dashboard_component/booking.templ`, Line: 246, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {

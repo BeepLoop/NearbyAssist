@@ -75,15 +75,23 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 	}
 
 	booking := &models.BookingModel{
-		ClientId:  req.ClientId,
-		VendorId:  req.VendorId,
-		ServiceId: req.ServiceId,
-		Quantity:  req.Quantity,
-		Cost:      req.Cost,
+		ClientId:           req.ClientId,
+		VendorId:           req.VendorId,
+		ServiceId:          req.ServiceId,
+		ServiceTitle:       service.Title,
+		ServiceDescription: service.Description,
+		Price:              service.Price,
+		PricingType:        service.PricingType,
+		Quantity:           req.Quantity,
+		Cost:               req.Cost,
 		Extras: slices.AppendSeq(
-			make([]*models.ExtraModel, 0),
-			utils.Map(req.Extras, func(extra request.Extra) *models.ExtraModel {
-				return &models.ExtraModel{Model: models.Model{Id: extra.Id}}
+			make([]*models.BookingExtraModel, 0),
+			utils.Map(req.Extras, func(extra request.Extra) *models.BookingExtraModel {
+				return &models.BookingExtraModel{
+					ExtraTitle:       utils.Must(s.encrypt.EncryptString(extra.Title)),
+					ExtraDescription: utils.Must(s.encrypt.EncryptString(extra.Description)),
+					Price:            extra.Price,
+				}
 			}),
 		),
 	}
@@ -148,8 +156,8 @@ func (s *Service) GetBooking(bookingId string) (*models.BookingModel, error) {
 
 	booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
 	booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
-	booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
-	booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
+	booking.ServiceTitle = utils.Must(s.encrypt.DecryptString(booking.ServiceTitle))
+	booking.ServiceDescription = utils.Must(s.encrypt.DecryptString(booking.ServiceDescription))
 
 	if booking.Status == models.BOOKING_STATUS_CANCELLED || booking.Status == models.BOOKING_STATUS_REJECTED {
 		booking.CancelReason.String = utils.Must(s.encrypt.DecryptString(booking.CancelReason.String))
@@ -157,8 +165,8 @@ func (s *Service) GetBooking(bookingId string) (*models.BookingModel, error) {
 	}
 
 	for _, extra := range booking.Extras {
-		extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-		extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
+		extra.ExtraTitle = utils.Must(s.encrypt.DecryptString(extra.ExtraTitle))
+		extra.ExtraDescription = utils.Must(s.encrypt.DecryptString(extra.ExtraDescription))
 	}
 
 	return booking, nil
@@ -492,12 +500,12 @@ func (s *Service) GetBookingUserSent(bearerToken string) ([]*models.BookingModel
 	for _, booking := range bookings {
 		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
 		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
-		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
-		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
+		booking.ServiceTitle = utils.Must(s.encrypt.DecryptString(booking.ServiceTitle))
+		booking.ServiceDescription = utils.Must(s.encrypt.DecryptString(booking.ServiceDescription))
 
 		for _, extra := range booking.Extras {
-			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
+			extra.ExtraTitle = utils.Must(s.encrypt.DecryptString(extra.ExtraTitle))
+			extra.ExtraDescription = utils.Must(s.encrypt.DecryptString(extra.ExtraDescription))
 		}
 	}
 
@@ -518,12 +526,12 @@ func (s *Service) GetBookingUserReceived(bearerToken string) ([]*models.BookingM
 	for _, booking := range bookings {
 		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
 		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
-		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
-		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
+		booking.ServiceTitle = utils.Must(s.encrypt.DecryptString(booking.ServiceTitle))
+		booking.ServiceDescription = utils.Must(s.encrypt.DecryptString(booking.ServiceDescription))
 
 		for _, extra := range booking.Extras {
-			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
+			extra.ExtraTitle = utils.Must(s.encrypt.DecryptString(extra.ExtraTitle))
+			extra.ExtraDescription = utils.Must(s.encrypt.DecryptString(extra.ExtraDescription))
 		}
 	}
 
@@ -544,12 +552,12 @@ func (s *Service) GetRecentBookings(bearerToken string) ([]*models.BookingModel,
 	for _, booking := range bookings {
 		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
 		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
-		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
-		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
+		booking.ServiceTitle = utils.Must(s.encrypt.DecryptString(booking.ServiceTitle))
+		booking.ServiceDescription = utils.Must(s.encrypt.DecryptString(booking.ServiceDescription))
 
 		for _, extra := range booking.Extras {
-			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
+			extra.ExtraTitle = utils.Must(s.encrypt.DecryptString(extra.ExtraTitle))
+			extra.ExtraDescription = utils.Must(s.encrypt.DecryptString(extra.ExtraDescription))
 		}
 	}
 
@@ -570,12 +578,12 @@ func (s *Service) GetConfirmedBookings(bearerToken, filter string) ([]*models.Bo
 	for _, booking := range bookings {
 		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
 		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
-		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
-		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
+		booking.ServiceTitle = utils.Must(s.encrypt.DecryptString(booking.ServiceTitle))
+		booking.ServiceDescription = utils.Must(s.encrypt.DecryptString(booking.ServiceDescription))
 
 		for _, extra := range booking.Extras {
-			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
+			extra.ExtraTitle = utils.Must(s.encrypt.DecryptString(extra.ExtraTitle))
+			extra.ExtraDescription = utils.Must(s.encrypt.DecryptString(extra.ExtraDescription))
 		}
 	}
 
@@ -596,12 +604,12 @@ func (s *Service) GetReviewableBookings(bearerToken string) ([]*models.BookingMo
 	for _, reviewable := range reviewables {
 		reviewable.Vendor.Name = utils.Must(s.encrypt.DecryptString(reviewable.Vendor.Name))
 		reviewable.Client.Name = utils.Must(s.encrypt.DecryptString(reviewable.Client.Name))
-		reviewable.Service.Title = utils.Must(s.encrypt.DecryptString(reviewable.Service.Title))
-		reviewable.Service.Description = utils.Must(s.encrypt.DecryptString(reviewable.Service.Description))
+		reviewable.ServiceTitle = utils.Must(s.encrypt.DecryptString(reviewable.ServiceTitle))
+		reviewable.ServiceDescription = utils.Must(s.encrypt.DecryptString(reviewable.ServiceDescription))
 
 		for _, extra := range reviewable.Extras {
-			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
+			extra.ExtraTitle = utils.Must(s.encrypt.DecryptString(extra.ExtraTitle))
+			extra.ExtraDescription = utils.Must(s.encrypt.DecryptString(extra.ExtraDescription))
 		}
 	}
 
@@ -622,8 +630,8 @@ func (s *Service) GetBookingHistory(bearerToken, filter string) ([]*models.Booki
 	for _, booking := range bookings {
 		booking.Vendor.Name = utils.Must(s.encrypt.DecryptString(booking.Vendor.Name))
 		booking.Client.Name = utils.Must(s.encrypt.DecryptString(booking.Client.Name))
-		booking.Service.Title = utils.Must(s.encrypt.DecryptString(booking.Service.Title))
-		booking.Service.Description = utils.Must(s.encrypt.DecryptString(booking.Service.Description))
+		booking.ServiceTitle = utils.Must(s.encrypt.DecryptString(booking.ServiceTitle))
+		booking.ServiceDescription = utils.Must(s.encrypt.DecryptString(booking.ServiceDescription))
 
 		if booking.Status == models.BOOKING_STATUS_CANCELLED || booking.Status == models.BOOKING_STATUS_REJECTED {
 			booking.CancelReason.String = utils.Must(s.encrypt.DecryptString(booking.CancelReason.String))
@@ -631,8 +639,8 @@ func (s *Service) GetBookingHistory(bearerToken, filter string) ([]*models.Booki
 		}
 
 		for _, extra := range booking.Extras {
-			extra.Title = utils.Must(s.encrypt.DecryptString(extra.Title))
-			extra.Description = utils.Must(s.encrypt.DecryptString(extra.Description))
+			extra.ExtraTitle = utils.Must(s.encrypt.DecryptString(extra.ExtraTitle))
+			extra.ExtraDescription = utils.Must(s.encrypt.DecryptString(extra.ExtraDescription))
 		}
 	}
 

@@ -15,21 +15,32 @@ const (
 type BookingModel struct {
 	Model
 	UpdateableModel
-	VendorId      string         `db:"vendorId"`
-	ClientId      string         `db:"clientId"`
-	ServiceId     string         `db:"serviceId"`
-	Status        BookingStatus  `db:"status"`
-	Quantity      int            `db:"quantity"`
-	Cost          string         `db:"cost"`
-	IsReviewed    bool           `db:"isReviewed"`
-	ScheduleStart sql.NullString `db:"scheduleStart"`
-	ScheduleEnd   sql.NullString `db:"scheduleEnd"`
-	CancelReason  sql.NullString `db:"cancelReason"`
-	CancelledBy   sql.NullString `db:"cancelledBy"`
+	VendorId           string         `db:"vendorId"`
+	ClientId           string         `db:"clientId"`
+	ServiceId          string         `db:"serviceId"`
+	ServiceTitle       string         `db:"serviceTitle"`
+	ServiceDescription string         `db:"serviceDescription"`
+	Price              string         `db:"price"`
+	PricingType        PricingType    `db:"pricingType"`
+	Status             BookingStatus  `db:"status"`
+	Quantity           int            `db:"quantity"`
+	Cost               string         `db:"cost"`
+	IsReviewed         bool           `db:"isReviewed"`
+	ScheduleStart      sql.NullString `db:"scheduleStart"`
+	ScheduleEnd        sql.NullString `db:"scheduleEnd"`
+	CancelReason       sql.NullString `db:"cancelReason"`
+	CancelledBy        sql.NullString `db:"cancelledBy"`
 
 	// Additional fields for joins
-	Service *ServiceModel `json:"service,omitempty"`
-	Vendor  UserModel     `json:"vendor" db:"vendor"`
-	Client  UserModel     `json:"client" db:"client"`
-	Extras  []*ExtraModel `json:"extras" db:"extras"`
+	Vendor UserModel            `json:"vendor" db:"vendor"`
+	Client UserModel            `json:"client" db:"client"`
+	Extras []*BookingExtraModel `json:"extras" db:"extras"`
+}
+
+type BookingExtraModel struct {
+	BookingId        string `db:"bookingId"`
+	ExtraTitle       string `db:"extraTitle"`
+	ExtraDescription string `db:"extraDescription"`
+	Price            string `db:"price"`
+	CreatedAt        string `db:"createdAt"`
 }

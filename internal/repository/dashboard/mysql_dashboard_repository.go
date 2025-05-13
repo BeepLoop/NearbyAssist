@@ -603,6 +603,10 @@ func (s *MysqlDashboardRepository) GetBookingsThisWeek() ([]*models.BookingModel
             t.vendorId,
             t.clientId,
             t.serviceId,
+            t.serviceTitle,
+            t.serviceDescription,
+            t.price,
+            t.pricingType,
             t.status,
             t.quantity,
             t.cost,
@@ -610,7 +614,8 @@ func (s *MysqlDashboardRepository) GetBookingsThisWeek() ([]*models.BookingModel
             t.updatedAt,
             t.scheduleStart,
             t.scheduleEnd,
-            t.cancelReason
+            t.cancelReason,
+            t.cancelledBy
         FROM 
             Booking t
             JOIN User uVendor ON uVendor.id = t.vendorId

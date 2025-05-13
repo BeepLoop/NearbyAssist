@@ -377,16 +377,21 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				CreatedAt: utils.FormatDate(service.CreatedAt),
 				UpdatedAt: utils.FormatDate(service.UpdatedAt),
 			},
-			Quantity: res.Quantity,
-			Cost:     res.Cost,
-			Status:   string(res.Status),
+			ServiceId:          res.ServiceId,
+			ServiceTitle:       utils.Must(s.encrypt.DecryptString(res.ServiceTitle)),
+			ServiceDescription: utils.Must(s.encrypt.DecryptString(res.ServiceDescription)),
+			Price:              res.Price,
+			PricingType:        string(res.PricingType),
+			Quantity:           res.Quantity,
+			Cost:               res.Cost,
+			Status:             string(res.Status),
 			Extras: slices.AppendSeq(
-				make([]dto.Extra, 0),
-				utils.Map(res.Extras, func(x *models.ExtraModel) dto.Extra {
-					return dto.Extra{
-						Id:          x.Id,
-						Title:       utils.Must(s.encrypt.DecryptString(x.Title)),
-						Description: utils.Must(s.encrypt.DecryptString(x.Description)),
+				make([]dto.BookingExtra, 0),
+				utils.Map(res.Extras, func(x *models.BookingExtraModel) dto.BookingExtra {
+					return dto.BookingExtra{
+						BookingId:   x.BookingId,
+						Title:       utils.Must(s.encrypt.DecryptString(x.ExtraTitle)),
+						Description: utils.Must(s.encrypt.DecryptString(x.ExtraDescription)),
 						Price:       x.Price,
 					}
 				}),

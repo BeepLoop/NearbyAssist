@@ -79,14 +79,6 @@ func (h *bookingHandler) CreateBooking(c echo.Context) error {
 		})
 	}
 
-	service, err := h.serviceService.GetService(booking.ServiceId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Could not get service information of booking",
-			Error:   err.Error(),
-		})
-	}
-
 	response := response.Booking{
 		Id: booking.Id,
 		Vendor: response.User{
@@ -99,34 +91,30 @@ func (h *bookingHandler) CreateBooking(c echo.Context) error {
 			Name:     booking.Client.Name,
 			ImageURL: booking.Client.ImageUrl,
 		},
-		Quantity: booking.Quantity,
-		Cost:     booking.Cost,
+		ServiceId:          booking.ServiceId,
+		ServiceTitle:       booking.ServiceTitle,
+		ServiceDescription: booking.ServiceDescription,
+		Price:              booking.Price,
+		PricingType:        string(booking.PricingType),
+		Quantity:           booking.Quantity,
+		Cost:               booking.Cost,
 		Extras: slices.AppendSeq(
-			make([]response.Extra, 0),
-			utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
-				return response.Extra{
-					Id:          x.Id,
-					Title:       x.Title,
-					Description: x.Description,
+			make([]response.BookingExtra, 0),
+			utils.Map(booking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
+				return response.BookingExtra{
+					BookingId:   x.BookingId,
+					Title:       x.ExtraTitle,
+					Description: x.ExtraDescription,
 					Price:       x.Price,
 				}
 			}),
 		),
-		Service: response.ServiceBareInfo{
-			Id:          booking.ServiceId,
-			VendorId:    booking.VendorId,
-			Title:       service.Service.Title,
-			Description: service.Service.Description,
-			Price:       service.Service.Price,
-			PricingType: service.Service.PricingType,
-			Tags:        service.Service.Tags,
-			Location:    service.Service.Location,
-		},
 		Status:        string(booking.Status),
 		CreatedAt:     booking.CreatedAt,
 		UpdatedAt:     booking.UpdatedAt,
 		ScheduleStart: booking.ScheduleStart.String,
 		ScheduleEnd:   booking.ScheduleEnd.String,
+		CancelledBy:   booking.CancelledBy.String,
 		CancelReason:  booking.CancelReason.String,
 		QRSignature: utils.Must(h.qrService.SignData(&request.QRSignatureInput{
 			ClientID:  booking.ClientId,
@@ -165,14 +153,6 @@ func (h *bookingHandler) GetBooking(c echo.Context) error {
 		booking = res
 	}
 
-	service, err := h.serviceService.GetService(booking.ServiceId)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Could not get service information of booking",
-			Error:   err.Error(),
-		})
-	}
-
 	response := response.Booking{
 		Id: booking.Id,
 		Vendor: response.User{
@@ -185,29 +165,24 @@ func (h *bookingHandler) GetBooking(c echo.Context) error {
 			Name:     booking.Client.Name,
 			ImageURL: booking.Client.ImageUrl,
 		},
-		Quantity: booking.Quantity,
-		Cost:     booking.Cost,
+		ServiceId:          booking.ServiceId,
+		ServiceTitle:       booking.ServiceTitle,
+		ServiceDescription: booking.ServiceDescription,
+		Price:              booking.Price,
+		PricingType:        string(booking.PricingType),
+		Quantity:           booking.Quantity,
+		Cost:               booking.Cost,
 		Extras: slices.AppendSeq(
-			make([]response.Extra, 0),
-			utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
-				return response.Extra{
-					Id:          x.Id,
-					Title:       x.Title,
-					Description: x.Description,
+			make([]response.BookingExtra, 0),
+			utils.Map(booking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
+				return response.BookingExtra{
+					BookingId:   x.BookingId,
+					Title:       x.ExtraTitle,
+					Description: x.ExtraDescription,
 					Price:       x.Price,
 				}
 			}),
 		),
-		Service: response.ServiceBareInfo{
-			Id:          booking.ServiceId,
-			VendorId:    booking.VendorId,
-			Title:       service.Service.Title,
-			Description: service.Service.Description,
-			Price:       service.Service.Price,
-			PricingType: service.Service.PricingType,
-			Tags:        service.Service.Tags,
-			Location:    service.Service.Location,
-		},
 		Status:        string(booking.Status),
 		CreatedAt:     booking.CreatedAt,
 		UpdatedAt:     booking.UpdatedAt,
@@ -392,14 +367,6 @@ func (h *bookingHandler) GetUserBookingList(c echo.Context) error {
 
 	resp := make([]response.Booking, 0)
 	for _, booking := range bookings {
-		service, err := h.serviceService.GetService(booking.ServiceId)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of booking",
-				Error:   err.Error(),
-			})
-		}
-
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
@@ -412,29 +379,24 @@ func (h *bookingHandler) GetUserBookingList(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Quantity: booking.Quantity,
-			Cost:     booking.Cost,
+			ServiceId:          booking.ServiceId,
+			ServiceTitle:       booking.ServiceTitle,
+			ServiceDescription: booking.ServiceDescription,
+			Price:              booking.Price,
+			PricingType:        string(booking.PricingType),
+			Quantity:           booking.Quantity,
+			Cost:               booking.Cost,
 			Extras: slices.AppendSeq(
-				make([]response.Extra, 0),
-				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
-					return response.Extra{
-						Id:          x.Id,
-						Title:       x.Title,
-						Description: x.Description,
+				make([]response.BookingExtra, 0),
+				utils.Map(booking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
+					return response.BookingExtra{
+						BookingId:   x.BookingId,
+						Title:       x.ExtraTitle,
+						Description: x.ExtraDescription,
 						Price:       x.Price,
 					}
 				}),
 			),
-			Service: response.ServiceBareInfo{
-				Id:          booking.ServiceId,
-				VendorId:    booking.VendorId,
-				Title:       service.Service.Title,
-				Description: service.Service.Description,
-				Price:       service.Service.Price,
-				PricingType: service.Service.PricingType,
-				Tags:        service.Service.Tags,
-				Location:    service.Service.Location,
-			},
 			Status:        string(booking.Status),
 			CreatedAt:     booking.CreatedAt,
 			UpdatedAt:     booking.UpdatedAt,
@@ -467,14 +429,6 @@ func (h *bookingHandler) GetRecentBookings(c echo.Context) error {
 
 	resp := make([]response.Booking, 0)
 	for _, booking := range bookings {
-		service, err := h.serviceService.GetService(booking.ServiceId)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of booking",
-				Error:   err.Error(),
-			})
-		}
-
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
@@ -487,29 +441,24 @@ func (h *bookingHandler) GetRecentBookings(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Quantity: booking.Quantity,
-			Cost:     booking.Cost,
+			ServiceId:          booking.ServiceId,
+			ServiceTitle:       booking.ServiceTitle,
+			ServiceDescription: booking.ServiceDescription,
+			Price:              booking.Price,
+			PricingType:        string(booking.PricingType),
+			Quantity:           booking.Quantity,
+			Cost:               booking.Cost,
 			Extras: slices.AppendSeq(
-				make([]response.Extra, 0),
-				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
-					return response.Extra{
-						Id:          x.Id,
-						Title:       x.Title,
-						Description: x.Description,
+				make([]response.BookingExtra, 0),
+				utils.Map(booking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
+					return response.BookingExtra{
+						BookingId:   x.BookingId,
+						Title:       x.ExtraTitle,
+						Description: x.ExtraDescription,
 						Price:       x.Price,
 					}
 				}),
 			),
-			Service: response.ServiceBareInfo{
-				Id:          booking.ServiceId,
-				VendorId:    booking.VendorId,
-				Title:       service.Service.Title,
-				Description: service.Service.Description,
-				Price:       service.Service.Price,
-				PricingType: service.Service.PricingType,
-				Tags:        service.Service.Tags,
-				Location:    service.Service.Location,
-			},
 			Status:        string(booking.Status),
 			CreatedAt:     booking.CreatedAt,
 			UpdatedAt:     booking.UpdatedAt,
@@ -543,14 +492,6 @@ func (h *bookingHandler) GetConfirmedBookings(c echo.Context) error {
 
 	resp := make([]response.Booking, 0)
 	for _, booking := range bookings {
-		service, err := h.serviceService.GetService(booking.ServiceId)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of booking",
-				Error:   err.Error(),
-			})
-		}
-
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
@@ -563,29 +504,24 @@ func (h *bookingHandler) GetConfirmedBookings(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Quantity: booking.Quantity,
-			Cost:     booking.Cost,
+			ServiceId:          booking.ServiceId,
+			ServiceTitle:       booking.ServiceTitle,
+			ServiceDescription: booking.ServiceDescription,
+			Price:              booking.Price,
+			PricingType:        string(booking.PricingType),
+			Quantity:           booking.Quantity,
+			Cost:               booking.Cost,
 			Extras: slices.AppendSeq(
-				make([]response.Extra, 0),
-				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
-					return response.Extra{
-						Id:          x.Id,
-						Title:       x.Title,
-						Description: x.Description,
+				make([]response.BookingExtra, 0),
+				utils.Map(booking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
+					return response.BookingExtra{
+						BookingId:   x.BookingId,
+						Title:       x.ExtraTitle,
+						Description: x.ExtraDescription,
 						Price:       x.Price,
 					}
 				}),
 			),
-			Service: response.ServiceBareInfo{
-				Id:          booking.ServiceId,
-				VendorId:    booking.VendorId,
-				Title:       service.Service.Title,
-				Description: service.Service.Description,
-				Price:       service.Service.Price,
-				PricingType: service.Service.PricingType,
-				Tags:        service.Service.Tags,
-				Location:    service.Service.Location,
-			},
 			Status:        string(booking.Status),
 			CreatedAt:     booking.CreatedAt,
 			UpdatedAt:     booking.UpdatedAt,
@@ -618,14 +554,6 @@ func (h *bookingHandler) GetReviewableBookings(c echo.Context) error {
 
 	resp := make([]response.Booking, 0)
 	for _, booking := range reviewables {
-		service, err := h.serviceService.GetService(booking.ServiceId)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of booking",
-				Error:   err.Error(),
-			})
-		}
-
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
@@ -638,29 +566,24 @@ func (h *bookingHandler) GetReviewableBookings(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Quantity: booking.Quantity,
-			Cost:     booking.Cost,
+			ServiceId:          booking.ServiceId,
+			ServiceTitle:       booking.ServiceTitle,
+			ServiceDescription: booking.ServiceDescription,
+			Price:              booking.Price,
+			PricingType:        string(booking.PricingType),
+			Quantity:           booking.Quantity,
+			Cost:               booking.Cost,
 			Extras: slices.AppendSeq(
-				make([]response.Extra, 0),
-				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
-					return response.Extra{
-						Id:          x.Id,
-						Title:       x.Title,
-						Description: x.Description,
+				make([]response.BookingExtra, 0),
+				utils.Map(booking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
+					return response.BookingExtra{
+						BookingId:   x.BookingId,
+						Title:       x.ExtraTitle,
+						Description: x.ExtraDescription,
 						Price:       x.Price,
 					}
 				}),
 			),
-			Service: response.ServiceBareInfo{
-				Id:          booking.ServiceId,
-				VendorId:    booking.VendorId,
-				Title:       service.Service.Title,
-				Description: service.Service.Description,
-				Price:       service.Service.Price,
-				PricingType: service.Service.PricingType,
-				Tags:        service.Service.Tags,
-				Location:    service.Service.Location,
-			},
 			Status:        string(booking.Status),
 			CreatedAt:     booking.CreatedAt,
 			UpdatedAt:     booking.UpdatedAt,
@@ -694,14 +617,6 @@ func (h *bookingHandler) GetBookingHistory(c echo.Context) error {
 
 	resp := make([]response.Booking, 0)
 	for _, booking := range bookings {
-		service, err := h.serviceService.GetService(booking.ServiceId)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-				Message: "Could not get service information of booking",
-				Error:   err.Error(),
-			})
-		}
-
 		resp = append(resp, response.Booking{
 			Id: booking.Id,
 			Vendor: response.User{
@@ -714,29 +629,24 @@ func (h *bookingHandler) GetBookingHistory(c echo.Context) error {
 				Name:     booking.Client.Name,
 				ImageURL: booking.Client.ImageUrl,
 			},
-			Quantity: booking.Quantity,
-			Cost:     booking.Cost,
+			ServiceId:          booking.ServiceId,
+			ServiceTitle:       booking.ServiceTitle,
+			ServiceDescription: booking.ServiceDescription,
+			Price:              booking.Price,
+			PricingType:        string(booking.PricingType),
+			Quantity:           booking.Quantity,
+			Cost:               booking.Cost,
 			Extras: slices.AppendSeq(
-				make([]response.Extra, 0),
-				utils.Map(booking.Extras, func(x *models.ExtraModel) response.Extra {
-					return response.Extra{
-						Id:          x.Id,
-						Title:       x.Title,
-						Description: x.Description,
+				make([]response.BookingExtra, 0),
+				utils.Map(booking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
+					return response.BookingExtra{
+						BookingId:   x.BookingId,
+						Title:       x.ExtraTitle,
+						Description: x.ExtraDescription,
 						Price:       x.Price,
 					}
 				}),
 			),
-			Service: response.ServiceBareInfo{
-				Id:          booking.ServiceId,
-				VendorId:    booking.VendorId,
-				Title:       service.Service.Title,
-				Description: service.Service.Description,
-				Price:       service.Service.Price,
-				PricingType: service.Service.PricingType,
-				Tags:        service.Service.Tags,
-				Location:    service.Service.Location,
-			},
 			Status:        string(booking.Status),
 			CreatedAt:     booking.CreatedAt,
 			UpdatedAt:     booking.UpdatedAt,

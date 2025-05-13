@@ -810,7 +810,7 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		switch booking.Service.PricingType {
+		switch booking.PricingType {
 		case "fixed":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 69, "<p class=\"text-neutral-gray\">")
 			if templ_7745c5c3_Err != nil {
@@ -1030,9 +1030,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var46 string
-		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Title)
+		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ServiceTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 371, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 371, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 		if templ_7745c5c3_Err != nil {
@@ -1043,9 +1043,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var47 string
-		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(booking.Service.Description)
+		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(booking.ServiceDescription)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 375, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 375, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
@@ -1065,16 +1065,16 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		switch booking.Service.PricingType {
+		switch booking.PricingType {
 		case "fixed":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "<p class=\"text-neutral-gray\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var48 string
-			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 389, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 389, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 			if templ_7745c5c3_Err != nil {
@@ -1090,9 +1090,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var49 string
-			templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 391, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 391, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 			if templ_7745c5c3_Err != nil {
@@ -1108,9 +1108,9 @@ func offCanvasBookingData(booking dto.Booking) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var50 string
-			templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Service.Price))
+			templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(utils.FormatCurrency(booking.Price))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 393, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/user_management/user/user_account.templ`, Line: 393, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 			if templ_7745c5c3_Err != nil {
