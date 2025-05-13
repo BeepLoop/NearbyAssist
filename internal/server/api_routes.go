@@ -218,6 +218,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		userService := user_service.NewService(userStore, vendorStore, applicationStore, supportingImageStore, resourceService, s.FS, s.Encrypt, s.Hash, s.JWT)
+		qrService := qr_service.NewService(utils.Must((s.Encrypt.GetKey())))
 		serviceService := service_service.NewService(
 			serviceStore,
 			vendorStore,
@@ -233,11 +234,11 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 			vendorStore,
 			notifStore,
 			bookingStore,
+			qrService,
 			s.WS,
 			s.Encrypt,
 			s.JWT,
 		)
-		qrService := qr_service.NewService(utils.Must((s.Encrypt.GetKey())))
 
 		handler := booking.NewHandler(bookingService, serviceService, userService, qrService)
 

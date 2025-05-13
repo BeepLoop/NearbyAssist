@@ -9,8 +9,10 @@ import (
 	service_repo "nearbyassist/internal/repository/service"
 	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	notification_service "nearbyassist/internal/service/notification"
+	qr_service "nearbyassist/internal/service/qr"
 	"nearbyassist/internal/service/websocket"
 	"nearbyassist/internal/utils"
 	"slices"
@@ -31,6 +33,7 @@ type Service struct {
 	vendorStore  vendor_repo.VendorRepository
 	notifStore   notification_repo.NotificationRepository
 	bookingStore booking_repo.BookingRepository
+	qrService    *qr_service.Service
 	ws           websocket.Socket
 	encrypt      core.Encryption
 	jwt          core.Authenticator
@@ -41,6 +44,7 @@ func NewService(
 	vendorStore vendor_repo.VendorRepository,
 	notifStore notification_repo.NotificationRepository,
 	bookingStore booking_repo.BookingRepository,
+	qrService *qr_service.Service,
 	ws websocket.Socket,
 	encrypt core.Encryption,
 	jwt core.Authenticator,
@@ -50,6 +54,7 @@ func NewService(
 		vendorStore:  vendorStore,
 		notifStore:   notifStore,
 		bookingStore: bookingStore,
+		qrService:    qrService,
 		ws:           ws,
 		encrypt:      encrypt,
 		jwt:          jwt,
@@ -109,6 +114,55 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 		return "", err
 	}
 
+	createdBooking, err := s.bookingStore.FindById(bookingId)
+	if err != nil {
+		return "", err
+	}
+
+	createdBookingPayload := response.Booking{
+		Id: createdBooking.Id,
+		Vendor: response.User{
+			Id:       createdBooking.VendorId,
+			Name:     utils.Must(s.encrypt.DecryptString(createdBooking.Vendor.Name)),
+			ImageURL: createdBooking.Vendor.ImageUrl,
+		},
+		Client: response.User{
+			Id:       createdBooking.ClientId,
+			Name:     utils.Must(s.encrypt.DecryptString(createdBooking.Client.Name)),
+			ImageURL: createdBooking.Client.ImageUrl,
+		},
+		ServiceId:          createdBooking.ServiceId,
+		ServiceTitle:       utils.Must(s.encrypt.DecryptString(createdBooking.ServiceTitle)),
+		ServiceDescription: utils.Must(s.encrypt.DecryptString(createdBooking.ServiceDescription)),
+		Price:              createdBooking.Price,
+		PricingType:        string(createdBooking.PricingType),
+		Quantity:           createdBooking.Quantity,
+		Cost:               createdBooking.Cost,
+		Extras: slices.AppendSeq(
+			make([]response.BookingExtra, 0),
+			utils.Map(createdBooking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
+				return response.BookingExtra{
+					BookingId:   x.BookingId,
+					Title:       x.ExtraTitle,
+					Description: x.ExtraDescription,
+					Price:       x.Price,
+				}
+			}),
+		),
+		Status:        string(createdBooking.Status),
+		CreatedAt:     createdBooking.CreatedAt,
+		UpdatedAt:     createdBooking.UpdatedAt,
+		ScheduleStart: createdBooking.ScheduleStart.String,
+		ScheduleEnd:   createdBooking.ScheduleEnd.String,
+		CancelledBy:   createdBooking.CancelledBy.String,
+		CancelReason:  createdBooking.CancelReason.String,
+		QRSignature: utils.Must(s.qrService.SignData(&request.QRSignatureInput{
+			ClientID:  createdBooking.ClientId,
+			VendorID:  createdBooking.VendorId,
+			BookingID: createdBooking.Id,
+		})),
+	}
+
 	notificationHeading := "New Request"
 	notificationContent := "1 new booking request"
 
@@ -142,8 +196,14 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 		Type:       websocket.EVT_NOTIF,
 		Payload:    notification,
 	}
+	bookingEvent := &websocket.EventModel{
+		ReceiverId: booking.VendorId,
+		Type:       websocket.EVT_RECEIVED_BOOKING,
+		Payload:    createdBookingPayload,
+	}
 
 	s.ws.Send(notifEvent)
+	s.ws.Send(bookingEvent)
 
 	return bookingId, nil
 }
@@ -242,8 +302,14 @@ func (s *Service) VendorCancelBooking(bearerToken string, req *request.CancelBoo
 		Type:       websocket.EVT_NOTIF,
 		Payload:    notification,
 	}
+	bookingEvent := &websocket.EventModel{
+		ReceiverId: booking.ClientId,
+		Type:       websocket.EVT_VENDOR_CANCELLED_BOOKING,
+		Payload:    utils.Mapper{"id": req.BookingId, "reason": req.Reason},
+	}
 
 	s.ws.Send(notifEvent)
+	s.ws.Send(bookingEvent)
 
 	return nil
 }
@@ -309,8 +375,14 @@ func (s *Service) ClientCancelBooking(bearerToken string, req *request.CancelBoo
 		Type:       websocket.EVT_NOTIF,
 		Payload:    notification,
 	}
+	bookingEvent := &websocket.EventModel{
+		ReceiverId: booking.VendorId,
+		Type:       websocket.EVT_CLIENT_CANCELLED_BOOKING,
+		Payload:    utils.Mapper{"id": req.BookingId, "reason": req.Reason},
+	}
 
 	s.ws.Send(notifEvent)
+	s.ws.Send(bookingEvent)
 
 	return nil
 }
