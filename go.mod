@@ -1,11 +1,12 @@
 module nearbyassist
 
-go 1.24
-
-toolchain go1.24.2
+go 1.24.2
 
 require (
 	github.com/a-h/templ v0.3.857
+	github.com/chromedp/cdproto v0.0.0-20250429231605-6ed5b53462d4
+	github.com/chromedp/chromedp v0.13.6
+	github.com/dustin/go-humanize v1.0.1
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -25,11 +26,9 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/chromedp/cdproto v0.0.0-20250429231605-6ed5b53462d4 // indirect
-	github.com/chromedp/chromedp v0.13.6 // indirect
+	github.com/beeploop/simple-additive-weighting v1.0.0 // indirect
 	github.com/chromedp/sysutil v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

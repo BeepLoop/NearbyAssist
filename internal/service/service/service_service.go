@@ -2,11 +2,12 @@ package service_service
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"mime/multipart"
 	"nearbyassist/internal/config/setting"
-	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	service_repo "nearbyassist/internal/repository/service"
 	vendor_repo "nearbyassist/internal/repository/vendor"
@@ -20,6 +21,9 @@ import (
 	"nearbyassist/internal/utils"
 	"slices"
 	"strings"
+
+	"github.com/beeploop/simple-additive-weighting/roc"
+	"github.com/beeploop/simple-additive-weighting/saw"
 )
 
 const (
@@ -567,8 +571,11 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		}
 	}
 
+	// Perform SAW with ROC
 	// Compute distance from origin to each service
-	suggestionOpsInput := make([]dto.GeospatialOperation, 0)
+	completedBookingMap := make(map[string]int)
+	computedDistances := make(map[string]float32)
+	alternatives := make([]saw.Alternative, 0)
 	for _, service := range validServices {
 		destination := &models.GeoSpatialModel{
 			Latitude:  service.Address.Latitude,
@@ -586,40 +593,104 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 			continue
 		}
 
-		suggestionOpsInput = append(suggestionOpsInput, dto.GeospatialOperation{
-			Id:                 service.Id,
-			Price:              utils.StringToFloat32ElseZero(service.Price),
-			Rating:             utils.StringToFloat32ElseZero(service.Vendor.Rating),
-			Latitude:           float32(service.Vendor.User.Address.Latitude),
-			Longitude:          float32(service.Vendor.User.Address.Longitude),
-			CompletedBookings:  float32(completedBookings),
-			DistanceFromOrigin: distance,
-		})
+		alternative := saw.Alternative{
+			Title: service.Id,
+			Criterion: []saw.Criteria{
+				{Title: "price", Value: utils.StringToFloat64ElseZero(service.Price)},
+				{Title: "rating", Value: utils.StringToFloat64ElseZero(service.Vendor.Rating)},
+				{Title: "distance", Value: float64(distance)},
+				{Title: "completed_bookings", Value: float64(completedBookings)},
+			},
+		}
+
+		completedBookingMap[service.Id] = completedBookings
+		computedDistances[service.Id] = distance
+		alternatives = append(alternatives, alternative)
 	}
 
-	// Compute suggestibility score of each service
-	serviceScores, err := s.suggest.GenerateSuggestions(suggestionOpsInput)
-	if err != nil {
-		return nil, err
+	userCriteriaPreference := []roc.Criteria{}
+	if preferences, ok := params["preference"]; !ok {
+		// Default criteria
+		userCriteriaPreference = []roc.Criteria{
+			{Title: "price", Rank: 1},
+			{Title: "rating", Rank: 2},
+			{Title: "distance", Rank: 3},
+			{Title: "completed_bookings", Rank: 4},
+		}
+	} else {
+		for i, pref := range strings.Split(preferences, ",") {
+			switch pref {
+			case "p":
+				userCriteriaPreference = append(userCriteriaPreference, roc.Criteria{
+					Title: "price", Rank: i + 1,
+				})
+			case "r":
+				userCriteriaPreference = append(userCriteriaPreference, roc.Criteria{
+					Title: "rating", Rank: i + 1,
+				})
+			case "d":
+				userCriteriaPreference = append(userCriteriaPreference, roc.Criteria{
+					Title: "distance", Rank: i + 1,
+				})
+			case "b":
+				userCriteriaPreference = append(userCriteriaPreference, roc.Criteria{
+					Title: "completed_bookings", Rank: i + 1,
+				})
+			}
+		}
+	}
+
+	r := roc.NewRankOrderCentroid(userCriteriaPreference)
+	priceWeight := r.CalculateWeightOf("price")
+	ratingWeight := r.CalculateWeightOf("rating")
+	distanceWeight := r.CalculateWeightOf("distance")
+	cbWeight := r.CalculateWeightOf("completed_bookings")
+
+	scores := make(map[string]float64)
+	sawInstance := saw.NewSAW(alternatives)
+	normalizer := saw.NewNormalizer()
+
+	for _, alternative := range sawInstance.Alternatives {
+		price, _ := alternative.CriteriaWithTitle("price")
+		otherPrices := sawInstance.CriteriasWithTitle("price")
+		normalizedPrice := normalizer.NormalizeCost(price.Value, otherPrices)
+
+		rating, _ := alternative.CriteriaWithTitle("rating")
+		otherRatings := sawInstance.CriteriasWithTitle("rating")
+		normalizedRating := normalizer.NormalizeBenefit(rating.Value, otherRatings)
+
+		distance, _ := alternative.CriteriaWithTitle("distance")
+		otherDistances := sawInstance.CriteriasWithTitle("distance")
+		normalizedDistance := normalizer.NormalizeCost(distance.Value, otherDistances)
+
+		cb, _ := alternative.CriteriaWithTitle("completed_bookings")
+		otherCBs := sawInstance.CriteriasWithTitle("completed_bookings")
+		normalizedCBs := normalizer.NormalizeBenefit(cb.Value, otherCBs)
+
+		pairs := []saw.WeightAndNormalizedPair{
+			{Weight: priceWeight, Normalized: normalizedPrice},
+			{Weight: ratingWeight, Normalized: normalizedRating},
+			{Weight: distanceWeight, Normalized: normalizedDistance},
+			{Weight: cbWeight, Normalized: normalizedCBs},
+		}
+
+		score := sawInstance.ComputeWeightedSum(pairs)
+		scores[alternative.Title] = score
 	}
 
 	results := slices.AppendSeq(
 		make([]*response.ServiceSearchResult, 0),
 		utils.Map(validServices, func(service *models.ServiceModel) *response.ServiceSearchResult {
-			// Index should be guaranteed to not be -1, something is terribly wrong if it is -1
-			index := slices.IndexFunc(suggestionOpsInput, func(s dto.GeospatialOperation) bool {
-				return s.Id == service.Id
-			})
-
 			return &response.ServiceSearchResult{
 				Id:                service.Id,
 				VendorName:        utils.Must(s.encrypt.DecryptString(service.Vendor.User.Name)),
-				SuggestionScore:   float32(serviceScores[service.Id]),
-				Price:             float32(utils.StringToFloat64ElseZero(service.Price)),
-				Rating:            float32(utils.StringToFloat64ElseZero(service.Vendor.Rating)),
+				Suggestibility:    float32(scores[service.Id]),
+				Price:             service.Price,
+				Rating:            service.Vendor.Rating,
 				Latitude:          service.Vendor.User.Address.Latitude,
 				Longitude:         service.Vendor.User.Address.Longitude,
-				CompletedBookings: suggestionOpsInput[index].CompletedBookings,
+				CompletedBookings: completedBookingMap[service.Id],
+				Distance:          computedDistances[service.Id],
 				Service: response.Service{
 					Id:          service.Id,
 					VendorId:    service.VendorId,
@@ -659,6 +730,11 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 			}
 		}),
 	)
+
+	utils.ForEach(results, func(result *response.ServiceSearchResult) {
+		b, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(b))
+	})
 
 	return results, nil
 }

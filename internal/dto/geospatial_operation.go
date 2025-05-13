@@ -9,3 +9,11 @@ type GeospatialOperation struct {
 	CompletedBookings  float32
 	DistanceFromOrigin float32
 }
+
+type ServiceWithDistance struct {
+	Id                 string
+	Price              float64
+	Rating             float64
+	DistanceFromOrigin float64
+	CompletedBookings  float64
+}
