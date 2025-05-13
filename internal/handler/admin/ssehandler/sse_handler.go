@@ -18,8 +18,6 @@ func NewHandler() *handler {
 }
 
 func (h *handler) Listen(c echo.Context) error {
-	fmt.Println("sse client connected, ip: %v", c.RealIP())
-
 	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")
 	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
 	c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
@@ -35,7 +33,6 @@ func (h *handler) Listen(c echo.Context) error {
 	for {
 		select {
 		case <-c.Request().Context().Done():
-			fmt.Println("sse client disconnected, ip: %v", c.RealIP())
 			return nil
 		case <-ticker.C:
 			b, err := sse.New().GetMarshalled()

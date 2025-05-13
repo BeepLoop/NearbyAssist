@@ -9,14 +9,12 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
 	"nearbyassist/internal/models"
-	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-func Settings(admin models.AdminModel, flash string, searchBehavior string, weights suggestion_engine.Weights) templ.Component {
+func Settings(admin models.AdminModel, flash string, searchBehavior string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -100,65 +98,13 @@ func Settings(admin models.AdminModel, flash string, searchBehavior string, weig
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(searchBehavior)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings/settings.templ`, Line: 37, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings/settings.templ`, Line: 35, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" required autocomplete=\"off\" class=\"rounded-sm p-1 text-xs outline-1 outline-pale-gray focus:outline-primary\"> <datalist id=\"search_behaviors\"><option value=\"exact_match\"></option> <option value=\"fuzzy_match\"></option></datalist> <button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs font-medium text-white hover:opacity-75\">save</button></form></div><!-- weights configuration --><div class=\"border-b border-pale-gray p-2\"><p class=\"font-medium text-neutral-dark\">Weights Configuration:</p><div class=\"mt-2 text-neutral-dark\" x-data=\"weights\" x-init=\"init()\"><form action=\"/admin/settings/weights\" method=\"POST\" class=\"grid max-w-sm gap-2 p-2\"><div class=\"flex items-center justify-between gap-2\"><label for=\"price\" class=\"font-medium\">Price:</label> <input type=\"number\" id=\"price\" name=\"price\" placeholder=\"0.4\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.3f", weights.PriceWeight))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings/settings.templ`, Line: 72, Col: 56}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"rounded-sm p-1.5 outline-1 outline-neutral-gray focus:outline-primary\" min=\"0\" max=\"1\" step=\"0.01\"></div><div class=\"flex items-center justify-between gap-2\"><label for=\"rating\" class=\"font-medium\">Rating:</label> <input type=\"number\" id=\"rating\" name=\"rating\" placeholder=\"0.3\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.3f", weights.RatingWeight))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings/settings.templ`, Line: 86, Col: 57}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"rounded-sm p-1.5 outline-1 outline-neutral-gray focus:outline-primary\" min=\"0\" max=\"1\" step=\"0.01\"></div><div class=\"flex items-center justify-between gap-2\"><label for=\"distance\" class=\"font-medium\">Distance:</label> <input type=\"number\" id=\"distance\" name=\"distance\" placeholder=\"0.2\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.3f", weights.DistanceWeight))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings/settings.templ`, Line: 100, Col: 59}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"rounded-sm p-1.5 outline-1 outline-neutral-gray focus:outline-primary\" min=\"0\" max=\"1\" step=\"0.01\"></div><div class=\"flex items-center justify-between gap-2\"><label for=\"completedBookings\" class=\"font-medium\">Completed Bookings:</label> <input type=\"number\" id=\"completedBookings\" name=\"completedBookings\" placeholder=\"0.1\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.3f", weights.BookingsCompletedWeight))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings/settings.templ`, Line: 114, Col: 68}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"rounded-sm p-1.5 outline-1 outline-neutral-gray focus:outline-primary\" min=\"0\" max=\"1\" step=\"0.01\"></div><div x-show=\"showWarning\" class=\"mt-2 rounded-sm bg-danger-light/25 p-2 text-xs text-danger outline-1 outline-danger\"><p class=\"font-medium\">Sum of values must not exceed 1</p></div><div class=\"flex justify-end\"><button type=\"submit\" x-bind:disabled=\"disabled\" x-bind:class=\"disabled === true ? &#39;bg-neutral-gray/25&#39; : &#39;bg-primary text-white font-medium&#39;\" class=\"cursor-pointer rounded-sm px-2 py-1.5 font-medium hover:opacity-75\">Save</button></div><script>\n                            (function() {\n                                document.addEventListener(\"alpine:init\", () => {\n                                    Alpine.data(\"weights\", () => ({\n                                        showWarning: false,\n                                        disabled: false,\n                                        init() {\n                                            const inputs = Array.from(document.querySelectorAll('input[type=\"number\"]'));\n\n                                            const update = () => {\n                                                const sum = inputs.reduce((acc, input) => acc + parseFloat(input.value || 0), 0);\n                                                const rounded = Math.round(sum * 1000)/1000;\n\n                                                this.showWarning = rounded > 1.0;\n                                                this.disabled = rounded !== 1.0;\n                                            }\n\n                                            inputs.forEach(input => {\n                                                input.addEventListener(\"input\", update);\n                                            });\n\n                                            update();\n                                        },\n                                    }));\n                                });\n                             })();\n                        </script></form></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" required autocomplete=\"off\" class=\"rounded-sm p-1 text-xs outline-1 outline-pale-gray focus:outline-primary\"> <datalist id=\"search_behaviors\"><option value=\"exact_match\"></option> <option value=\"fuzzy_match\"></option></datalist> <button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs font-medium text-white hover:opacity-75\">save</button></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
