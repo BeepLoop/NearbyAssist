@@ -1,11 +1,12 @@
 package web
 
 import (
-	"net/http"
+	"nearbyassist/views/pages"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetIndex(c echo.Context) error {
-	return c.Redirect(http.StatusSeeOther, "/auth/login")
+	page := pages.Index()
+	return page.Render(c.Request().Context(), c.Response().Writer)
 }

@@ -29,15 +29,7 @@ func BasicLayout() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = head().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<body class=\"font-roboto\"><header class=\"flex items-center px-4 py-2 justify-between z-50\"><!-- Logo --><a href=\"/\" class=\"cursor-pointer\"><div class=\"\"><div class=\"text-xl font-bold\"><span class=\"\">Nearby</span> <span class=\"text-green-700\">Assist</span></div></div></a><!-- Links --><div><ul class=\"flex items-center gap-4 text-sm\"><li><a href=\"/privacy_policy\" class=\"hover:underline\">Privacy Policy</a></li><li><a href=\"/terms_and_conditions\" class=\"hover:underline\">Terms and Conditions</a></li></ul></div></header><div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>NearbyAssist</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/public/logo.ico\"><link rel=\"stylesheet\" href=\"/static/style/style.css\"><!-- Alpine Plugins --><script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js\"></script><script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js\"></script><!-- Alpine Core --><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script></head><body class=\"font-roboto\"><header class=\"flex items-center px-4 py-2 justify-between z-50\"><!-- Logo --><a href=\"/\" class=\"cursor-pointer\"><div class=\"\"><div class=\"text-xl font-bold\"><span class=\"\">Nearby</span> <span class=\"text-primary\">Assist</span></div></div></a></header><div class=\"\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -45,7 +37,7 @@ func BasicLayout() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><footer class=\"bg-gray-900 text-gray-400 text-center py-4 text-xs\"><p>&copy; 2025 NearbyAssist. All rights reserved.</p><div class=\"mt-2\"><a href=\"/privacy_policy\" class=\"text-green-500 hover:text-white mx-2\">Privacy Policy</a> | <a href=\"/terms_and_conditions\" class=\"text-green-500 hover:text-white mx-2\">Terms and Conditions</a> | <a href=\"/auth/login\" class=\"text-green-500 hover:text-white mx-2\">Admin</a></div></footer></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

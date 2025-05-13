@@ -8,10 +8,7 @@ package pages
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"nearbyassist/views/layout"
-	"nearbyassist/views/partials"
-)
+import "nearbyassist/views/partials"
 
 func Login(flash string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -34,49 +31,35 @@ func Login(flash string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-			if !templ_7745c5c3_IsBuffer {
-				defer func() {
-					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err == nil {
-						templ_7745c5c3_Err = templ_7745c5c3_BufErr
-					}
-				}()
-			}
-			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templ.JSONScript("flash", flash).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <!-- toasy component --> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = partials.ToastNotification().Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <!-- login form --> <div class=\"fixed right-0 left-0 z-0 grid h-screen place-items-center\"><div class=\"w-full max-w-sm rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter\"><h2 class=\"mb-4 text-center text-2xl font-semibold\">Welcome back</h2>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = loginForm().Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = requestPasswordReset().Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			return nil
-		})
-		templ_7745c5c3_Err = layout.BasicLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>NearbyAssist</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/public/logo.ico\"><link rel=\"stylesheet\" href=\"/static/style/style.css\"><!-- Alpine Plugins --><script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js\"></script><script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js\"></script><!-- Alpine Core --><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script></head><body class=\"font-roboto flex flex-col h-screen\"><header class=\"flex items-center px-4 py-2 justify-between z-50\"><!-- Logo --><a href=\"/\" class=\"cursor-pointer\"><div class=\"\"><div class=\"text-xl font-bold\"><span class=\"\">Nearby</span> <span class=\"text-green-700\">Assist</span></div></div></a></header><div class=\"flex-1 grid place-content-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.JSONScript("flash", flash).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- toasy component -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = partials.ToastNotification().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- login form --><div class=\"\"><div class=\"w-md rounded-md bg-white p-8 shadow-2xl outline-1 outline-neutral-gray-lighter\"><h2 class=\"mb-4 text-center text-2xl font-semibold\">Welcome back</h2>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = loginForm().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = requestPasswordReset().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div></div><footer class=\"bg-gray-900 text-gray-400 text-center py-4 text-xs\"><p>&copy; 2025 NearbyAssist. All rights reserved.</p><div class=\"mt-2\"><a href=\"/privacy_policy\" class=\"text-green-500 hover:text-white mx-2\">Privacy Policy</a> | <a href=\"/terms_and_conditions\" class=\"text-green-500 hover:text-white mx-2\">Terms and Conditions</a> | <a href=\"/auth/login\" class=\"text-green-500 hover:text-white mx-2\">Admin</a></div></footer></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -100,12 +83,12 @@ func loginForm() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<form action=\"/auth/login\" method=\"POST\" class=\"flex flex-col items-center\"><div class=\"mb-4 w-full text-xs\"><input type=\"text\" id=\"username\" name=\"username\" placeholder=\"Username\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-primary focus:outline-none\" autoComplete=\"off\" autofocus required></div><div class=\"mb-6 w-full text-xs\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<form action=\"/auth/login\" method=\"POST\" class=\"flex flex-col items-center\"><div class=\"mb-4 w-full text-xs\"><input type=\"text\" id=\"username\" name=\"username\" placeholder=\"Username\" class=\"mt-1 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 focus:border-primary focus:outline-none\" autoComplete=\"off\" autofocus required></div><div class=\"mb-6 w-full text-xs\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -113,7 +96,7 @@ func loginForm() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><button type=\"submit\" class=\"w-full cursor-pointer rounded-md bg-good px-4 py-2 text-xs font-semibold text-white hover:opacity-75\">Login</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><button type=\"submit\" class=\"w-full cursor-pointer rounded-md bg-primary px-4 py-2 text-xs font-semibold text-white hover:opacity-75\">Login</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -137,12 +120,12 @@ func requestPasswordReset() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div x-data=\"{passwordResetOpen: false}\"><div class=\"mt-4 flex justify-center\"><p x-on:click=\"passwordResetOpen = true\" class=\"cursor-pointer text-xs text-good hover:underline\">Forgot Password?</p></div><div x-cloak x-show=\"passwordResetOpen\" x-on:keydown.esc.window=\"passwordResetOpen = false\" x-on:click.self=\"passwordResetOpen = false\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50\"><!-- Modal Dialog --><div x-show=\"passwordResetOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"max-w-96 min-w-80 rounded-sm bg-white p-2 p-4 outline-1 outline-pale-gray\"><!-- Dialog Header --><div class=\"flex items-center justify-between\"><h3 id=\"defaultModalTitle\" class=\"text-sm font-semibold tracking-wide\">Reset Request</h3><button x-on:click=\"passwordResetOpen = false\" aria-label=\"close modal\" class=\"cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.4\" class=\"h-5 w-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Dialog Body --><div class=\"mt-4\"><div class=\"rounded-sm bg-neutral-gray/25 p-2 text-xs text-neutral-dark\"><p>Enter username to submit a password reset request. </p></div><form action=\"/admin/reset\" method=\"POST\" class=\"mt-2\"><input type=\"text\" name=\"username\" placeholder=\"username\" autocomplete=\"off\" autofocus class=\"w-full rounded-sm border border-neutral-gray-lighter p-2 text-xs text-neutral-dark focus:border-primary focus:outline-none\"><div class=\"mt-4 flex justify-end gap-2\"><button x-on:click=\"passwordResetOpen = false\" type=\"button\" class=\"cursor-pointer rounded-sm px-4 py-2 text-xs font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75\">Cancel</button> <button x-on:click=\"passwordResetOpen = false\" type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-4 py-2 text-center text-xs font-medium text-white hover:opacity-75\"><span class=\"flex items-center gap-1\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m4.5 12.75 6 6 9-13.5\"></path></svg><p>Submit</p></span></button></div></form></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div x-data=\"{passwordResetOpen: false}\"><div class=\"mt-4 flex justify-center\"><p x-on:click=\"passwordResetOpen = true\" class=\"cursor-pointer text-xs text-primary hover:underline\">Forgot Password?</p></div><div x-cloak x-show=\"passwordResetOpen\" x-on:keydown.esc.window=\"passwordResetOpen = false\" x-on:click.self=\"passwordResetOpen = false\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"defaultModalTitle\" class=\"fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50\"><!-- Modal Dialog --><div x-show=\"passwordResetOpen\" x-transition:enter=\"transition ease-out duration-200 delay-100 motion-reduce:transition-opacity\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" class=\"max-w-96 min-w-80 rounded-sm bg-white p-2 p-4 outline-1 outline-pale-gray\"><!-- Dialog Header --><div class=\"flex items-center justify-between\"><h3 id=\"defaultModalTitle\" class=\"text-sm font-semibold tracking-wide\">Reset Request</h3><button x-on:click=\"passwordResetOpen = false\" aria-label=\"close modal\" class=\"cursor-pointer\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" stroke=\"currentColor\" fill=\"none\" stroke-width=\"1.4\" class=\"h-5 w-5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><!-- Dialog Body --><div class=\"mt-4\"><div class=\"rounded-sm bg-neutral-gray/25 p-2 text-xs text-neutral-dark\"><p>Enter username to submit a password reset request. </p></div><form action=\"/admin/reset\" method=\"POST\" class=\"mt-2\"><input type=\"text\" name=\"username\" placeholder=\"username\" autocomplete=\"off\" autofocus class=\"w-full rounded-sm border border-neutral-gray-lighter p-2 text-xs text-neutral-dark focus:border-primary focus:outline-none\"><div class=\"mt-4 flex justify-end gap-2\"><button x-on:click=\"passwordResetOpen = false\" type=\"button\" class=\"cursor-pointer rounded-sm px-4 py-2 text-xs font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75\">Cancel</button> <button x-on:click=\"passwordResetOpen = false\" type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-4 py-2 text-center text-xs font-medium text-white hover:opacity-75\"><span class=\"flex items-center gap-1\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m4.5 12.75 6 6 9-13.5\"></path></svg><p>Submit</p></span></button></div></form></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
