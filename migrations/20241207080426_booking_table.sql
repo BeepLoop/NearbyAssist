@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS Booking (
     id VARCHAR(255) NOT NULL,
     vendorId VARCHAR(255) NOT NULL,
     clientId VARCHAR(255) NOT NULL,
+    serviceId VARCHAR(255) NOT NULL,
     serviceTitle VARCHAR(255) NOT NULL,
     serviceDescription TEXT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS Booking (
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY(clientId) REFERENCES User(id),
+    FOREIGN KEY(serviceId) REFERENCES Service(id),
     FOREIGN KEY(cancelledBy) REFERENCES User(id),
     INDEX(id)
 );
