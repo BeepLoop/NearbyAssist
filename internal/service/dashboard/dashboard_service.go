@@ -201,7 +201,7 @@ func (s *Service) GetDashbaordData() (*dto.Dashboard, error) {
 						Name:      utils.Must(s.encrypt.DecryptString(user.Name)),
 						Email:     utils.Must(s.encrypt.DecryptString(user.Email)),
 						ImageURL:  user.ImageUrl,
-						CreatedAt: utils.DateMonth(user.CreatedAt),
+						CreatedAt: utils.FormatDMY(user.CreatedAt),
 					}
 				}),
 			),

@@ -16,7 +16,8 @@ func FormatDate(date string) string {
 		return date
 	}
 
-	return t.Format(time.RFC1123)
+	format := "Mon, 02 Jan 2006 03:04:05 PM"
+	return t.Format(format)
 }
 
 func FormatDateTime(date time.Time) string {
