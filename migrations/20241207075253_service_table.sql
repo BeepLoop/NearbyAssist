@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS Service (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
-    FOREIGN KEY(vendorId) REFERENCES User(id),
+    FOREIGN KEY(vendorId) REFERENCES Vendor(vendorId),
     INDEX(id, vendorId, signature)
 );
 -- +goose StatementBegin

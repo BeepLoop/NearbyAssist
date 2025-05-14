@@ -589,8 +589,9 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 
 		completedBookings, err := s.vendorStore.CompletedBookingCountOfService(service.VendorId, service.Id)
 		if err != nil {
+			fmt.Println("err completed bookins: ", err.Error())
 			// If error, skip this service
-			continue
+			completedBookings = 0
 		}
 
 		alternative := saw.Alternative{

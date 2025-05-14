@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS IdentityVerification (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
+    FOREIGN KEY(userId) REFERENCES User(id),
     INDEX(id, userId)
 );
 -- +goose StatementBegin

@@ -351,7 +351,7 @@ func (s *MysqlServiceRepository) GetAllWithTagAny(tags []string) ([]*models.Serv
 	defer cancel()
 
 	base := `
-        SELECT
+        SELECT DISTINCT
             s.id
         FROM 
             ServiceTag st
@@ -399,7 +399,7 @@ func (s *MysqlServiceRepository) FuzzyMatchTags(tags []string) ([]*models.Servic
 	defer cancel()
 
 	query := `
-        SELECT
+        SELECT DISTINCT
             s.id
         FROM 
             ServiceTag st
