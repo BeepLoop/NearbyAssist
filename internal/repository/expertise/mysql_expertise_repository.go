@@ -32,10 +32,8 @@ func (s *MysqlExpertiseRepository) Create(data *models.ExpertiseModel) (string, 
 		return "", err
 	}
 
-	for _, tag := range data.Tags {
-		if _, err := s.CreateTag(data.Id, tag); err != nil {
-			return "", err
-		}
+	if err := s.CreateTags(data.Id, data.Tags); err != nil {
+		return "", err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -45,48 +43,38 @@ func (s *MysqlExpertiseRepository) Create(data *models.ExpertiseModel) (string, 
 	return data.Id, nil
 }
 
-func (s *MysqlExpertiseRepository) CreateTag(expertiseId string, data *models.TagModel) (string, error) {
+func (s *MysqlExpertiseRepository) CreateTags(expertiseId string, tags []*models.TagModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	data.Id = utils.GenerateId()
-
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return "", err
+		return err
 	}
+	defer tx.Rollback()
 
 	createTagQuery := "INSERT INTO Tag (id, title) VALUES (:id, :title)"
-	if _, err := tx.NamedExecContext(ctx, createTagQuery, data); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return "", err
-		}
-
-		return "", err
-	}
-
 	createRelationshipQuery := "INSERT INTO ExpertiseTag (expertiseId, tagId) VALUES (?, ?)"
-	if _, err := tx.ExecContext(ctx, createRelationshipQuery, expertiseId, data.Id); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return "", err
+	for _, tag := range tags {
+		tag.Id = utils.GenerateId()
+		if _, err := tx.NamedExecContext(ctx, createTagQuery, tag); err != nil {
+			return err
 		}
 
-		return "", err
+		if _, err := tx.ExecContext(ctx, createRelationshipQuery, expertiseId, tag.Id); err != nil {
+			return err
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return "", err
-		}
-
-		return "", err
+		return err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", context.DeadlineExceeded
+		return context.DeadlineExceeded
 	}
 
-	return data.Id, nil
+	return nil
 }
 
 func (s *MysqlExpertiseRepository) GetAll() ([]*models.ExpertiseModel, error) {

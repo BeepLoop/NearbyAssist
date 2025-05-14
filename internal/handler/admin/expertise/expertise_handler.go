@@ -8,6 +8,7 @@ import (
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/expertise"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -104,11 +105,18 @@ func (h *expertiseHandler) AddTagToExpertise(c echo.Context) error {
 	expertiseId := c.FormValue("expertiseId")
 	title := c.FormValue("title")
 
-	data := &models.TagModel{
-		Title: title,
-	}
+	titles := strings.Split(title, ",")
+	newTags := slices.AppendSeq(
+		make([]*models.TagModel, 0),
+		utils.Map(titles, func(title string) *models.TagModel {
+			cleaned := strings.TrimSpace(title)
+			return &models.TagModel{
+				Title: cleaned,
+			}
+		}),
+	)
 
-	if _, err := h.expertService.AddTagToExpertise(expertiseId, data); err != nil {
+	if err := h.expertService.AddTagToExpertise(expertiseId, newTags); err != nil {
 		if err := utils.SetFlashMessage(c, "error", err.Error()); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/expertise?error=creation_error")
 		}

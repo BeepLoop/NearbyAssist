@@ -110,6 +110,6 @@ func (s *Service) FindExpertise(query string) (*models.ExpertiseModel, error) {
 	return s.expertiseStore.FindByTitle(query)
 }
 
-func (s *Service) AddTagToExpertise(expertiseId string, data *models.TagModel) (string, error) {
-	return s.expertiseStore.CreateTag(expertiseId, data)
+func (s *Service) AddTagToExpertise(expertiseId string, data []*models.TagModel) error {
+	return s.expertiseStore.CreateTags(expertiseId, data)
 }
