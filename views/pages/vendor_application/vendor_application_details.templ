@@ -15,23 +15,7 @@ templ VendorApplicationDetails(user models.AdminModel, application models.Applic
 		<div class="mx-auto max-w-4xl">
 			<!-- Actions -->
 			<div class="flex justify-end gap-2">
-				<form
-					action="/admin/vendor-applications/accept"
-					method="POST"
-				>
-					<input
-						type="text"
-						hidden="true"
-						value={ application.Id }
-						name="applicationId"
-					/>
-					<button
-						type="submit"
-						class="cursor-pinter flex-1 rounded-sm bg-primary px-4 py-2 text-xs font-medium text-white hover:opacity-75"
-					>
-						Approve
-					</button>
-				</form>
+				@acceptButton(application.Id)
 				@rejectButton(application.Id)
 			</div>
 			@partials.Divider()
@@ -65,6 +49,87 @@ templ VendorApplicationDetails(user models.AdminModel, application models.Applic
 			</div>
 		</div>
 	}
+}
+
+templ acceptButton(applicationId string) {
+	<div x-data="{acceptModalOpen: false, loading: false}">
+		<button
+			x-on:click="acceptModalOpen = true"
+			type="button"
+			class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-xs font-medium text-white hover:opacity-75"
+		>Accept</button>
+		<div
+			x-cloak
+			x-show="acceptModalOpen"
+			x-on:keydown.esc.window="acceptModalOpen = false"
+			x-on:click.self="acceptModalOpen = false"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="defaultModalTitle"
+			class="fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50"
+		>
+			<!-- Modal Dialog -->
+			<div
+				x-show="acceptModalOpen"
+				x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				class="relative rounded-sm bg-white p-2 p-4 outline-1 outline-pale-gray w-sm"
+			>
+				<!-- Spinner -->
+				<div
+					x-show="loading"
+					class="absolute inset-0 grid place-items-center border-none bg-neutral-gray/30 outline-none"
+				>
+					@partials.Spinner()
+				</div>
+				<!-- Dialog Header -->
+				<div class="flex items-center justify-between">
+					<h3 id="defaultModalTitle" class="font-semibold tracking-wide">Accept request</h3>
+					<button
+						x-on:click="acceptModalOpen = false"
+						aria-label="close modal"
+						class="cursor-pointer"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="1.4" class="h-5 w-5">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<!-- Dialog Body -->
+				<div class="mt-4">
+					<div class="text-center grid gap-2 text-xs my-8">
+						<p class="text-danger font-medium">Are you sure you want to accept this request?</p>
+						<p>This action is <strong class="italic">irreversible</strong>. Make sure to double check all information before continuing.</p>
+					</div>
+				</div>
+				<!-- Dialog Footer -->
+				<div class="mt-4 flex justify-end gap-2">
+					<button
+						x-on:click="acceptModalOpen = false"
+						type="button"
+						class="rounded-sm px-4 py-2 cursor-pointer font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75"
+					>Cancel</button>
+					<form
+						action="/admin/vendor-applications/accept"
+						method="POST"
+						x-on:submit="loading = true"
+					>
+						<input
+							type="text"
+							hidden="true"
+							value={ applicationId }
+							name="applicationId"
+						/>
+						<button
+							type="submit"
+							class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-xs text-center font-medium text-white hover:opacity-75"
+						>Continue</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 }
 
 templ rejectButton(applicationId string) {
