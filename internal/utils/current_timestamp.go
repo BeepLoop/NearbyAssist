@@ -28,3 +28,15 @@ func CurrentTimeStampNonUTC() string {
 
 	return time.Now().In(location).Format(format)
 }
+
+func FilenameFriendlyTimeStamp() string {
+	format := "2006-01-02_15-04-05"
+
+	location, err := time.LoadLocation("Asia/Manila")
+	if err != nil {
+		fmt.Println("Error timezone: ", err.Error())
+		return time.Now().Format(format)
+	}
+
+	return time.Now().In(location).Format(format)
+}

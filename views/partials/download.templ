@@ -1,13 +1,15 @@
 package partials
 
 type DownloadButtonProps struct {
-	Link  string
-	Label string
+	Link       string
+	Label      string
+	WithParams bool
 }
 
 templ DownloadButton(props DownloadButtonProps) {
 	<a
 		href={ templ.URL(props.Link) }
+		id="downloadButton"
 		class="inline-flex cursor-pointer items-center gap-2 rounded-sm bg-primary bg-success/25 p-1 pr-2 text-xs font-semibold whitespace-nowrap text-success outline-1 outline-success hover:opacity-75"
 	>
 		<span class="flex items-center gap-1">
@@ -16,5 +18,14 @@ templ DownloadButton(props DownloadButtonProps) {
 			</svg>
 			<p>{ props.Label }</p>
 		</span>
+		if props.WithParams {
+			<script>
+                (function() {
+                    const a = document.getElementById("downloadButton")
+                    const params = window.location.search;
+                    a.href += params;
+                 })();
+            </script>
+		}
 	</a>
 }

@@ -2,6 +2,7 @@ package log_handler
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
@@ -66,4 +67,56 @@ func (h *logHandler) GetLogs(c echo.Context) error {
 
 	page := logspage.Logs(*admin, data)
 	return page.Render(context.Background(), c.Response().Writer)
+}
+
+func (h *logHandler) DownloadCSV(c echo.Context) error {
+	params := c.QueryParams()
+	limit, _ := strconv.Atoi(params.Get("limit"))
+	if limit == 0 {
+		limit = DEFAULT_LIMIT
+	}
+
+	offset, _ := strconv.Atoi(params.Get("offset"))
+	if offset == 0 {
+		offset = DEFAULT_OFFSET
+	}
+
+	logs, err := activitylog.MustGetInstance().GetAll(limit, offset, params.Get("range"))
+	if err != nil {
+		if err := utils.SetFlashMessage(c, "error", "Failed to generate CSV File"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/logs?error=csv_file_generation_failed")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/logs")
+	}
+
+	data := [][]string{{"ID", "Admin Username", "Action", "Target", "Created At"}}
+	for _, log := range logs {
+		row := []string{
+			log.Id,
+			log.AdminUsername,
+			log.Action,
+			log.Target,
+			utils.FormatDate(log.CreatedAt),
+		}
+
+		data = append(data, row)
+	}
+
+	ts := utils.FilenameFriendlyTimeStamp()
+	c.Response().Header().Set(echo.HeaderContentDisposition, fmt.Sprintf(`attachment; filename="%s_logs.csv"`, ts))
+	c.Response().Header().Set(echo.HeaderContentType, "text/csv")
+
+	writer := csv.NewWriter(c.Response())
+
+	if err := writer.WriteAll(data); err != nil {
+		if err := utils.SetFlashMessage(c, "error", "Failed to generate CSV File"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/logs?error=csv_file_generation_failed")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/logs")
+	}
+
+	writer.Flush()
+	return nil
 }

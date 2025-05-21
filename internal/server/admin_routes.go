@@ -338,5 +338,6 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		handler := log_handler.NewHandler()
 
 		logsRoute.GET("", handler.GetLogs)
+		logsRoute.GET("/download", handler.DownloadCSV)
 	}
 }

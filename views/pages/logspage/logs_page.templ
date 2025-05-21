@@ -11,8 +11,13 @@ templ Logs(admin models.AdminModel, logs []dto.ActivityLog) {
 	@layout.Layout(admin) {
 		@partials.PageBanner("Logs", "monitor activities in the site")
 		<!-- content -->
-		<div class="flex justify-end">
+		<div class="flex justify-end gap-4">
 			@rangeFilter()
+			@partials.DownloadButton(partials.DownloadButtonProps{
+				Link:       "/admin/logs/download",
+				Label:      "Download CSV",
+				WithParams: true,
+			})
 		</div>
 		<div class="w-full overflow-hidden overflow-x-auto mt-2">
 			<table class="w-full text-left text-sm text-xs text-neutral-gray">
