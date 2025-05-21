@@ -1599,6 +1599,9 @@
   .outline-danger {
     outline-color: var(--color-danger);
   }
+  .outline-good {
+    outline-color: var(--color-good);
+  }
   .outline-gray-300 {
     outline-color: var(--color-gray-300);
   }

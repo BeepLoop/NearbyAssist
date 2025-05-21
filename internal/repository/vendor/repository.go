@@ -8,6 +8,7 @@ import (
 type VendorRepository interface {
 	GetAll(limit, offset int) ([]*models.VendorModel, error)
 	FindByEmailHash(emailhash string) (*models.VendorModel, error)
+	GetAllByExpertise(expertise string, limit, offset int) ([]*models.VendorModel, error)
 	FindById(id string) (*models.VendorModel, error)
 	GetVendorServiceList(vendorId string) ([]*models.ServiceModel, error)
 	IsRestricted(userId string) (bool, bool, error)

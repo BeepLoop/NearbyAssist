@@ -115,6 +115,45 @@ func (s *MysqlVendorRepository) FindByEmailHash(emailHash string) (*models.Vendo
 	return vendor, nil
 }
 
+func (s *MysqlVendorRepository) GetAllByExpertise(expertise string, limit, offset int) ([]*models.VendorModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	findQuery := `
+        SELECT
+            ue.userId
+        FROM
+            UserExpertise ue
+            JOIN Expertise e ON e.id = ue.expertiseId
+        WHERE
+            e.title = ?
+        ORDER BY
+            ue.createdAt DESC
+        LIMIT ? OFFSET ?
+    `
+
+	ids := make([]string, 0)
+	if err := s.db.SelectContext(ctx, &ids, findQuery, expertise, limit, offset); err != nil {
+		return nil, err
+	}
+
+	vendors := make([]*models.VendorModel, 0)
+	for _, id := range ids {
+		vendor, err := s.FindById(id)
+		if err != nil {
+			return nil, err
+		}
+
+		vendors = append(vendors, vendor)
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return vendors, nil
+}
+
 func (s *MysqlVendorRepository) FindById(vendorId string) (*models.VendorModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -223,6 +262,8 @@ func (s *MysqlVendorRepository) GetAll(limit, offset int) ([]*models.VendorModel
         FROM 
             Vendor  v
             JOIN User u ON u.id = v.vendorId
+        ORDER BY
+            v.joinedAt DESC
         LIMIT ? OFFSET ?
     `
 
