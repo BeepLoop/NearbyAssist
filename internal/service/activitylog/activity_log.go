@@ -173,6 +173,55 @@ func (a *activityLog) GetAll(limit, offset int, rangeFilter string) ([]*models.A
 	return a.getAll(finalQuery, args)
 }
 
+func (a *activityLog) GetAllNoLimit(rangeFilter string) ([]*models.ActivityLogModel, error) {
+	validRangeFilters := []string{"all_time", "today", "yesterday", "last_week", "last_month"}
+	if rangeFilter == "" {
+		rangeFilter = "all_time"
+	}
+	if rangeFilter != "" {
+		if !slices.Contains(validRangeFilters, rangeFilter) {
+			rangeFilter = "all_time"
+		}
+	}
+
+	base := "SELECT * FROM ActivityLog"
+	order := " ORDER BY createdAt DESC"
+	finalQuery := ""
+	args := make([]interface{}, 0)
+
+	switch rangeFilter {
+	case "all_time":
+		finalQuery = base + order
+		args = append(args)
+
+	case "today":
+		condition := " WHERE DATE(createdAt) = CURDATE()"
+		finalQuery = base + condition + order
+		args = append(args)
+
+	case "yesterday":
+		condition := " WHERE DATE(createdAt) = CURDATE() - INTERVAL 1 DAY"
+		finalQuery = base + condition + order
+		args = append(args)
+
+	case "last_week":
+		condition := `
+		WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+		AND createdAt < CURDATE() + INTERVAL 1 DAY`
+		finalQuery = base + condition + order
+		args = append(args)
+
+	case "last_month":
+		condition := `
+		WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+		AND createdAt < CURDATE() + INTERVAL 1 DAY`
+		finalQuery = base + condition + order
+		args = append(args)
+	}
+
+	return a.getAll(finalQuery, args)
+}
+
 func (a *activityLog) getAll(query string, args []interface{}) ([]*models.ActivityLogModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

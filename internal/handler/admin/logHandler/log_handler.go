@@ -71,17 +71,7 @@ func (h *logHandler) GetLogs(c echo.Context) error {
 
 func (h *logHandler) DownloadCSV(c echo.Context) error {
 	params := c.QueryParams()
-	limit, _ := strconv.Atoi(params.Get("limit"))
-	if limit == 0 {
-		limit = DEFAULT_LIMIT
-	}
-
-	offset, _ := strconv.Atoi(params.Get("offset"))
-	if offset == 0 {
-		offset = DEFAULT_OFFSET
-	}
-
-	logs, err := activitylog.MustGetInstance().GetAll(limit, offset, params.Get("range"))
+	logs, err := activitylog.MustGetInstance().GetAllNoLimit(params.Get("range"))
 	if err != nil {
 		if err := utils.SetFlashMessage(c, "error", "Failed to generate CSV File"); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/logs?error=csv_file_generation_failed")
