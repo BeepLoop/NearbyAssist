@@ -8,10 +8,7 @@ package pages
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"nearbyassist/views/layout"
-	"nearbyassist/views/partials"
-)
+import "nearbyassist/views/partials"
 
 func ChangePassword(flash string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -34,71 +31,106 @@ func ChangePassword(flash string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-			if !templ_7745c5c3_IsBuffer {
-				defer func() {
-					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err == nil {
-						templ_7745c5c3_Err = templ_7745c5c3_BufErr
-					}
-				}()
-			}
-			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templ.JSONScript("flash", flash).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = partials.ToastNotification().Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <div class=\"fixed right-0 left-0 grid h-full place-items-center\"><form action=\"/admin/reset/cp\" method=\"POST\" class=\"grid max-w-xl gap-4 rounded-sm bg-white p-4 shadow-2xl outline-1 outline-neutral-gray-lighter\"><div class=\"text-center\"><h2 class=\"font-medium text-neutral-dark\">Update Password</h2><p class=\"mt-1.5 rounded-sm bg-neutral-gray/25 p-2 text-xs font-semibold text-neutral-gray\">You are required to change your password after a password reset.</p></div><div><label for=\"username\" class=\"text-xs font-medium\">Username</label> <input type=\"text\" name=\"username\" id=\"username\" placeholder=\"username\" autocomplete=\"off\" autofocus class=\"mt-1.5 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 text-xs focus:border-primary focus:outline-none\"></div><div><label for=\"oldPassword\" class=\"text-xs font-medium\">Old Password</label>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
-				Id:          "oldPassword",
-				Name:        "oldPassword",
-				Placeholder: "old password",
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div><label for=\"password\" class=\"text-xs font-medium\">New Password</label><!-- Information --><div class=\"mt-1 flex gap-2 rounded-sm bg-good/25 px-1 py-2 text-xs text-neutral-gray\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg><p class=\"\">Password must be  <span class=\"font-bold\">at least 8 characters long, at least 1 uppercase, at least 1 lowercase, at least 1 special character, and no whitespace</span></p></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
-				Placeholder: "new password",
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div><label for=\"confirmationPassword\" class=\"text-xs font-medium\">Confirm Password</label>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
-				Id:          "confirmationPassword",
-				Name:        "confirmationPassword",
-				Placeholder: "confirm password",
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div class=\"mt-4 flex justify-end gap-2\"><a href=\"/\" role=\"button\" class=\"cursor-pointer rounded-sm bg-neutral-gray/50 px-2 py-1.5 text-xs font-medium text-neutral-gray hover:opacity-75\">Cancel</a> <button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs font-medium text-white hover:opacity-75\">Continue</button></div></form></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			return nil
-		})
-		templ_7745c5c3_Err = layout.BasicLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>NearbyAssist</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/public/logo.ico\"><link rel=\"stylesheet\" href=\"/static/style/style.css\"><!-- Alpine Plugins --><script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js\"></script><script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js\"></script><!-- Alpine Core --><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script></head><body class=\"font-roboto flex flex-col h-screen\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.JSONScript("flash", flash).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = partials.ToastNotification().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<header class=\"flex items-center px-4 py-2 justify-between z-50\"><!-- Logo --><a href=\"/\" class=\"cursor-pointer\"><div class=\"\"><div class=\"text-xl font-bold\"><span class=\"\">Nearby</span> <span class=\"text-green-700\">Assist</span></div></div></a></header><div class=\"flex-1 grid place-content-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.JSONScript("flash", flash).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- toasy component -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = partials.ToastNotification().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- login form --><div class=\"my-4\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = changePasswordForm().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><footer class=\"bg-gray-900 text-gray-400 text-center py-4 text-xs\"><p>&copy; 2025 NearbyAssist. All rights reserved.</p><div class=\"mt-2\"><a href=\"/privacy_policy\" class=\"text-green-500 hover:text-white mx-2\">Privacy Policy</a> | <a href=\"/terms_and_conditions\" class=\"text-green-500 hover:text-white mx-2\">Terms and Conditions</a> | <a href=\"/auth/login\" class=\"text-green-500 hover:text-white mx-2\">Admin</a></div></footer></body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func changePasswordForm() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<form action=\"/admin/reset/cp\" method=\"POST\" class=\"grid max-w-xl gap-4 rounded-sm bg-white p-4 shadow-2xl outline-1 outline-neutral-gray-lighter\"><div class=\"text-center\"><h2 class=\"font-medium text-neutral-dark\">Update Password</h2><p class=\"mt-1.5 rounded-sm bg-neutral-gray/25 p-2 text-xs font-semibold text-neutral-gray\">You are required to change your password after a password reset.</p></div><div><label for=\"username\" class=\"text-xs font-medium\">Username</label> <input type=\"text\" name=\"username\" id=\"username\" placeholder=\"username\" autocomplete=\"off\" autofocus class=\"mt-1.5 w-full rounded-md border border-neutral-gray-lighter px-4 py-2 text-xs focus:border-primary focus:outline-none\"></div><div><label for=\"oldPassword\" class=\"text-xs font-medium\">Old Password</label>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
+			Id:          "oldPassword",
+			Name:        "oldPassword",
+			Placeholder: "old password",
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div><label for=\"password\" class=\"text-xs font-medium\">New Password</label><!-- Information --><div class=\"mt-1 flex gap-2 rounded-sm bg-good/25 px-1 py-2 text-xs text-neutral-gray\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-6\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg><p class=\"\">Password must be  <span class=\"font-bold\">at least 8 characters long, at least 1 uppercase, at least 1 lowercase, at least 1 special character, and no whitespace</span></p></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
+			Placeholder: "new password",
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div><label for=\"confirmationPassword\" class=\"text-xs font-medium\">Confirm Password</label>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = partials.Password(partials.PasswordProps{
+			Id:          "confirmationPassword",
+			Name:        "confirmationPassword",
+			Placeholder: "confirm password",
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"mt-4 flex justify-end gap-2\"><a href=\"/\" role=\"button\" class=\"cursor-pointer rounded-sm bg-neutral-gray/50 px-2 py-1.5 text-xs font-medium text-neutral-gray hover:opacity-75\">Cancel</a> <button type=\"submit\" class=\"cursor-pointer rounded-sm bg-primary px-2 py-1.5 text-xs font-medium text-white hover:opacity-75\">Continue</button></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -49,6 +49,8 @@ func (h *complaintHandler) CreateBugReport(c echo.Context) error {
 		})
 	}
 
+	sse.New().IncreaseBugReport()
+
 	return c.JSON(http.StatusNoContent, nil)
 }
 

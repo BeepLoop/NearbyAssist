@@ -11,7 +11,7 @@ templ Sidebar(user models.AdminModel) {
 			@logo()
 			@navlist(user)
 		</div>
-		<div class="">
+		<div class="mt-8">
 			<form action="/auth/logout" method="POST">
 				<button
 					type="submit"
@@ -31,6 +31,7 @@ templ Sidebar(user models.AdminModel) {
                  const application = document.getElementById("sidebar_application")
                  const report = document.getElementById("sidebar_report")
                  const prr = document.getElementById("sidebar_prr")
+                 const bugs = document.getElementById("sidebar_bugs")
 
                  function updateIndicator(parentElement, value) {
                      if (!parentElement) return;
@@ -51,11 +52,13 @@ templ Sidebar(user models.AdminModel) {
 
                  sse.onmessage = function(event) {
                      const data = JSON.parse(event.data);
+                     console.log(data);
 
                      updateIndicator(verification, data.verification);
                      updateIndicator(application, data.application);
                      updateIndicator(report, data.report);
                      updateIndicator(prr, data.prr);
+                     updateIndicator(bugs, data.bugs);
                  }
 
                  sse.onerror = function(error) {
@@ -193,12 +196,13 @@ templ navlist(user models.AdminModel) {
 					Path:  "/admin/complaints/users",
 					Label: "Reported users",
 				})
-				<!--
-				@nav.SubItem(nav.NavItemProps{
-					Path:  "/admin/complaints/bugs",
-					Label: "Bugs",
-				})
-                -->
+				if user.Role == "admin" {
+					@nav.SubItem(nav.NavItemProps{
+						ID:    "bugs",
+						Path:  "/admin/complaints/bugs",
+						Label: "Bugs",
+					})
+				}
 			}
 			if user.Role == "admin" {
 				@nav.NavWithSubItem("Account Manangement") {

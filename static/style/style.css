@@ -1611,9 +1611,6 @@
   .outline-gray-300 {
     outline-color: var(--color-gray-300);
   }
-  .outline-neutral-gray {
-    outline-color: var(--color-neutral-gray);
-  }
   .outline-neutral-gray-lighter {
     outline-color: var(--color-neutral-gray-lighter);
   }
