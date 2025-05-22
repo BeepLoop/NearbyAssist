@@ -2,6 +2,7 @@ package userManagement
 
 import (
 	"context"
+	"fmt"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/user_management/user"
@@ -28,6 +29,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 	if params.Has("query") && params.Get("query") != "" {
 		user, err := h.userService.FindByEmail(params.Get("query"))
 		if err != nil {
+			fmt.Println("error find by email: ", err.Error())
 			page := pages.UserList(*admin, make([]dto.User, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
@@ -46,6 +48,7 @@ func (h *userManagementHandler) GetUserList(c echo.Context) error {
 
 		res, err := h.userService.GetAllBasicUsers(limit, offset)
 		if err != nil {
+			fmt.Println("error get users: ", err.Error())
 			page := pages.UserList(*admin, make([]dto.User, 0))
 			return page.Render(context.Background(), c.Response().Writer)
 		}
