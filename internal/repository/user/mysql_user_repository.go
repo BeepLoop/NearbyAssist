@@ -3,6 +3,7 @@ package user_repo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/utils"
 	"slices"
@@ -136,6 +137,7 @@ func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models
     `
 	ids := make([]string, 0)
 	if err := s.db.SelectContext(ctx, &ids, getAccountsQuery, limit, offset); err != nil {
+		fmt.Println("error get ids: ", err.Error())
 		return nil, err
 	}
 
@@ -143,6 +145,7 @@ func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models
 	for _, id := range ids {
 		account, err := s.FindById(id)
 		if err != nil {
+			fmt.Println("error find by id: ", err.Error())
 			return nil, err
 		}
 
@@ -207,28 +210,33 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 	user := new(models.UserModel)
 	err := s.db.GetContext(ctx, user, getUserQuery, id)
 	if err != nil {
+		fmt.Println("error get user: ", err.Error())
 		return nil, err
 	}
 
 	if banned, err := s.IsBanned(user.Id); err != nil {
+		fmt.Println("error get is banned: ", err.Error())
 		return nil, err
 	} else {
 		user.Banned = banned
 	}
 
 	if restricted, expired, err := s.IsRestricted(user.Id); err != nil {
+		fmt.Println("error get is restricted: ", err.Error())
 		return nil, err
 	} else {
 		user.Restricted = restricted && !expired
 	}
 
 	if address, err := s.GetAddress(user.Id); err != nil {
+		fmt.Println("error get address: ", err.Error())
 		return nil, err
 	} else {
 		user.Address = *address
 	}
 
 	if submitted, err := s.HasSubmittedIdentification(user.Id); err != nil {
+		fmt.Println("error has submitted identification: ", err.Error())
 		return nil, err
 	} else {
 		user.HasSubmittedIdentification = submitted
@@ -236,6 +244,7 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 
 	if user.HasSubmittedIdentification {
 		if identification, err := s.GetIdentification(user.Id); err != nil {
+			fmt.Println("error get identification: ", err.Error())
 			return nil, err
 		} else {
 			user.Identification = *identification
@@ -396,11 +405,9 @@ func (s *MysqlUserRepository) HasSubmittedIdentification(userId string) (bool, e
 	defer cancel()
 
 	query := `
-        SELECT CASE
-            WHEN (SELECT 1 FROM UserIdentification WHERE userId = ?)
-            THEN 1
-            ELSE 0
-        END AS submitted
+        SELECT EXISTS
+            (SELECT 1 FROM UserIdentification WHERE userId = ?)
+        AS submitted
     `
 
 	submitted := false
