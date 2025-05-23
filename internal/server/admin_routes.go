@@ -14,6 +14,7 @@ import (
 	"nearbyassist/internal/handler/admin/userManagement"
 	application "nearbyassist/internal/handler/admin/vendor_application"
 	"nearbyassist/internal/handler/admin/verification"
+	"nearbyassist/internal/handler/web"
 	"nearbyassist/internal/middleware"
 	admin_repo "nearbyassist/internal/repository/admin"
 	application_repo "nearbyassist/internal/repository/application"
@@ -340,4 +341,6 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		logsRoute.GET("", handler.GetLogs)
 		logsRoute.GET("/download", handler.DownloadCSV)
 	}
+
+	r.RouteNotFound("/*", web.GetNotFound)
 }

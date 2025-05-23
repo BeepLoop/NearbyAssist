@@ -2,6 +2,9 @@ package server
 
 import (
 	"nearbyassist/internal/handler/web"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func (s *Server) routes() {
@@ -31,5 +34,7 @@ func (s *Server) routes() {
 	ws := s.Echo.Group("/ws")
 	s.websocketRoute(ws)
 
-	s.Echo.RouteNotFound("/*", web.GetNotFound)
+	s.Echo.RouteNotFound("/*", func(c echo.Context) error {
+		return c.String(http.StatusNotFound, "not found")
+	})
 }
