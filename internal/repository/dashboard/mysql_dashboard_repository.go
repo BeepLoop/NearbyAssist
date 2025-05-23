@@ -408,7 +408,7 @@ func (s *MysqlDashboardRepository) RecentUsers() ([]*models.UserModel, error) {
             User
         ORDER BY
             createdAt DESC
-        LIMIT 10
+        LIMIT 5
     `
 
 	users := make([]*models.UserModel, 0)
