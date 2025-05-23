@@ -25,6 +25,13 @@ func (h *resourceHandler) GetPublicFile(c echo.Context) error {
 
 	file, err := h.resourceService.GetRawFile(path)
 	if err != nil {
+		if strings.Contains(err.Error(), "no such file") {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "File not found",
+				Error:   "File not found",
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error occurred retrieving the requested file",
 			Error:   err.Error(),
@@ -62,6 +69,13 @@ func (h *resourceHandler) GetPrivateFile(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
 				Message: "Unauthorized file access",
 				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), "no such file") {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "File not found",
+				Error:   "File not found",
 			})
 		}
 
