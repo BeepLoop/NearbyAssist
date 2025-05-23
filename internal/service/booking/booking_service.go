@@ -85,7 +85,7 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 		ServiceId:          req.ServiceId,
 		ServiceTitle:       service.Title,
 		ServiceDescription: service.Description,
-		Price:              service.Price,
+		Price:              utils.Float64ToString(utils.StringToFloat64ElseZero(service.Price)),
 		PricingType:        service.PricingType,
 		Quantity:           req.Quantity,
 		Cost:               req.Cost,
