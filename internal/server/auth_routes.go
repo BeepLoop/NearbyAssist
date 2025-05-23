@@ -2,6 +2,7 @@ package server
 
 import (
 	"nearbyassist/internal/handler/admin/auth"
+	"nearbyassist/internal/handler/web"
 	admin_repo "nearbyassist/internal/repository/admin"
 	adminauth_service "nearbyassist/internal/service/admin_auth"
 
@@ -17,4 +18,6 @@ func (s *Server) authRoutes(r *echo.Group) {
 	r.GET("/login", authHandler.GetLogin)
 	r.POST("/login", authHandler.PostLogin)
 	r.POST("/logout", authHandler.PostLogout)
+
+	r.RouteNotFound("/*", web.GetNotFound)
 }
