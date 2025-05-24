@@ -1,6 +1,7 @@
 package user
 
 import (
+	"database/sql"
 	"encoding/json"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
@@ -46,6 +47,27 @@ func (h *userHandler) FindUser(c echo.Context) error {
 
 	user, err := h.userService.GetUserById(userId)
 	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error while retrieving user data",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"user": user,
+	})
+}
+
+func (h *userHandler) FindUserByEmail(c echo.Context) error {
+	user, err := h.userService.FindByEmail(c.Param("email"))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "Email not found",
+				Error:   "Email not found",
+			})
+		}
+
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error while retrieving user data",
 			Error:   err.Error(),

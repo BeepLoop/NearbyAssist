@@ -96,8 +96,6 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	// ===== USER =======
 	userRoute := v1.Group("/user")
 	{
-		userRoute.Use(middleware.CheckAuth(s.JWT))
-
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
@@ -120,15 +118,16 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		handler := user.NewHandler(userService, userVerificationService)
 
-		userRoute.GET("", handler.GetUser)
-		userRoute.GET("/:userId", handler.FindUser)
-		userRoute.GET("/verify", handler.CheckVerificationStatus)
-		userRoute.POST("/verify", handler.VerifyAccount)
-		userRoute.POST("/socials", handler.AddSocial)
-		userRoute.DELETE("/socials/:id", handler.DeleteSocial)
-		userRoute.POST("/addExpertise", handler.AddExpertise)
-		userRoute.POST("/dbl/:value", handler.SetDBL)
-		userRoute.PUT("/address", handler.ChangeAddress)
+		userRoute.GET("", handler.GetUser, middleware.CheckAuth(s.JWT))
+		userRoute.GET("/:userId", handler.FindUser, middleware.CheckAuth(s.JWT))
+		userRoute.GET("/exists/:email", handler.FindUserByEmail)
+		userRoute.GET("/verify", handler.CheckVerificationStatus, middleware.CheckAuth(s.JWT))
+		userRoute.POST("/verify", handler.VerifyAccount, middleware.CheckAuth(s.JWT))
+		userRoute.POST("/socials", handler.AddSocial, middleware.CheckAuth(s.JWT))
+		userRoute.DELETE("/socials/:id", handler.DeleteSocial, middleware.CheckAuth(s.JWT))
+		userRoute.POST("/addExpertise", handler.AddExpertise, middleware.CheckAuth(s.JWT))
+		userRoute.POST("/dbl/:value", handler.SetDBL, middleware.CheckAuth(s.JWT))
+		userRoute.PUT("/address", handler.ChangeAddress, middleware.CheckAuth(s.JWT))
 	}
 
 	// ===== TAGS =======

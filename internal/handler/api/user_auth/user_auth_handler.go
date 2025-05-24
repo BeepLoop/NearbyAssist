@@ -41,7 +41,7 @@ func (h *userAuthHandler) Login(c echo.Context) error {
 	if err != nil {
 		if strings.Contains(err.Error(), userauth_service.ERR_NOT_FOUND) {
 			return echo.NewHTTPError(http.StatusNotFound, models.Error{
-				Message: "Account associated with this email not found",
+				Message: "Email not found",
 				Error:   err.Error(),
 			})
 		}
