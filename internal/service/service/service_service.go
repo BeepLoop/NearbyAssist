@@ -2,7 +2,6 @@ package service_service
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -15,6 +14,7 @@ import (
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/geodistance"
 	"nearbyassist/internal/service/route_engine"
 	searchhistory "nearbyassist/internal/service/search_history"
 	"nearbyassist/internal/service/suggestion_engine"
@@ -507,13 +507,6 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		}
 	}
 
-	origin := new(models.GeoSpatialModel)
-	if location, ok := params["l"]; ok {
-		if err := origin.FromString(location); err != nil {
-			return nil, err
-		}
-	}
-
 	tags := make([]string, 0)
 	if q, ok := params["q"]; ok {
 		cleaned := utils.Map(strings.Split(q, ","), func(tag string) string {
@@ -562,8 +555,45 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		}),
 	)
 
+	origin := new(models.GeoSpatialModel)
+	if location, ok := params["l"]; ok {
+		if err := origin.FromString(location); err != nil {
+			return nil, err
+		}
+	}
+
+	radius := 0.0
+	if r, ok := params["r"]; !ok {
+		return nil, errors.New("missing parameter radius")
+	} else {
+		radius = utils.StringToFloat64ElseZero(r)
+	}
+
+	// Filter out services outside of given radius
+	inRangeServices := slices.AppendSeq(
+		make([]*models.ServiceModel, 0),
+		utils.Retain(validServices, func(service *models.ServiceModel) bool {
+			userLocation := geodistance.Coordinate{
+				Latitude:  origin.Latitude,
+				Longitude: origin.Longitude,
+			}
+
+			serviceLocation := geodistance.Coordinate{
+				Latitude:  service.Address.Latitude,
+				Longitude: service.Address.Longitude,
+			}
+
+			distanceInMeter := userLocation.DistanceTo(serviceLocation, geodistance.M)
+			if distanceInMeter > geodistance.Distance(radius) {
+				return false
+			}
+
+			return true
+		}),
+	)
+
 	// Retrieve vendor details of each service
-	for _, service := range validServices {
+	for _, service := range inRangeServices {
 		if vendor, err := s.vendorStore.FindById(service.VendorId); err != nil {
 			return nil, err
 		} else {
@@ -576,7 +606,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 	completedBookingMap := make(map[string]int)
 	computedDistances := make(map[string]float32)
 	alternatives := make([]saw.Alternative, 0)
-	for _, service := range validServices {
+	for _, service := range inRangeServices {
 		destination := &models.GeoSpatialModel{
 			Latitude:  service.Address.Latitude,
 			Longitude: service.Address.Longitude,
@@ -681,7 +711,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 
 	results := slices.AppendSeq(
 		make([]*response.ServiceSearchResult, 0),
-		utils.Map(validServices, func(service *models.ServiceModel) *response.ServiceSearchResult {
+		utils.Map(inRangeServices, func(service *models.ServiceModel) *response.ServiceSearchResult {
 			return &response.ServiceSearchResult{
 				Id:                service.Id,
 				VendorName:        utils.Must(s.encrypt.DecryptString(service.Vendor.User.Name)),
@@ -731,11 +761,6 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 			}
 		}),
 	)
-
-	utils.ForEach(results, func(result *response.ServiceSearchResult) {
-		b, _ := json.MarshalIndent(result, "", "  ")
-		fmt.Println(string(b))
-	})
 
 	return results, nil
 }
