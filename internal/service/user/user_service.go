@@ -296,8 +296,10 @@ func (s *Service) GetUserById(userId string) (*response.DetailedUser, error) {
 				}
 			}),
 		),
-		IsRestricted: user.Restricted,
-		DBL:          dailyBookingLimit,
+		IsRestricted:           user.Restricted,
+		DBL:                    dailyBookingLimit,
+		HasPendingVerification: user.HasPendingVerification,
+		HasPendingApplication:  user.HasPendingApplication,
 	}
 
 	return response, nil
@@ -378,8 +380,10 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 				}
 			}),
 		),
-		IsRestricted: user.Restricted,
-		DBL:          dailyBookingLimit,
+		IsRestricted:           user.Restricted,
+		DBL:                    dailyBookingLimit,
+		HasPendingVerification: user.HasPendingVerification,
+		HasPendingApplication:  user.HasPendingApplication,
 	}
 
 	return response, nil

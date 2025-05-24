@@ -29,4 +29,6 @@ type UserModel struct {
 	Address                    AddressModel
 	Identification             IdentificationModel
 	HasSubmittedIdentification bool
+	HasPendingVerification     bool
+	HasPendingApplication      bool
 }

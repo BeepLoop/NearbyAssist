@@ -264,7 +264,14 @@ func (s *Service) RejectRequest(id, reason string) error {
 		Payload:    notification,
 	}
 
+	syncEvent := &websocket.EventModel{
+		ReceiverId: application.ApplicantId,
+		Type:       websocket.EVT_SYNC,
+		Payload:    nil,
+	}
+
 	s.ws.Send(event)
+	s.ws.Send(syncEvent)
 
 	return nil
 }
