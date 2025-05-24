@@ -1,6 +1,7 @@
 package vendor
 
 import (
+	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/response"
 	resource_service "nearbyassist/internal/service/resource"
@@ -36,6 +37,7 @@ func (h *vendorHandler) GetVendor(c echo.Context) error {
 
 	vendor, err := h.vendorService.FindById(vendorId)
 	if err != nil {
+		fmt.Println("error get vendor: ", err.Error())
 		if strings.Contains(err.Error(), "no rows in result set") {
 			return echo.NewHTTPError(http.StatusNotFound, models.Error{
 				Message: "Vendor not found",

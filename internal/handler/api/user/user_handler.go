@@ -30,7 +30,23 @@ func (h *userHandler) GetUser(c echo.Context) error {
 
 	user, err := h.userService.GetUser(bearerToken)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error while retrieving user data",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"user": user,
+	})
+}
+
+func (h *userHandler) FindUser(c echo.Context) error {
+	userId := c.Param("userId")
+
+	user, err := h.userService.GetUserById(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error while retrieving user data",
 			Error:   err.Error(),
 		})

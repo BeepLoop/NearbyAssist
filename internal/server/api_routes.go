@@ -121,6 +121,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		handler := user.NewHandler(userService, userVerificationService)
 
 		userRoute.GET("", handler.GetUser)
+		userRoute.GET("/:userId", handler.FindUser)
 		userRoute.GET("/verify", handler.CheckVerificationStatus)
 		userRoute.POST("/verify", handler.VerifyAccount)
 		userRoute.POST("/socials", handler.AddSocial)

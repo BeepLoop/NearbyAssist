@@ -220,6 +220,55 @@ func (s *Service) FindById(id string) (*models.VendorModel, error) {
 	return data, nil
 }
 
+func (s *Service) FindByIdDTO(id string) (*dto.Vendor, error) {
+	vendor, err := s.vendorStore.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	data := &dto.Vendor{
+		Id:       vendor.VendorId,
+		Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
+		Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
+		ImageURL: vendor.User.ImageUrl,
+		Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
+		Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
+		Socials: slices.AppendSeq(
+			make([]dto.Social, 0),
+			utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
+				return dto.Social{
+					Id:    social.Id,
+					Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+					Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+					URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+				}
+			}),
+		),
+		Identification: dto.Identification{
+			Type:     vendor.User.Identification.Type,
+			IdNumber: vendor.User.Identification.ReferenceNumber,
+		},
+		Rating: vendor.Rating,
+		Expertise: slices.AppendSeq(
+			make([]dto.Expertise, 0),
+			utils.Map(vendor.Expertise, func(e models.ExpertiseModel) dto.Expertise {
+				return dto.Expertise{
+					Title:              e.Title,
+					DateApplied:        utils.FormatDate(e.DateApplied),
+					DateApproved:       utils.FormatDate(e.DateApproved.String),
+					SupportingDocument: utils.Must(s.resourceService.SignURLWithDefaultDuration(e.SupportingImageUrl)),
+				}
+			}),
+		),
+		JoinedAt:     vendor.JoinedAt,
+		DateVerified: utils.FormatDate(vendor.User.VerifiedAt.String),
+		IsRestricted: vendor.User.Restricted,
+		IsBanned:     vendor.User.Banned,
+	}
+
+	return data, nil
+}
+
 func (s *Service) GetVendorServicesList(vendorId string) ([]*models.ServiceModel, error) {
 	services, err := s.vendorStore.GetVendorServiceList(vendorId)
 	if err != nil {
