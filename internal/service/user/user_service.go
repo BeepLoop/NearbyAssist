@@ -256,19 +256,9 @@ func (s *Service) GetUserById(userId string) (*response.DetailedUser, error) {
 		}
 
 		for _, expertise := range expertises {
-			expertiseTags := make([]response.Tag, 0)
-
-			for _, tag := range expertise.Tags {
-				expertiseTags = append(expertiseTags, response.Tag{
-					Id:    tag.Id,
-					Title: tag.Title,
-				})
-			}
-
 			vendorExpertises = append(vendorExpertises, response.Expertise{
 				Id:    expertise.Id,
 				Title: expertise.Title,
-				Tags:  expertiseTags,
 			})
 		}
 	}
@@ -340,19 +330,9 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		}
 
 		for _, expertise := range expertises {
-			expertiseTags := make([]response.Tag, 0)
-
-			for _, tag := range expertise.Tags {
-				expertiseTags = append(expertiseTags, response.Tag{
-					Id:    tag.Id,
-					Title: tag.Title,
-				})
-			}
-
 			vendorExpertises = append(vendorExpertises, response.Expertise{
 				Id:    expertise.Id,
 				Title: expertise.Title,
-				Tags:  expertiseTags,
 			})
 		}
 	}
@@ -437,7 +417,7 @@ func (s *Service) DeleteSocial(bearerToken, id string) error {
 	return nil
 }
 
-func (s *Service) AddUserExpertise(bearerToken, expertiseId string, file *multipart.FileHeader) error {
+func (s *Service) AddVendorExpertise(bearerToken, expertiseId string, file *multipart.FileHeader) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err

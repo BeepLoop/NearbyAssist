@@ -273,7 +273,6 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		expertiseRoute.GET("", handler.GetAllExpertise)
 		expertiseRoute.POST("", handler.CreateExpertise)
-		expertiseRoute.POST("/tags", handler.AddTagToExpertise)
 	}
 
 	accountManagementRoute := r.Group("/account-management")

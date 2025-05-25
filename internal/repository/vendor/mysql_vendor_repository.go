@@ -121,9 +121,9 @@ func (s *MysqlVendorRepository) GetAllByExpertise(expertise string, limit, offse
 
 	findQuery := `
         SELECT
-            ue.userId
+            ue.vendorId
         FROM
-            UserExpertise ue
+            VendorExpertise ue
             JOIN Expertise e ON e.id = ue.expertiseId
         WHERE
             e.title = ?
@@ -236,7 +236,6 @@ func (s *MysqlVendorRepository) FindById(vendorId string) (*models.VendorModel, 
 					Model:              models.Model{Id: e.Id, CreatedAt: e.CreatedAt},
 					UpdateableModel:    e.UpdateableModel,
 					Title:              e.Title,
-					Tags:               e.Tags,
 					DateApplied:        e.DateApplied,
 					DateApproved:       e.DateApproved,
 					SupportingImageUrl: e.SupportingImageUrl,
@@ -519,7 +518,7 @@ func (s *MysqlVendorRepository) AddExpertise(userId, expertiseId, supportingImag
 
 	query := `
         INSERT INTO
-            UserExpertise (userId, expertiseId, supportingImage)
+            VendorExpertise (vendorId, expertiseId, supportingImage)
         VALUES
             (?, ?, ?)
     `
@@ -633,12 +632,12 @@ func (s *MysqlVendorRepository) getVendorExpertise(vendorId string) ([]*models.E
             a.updatedAt AS dateApproved,
             i.url AS supportingImageUrl
         FROM
-            Expertise e
-            JOIN UserExpertise ue ON ue.expertiseId = e.id
-            JOIN Application a ON a.applicantid = ue.userId
+            VendorExpertise ue
+            JOIN Expertise e ON e.id = ue.expertiseId
+            JOIN Application a ON a.id = ue.applicationId
             JOIN SupportingImage i ON i.id = ue.supportingImage
         WHERE
-            ue.userId = ? AND a.status = 'approved'
+            ue.vendorId = ? AND a.status = 'approved'
     `
 
 	expertise := make([]*models.ExpertiseModel, 0)
@@ -713,7 +712,7 @@ func (s *MysqlVendorRepository) HasExpertise(vendorId, expertiseId string) (bool
 
 	query := `
         SELECT EXISTS
-            (SELECT 1 FROM UserExpertise WHERE userId = ? AND expertiseId = ?)
+            (SELECT 1 FROM VendorExpertise WHERE vendorId = ? AND expertiseId = ?)
         AS has_expertise
     `
 	hasExpertise := false

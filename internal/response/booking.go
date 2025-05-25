@@ -48,7 +48,7 @@ type Service struct {
 	Description string   `json:"description"`
 	Price       string   `json:"price"`
 	PricingType string   `json:"pricingType"`
-	Tags        []Tag    `json:"tags"`
+	Tags        []string `json:"tags"`
 	Extras      []Extra  `json:"extras"`
 	Images      []Image  `json:"images"`
 	Location    Location `json:"location"`

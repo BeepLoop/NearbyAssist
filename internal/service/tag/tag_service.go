@@ -2,19 +2,21 @@ package tag_service
 
 import (
 	"nearbyassist/internal/models"
+	expertise_repo "nearbyassist/internal/repository/expertise"
 	tag_repo "nearbyassist/internal/repository/tag"
 )
 
 type Service struct {
-	store tag_repo.TagRepository
+	tagStore       tag_repo.TagRepository
+	expertiseStore expertise_repo.ExpertiseRepository
 }
 
-func NewService(store tag_repo.TagRepository) *Service {
-	return &Service{store: store}
+func NewService(tagStore tag_repo.TagRepository, expertiseStore expertise_repo.ExpertiseRepository) *Service {
+	return &Service{tagStore: tagStore, expertiseStore: expertiseStore}
 }
 
 func (s *Service) GetTags() ([]*models.TagModel, error) {
-	tags, err := s.store.FindAll()
+	tags, err := s.tagStore.FindAll()
 	if err != nil {
 		return nil, err
 	}
@@ -22,6 +24,6 @@ func (s *Service) GetTags() ([]*models.TagModel, error) {
 	return tags, nil
 }
 
-func (s *Service) GetExpertise() ([]*models.ExpertiseModel, error) {
-	return s.store.FindAllWithExpertise()
+func (s *Service) GetExpertiseList() ([]*models.ExpertiseModel, error) {
+	return s.expertiseStore.GetAll()
 }

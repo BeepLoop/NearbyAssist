@@ -91,15 +91,6 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 				return response.Expertise{
 					Id:    expertise.Id,
 					Title: expertise.Title,
-					Tags: slices.AppendSeq(
-						make([]response.Tag, 0),
-						utils.Map(expertise.Tags, func(tag *models.TagModel) response.Tag {
-							return response.Tag{
-								Id:    tag.Id,
-								Title: tag.Title,
-							}
-						}),
-					),
 				}
 			}),
 		)

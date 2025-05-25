@@ -188,24 +188,6 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
 		return err
 	}
 
-	addUserExpertiseQuery := `
-        INSERT INTO
-            UserExpertise (userId, expertiseId, supportingImage)
-        SELECT
-            applicantId, expertiseId, supportingDocument
-        FROM 
-            Application
-        WHERE
-            id = ?
-    `
-	if _, err := tx.ExecContext(ctx, addUserExpertiseQuery, applicationId); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-
-		return err
-	}
-
 	createVendorQuery := `
         INSERT IGNORE
             Vendor (vendorId)
@@ -217,6 +199,24 @@ func (s *MysqlApplicationRepository) AcceptRequest(applicationId string) error {
             id = ?
     `
 	if _, err := tx.ExecContext(ctx, createVendorQuery, applicationId); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	addVendorExpertiseQuery := `
+        INSERT INTO
+            VendorExpertise (vendorId, expertiseId, applicationId, supportingImage)
+        SELECT
+            applicantId, expertiseId, id, supportingDocument
+        FROM 
+            Application
+        WHERE
+            id = ?
+    `
+	if _, err := tx.ExecContext(ctx, addVendorExpertiseQuery, applicationId); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}

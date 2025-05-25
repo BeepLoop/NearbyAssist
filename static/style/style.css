@@ -892,9 +892,6 @@
   .max-w-6xl {
     max-width: var(--container-6xl);
   }
-  .max-w-80 {
-    max-width: calc(var(--spacing) * 80);
-  }
   .max-w-96 {
     max-width: calc(var(--spacing) * 96);
   }
@@ -915,9 +912,6 @@
   }
   .min-w-60 {
     min-width: calc(var(--spacing) * 60);
-  }
-  .min-w-72 {
-    min-width: calc(var(--spacing) * 72);
   }
   .min-w-80 {
     min-width: calc(var(--spacing) * 80);

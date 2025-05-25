@@ -32,49 +32,11 @@ func (s *MysqlExpertiseRepository) Create(data *models.ExpertiseModel) (string, 
 		return "", err
 	}
 
-	if err := s.CreateTags(data.Id, data.Tags); err != nil {
-		return "", err
-	}
-
 	if ctx.Err() == context.DeadlineExceeded {
 		return "", context.DeadlineExceeded
 	}
 
 	return data.Id, nil
-}
-
-func (s *MysqlExpertiseRepository) CreateTags(expertiseId string, tags []*models.TagModel) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	tx, err := s.db.BeginTxx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	createTagQuery := "INSERT INTO Tag (id, title) VALUES (:id, :title)"
-	createRelationshipQuery := "INSERT INTO ExpertiseTag (expertiseId, tagId) VALUES (?, ?)"
-	for _, tag := range tags {
-		tag.Id = utils.GenerateId()
-		if _, err := tx.NamedExecContext(ctx, createTagQuery, tag); err != nil {
-			return err
-		}
-
-		if _, err := tx.ExecContext(ctx, createRelationshipQuery, expertiseId, tag.Id); err != nil {
-			return err
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
-	}
-
-	return nil
 }
 
 func (s *MysqlExpertiseRepository) GetAll() ([]*models.ExpertiseModel, error) {
@@ -85,27 +47,6 @@ func (s *MysqlExpertiseRepository) GetAll() ([]*models.ExpertiseModel, error) {
 	expertise := make([]*models.ExpertiseModel, 0)
 	if err := s.db.SelectContext(ctx, &expertise, getExpertiseQuery); err != nil {
 		return nil, err
-	}
-
-	getExpertiseTagsQuery := `
-        SELECT
-            t.id,
-            t.title,
-            t.createdAt
-        FROM
-            ExpertiseTag et
-            JOIN Tag t ON t.id = et.tagId
-        WHERE
-            et.expertiseId = ?
-    `
-
-	for _, entry := range expertise {
-		tags := make([]*models.TagModel, 0)
-		if err := s.db.SelectContext(ctx, &tags, getExpertiseTagsQuery, entry.Id); err != nil {
-			return nil, err
-		}
-
-		entry.Tags = tags
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -129,24 +70,6 @@ func (s *MysqlExpertiseRepository) FindById(id string) (*models.ExpertiseModel, 
 		return nil, errors.New("not found")
 	}
 
-	getTagsQuery := `
-        SELECT
-            t.id,
-            t.title,
-            t.createdAt
-        FROM
-            ExpertiseTag et
-            JOIN Tag t ON t.id = et.tagId
-        WHERE
-            et.expertiseId = ?
-    `
-
-	tags := make([]*models.TagModel, 0)
-	if err := s.db.SelectContext(ctx, &tags, getTagsQuery, expertise.Id); err != nil {
-		return nil, err
-	}
-	expertise.Tags = tags
-
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded
 	}
@@ -158,7 +81,7 @@ func (s *MysqlExpertiseRepository) FindByTitle(title string) (*models.ExpertiseM
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getExpertiseQuery := "SELECT id, title, createdAt, updatedAt FROM Expertise WHERE title = ?"
+	getExpertiseQuery := "SELECT id, title, createdAt FROM Expertise WHERE title = ?"
 	expertise := new(models.ExpertiseModel)
 	if err := s.db.GetContext(ctx, expertise, getExpertiseQuery, title); err != nil {
 		fmt.Println("error search: ", err.Error())
@@ -168,24 +91,6 @@ func (s *MysqlExpertiseRepository) FindByTitle(title string) (*models.ExpertiseM
 	if expertise.Id == "" {
 		return nil, errors.New("not found")
 	}
-
-	getTagsQuery := `
-        SELECT
-            t.id,
-            t.title,
-            t.createdAt
-        FROM
-            ExpertiseTag et
-            JOIN Tag t ON t.id = et.tagId
-        WHERE
-            et.expertiseId = ?
-    `
-
-	tags := make([]*models.TagModel, 0)
-	if err := s.db.SelectContext(ctx, &tags, getTagsQuery, expertise.Id); err != nil {
-		return nil, err
-	}
-	expertise.Tags = tags
 
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, context.DeadlineExceeded

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS Service (
     pricingType ENUM('fixed', 'per_hour', 'per_day') NOT NULL DEFAULT 'fixed',
     signature VARCHAR(64) NOT NULL,
     disabled BOOLEAN DEFAULT FALSE,
+    status ENUM('under_review', 'accepted', 'rejected') DEFAULT 'under_review',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY(id),

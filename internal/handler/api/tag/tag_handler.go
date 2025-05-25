@@ -2,9 +2,11 @@ package tag
 
 import (
 	"nearbyassist/internal/models"
+	"nearbyassist/internal/response"
 	tag_service "nearbyassist/internal/service/tag"
 	"nearbyassist/internal/utils"
 	"net/http"
+	"slices"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,59 +28,38 @@ func (h *tagHandler) GetTags(c echo.Context) error {
 		})
 	}
 
+	resp := slices.AppendSeq(
+		make([]string, 0),
+		utils.Map(tags, func(t *models.TagModel) string {
+			return t.Title
+		}),
+	)
+
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"tags": tags,
+		"tags": resp,
 	})
 }
 
-func (h *tagHandler) GetExpertise(c echo.Context) error {
-	expertiseWithTags, err := h.tagService.GetExpertise()
+func (h *tagHandler) GetExpertiseList(c echo.Context) error {
+	list, err := h.tagService.GetExpertiseList()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
-			Message: "Error getting expertise",
+			Message: "Error retrieving expertise list",
 			Error:   err.Error(),
 		})
 	}
 
-	response := []struct {
-		Id    string `json:"id"`
-		Title string `json:"title"`
-		Tags  []struct {
-			Id    string `json:"id"`
-			Title string `json:"title"`
-		} `json:"tags"`
-	}{}
-
-	for _, entry := range expertiseWithTags {
-		tags := make([]struct {
-			Id    string `json:"id"`
-			Title string `json:"title"`
-		}, 0)
-		for _, tag := range entry.Tags {
-			tags = append(tags, struct {
-				Id    string `json:"id"`
-				Title string `json:"title"`
-			}{
-				Id:    tag.Id,
-				Title: tag.Title,
-			})
-		}
-
-		response = append(response, struct {
-			Id    string `json:"id"`
-			Title string `json:"title"`
-			Tags  []struct {
-				Id    string `json:"id"`
-				Title string `json:"title"`
-			} `json:"tags"`
-		}{
-			Id:    entry.Id,
-			Title: entry.Title,
-			Tags:  tags,
-		})
-	}
+	resp := slices.AppendSeq(
+		make([]response.Expertise, 0),
+		utils.Map(list, func(e *models.ExpertiseModel) response.Expertise {
+			return response.Expertise{
+				Id:    e.Id,
+				Title: e.Title,
+			}
+		}),
+	)
 
 	return c.JSON(http.StatusOK, utils.Mapper{
-		"expertises": response,
+		"expertise": resp,
 	})
 }

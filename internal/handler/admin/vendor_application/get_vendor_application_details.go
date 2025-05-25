@@ -100,6 +100,7 @@ func (h *applicationHandler) AcceptRequest(c echo.Context) error {
 	application, _ := h.applicationService.GetApplicationDetail(applicationId)
 
 	if err := h.applicationService.AcceptRequest(applicationId); err != nil {
+		fmt.Println(err.Error())
 		if err := utils.SetFlashMessage(c, "error", "Request accept failed"); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=accept_error")
 		}

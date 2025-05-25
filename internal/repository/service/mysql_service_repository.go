@@ -57,23 +57,6 @@ func (s *MysqlServiceRepository) Create(service *models.ServiceModel) (string, e
 		return "", err
 	}
 
-	registerTag := `
-        INSERT INTO 
-            ServiceTag (id, serviceId, tagId)
-        SELECT
-            ?, ?, t.id
-        FROM
-            Tag t
-        WHERE
-            t.title = ?
-    `
-	for _, tag := range service.TagsAsString {
-		tagId := utils.GenerateId()
-		if _, err := tx.ExecContext(ctx, registerTag, tagId, service.Id, tag); err != nil {
-			return "", err
-		}
-	}
-
 	registerExtra := `
         INSERT INTO
             Extra (id, title, description, price, serviceId)
@@ -93,6 +76,54 @@ func (s *MysqlServiceRepository) Create(service *models.ServiceModel) (string, e
 		}
 
 		if _, err := tx.ExecContext(ctx, registerServiceExtra, service.Id, extraId); err != nil {
+			return "", err
+		}
+	}
+
+	tagExists := `
+        SELECT EXISTS
+            (SELECT 1 FROM Tag WHERE title = ?)
+        AS tag_exists
+    `
+	getTagByTitle := "SELECT id, title FROM Tag WHER title = ?"
+	createTag := "INSERT INTO Tag (id, title) VALUES (?, ?)"
+	serviceTagRelation := `
+        INSERT INTO
+            ServiceTag (id, serviceId, tagId)
+        VALUES
+            (?, ?, ?)
+    `
+
+	for _, tag := range service.TagsAsString {
+		exists := false
+		if err := tx.GetContext(ctx, &exists, tagExists, tag); err != nil {
+			fmt.Println("error existence check: ", err.Error())
+			return "", err
+		}
+
+		if exists {
+			existingTag := new(models.TagModel)
+			if err := tx.GetContext(ctx, existingTag, getTagByTitle, tag); err != nil {
+				fmt.Println("error get existing tag: ", err.Error())
+				return "", err
+			}
+
+			serviceTagId := utils.GenerateId()
+			if _, err := tx.ExecContext(ctx, serviceTagRelation, serviceTagId, service.Id, existingTag.Id); err != nil {
+				fmt.Println("error service tag relation create: ", err.Error())
+				return "", err
+			}
+
+			continue
+		}
+
+		tagId := utils.GenerateId()
+		if _, err := tx.ExecContext(ctx, createTag, tagId, tag); err != nil {
+			return "", err
+		}
+
+		serviceTagId := utils.GenerateId()
+		if _, err := tx.ExecContext(ctx, serviceTagRelation, serviceTagId, service.Id, tagId); err != nil {
 			return "", err
 		}
 	}
@@ -143,23 +174,6 @@ func (s *MysqlServiceRepository) CreateWithPricingType(service *models.ServiceMo
 		return "", err
 	}
 
-	registerTag := `
-        INSERT INTO 
-            ServiceTag (id, serviceId, tagId)
-        SELECT
-            ?, ?, t.id
-        FROM
-            Tag t
-        WHERE
-            t.title = ?
-    `
-	for _, tag := range service.TagsAsString {
-		tagId := utils.GenerateId()
-		if _, err := tx.ExecContext(ctx, registerTag, tagId, service.Id, tag); err != nil {
-			return "", err
-		}
-	}
-
 	registerExtra := `
         INSERT INTO
             Extra (id, title, description, price, serviceId)
@@ -179,6 +193,52 @@ func (s *MysqlServiceRepository) CreateWithPricingType(service *models.ServiceMo
 		}
 
 		if _, err := tx.ExecContext(ctx, registerServiceExtra, service.Id, extraId); err != nil {
+			return "", err
+		}
+	}
+
+	tagExists := `
+        SELECT EXISTS
+            (SELECT 1 FROM Tag WHERE title = ?)
+        AS tag_exists
+    `
+	getTagByTitle := "SELECT id, title FROM Tag WHER title = ?"
+	createTag := "INSERT INTO Tag (id, title) VALUES (?, ?)"
+	serviceTagRelation := `
+        INSERT INTO
+            ServiceTag (id, serviceId, tagId)
+        VALUES
+            (?, ?, ?)
+    `
+
+	for _, tag := range service.TagsAsString {
+		exists := false
+		if err := tx.GetContext(ctx, &exists, tagExists, tag); err != nil {
+			fmt.Println("error existence check: ", err.Error())
+			return "", err
+		}
+
+		if exists {
+			existingTag := new(models.TagModel)
+			if err := tx.GetContext(ctx, existingTag, getTagByTitle, tag); err != nil {
+				return "", err
+			}
+
+			serviceTagId := utils.GenerateId()
+			if _, err := tx.ExecContext(ctx, serviceTagRelation, serviceTagId, service.Id, existingTag.Id); err != nil {
+				return "", err
+			}
+
+			continue
+		}
+
+		tagId := utils.GenerateId()
+		if _, err := tx.ExecContext(ctx, createTag, tagId, tag); err != nil {
+			return "", err
+		}
+
+		serviceTagId := utils.GenerateId()
+		if _, err := tx.ExecContext(ctx, serviceTagRelation, serviceTagId, service.Id, tagId); err != nil {
 			return "", err
 		}
 	}
@@ -551,7 +611,7 @@ func (s *MysqlServiceRepository) FindPhotoById(imageId string) (*models.ServiceP
 	return photo, nil
 }
 
-func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) error {
+func (s *MysqlServiceRepository) Update(updatedData *models.ServiceModel) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -571,7 +631,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
         WHERE
             id = :id
     `
-	if _, err = tx.NamedExecContext(ctx, updateService, updatedService); err != nil {
+	if _, err = tx.NamedExecContext(ctx, updateService, updatedData); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
@@ -583,6 +643,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
         SELECT
             st.id,
             st.serviceId,
+            st.tagId,
             t.title
         FROM
             ServiceTag st
@@ -593,7 +654,7 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 
 	// Retrieve current tags
 	currentSvcTag := make([]models.ServiceTagModel, 0)
-	if err := tx.SelectContext(ctx, &currentSvcTag, getCurrentTags, updatedService.Id); err != nil {
+	if err := tx.SelectContext(ctx, &currentSvcTag, getCurrentTags, updatedData.Id); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
@@ -614,19 +675,47 @@ func (s *MysqlServiceRepository) Update(updatedService *models.ServiceModel) err
 	}
 
 	// Insert new tags
-	insertTag := `
-        INSERT INTO ServiceTag (id, serviceId, tagId) 
-        SELECT ?, ?, t.id
-        FROM Tag t 
-        WHERE t.title = ?
+	tagExists := `
+        SELECT EXISTS
+            (SELECT 1 FROM Tag WHERE title = ?)
+        AS tag_exists
     `
-	for _, tag := range updatedService.TagsAsString {
-		generatedId := utils.GenerateId()
-		if _, err := tx.ExecContext(ctx, insertTag, generatedId, updatedService.Id, tag); err != nil {
-			if err := tx.Rollback(); err != nil {
+	getTagByTitle := "SELECT id, title FROM Tag WHERE title = ?"
+	createTag := "INSERT INTO Tag (id, title) VALUES (?, ?)"
+	serviceTagRelation := `
+        INSERT INTO
+            ServiceTag (id, serviceId, tagId)
+        VALUES
+            (?, ?, ?)
+    `
+
+	for _, tag := range updatedData.TagsAsString {
+		exists := false
+		if err := tx.GetContext(ctx, &exists, tagExists, tag); err != nil {
+			return err
+		}
+
+		if exists {
+			existingTag := new(models.TagModel)
+			if err := tx.GetContext(ctx, existingTag, getTagByTitle, tag); err != nil {
 				return err
 			}
 
+			serviceTagId := utils.GenerateId()
+			if _, err := tx.ExecContext(ctx, serviceTagRelation, serviceTagId, updatedData.Id, existingTag.Id); err != nil {
+				return err
+			}
+
+			continue
+		}
+
+		tagId := utils.GenerateId()
+		if _, err := tx.ExecContext(ctx, createTag, tagId, tag); err != nil {
+			return err
+		}
+
+		serviceTagId := utils.GenerateId()
+		if _, err := tx.ExecContext(ctx, serviceTagRelation, serviceTagId, updatedData.Id, tagId); err != nil {
 			return err
 		}
 	}

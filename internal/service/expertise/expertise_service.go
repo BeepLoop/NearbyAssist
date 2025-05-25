@@ -11,7 +11,6 @@ import (
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	"nearbyassist/internal/utils"
-	"strings"
 )
 
 const (
@@ -42,24 +41,11 @@ func NewService(userStore user_repo.UserRepository, vendorStore vendor_repo.Vend
 	}
 }
 
-func (s *Service) CreateExpertise(data *models.ExpertiseModel, tagsInput string) (string, error) {
-	// Clean up the tags input
-	if tagsInput != "" {
-		csv := strings.Split(tagsInput, ",")
-		for _, v := range csv {
-			trimmed := strings.TrimSpace(v)
-			if trimmed != "" {
-				data.Tags = append(data.Tags, &models.TagModel{
-					Title: strings.ToLower(trimmed),
-				})
-			}
-		}
-	}
-
+func (s *Service) CreateExpertise(data *models.ExpertiseModel) (string, error) {
 	return s.expertiseStore.Create(data)
 }
 
-func (s *Service) AddUserExpertise(bearerToken, expertiseId string, file *multipart.FileHeader) error {
+func (s *Service) AddVendorExpertise(bearerToken, expertiseId string, file *multipart.FileHeader) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
@@ -108,8 +94,4 @@ func (s *Service) GetAllExpertise() ([]*models.ExpertiseModel, error) {
 
 func (s *Service) FindExpertise(query string) (*models.ExpertiseModel, error) {
 	return s.expertiseStore.FindByTitle(query)
-}
-
-func (s *Service) AddTagToExpertise(expertiseId string, data []*models.TagModel) error {
-	return s.expertiseStore.CreateTags(expertiseId, data)
 }

@@ -2,7 +2,7 @@ package models
 
 import "database/sql"
 
-type UserExpertiseModel struct {
+type VendorExpertiseModel struct {
 	Model
 	UpdateableModel
 	UserId             string `db:"userId"`

@@ -56,42 +56,24 @@ func (s *MysqlTagRepository) FindAll() ([]*models.TagModel, error) {
 	return tags, nil
 }
 
-func (s *MysqlTagRepository) FindAllWithExpertise() ([]*models.ExpertiseModel, error) {
+func (s *MysqlTagRepository) Exists(tag string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Get all expertise
-	expertiseQuery := "SELECT id, title from Expertise"
-
-	expertises := make([]*models.ExpertiseModel, 0)
-	if err := s.db.SelectContext(ctx, &expertises, expertiseQuery); err != nil {
-		return nil, err
-	}
-
-	// Get all tags for each expertise
-	tagQuery := `
-        SELECT
-            t.id,
-            t.title
-        FROM 
-            Tag t 
-            JOIN ExpertiseTag et ON et.tagId = t.id
-        WHERE
-            et.expertiseId = ?
+	query := `
+        SELECT EXISTS
+            (SELECT 1 FROM Tag WHERE title = ?)
+        as exists
     `
 
-	for _, expertise := range expertises {
-		tags := make([]*models.TagModel, 0)
-		if err := s.db.SelectContext(ctx, &tags, tagQuery, expertise.Id); err != nil {
-			return nil, err
-		}
-
-		expertise.Tags = tags
+	exists := false
+	if err := s.db.GetContext(ctx, &exists, query, tag); err != nil {
+		return false, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
+		return false, context.DeadlineExceeded
 	}
 
-	return expertises, nil
+	return exists, nil
 }

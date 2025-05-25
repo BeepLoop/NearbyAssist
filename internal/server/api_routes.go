@@ -23,6 +23,7 @@ import (
 	booking_repo "nearbyassist/internal/repository/booking"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
+	expertise_repo "nearbyassist/internal/repository/expertise"
 	message_repo "nearbyassist/internal/repository/message"
 	notification_repo "nearbyassist/internal/repository/notification"
 	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
@@ -134,11 +135,12 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	tagRoute := v1.Group("/tags")
 	{
 		tagStore := tag_repo.NewMysqlTagRepository(s.DB)
-		tagService := tag_service.NewService(tagStore)
+		expertiseStore := expertise_repo.NewMysqlExpertiseRepository(s.DB)
+		tagService := tag_service.NewService(tagStore, expertiseStore)
 		handler := tag.NewHandler(tagService)
 
 		tagRoute.GET("", handler.GetTags)
-		tagRoute.GET("/expertise", handler.GetExpertise)
+		tagRoute.GET("/expertise", handler.GetExpertiseList)
 	}
 
 	// ===== VENDOR =======

@@ -207,7 +207,7 @@ func (h *userHandler) AddExpertise(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-	if err := h.userService.AddUserExpertise(bearerToken, expertiseId, files[0]); err != nil {
+	if err := h.userService.AddVendorExpertise(bearerToken, expertiseId, files[0]); err != nil {
 		if strings.Contains(err.Error(), user_service.ERR_FORBIDDEN) {
 			return echo.NewHTTPError(http.StatusForbidden, models.Error{
 				Message: "Adding expertise not allowed",

@@ -87,13 +87,20 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 		return "", errors.New(ERR_DUPLICATE_SERVICE)
 	}
 
+	tags := slices.AppendSeq(
+		make([]string, 0),
+		utils.Map(req.Tags, func(tag string) string {
+			return strings.TrimSpace(tag)
+		}),
+	)
+
 	newService := &models.ServiceModel{
 		VendorId:     req.VendorId,
 		Title:        utils.Must(s.encrypt.EncryptString(req.Title)),
 		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
 		Price:        req.Price,
 		PricingType:  models.PricingType(req.PricingType),
-		TagsAsString: req.Tags,
+		TagsAsString: tags,
 		Extras: slices.AppendSeq(
 			make([]*models.ExtraModel, 0),
 			utils.Map(req.Extras, func(x request.NewExtra) *models.ExtraModel {
@@ -155,9 +162,9 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 			Price:       service.Price,
 			PricingType: string(service.PricingType),
 			Tags: slices.AppendSeq(
-				make([]response.Tag, 0),
-				utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
-					return response.Tag{Id: t.Id, Title: t.Title}
+				make([]string, 0),
+				utils.Map(service.Tags, func(t *models.TagModel) string {
+					return t.Title
 				}),
 			),
 			Extras: slices.AppendSeq(
@@ -250,6 +257,13 @@ func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePa
 		}
 	}
 
+	tags := slices.AppendSeq(
+		make([]string, 0),
+		utils.Map(req.Tags, func(tag string) string {
+			return strings.TrimSpace(tag)
+		}),
+	)
+
 	updatedService := &models.ServiceModel{
 		Model:        models.Model{Id: req.Id},
 		VendorId:     req.VendorId,
@@ -257,7 +271,7 @@ func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePa
 		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
 		Price:        req.Price,
 		PricingType:  models.PricingType(req.PricingType),
-		TagsAsString: req.Tags,
+		TagsAsString: tags,
 		Signature:    computeSignature(req.VendorId, req.Title, req.Description, req.PricingType, s.hash.Generate),
 	}
 
@@ -730,9 +744,9 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 					Price:       service.Price,
 					PricingType: string(service.PricingType),
 					Tags: slices.AppendSeq(
-						make([]response.Tag, 0),
-						utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
-							return response.Tag{Id: t.Id, Title: t.Title}
+						make([]string, 0),
+						utils.Map(service.Tags, func(t *models.TagModel) string {
+							return t.Title
 						}),
 					),
 					Extras: slices.AppendSeq(
