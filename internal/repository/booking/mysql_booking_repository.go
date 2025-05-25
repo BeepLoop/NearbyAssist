@@ -34,9 +34,9 @@ func (s *MysqlBookingRepository) Create(data *models.BookingModel) (string, erro
 
 	query := `
         INSERT INTO
-            Booking (id, vendorId, clientId, serviceId, serviceTitle, serviceDescription, price, pricingType, quantity, cost)
+            Booking (id, vendorId, clientId, serviceId, serviceTitle, serviceDescription, price, pricingType, quantity, cost, requestedStart, requestedEnd)
         VALUES
-            (:id, :vendorId, :clientId, :serviceId, :serviceTitle, :serviceDescription, :price, :pricingType, :quantity, :cost)
+            (:id, :vendorId, :clientId, :serviceId, :serviceTitle, :serviceDescription, :price, :pricingType, :quantity, :cost, :requestedStart, :requestedEnd)
     `
 
 	data.Id = utils.GenerateId()
@@ -87,6 +87,8 @@ func (s *MysqlBookingRepository) FindById(id string) (*models.BookingModel, erro
             t.cost,
             t.createdAt,
             t.updatedAt,
+            t.requestedStart,
+            t.requestedEnd,
             t.scheduleStart,
             t.scheduleEnd,
             t.cancelReason,

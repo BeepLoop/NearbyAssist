@@ -79,6 +79,20 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 		req.Cost = utils.Float64ToString(cost)
 	}
 
+	requestedStart, err := utils.ParseDateString(req.RequestedStart)
+	if err != nil {
+		return "", err
+	}
+
+	requestedEnd, err := utils.ParseDateString(req.RequestedEnd)
+	if err != nil {
+		return "", err
+	}
+
+	if err := utils.ValidateDateRange(requestedStart, requestedEnd); err != nil {
+		return "", err
+	}
+
 	booking := &models.BookingModel{
 		ClientId:           req.ClientId,
 		VendorId:           req.VendorId,
@@ -89,6 +103,8 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 		PricingType:        service.PricingType,
 		Quantity:           req.Quantity,
 		Cost:               req.Cost,
+		RequestedStart:     req.RequestedStart,
+		RequestedEnd:       req.RequestedEnd,
 		Extras: slices.AppendSeq(
 			make([]*models.BookingExtraModel, 0),
 			utils.Map(req.Extras, func(extra request.Extra) *models.BookingExtraModel {
@@ -149,13 +165,15 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 				}
 			}),
 		),
-		Status:        string(createdBooking.Status),
-		CreatedAt:     createdBooking.CreatedAt,
-		UpdatedAt:     createdBooking.UpdatedAt,
-		ScheduleStart: createdBooking.ScheduleStart.String,
-		ScheduleEnd:   createdBooking.ScheduleEnd.String,
-		CancelledBy:   createdBooking.CancelledBy.String,
-		CancelReason:  createdBooking.CancelReason.String,
+		Status:         string(createdBooking.Status),
+		CreatedAt:      createdBooking.CreatedAt,
+		UpdatedAt:      createdBooking.UpdatedAt,
+		RequestedStart: createdBooking.RequestedStart,
+		RequestedEnd:   createdBooking.RequestedEnd,
+		ScheduleStart:  createdBooking.ScheduleStart.String,
+		ScheduleEnd:    createdBooking.ScheduleEnd.String,
+		CancelledBy:    createdBooking.CancelledBy.String,
+		CancelReason:   createdBooking.CancelReason.String,
 		QRSignature: utils.Must(s.qrService.SignData(&request.QRSignatureInput{
 			ClientID:  createdBooking.ClientId,
 			VendorID:  createdBooking.VendorId,

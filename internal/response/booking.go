@@ -15,6 +15,8 @@ type Booking struct {
 	Status             string         `json:"status"`
 	CreatedAt          string         `json:"createdAt"`
 	UpdatedAt          string         `json:"updatedAt"`
+	RequestedStart     string         `json:"requestedStart"`
+	RequestedEnd       string         `json:"requestedEnd"`
 	ScheduleStart      string         `json:"scheduleStart"`
 	ScheduleEnd        string         `json:"scheduleEnd"`
 	CancelReason       string         `json:"cancelReason"`

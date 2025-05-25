@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS Booking (
     quantity INT NOT NULL DEFAULT 1, -- for fixed price service
     cost DECIMAL(10, 2) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    requestedStart TIMESTAMP,
+    requestedEnd TIMESTAMP,
     scheduleStart TIMESTAMP,
     scheduleEnd TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
