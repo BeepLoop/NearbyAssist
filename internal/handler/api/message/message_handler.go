@@ -118,7 +118,8 @@ func (h *messageHandler) SendMessage(c echo.Context) error {
 
 	message := &models.MessageModel{
 		Model: models.Model{
-			Id: req.Id,
+			Id:        req.Id,
+			CreatedAt: req.CreatedAt,
 		},
 		Sender:   req.Sender,
 		Receiver: req.Receiver,
