@@ -18,7 +18,7 @@ type User struct {
 	Name                       string
 	Email                      string
 	ImageURL                   string
-	Address                    string
+	Address                    Address
 	Phone                      string
 	Socials                    []Social
 	Identification             Identification
@@ -34,7 +34,7 @@ type Vendor struct {
 	Name           string
 	Email          string
 	ImageURL       string
-	Address        string
+	Address        Address
 	Phone          string
 	Socials        []Social
 	Identification Identification

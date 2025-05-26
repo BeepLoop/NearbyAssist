@@ -105,8 +105,12 @@ func (s *Service) GetDashbaordData() (*dto.Dashboard, error) {
 						Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
 						Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
 						ImageURL: vendor.User.ImageUrl,
-						Address:  utils.Try(s.encrypt.DecryptString(vendor.User.Address.Address)),
-						Phone:    utils.Try(s.encrypt.DecryptString(vendor.User.Phone)),
+						Address: dto.Address{
+							Address:   utils.Try(s.encrypt.DecryptString(vendor.User.Address.Address)),
+							Latitude:  vendor.User.Address.Latitude,
+							Longitude: vendor.User.Address.Longitude,
+						},
+						Phone: utils.Try(s.encrypt.DecryptString(vendor.User.Phone)),
 						Socials: slices.AppendSeq(
 							make([]dto.Social, 0),
 							utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {

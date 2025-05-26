@@ -7,6 +7,7 @@ templ MapComponent(data dto.MapData) {
 	@templ.JSONScript("services", data.Services)
 	<script>
         (function() {
+            const params = new URLSearchParams(window.location.search);
             const services = JSON.parse(document.getElementById("services").textContent);
             if (!services) return;
 
@@ -24,13 +25,33 @@ templ MapComponent(data dto.MapData) {
             });
 
             const bounds = new maplibregl.LngLatBounds();
+
             services.forEach(service => {
                 bounds.extend([service.Address.Longitude, service.Address.Latitude]);
             });
+
+            if (params.has("point")) {
+                const latitude = params.get("point").split(",")[0];
+                const longitude = params.get("point").split(",")[1];
+
+                bounds.extend([longitude, latitude]);
+            }
+
+
             map.fitBounds(bounds, {
                 padding: 100,
                 maxZoom: 16,
             });
+
+            if (params.has("point")) {
+                const latitude = params.get("point").split(",")[0];
+                const longitude = params.get("point").split(",")[1];
+
+                let marker = new maplibregl.Marker({color: "red"});
+                const coord = new maplibregl.LngLat(longitude, latitude);
+                marker.setLngLat(coord);
+                marker.addTo(map);
+            }
 
             services.forEach(service => {
                 const popup = createPopup(service);

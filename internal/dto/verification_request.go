@@ -7,7 +7,7 @@ type VerificationRequest struct {
 	Email           string
 	ImageURL        string
 	Phone           string
-	Address         string
+	Address         Address
 	IDType          string
 	ReferenceNumber string
 	IDFrontImageURL string

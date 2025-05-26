@@ -312,9 +312,12 @@ templ reported(data dto.UserReportDetail) {
 				<span class="font-medium text-neutral-dark">Email:</span>
 				<p class="text-neutral-gray">{ data.Reported.Email }</p>
 			</div>
-			<div class="mt-2 flex gap-2">
-				<span class="font-medium text-neutral-dark">Address:</span>
-				<p class="text-neutral-gray">{ data.Reported.Address }</p>
+			<div class="flex gap-2 ">
+				<h3 class="font-medium text-neutral-dark">Address:</h3>
+				<a
+					href={ templ.URL(fmt.Sprintf("/admin/map/?point=%f,%f", data.Reported.Address.Latitude, data.Reported.Address.Longitude)) }
+					class="text-good hover:underline"
+				>{ data.Reported.Address.Address }</a>
 			</div>
 			<div class="mt-2 flex gap-2">
 				<span class="font-medium text-neutral-dark">Phone:</span>
@@ -431,9 +434,12 @@ templ reporter(data dto.UserReportDetail) {
 				<span class="font-medium text-neutral-dark">Email:</span>
 				<p class="text-neutral-gray">{ data.Reporter.Email }</p>
 			</div>
-			<div class="mt-2 flex gap-2">
-				<span class="font-medium text-neutral-dark">Address:</span>
-				<p class="text-neutral-gray">{ data.Reporter.Address }</p>
+			<div class="flex gap-2 ">
+				<h3 class="font-medium text-neutral-dark">Address:</h3>
+				<a
+					href={ templ.URL(fmt.Sprintf("/admin/map/?point=%f,%f", data.Reporter.Address.Latitude, data.Reporter.Address.Longitude)) }
+					class="text-good hover:underline"
+				>{ data.Reporter.Address.Address }</a>
 			</div>
 			<div class="mt-2 flex gap-2">
 				<span class="font-medium text-neutral-dark">Phone:</span>

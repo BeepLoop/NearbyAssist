@@ -32,7 +32,10 @@ templ IdentityVerification(user models.AdminModel, request dto.VerificationReque
 				</div>
 				<div class="flex gap-2 ">
 					<h3 class="font-medium text-neutral-dark">Address:</h3>
-					<p class="text-neutral-gray">{ request.Address }</p>
+					<a
+						href={ templ.URL(fmt.Sprintf("/admin/map/?point=%f,%f", request.Address.Latitude, request.Address.Longitude)) }
+						class="text-good hover:underline"
+					>{ request.Address.Address }</a>
 				</div>
 				<div class="flex gap-2 ">
 					<h3 class="font-medium text-neutral-dark">ID Type:</h3>

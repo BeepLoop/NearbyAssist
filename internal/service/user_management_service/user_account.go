@@ -39,8 +39,12 @@ func (s *Service) GetUserAccountDetail(userId string) (*dto.UserAccountDetail, e
 			Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
 			Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
 			ImageURL: user.ImageUrl,
-			Address:  utils.Try(s.encrypt.DecryptString(user.Address.Address)),
-			Phone:    utils.Try(s.encrypt.DecryptString(user.Phone)),
+			Address: dto.Address{
+				Address:   utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+				Latitude:  user.Address.Latitude,
+				Longitude: user.Address.Longitude,
+			},
+			Phone: utils.Try(s.encrypt.DecryptString(user.Phone)),
 			Socials: slices.AppendSeq(
 				make([]dto.Social, 0),
 				utils.Map(user.Socials, func(social models.SocialModel) dto.Social {

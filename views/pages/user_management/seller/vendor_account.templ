@@ -159,6 +159,13 @@ templ profile(data dto.VendorAccountDetail) {
 					<span class="font-medium text-neutral-dark">Date Verified: </span>
 					<p class="text-neutral-gray">{ data.Vendor.DateVerified } </p>
 				</div>
+				<div class="flex gap-2 ">
+					<h3 class="font-medium text-neutral-dark">Address:</h3>
+					<a
+						href={ templ.URL(fmt.Sprintf("/admin/map/?point=%f,%f", data.Vendor.Address.Latitude, data.Vendor.Address.Longitude)) }
+						class="text-good hover:underline"
+					>{ data.Vendor.Address.Address }</a>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -49,8 +49,12 @@ func (s *Service) GetAll(limit, offset int) ([]dto.Vendor, error) {
 				Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
 				Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
 				ImageURL: vendor.User.ImageUrl,
-				Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
-				Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
+				Address: dto.Address{
+					Address:   utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
+					Latitude:  vendor.User.Address.Latitude,
+					Longitude: vendor.User.Address.Longitude,
+				},
+				Phone: utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
 				Socials: slices.AppendSeq(
 					make([]dto.Social, 0),
 					utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
@@ -91,8 +95,12 @@ func (s *Service) GetAllByEmail(email string) (*dto.Vendor, error) {
 		Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
 		Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
 		ImageURL: vendor.User.ImageUrl,
-		Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
-		Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
+		Address: dto.Address{
+			Address:   utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
+			Latitude:  vendor.User.Address.Latitude,
+			Longitude: vendor.User.Address.Longitude,
+		},
+		Phone: utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
 		Socials: slices.AppendSeq(
 			make([]dto.Social, 0),
 			utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
@@ -134,8 +142,12 @@ func (s *Service) GetAllByExpertise(expertise string, limit, offset int) ([]dto.
 			Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
 			Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
 			ImageURL: vendor.User.ImageUrl,
-			Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
-			Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
+			Address: dto.Address{
+				Address:   utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
+				Latitude:  vendor.User.Address.Latitude,
+				Longitude: vendor.User.Address.Longitude,
+			},
+			Phone: utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
 			Socials: slices.AppendSeq(
 				make([]dto.Social, 0),
 				utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
@@ -231,8 +243,12 @@ func (s *Service) FindByIdDTO(id string) (*dto.Vendor, error) {
 		Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
 		Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
 		ImageURL: vendor.User.ImageUrl,
-		Address:  utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
-		Phone:    utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
+		Address: dto.Address{
+			Address:   utils.Must(s.encrypt.DecryptString(vendor.User.Address.Address)),
+			Latitude:  vendor.User.Address.Latitude,
+			Longitude: vendor.User.Address.Longitude,
+		},
+		Phone: utils.Must(s.encrypt.DecryptString(vendor.User.Phone)),
 		Socials: slices.AppendSeq(
 			make([]dto.Social, 0),
 			utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {

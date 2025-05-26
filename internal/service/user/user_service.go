@@ -109,8 +109,12 @@ func (s *Service) GetAllBasicUsers(limit, offset int) ([]dto.User, error) {
 				Name:     utils.Must(s.encrypt.DecryptString(account.Name)),
 				Email:    utils.Must(s.encrypt.DecryptString(account.Email)),
 				ImageURL: account.ImageUrl,
-				Address:  utils.Must(s.encrypt.DecryptString(account.Address.Address)),
-				Phone:    utils.Must(s.encrypt.DecryptString(account.Phone)),
+				Address: dto.Address{
+					Address:   utils.Must(s.encrypt.DecryptString(account.Address.Address)),
+					Latitude:  account.Address.Latitude,
+					Longitude: account.Address.Longitude,
+				},
+				Phone: utils.Must(s.encrypt.DecryptString(account.Phone)),
 				Socials: slices.AppendSeq(
 					make([]dto.Social, 0),
 					utils.Map(account.Socials, func(social models.SocialModel) dto.Social {
@@ -156,8 +160,12 @@ func (s *Service) FindById(id string) (*dto.User, error) {
 		Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
 		Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
 		ImageURL: user.ImageUrl,
-		Address:  utils.Must(s.encrypt.DecryptString(user.Address.Address)),
-		Phone:    utils.Must(s.encrypt.DecryptString(user.Phone)),
+		Address: dto.Address{
+			Address:   utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+			Latitude:  user.Address.Latitude,
+			Longitude: user.Address.Longitude,
+		},
+		Phone: utils.Must(s.encrypt.DecryptString(user.Phone)),
 		Socials: slices.AppendSeq(
 			make([]dto.Social, 0),
 			utils.Map(user.Socials, func(social models.SocialModel) dto.Social {
@@ -202,8 +210,12 @@ func (s *Service) FindByEmail(email string) (*dto.User, error) {
 		Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
 		Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
 		ImageURL: user.ImageUrl,
-		Address:  utils.Must(s.encrypt.DecryptString(user.Address.Address)),
-		Phone:    utils.Must(s.encrypt.DecryptString(user.Phone)),
+		Address: dto.Address{
+			Address:   utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+			Latitude:  user.Address.Latitude,
+			Longitude: user.Address.Longitude,
+		},
+		Phone: utils.Must(s.encrypt.DecryptString(user.Phone)),
 		Socials: slices.AppendSeq(
 			make([]dto.Social, 0),
 			utils.Map(user.Socials, func(social models.SocialModel) dto.Social {
