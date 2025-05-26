@@ -119,6 +119,32 @@ func (s *MysqlUserRepository) ChangeAddress(userId string, address *models.Addre
 	return nil
 }
 
+func (s *MysqlUserRepository) UpdatePhone(userId, phone string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	updatePhone := "UPDATE User SET phone = ? WHERE id = ?"
+	if _, err := tx.ExecContext(ctx, updatePhone, phone, userId); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

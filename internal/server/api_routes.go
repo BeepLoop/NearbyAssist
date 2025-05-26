@@ -129,6 +129,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		userRoute.POST("/addExpertise", handler.AddExpertise, middleware.CheckAuth(s.JWT))
 		userRoute.POST("/dbl/:value", handler.SetDBL, middleware.CheckAuth(s.JWT))
 		userRoute.PUT("/address", handler.ChangeAddress, middleware.CheckAuth(s.JWT))
+		userRoute.PUT("/phone", handler.UpdatePhone, middleware.CheckAuth(s.JWT))
 	}
 
 	// ===== TAGS =======

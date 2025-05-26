@@ -524,3 +524,13 @@ func (s *Service) ChangeAddress(bearerToken string, req *request.ChangeAddressPa
 
 	return s.userStore.ChangeAddress(userId, address)
 }
+
+func (s *Service) UpdatePhone(bearerToken string, req *request.UpdatePhonePayload) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	encryptedPhone := utils.Must(s.encrypt.EncryptString(req.Phone))
+	return s.userStore.UpdatePhone(userId, encryptedPhone)
+}
