@@ -1,0 +1,472 @@
+package pages
+
+import (
+	"fmt"
+	"nearbyassist/internal/dto"
+	"nearbyassist/internal/models"
+	"nearbyassist/internal/utils"
+	"nearbyassist/views/layout"
+	"nearbyassist/views/partials"
+	"slices"
+)
+
+templ PendingServiceDetail(user models.AdminModel, data dto.PendingService) {
+	@layout.Layout(user) {
+		<div class="flex justify-between align-center px-4">
+			@partials.BackButton(partials.BackButtonProps{
+				URL: "/admin/pending-services",
+			})
+			<div class="flex gap-2">
+				@acceptButton(data.Service.Id)
+				@rejectButton(data.Service.Id)
+			</div>
+		</div>
+		<div class="grid grid-cols-2 mt-2 text-sm">
+			<div class="border-r border-pale-gray">
+				@pendingService(data.Service)
+			</div>
+			<div class="">
+				@pendingServiceVendor(data.Vendor)
+			</div>
+		</div>
+	}
+}
+
+templ pendingService(service dto.Service) {
+	<div class="px-4 py-2">
+		<!-- Header -->
+		<h2 class="text-xl font-medium text-neutral-dark">Service Information</h2>
+		@partials.Divider()
+		<!-- Service -->
+		<div class="mt-2">
+			<!-- Content -->
+			<div class="">
+				<div class="mt-2 text-neutral-gray">
+					<!-- Images -->
+					<div>
+						@partials.Carousel(partials.CarouselProps{
+							ImageURLs: slices.AppendSeq(
+								make([]string, 0),
+								utils.Map(service.Images, func(image dto.Image) string {
+									return image.URL
+								}),
+							),
+						})
+					</div>
+					@partials.Divider()
+					<div class="mt-4">
+						<span class="font-medium text-neutral-dark">Status:</span>
+						switch (service.Status) {
+							case "under_review":
+								@partials.DefaultBadgeWarning(service.Status)
+							case "accepted":
+								@partials.DefaultBadgeSuccess(service.Status)
+							case "rejected":
+								@partials.DefaultBadgeDanger(service.Status)
+						}
+					</div>
+					<div class="mt-2 flex gap-2">
+						<span class="font-medium text-neutral-dark">Date Created:</span>
+						<p class="text-neutral-gray">{ service.CreatedAt }</p>
+					</div>
+					<div class="mt-2 flex gap-2">
+						<span class="font-medium text-neutral-dark">Last Modified:</span>
+						<p class="text-neutral-gray">{ service.UpdatedAt }</p>
+					</div>
+					switch (service.Status) {
+						case "accepted":
+							<div class="mt-2 flex gap-2">
+								<span class="font-medium text-neutral-dark">Date Accepted:</span>
+								<p class="text-neutral-gray">{ service.AcceptedAt }</p>
+							</div>
+						case "rejected":
+							<div class="mt-2 flex gap-2">
+								<span class="font-medium text-neutral-dark">Date Rejected:</span>
+								<p class="text-neutral-gray">{ service.RejectedAt }</p>
+							</div>
+							<div class="mt-2 mb-4">
+								<span class="font-medium text-neutral-dark">Reason for Rejection:</span>
+								<p class="text-neutral-gray">{ service.RejectReason }</p>
+							</div>
+					}
+					@partials.Divider()
+					<!-- Detail -->
+					<div class="mt-4 grid gap-1">
+						<div class="mt-2">
+							<span class="font-medium text-neutral-dark">Title:</span>
+							<p class="text-neutral-gray">{ service.Title }</p>
+						</div>
+						<div class="mt-2">
+							<span class="font-medium text-neutral-dark">Description:</span>
+							<p class="text-neutral-gray">{ service.Description }</p>
+						</div>
+						<div class="mt-2">
+							switch (service.PricingType) {
+								case "fixed":
+									<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } (fixed)</span>
+								case "per_hour":
+									<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } / hour</span>
+								case "per_day":
+									<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } / day</span>
+							}
+						</div>
+					</div>
+					<div class="mt-4">
+						<!-- Note -->
+						<div class="mt-2 flex gap-2 rounded-sm bg-good/25 px-1 py-2 text-xs text-neutral-gray">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+								<path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"></path>
+							</svg>
+							<p>You can click on the tag to perform a quick map search </p>
+						</div>
+						<!-- Tags -->
+						<div class="my-2 flex flex-wrap gap-2">
+							for _, tag := range service.Tags {
+								<a
+									href={ templ.SafeURL(fmt.Sprintf("/admin/map?query=%s", tag)) }
+									class="mt-2"
+								>
+									@partials.DefaultBadgeSuccess(tag)
+								</a>
+							}
+						</div>
+					</div>
+					<!-- Extras -->
+					<div class="mt-4">
+						<h1 class="text-lg font-medium text-neutral-dark">Add-ons</h1>
+						<div>
+							for _, extra := range service.Extras {
+								@partials.Collapsable(partials.CollapsableProps{
+									Title:    extra.Title,
+									EndText:  utils.FormatCurrency(extra.Price),
+									Content:  extra.Description,
+									Expanded: true,
+								})
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ pendingServiceVendor(vendor dto.Vendor) {
+	<div class="px-4 py-2">
+		<!-- Header -->
+		<h2 class="text-xl font-medium text-neutral-dark">Vendor Information</h2>
+		@partials.Divider()
+		<!-- Information -->
+		<div class="mt-2">
+			<div class="flex justify-between mt-2">
+				<img
+					src={ vendor.ImageURL }
+					alt="profile"
+					class="aspect-square h-44 w-44 outline-1 outline-pale-gray"
+				/>
+				<div class="">
+					<a
+						href={ templ.URL(fmt.Sprintf("/admin/user-management/vendors/%s", vendor.Id)) }
+						class="cursor-pointer rounded-sm bg-primary px-3 py-1.5 text-xs text-white hover:opacity-75"
+					>View Profile</a>
+				</div>
+			</div>
+			<div class="mt-2">
+				<div class="">
+					<!-- name & email -->
+					<div>
+						<span class="text-xl font-medium text-neutral-dark">{ vendor.Name }</span>
+						<p class="text-neutral-gray">{ vendor.Email }</p>
+						<p class="text-neutral-gray">{ vendor.Phone }</p>
+					</div>
+					<!-- id & created at -->
+					<div class="mt-2">
+						<div class="mt-1.5 flex items-center gap-2">
+							<span class="font-medium text-neutral-dark">Rating: </span>
+							<span class="flex gap-2 text-warning">
+								<p class="font-medium">{ vendor.Rating }</p>
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+									<path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"></path>
+								</svg>
+							</span>
+						</div>
+						<div class="mt-1.5 flex gap-2">
+							<span class="font-medium text-neutral-dark">User ID: </span>
+							<p class="text-neutral-gray">{ vendor.Id }</p>
+						</div>
+						<div class="mt-1.5 flex gap-2">
+							<span class="font-medium text-neutral-dark">User Since: </span>
+							<p class="text-neutral-gray">{ vendor.JoinedAt }</p>
+						</div>
+						<div class="mt-1.5 flex gap-2">
+							<span class="font-medium text-neutral-dark">Date Verified: </span>
+							<p class="text-neutral-gray">{ vendor.DateVerified } </p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Identification -->
+		<div class="mt-4">
+			<h2 class="text-xl font-medium text-neutral-dark">Identification</h2>
+			@partials.Divider()
+			<div class="flex mt-1.5">
+				<div class="flex-1">
+					<div class="flex gap-2">
+						<span class="font-medium text-neutral-dark">ID Type: </span>
+						<p class="text-neutral-gray">{ vendor.Identification.Type } </p>
+					</div>
+					<div class="mt-1.5 flex gap-2">
+						<span class="font-medium text-neutral-dark">ID Reference Code: </span>
+						<p class="text-neutral-gray">{ vendor.Identification.IdNumber } </p>
+					</div>
+				</div>
+				<div>
+					@partials.OffCanvas(partials.OffCanvasProps{ID: vendor.Identification.IdNumber, Label: "view"}) {
+						<div>
+							<div class="flex gap-2">
+								<span class="font-medium text-neutral-dark">ID Type: </span>
+								<p class="text-neutral-gray">{ vendor.Identification.Type } </p>
+							</div>
+							<div class="mt-1.5 flex gap-2">
+								<span class="font-medium text-neutral-dark">ID Reference Code: </span>
+								<p class="text-neutral-gray">{ vendor.Identification.IdNumber } </p>
+							</div>
+							<div class="mt-1.5">
+								<div class="mt-1.5 grid grid-cols-2 gap-2">
+									<div>
+										<span class="font-medium text-neutral-dark">Front:</span>
+										@partials.ImageViewer(partials.ImageViewerProps{
+											Title: "ID Front",
+											URL:   fmt.Sprintf("/api/v1/resource/%s", vendor.Identification.FrontImageURL),
+										})
+									</div>
+									<div>
+										<span class="font-medium text-neutral-dark">Back:</span>
+										@partials.ImageViewer(partials.ImageViewerProps{
+											Title: "ID Back",
+											URL:   fmt.Sprintf("/api/v1/resource/%s", vendor.Identification.BackImageURL),
+										})
+									</div>
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+		<!-- Expertise -->
+		<div class="mt-4">
+			<h2 class="text-xl font-medium text-neutral-dark">Expertise List</h2>
+			@partials.Divider()
+			<div class="mt-2">
+				for _, expertise := range vendor.Expertise {
+					<div class="flex mb-2 align-center">
+						<div class="flex-1">
+							@partials.DefaultBadgeSuccess(expertise.Title)
+						</div>
+						<div>
+							@partials.OffCanvas(partials.OffCanvasProps{ID: expertise.Title}) {
+								<div>
+									<div class="mt-1.5 flex gap-2">
+										<span class="font-medium text-neutral-dark">Expertise: </span>
+										<p class="text-neutral-gray">
+											@partials.DefaultBadgeSuccess(expertise.Title)
+										</p>
+									</div>
+									<div class="mt-1.5 flex gap-2">
+										<span class="font-medium text-neutral-dark">Date Applied: </span>
+										<p class="text-neutral-gray">{ expertise.DateApplied } </p>
+									</div>
+									<div class="mt-1.5 flex gap-2">
+										<span class="font-medium text-neutral-dark">Date Approved: </span>
+										<p class="text-neutral-gray">{ expertise.DateApproved } </p>
+									</div>
+									<div class="mt-1.5">
+										<span class="font-medium text-neutral-dark">Document:</span>
+										<div class="mt-1.5">
+											@partials.ImageViewer(partials.ImageViewerProps{
+												Title: "Document",
+												URL:   fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument),
+											})
+										</div>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+templ acceptButton(serviceId string) {
+	<div x-data="{acceptModalOpen: false, loading: false}">
+		<button
+			x-on:click="acceptModalOpen = true"
+			type="button"
+			class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-xs font-medium text-white hover:opacity-75 focus:outline-none focus:border-none"
+		>Accept</button>
+		<div
+			x-cloak
+			x-show="acceptModalOpen"
+			x-on:keydown.esc.window="acceptModalOpen = false"
+			x-on:click.self="acceptModalOpen = false"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="defaultModalTitle"
+			class="fixed inset-0 z-30 grid place-content-center bg-neutral-gray/50"
+		>
+			<!-- Modal Dialog -->
+			<div
+				x-show="acceptModalOpen"
+				x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				class="relative rounded-sm bg-white p-2 p-4 outline-1 outline-pale-gray w-sm"
+			>
+				<!-- Spinner -->
+				<div
+					x-show="loading"
+					class="absolute inset-0 grid place-items-center border-none bg-neutral-gray/30 outline-none"
+				>
+					@partials.Spinner()
+				</div>
+				<!-- Dialog Header -->
+				<div class="flex items-center justify-between">
+					<h3 id="defaultModalTitle" class="font-semibold tracking-wide">Accept service</h3>
+					<button
+						x-on:click="acceptModalOpen = false"
+						aria-label="close modal"
+						class="cursor-pointer"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="1.4" class="h-5 w-5">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<!-- Dialog Body -->
+				<div class="mt-4">
+					<div class="text-center grid gap-2 text-xs my-8">
+						<p class="text-danger font-medium">Are you sure you want to accept this service?</p>
+						<p>This action is <strong class="italic">irreversible</strong>. Make sure to double check that service aligns with the vendor's expertise before continuing.</p>
+					</div>
+				</div>
+				<!-- Dialog Footer -->
+				<div class="mt-4 flex justify-end gap-2">
+					<button
+						x-on:click="acceptModalOpen = false"
+						type="button"
+						class="rounded-sm px-4 py-2 cursor-pointer font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75"
+					>Cancel</button>
+					<form
+						action="/admin/pending-services/accept"
+						method="POST"
+						x-on:submit="loading = true"
+					>
+						<input
+							type="text"
+							hidden="true"
+							value={ serviceId }
+							name="serviceId"
+						/>
+						<button
+							type="submit"
+							class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-xs text-center font-medium text-white hover:opacity-75"
+						>Continue</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ rejectButton(serviceId string) {
+	<div x-data="{offCanvasOpen: false}">
+		<!-- offCanvas Button -->
+		<button
+			x-on:click="offCanvasOpen = !offCanvasOpen"
+			type="button"
+			class="cursor-pointer rounded-sm bg-danger px-4 py-2 text-xs font-medium text-white hover:opacity-75 focus:outline-none focus:border-none"
+		>Reject</button>
+		<!-- offCanvas Backdrop -->
+		<div
+			x-cloak
+			x-show="offCanvasOpen"
+			x-on:keydown.esc.window="offCanvasOpen = false"
+			x-on:click.self="offCanvasOpen = false"
+			role="dialog"
+			class="fixed inset-0 bg-neutral-gray/50"
+		>
+			<!-- offCanvas Sidebar -->
+			<div
+				x-cloak
+				x-show="offCanvasOpen"
+				x-transition:enter="transition ease-out duration-200"
+				x-transition:enter-start="translate-x-full"
+				x-transition:enter-end="translate-x-0"
+				x-transition:leave="transition ease-in duration-200"
+				x-transition:leave-start="translate-x-0"
+				x-transition:leave-end="translate-x-full"
+				role="document"
+				class="fixed top-0 right-0 flex h-full w-md flex-col bg-white p-4 outline-1 outline-pale-gray"
+			>
+				<!-- Header -->
+				<div class="flex justify-between">
+					<h3 class="text-sm font-medium text-neutral-dark">Rejection Reason</h3>
+					<button
+						x-on:click="offCanvasOpen = false"
+						type="button"
+						class="flex cursor-pointer items-center rounded-sm px-3 py-1.5 hover:bg-neutral-gray/25 hover:opacity-75"
+					>
+						<svg
+							class="hi-solid hi-x -mx-1 inline-block size-4"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+								clip-rule="evenodd"
+							></path>
+						</svg>
+					</button>
+				</div>
+				<!-- Content -->
+				<div class="mt-4">
+					<form
+						action="/admin/pending-services/reject"
+						method="POST"
+						class="grid gap-4"
+					>
+						<input
+							type="text"
+							hidden="off"
+							value={ serviceId }
+							name="serviceId"
+						/>
+						<div>
+							<label for="reason" class="font-medium text-neutral-dark">Reason</label>
+							<textarea
+								name="reason"
+								id="reason"
+								rows="6"
+								placeholder="reason..."
+								autocomplete="off"
+								class="mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none"
+							></textarea>
+						</div>
+						<div class="flex justify-end">
+							<button
+								type="submit"
+								class="cursor-pointer rounded-sm bg-danger bg-danger p-2 text-xs font-semibold text-white hover:opacity-75"
+							>Continue</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+}

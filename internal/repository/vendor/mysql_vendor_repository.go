@@ -297,10 +297,15 @@ func (s *MysqlVendorRepository) GetVendorServiceList(vendorId string) ([]*models
             vendorId,
             title,
             description,
-            FORMAT(price, 2) AS price,
+            price,
             pricingType,
+            disabled,
+            status,
+            rejectReason,
             createdAt,
-            disabled
+            updatedAt,
+            acceptedAt,
+            rejectedAt
         FROM 
             Service
         WHERE

@@ -666,63 +666,6 @@ func (s *MysqlBookingRepository) getBookingExtras(bookingId string) ([]*models.B
 	return extras, nil
 }
 
-// Deprecated: service info is now copied to the booking for snapshot
-func (s *MysqlBookingRepository) getService(serviceId string) (*models.ServiceModel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	service := new(models.ServiceModel)
-
-	query := `
-        SELECT
-            id,
-            vendorId,
-            title,
-            description,
-            FORMAT(price, 2) AS price,
-            createdAt,
-            updatedAt,
-            disabled
-        FROM 
-            Service
-        WHERE
-            id = ?
-    `
-	if err := s.db.GetContext(ctx, service, query, serviceId); err != nil {
-		return nil, err
-	}
-
-	if address, err := s.getAddress(serviceId); err != nil {
-		return nil, err
-	} else {
-		service.Address = *address
-	}
-
-	if extras, err := s.getExtras(serviceId); err != nil {
-		return nil, err
-	} else {
-		service.Extras = extras
-	}
-
-	if tags, err := s.getTags(serviceId); err != nil {
-		return nil, err
-	} else {
-		service.Tags = tags
-	}
-
-	if images, err := s.getPhotos(serviceId); err != nil {
-		return nil, err
-	} else {
-		service.Images = images
-	}
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return nil, context.DeadlineExceeded
-	}
-
-	return service, nil
-}
-
 func (s *MysqlBookingRepository) getTags(serviceId string) ([]*models.TagModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

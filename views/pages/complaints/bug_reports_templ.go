@@ -240,7 +240,10 @@ func viewBug(bug models.BugReportModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, image := range bug.Images {
-			templ_7745c5c3_Err = partials.ImageViewer("", fmt.Sprintf("/api/v1/resource/%s", image)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.ImageViewer(partials.ImageViewerProps{
+				Title: "",
+				URL:   fmt.Sprintf("/api/v1/resource/%s", image),
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -297,7 +300,7 @@ func confirmation(bugId string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(bugId)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 221, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/complaints/bug_reports.templ`, Line: 224, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {

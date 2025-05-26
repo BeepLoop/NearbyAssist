@@ -82,18 +82,22 @@ type Extra struct {
 }
 
 type Service struct {
-	Id          string
-	VendorId    string
-	Title       string
-	Description string
-	Price       string
-	PricingType string
-	Tags        []string
-	Extras      []Extra
-	Images      []Image
-	Address     Address
-	CreatedAt   string
-	UpdatedAt   string
+	Id           string
+	VendorId     string
+	Title        string
+	Description  string
+	Price        string
+	PricingType  string
+	Tags         []string
+	Extras       []Extra
+	Images       []Image
+	Address      Address
+	Status       string
+	RejectReason string
+	CreatedAt    string
+	UpdatedAt    string
+	AcceptedAt   string
+	RejectedAt   string
 }
 
 type Image struct {

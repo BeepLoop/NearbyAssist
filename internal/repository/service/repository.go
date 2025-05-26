@@ -10,12 +10,14 @@ type ServiceRepository interface {
 	FindById(id string) (*models.ServiceModel, error)
 	FindBySignature(signature string) (*models.ServiceModel, error)
 	GetAll(limit, offset int) ([]*models.ServiceModel, error)
+	GetAllUnderReview(limit, offset int) ([]*models.ServiceModel, error)
 	GetAllWithTag(tag string) ([]*models.ServiceModel, error)
 	GetAllWithTagAny(tags []string) ([]*models.ServiceModel, error)
 	FuzzyMatchTags(tags []string) ([]*models.ServiceModel, error)
 	GetAllTopRated(limit int) ([]*models.ServiceModel, error)
 
 	Update(data *models.ServiceModel) error
+	Resubmit(serviceId string) error
 
 	// Return nil if vendorId is found in vendor, else error
 	IsVendor(vendorId string) (bool, error)
@@ -39,4 +41,7 @@ type ServiceRepository interface {
 
 	HasActiveBookingWithThisExtra(extraId string) (bool, error)
 	HasActiveBookingWithThisService(serviceId string) (bool, error)
+
+	Accept(serviceId string) error
+	Reject(serviceId, reason string) error
 }

@@ -10,6 +10,7 @@ import (
 	review_service "nearbyassist/internal/service/review"
 	"nearbyassist/internal/service/save_service"
 	service_service "nearbyassist/internal/service/service"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
 	"net/http"
 	"strings"
@@ -165,6 +166,36 @@ func (h *serviceHandler) UpdateService(c echo.Context) error {
 			Error:   err.Error(),
 		})
 	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *serviceHandler) Resubmit(c echo.Context) error {
+	serviceId := c.Param("serviceId")
+
+	bearerToken := utils.BearerTokenFromHeader(c)
+	if err := h.serviceService.Resubmit(bearerToken, serviceId); err != nil {
+		if strings.Contains(err.Error(), service_service.ERR_UNAUTHORIZED) {
+			return echo.NewHTTPError(http.StatusUnauthorized, models.Error{
+				Message: "You are not authorized to perform this action",
+				Error:   err.Error(),
+			})
+		}
+
+		if strings.Contains(err.Error(), service_service.ERR_FORBIDDEN_ACTION) {
+			return echo.NewHTTPError(http.StatusBadGateway, models.Error{
+				Message: "Action not allowed",
+				Error:   err.Error(),
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error resubmitting service for review",
+			Error:   err.Error(),
+		})
+	}
+
+	sse.New().IncreasePendingService()
 
 	return c.JSON(http.StatusNoContent, nil)
 }

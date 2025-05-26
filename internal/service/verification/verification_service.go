@@ -218,7 +218,7 @@ func (s *Service) GetRequest(id string) (*dto.VerificationRequest, error) {
 		IDFrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(request.User.Identification.FrontImageUrl)),
 		IDBackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(request.User.Identification.BackImageUrl)),
 		SelfieImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(request.User.Identification.SelfieImageUrl)),
-		CreatedAt:       request.CreatedAt,
+		CreatedAt:       utils.FormatDate(request.CreatedAt),
 	}
 
 	return data, nil

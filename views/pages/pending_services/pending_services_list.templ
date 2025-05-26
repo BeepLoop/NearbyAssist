@@ -2,52 +2,58 @@ package pages
 
 import (
 	"fmt"
+	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
 	"nearbyassist/views/layout"
 	"nearbyassist/views/partials"
 )
 
-templ Applications(user models.AdminModel, applications []models.ApplicationModel, flash string) {
+templ PendingServicesList(user models.AdminModel, services []dto.PendingServiceListItem, flash string) {
 	@templ.JSONScript("flash", flash)
 	@partials.ToastNotification()
 	@layout.Layout(user) {
-		@partials.PageBanner("Vendor Applications", "View and manage vendor applications")
-		@applicationsData(applications)
+		@partials.PageBanner("Pending Services", "")
+		@serviceList(services)
 		@partials.Pagination()
 	}
 }
 
-templ applicationsData(applications []models.ApplicationModel) {
+templ serviceList(services []dto.PendingServiceListItem) {
 	<div class="w-full overflow-hidden overflow-x-auto rounded-sm outline-1 outline-gray-300">
 		<table class="w-full text-left text-sm">
 			<thead class="bg-primary-greener text-sm font-semibold text-white">
 				<tr>
-					<th scope="col" class="p-4">Request ID</th>
-					<th scope="col" class="p-4">User</th>
-					<th scope="col" class="p-4">Applied On</th>
+					<th scope="col" class="p-4">Service ID</th>
+					<th scope="col" class="p-4">Vendor</th>
+					<th scope="col" class="p-4">Date created</th>
 					<th scope="col" class="p-4">Action</th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-300">
-				if len(applications) < 1 {
+				if len(services) < 1 {
 					<tr class="">
 						<td class="px-6 py-4 text-neutral-dark" align="center" colspan="4" id="emptyTable">Empty</td>
 					</tr>
 				} else {
-					for _, application := range applications {
+					for _, service := range services {
 						<tr class="text-xs">
+							<td class="p-4">{ service.ID } </td>
 							<td class="p-4">
-								{ application.Id }
+								<div class="flex w-max items-center gap-2">
+									<div class="flex flex-col">
+										<span class="font-medium text-neutral-900">{ service.VendorName }</span>
+										<span class="text-neutral-600 opacity-85">{ service.VendorEmail }</span>
+									</div>
+								</div>
 							</td>
-							<td class="p-4">{ application.ApplicantName }</td>
-							<td class="p-4">{ application.CreatedAt }</td>
+							<td class="p-4">{ service.CreatedAt }</td>
 							<td class="p-4">
 								<ul>
 									<a
-										href={ templ.SafeURL(fmt.Sprintf("/admin/vendor-applications/%s", application.Id)) }
+										href={ templ.SafeURL(fmt.Sprintf("/admin/pending-services/%s", service.ID)) }
 										class="w-min rounded-sm bg-warning-light/25 p-1 font-semibold text-warning outline-1 outline-warning hover:opacity-75"
 									>
-										view request
+										view service
 									</a>
 								</ul>
 							</td>

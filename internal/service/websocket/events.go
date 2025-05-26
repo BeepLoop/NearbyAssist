@@ -19,6 +19,8 @@ const (
 	EVT_CLIENT_CANCELLED_BOOKING Event = "clientCancelledBooking"
 	EVT_VENDOR_CANCELLED_BOOKING Event = "vendorCancelledBooking"
 	EVT_RECEIVED_BOOKING         Event = "receivedBooking"
+	EVT_SERVICE_ACCEPTED         Event = "serviceAccepted"
+	EVT_SERVICE_REJECTED         Event = "serviceRejected"
 )
 
 type EventModel struct {

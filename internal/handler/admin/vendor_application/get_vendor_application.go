@@ -11,6 +11,8 @@ import (
 )
 
 func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
+
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
@@ -18,7 +20,7 @@ func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
 
 	applications, err := h.applicationService.GetApplications()
 	if err != nil {
-		page := pages.Applications(*admin, make([]models.ApplicationModel, 0))
+		page := pages.Applications(*admin, make([]models.ApplicationModel, 0), flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -39,6 +41,6 @@ func (h *applicationHandler) GetVendorApplication(c echo.Context) error {
 		})
 	}
 
-	page := pages.Applications(*admin, data)
+	page := pages.Applications(*admin, data, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }

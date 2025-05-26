@@ -132,23 +132,23 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 		},
 		Servics: slices.AppendSeq(
 			make([]response.Service, 0),
-			utils.Map(services, func(s *models.ServiceModel) response.Service {
+			utils.Map(services, func(service *models.ServiceModel) response.Service {
 				return response.Service{
-					Id:          s.Id,
-					VendorId:    s.VendorId,
-					Title:       s.Title,
-					Description: s.Description,
-					Price:       s.Price,
-					PricingType: string(s.PricingType),
+					Id:          service.Id,
+					VendorId:    service.VendorId,
+					Title:       service.Title,
+					Description: service.Description,
+					Price:       service.Price,
+					PricingType: string(service.PricingType),
 					Tags: slices.AppendSeq(
 						make([]string, 0),
-						utils.Map(s.Tags, func(t *models.TagModel) string {
+						utils.Map(service.Tags, func(t *models.TagModel) string {
 							return t.Title
 						}),
 					),
 					Extras: slices.AppendSeq(
 						make([]response.Extra, 0),
-						utils.Map(s.Extras, func(x *models.ExtraModel) response.Extra {
+						utils.Map(service.Extras, func(x *models.ExtraModel) response.Extra {
 							return response.Extra{
 								Id:          x.Id,
 								Title:       x.Title,
@@ -159,15 +159,17 @@ func (h *vendorHandler) GetVendorServiceList(c echo.Context) error {
 					),
 					Images: slices.AppendSeq(
 						make([]response.Image, 0),
-						utils.Map(s.Images, func(i *models.ServicePhotoModel) response.Image {
+						utils.Map(service.Images, func(i *models.ServicePhotoModel) response.Image {
 							return response.Image{Id: i.Id, Url: i.Url}
 						}),
 					),
 					Location: response.Location{
-						Latitude:  s.Address.Latitude,
-						Longitude: s.Address.Longitude,
+						Latitude:  service.Address.Latitude,
+						Longitude: service.Address.Longitude,
 					},
-					Disabled: s.Disabled,
+					Disabled:     service.Disabled,
+					Status:       string(service.Status),
+					RejectReason: service.RejectReason.String,
 				}
 			}),
 		),

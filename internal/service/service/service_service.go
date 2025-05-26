@@ -17,6 +17,7 @@ import (
 	"nearbyassist/internal/service/geodistance"
 	"nearbyassist/internal/service/route_engine"
 	searchhistory "nearbyassist/internal/service/search_history"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/utils"
 	"slices"
@@ -114,11 +115,22 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 		Signature: signature,
 	}
 
+	var serviceId string
 	if newService.PricingType == models.FIXED_PRICING {
-		return s.serviceStore.Create(newService)
+		serviceId, err = s.serviceStore.Create(newService)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		serviceId, err = s.serviceStore.CreateWithPricingType(newService)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	return s.serviceStore.CreateWithPricingType(newService)
+	sse.New().IncreasePendingService()
+
+	return serviceId, nil
 }
 
 func (s *Service) GetService(serviceId string) (*response.DetailedServiceResponse, error) {
@@ -188,7 +200,13 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 				Latitude:  service.Address.Latitude,
 				Longitude: service.Address.Longitude,
 			},
-			Disabled: service.Disabled,
+			Disabled:     service.Disabled,
+			Status:       string(service.Status),
+			RejectReason: service.RejectReason.String,
+			CreatedAt:    service.CreatedAt,
+			UpdatedAt:    service.UpdatedAt,
+			AcceptedAt:   service.AcceptedAt.String,
+			RejectedAt:   service.RejectedAt.String,
 		},
 		Vendor: response.Vendor{
 			Id:       vendor.VendorId,
@@ -276,6 +294,32 @@ func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePa
 	}
 
 	if err := s.serviceStore.Update(updatedService); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) Resubmit(bearerToken, serviceId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	service, err := s.serviceStore.FindById(serviceId)
+	if err != nil {
+		return err
+	}
+
+	if service.VendorId != userId {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
+	if service.Status != models.SERVICE_STATUS_REJECTED {
+		return errors.New(ERR_FORBIDDEN_ACTION)
+	}
+
+	if err := s.serviceStore.Resubmit(serviceId); err != nil {
 		return err
 	}
 
@@ -770,7 +814,13 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 						Latitude:  service.Address.Latitude,
 						Longitude: service.Address.Longitude,
 					},
-					Disabled: service.Disabled,
+					Disabled:     service.Disabled,
+					Status:       string(service.Status),
+					RejectReason: utils.Must(s.encrypt.DecryptString(service.RejectReason.String)),
+					CreatedAt:    service.CreatedAt,
+					UpdatedAt:    service.UpdatedAt,
+					AcceptedAt:   service.AcceptedAt.String,
+					RejectedAt:   service.RejectedAt.String,
 				},
 			}
 		}),

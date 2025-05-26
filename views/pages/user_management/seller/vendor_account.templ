@@ -175,8 +175,14 @@ templ profile(data dto.VendorAccountDetail) {
 			<p>{ data.Vendor.Identification.IdNumber }</p>
 		</div>
 		<div class="mt-4 flex max-h-44 gap-2">
-			@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.FrontImageURL))
-			@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.BackImageURL))
+			@partials.ImageViewer(partials.ImageViewerProps{
+				Title: "ID Front",
+				URL:   fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.FrontImageURL),
+			})
+			@partials.ImageViewer(partials.ImageViewerProps{
+				Title: "ID Back",
+				URL:   fmt.Sprintf("/api/v1/resource/%s", data.Vendor.Identification.BackImageURL),
+			})
 		</div>
 	</div>
 	<!-- Socials -->
@@ -225,7 +231,7 @@ templ profile(data dto.VendorAccountDetail) {
 							<p class="text-neutral-gray">{ expertise.DateApproved }</p>
 						</td>
 						<td>
-							@partials.OffCanvas(expertise.Title) {
+							@partials.OffCanvas(partials.OffCanvasProps{ID: expertise.Title}) {
 								<div class="text-sm">
 									<div class="mt-2 flex items-center gap-2">
 										<span class="font-medium text-neutral-dark">Title:</span>
@@ -242,7 +248,10 @@ templ profile(data dto.VendorAccountDetail) {
 									<div class="mt-2">
 										<span class="font-medium text-neutral-dark">Supporting Document:</span>
 										<div class="mt-1.5">
-											@partials.ImageViewer("Supporting Document", fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument))
+											@partials.ImageViewer(partials.ImageViewerProps{
+												Title: "Document",
+												URL:   fmt.Sprintf("/api/v1/resource/%s", expertise.SupportingDocument),
+											})
 										</div>
 									</div>
 								</div>
@@ -275,37 +284,82 @@ templ services(data dto.VendorAccountDetail) {
 							}
 						</td>
 						<td class="p-2">
+							switch (service.Status) {
+								case "under_review":
+									@partials.DefaultBadgeWarning(service.Status)
+								case "accepted":
+									@partials.DefaultBadgeSuccess(service.Status)
+								case "rejected":
+									@partials.DefaultBadgeDanger(service.Status)
+							}
+						</td>
+						<td class="p-2">
 							<span class="font-medium text-neutral-dark">Added on:</span>
 							<p class="text-neutral-gray">{ service.CreatedAt }</p>
 						</td>
 						<td class="p-2">
-							@partials.OffCanvas(service.Id) {
+							@partials.OffCanvas(partials.OffCanvasProps{ID: service.Id}) {
 								<!-- Content -->
 								<div class="mt-4">
 									@carousel(service.Images)
-									<div class="mt-2 text-neutral-gray">
-										<!-- Detail -->
-										<div class="mt-4 grid gap-1">
-											<div class="mt-2">
-												<span class="font-medium text-neutral-dark">Title:</span>
-												<p class="text-neutral-gray">{ service.Title }</p>
+									@partials.Divider()
+									<div class="mt-4">
+										<span class="font-medium text-neutral-dark">Status:</span>
+										switch (service.Status) {
+											case "under_review":
+												@partials.DefaultBadgeWarning(service.Status)
+											case "accepted":
+												@partials.DefaultBadgeSuccess(service.Status)
+											case "rejected":
+												@partials.DefaultBadgeDanger(service.Status)
+										}
+									</div>
+									<div class="mt-2 flex gap-2">
+										<span class="font-medium text-neutral-dark">Date Created:</span>
+										<p class="text-neutral-gray">{ service.CreatedAt }</p>
+									</div>
+									<div class="mt-2 flex gap-2">
+										<span class="font-medium text-neutral-dark">Last Modified:</span>
+										<p class="text-neutral-gray">{ service.UpdatedAt }</p>
+									</div>
+									switch (service.Status) {
+										case "accepted":
+											<div class="mt-2 flex gap-2">
+												<span class="font-medium text-neutral-dark">Date Accepted:</span>
+												<p class="text-neutral-gray">{ service.AcceptedAt }</p>
 											</div>
-											<div class="mt-2">
-												<span class="font-medium text-neutral-dark">Description:</span>
-												<p class="text-neutral-gray">{ service.Description }</p>
+										case "rejected":
+											<div class="mt-2 flex gap-2">
+												<span class="font-medium text-neutral-dark">Date Rejected:</span>
+												<p class="text-neutral-gray">{ service.RejectedAt }</p>
 											</div>
-											<div class="mt-2">
-												switch (service.PricingType) {
-													case "fixed":
-														<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } (fixed)</span>
-													case "per_hour":
-														<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } / hour</span>
-													case "per_day":
-														<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } / day</span>
-												}
+											<div class="mt-2 mb-4">
+												<span class="font-medium text-neutral-dark">Reason for Rejection:</span>
+												<p class="text-neutral-gray">{ service.RejectReason }</p>
 											</div>
+									}
+									@partials.Divider()
+									<!-- Detail -->
+									<div class="mt-4 grid gap-1">
+										<div class="mt-2">
+											<span class="font-medium text-neutral-dark">Title:</span>
+											<p class="text-neutral-gray">{ service.Title }</p>
 										</div>
-										<div class="mt-4">
+										<div class="mt-2">
+											<span class="font-medium text-neutral-dark">Description:</span>
+											<p class="text-neutral-gray">{ service.Description }</p>
+										</div>
+										<div class="mt-2">
+											switch (service.PricingType) {
+												case "fixed":
+													<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } (fixed)</span>
+												case "per_hour":
+													<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } / hour</span>
+												case "per_day":
+													<span class="font-medium text-neutral-dark">{ utils.FormatCurrency(service.Price) } / day</span>
+											}
+										</div>
+										<div class="mt-2">
 											<!-- Note -->
 											<div class="mt-2 flex gap-2 rounded-sm bg-good/25 px-1 py-2 text-xs text-neutral-gray">
 												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
@@ -384,7 +438,7 @@ templ activeBookings(data dto.VendorAccountDetail) {
 							}
 						</td>
 						<td class="p-2">
-							@partials.OffCanvas(booking.Id) {
+							@partials.OffCanvas(partials.OffCanvasProps{ID: booking.Id}) {
 								@offCanvasBookingData(booking)
 							}
 						</td>
@@ -430,7 +484,7 @@ templ previousBookings(data dto.VendorAccountDetail) {
 							<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 						</td>
 						<td class="p-2">
-							@partials.OffCanvas(booking.Id) {
+							@partials.OffCanvas(partials.OffCanvasProps{ID: booking.Id}) {
 								@offCanvasBookingData(booking)
 							}
 						</td>

@@ -80,8 +80,12 @@ func (s *Service) GetMapData(query string) (*dto.MapData, error) {
 						Latitude:  service.Address.Latitude,
 						Longitude: service.Address.Longitude,
 					},
-					CreatedAt: utils.FormatDate(service.CreatedAt),
-					UpdatedAt: utils.FormatDate(service.UpdatedAt),
+					CreatedAt:    utils.FormatDate(service.CreatedAt),
+					UpdatedAt:    utils.FormatDate(service.UpdatedAt),
+					Status:       string(service.Status),
+					RejectReason: utils.Must(s.encrypt.DecryptString(service.RejectReason.String)),
+					AcceptedAt:   utils.FormatDate(service.AcceptedAt.String),
+					RejectedAt:   utils.FormatDate(service.RejectedAt.String),
 				}
 			}),
 		)

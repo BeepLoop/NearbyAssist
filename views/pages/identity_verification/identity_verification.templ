@@ -48,9 +48,18 @@ templ IdentityVerification(user models.AdminModel, request dto.VerificationReque
 			<div class="mt-4">
 				<h3 class="mb-4 font-medium text-neutral-dark">Documents</h3>
 				<div class="grid grid-cols-3 gap-2">
-					@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL))
-					@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL))
-					@partials.ImageViewer("Selfie", fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL))
+					@partials.ImageViewer(partials.ImageViewerProps{
+						Title: "ID Front",
+						URL:   fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL),
+					})
+					@partials.ImageViewer(partials.ImageViewerProps{
+						Title: "ID Back",
+						URL:   fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL),
+					})
+					@partials.ImageViewer(partials.ImageViewerProps{
+						Title: "Selfie",
+						URL:   fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL),
+					})
 				</div>
 			</div>
 		</div>

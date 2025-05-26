@@ -190,6 +190,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		serviceRoute.POST("", handler.CreateService)
 		serviceRoute.GET("/search", handler.SearchService)
 		serviceRoute.GET("/:serviceId", handler.GetService)
+		serviceRoute.PUT("/:serviceId", handler.Resubmit)
 		serviceRoute.PUT("", handler.UpdateService)
 		serviceRoute.POST("/addImage/:serviceId", handler.AddImage)
 		serviceRoute.DELETE("/deleteImage/:imageId", handler.DeleteImage)

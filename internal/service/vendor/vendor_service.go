@@ -285,6 +285,7 @@ func (s *Service) GetVendorServicesList(vendorId string) ([]*models.ServiceModel
 		}
 
 		service.Address.Address = utils.Must(s.encrypt.DecryptString(service.Address.Address))
+		service.RejectReason.String = utils.Must(s.encrypt.DecryptString(service.RejectReason.String))
 	}
 
 	return services, nil

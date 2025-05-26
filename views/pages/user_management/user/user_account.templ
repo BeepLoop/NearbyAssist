@@ -165,8 +165,14 @@ templ profile(data dto.UserAccountDetail) {
 				<p>{ data.User.Identification.IdNumber }</p>
 			</div>
 			<div class="mt-4 flex max-h-44 gap-2">
-				@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.FrontImageURL))
-				@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.BackImageURL))
+				@partials.ImageViewer(partials.ImageViewerProps{
+					Title: "ID Front",
+					URL:   fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.FrontImageURL),
+				})
+				@partials.ImageViewer(partials.ImageViewerProps{
+					Title: "ID Front",
+					URL:   fmt.Sprintf("/api/v1/resource/%s", data.User.Identification.BackImageURL),
+				})
 			</div>
 		} else {
 			<div class="mt-2 grid place-content-center">
@@ -236,7 +242,7 @@ templ activeBookings(data dto.UserAccountDetail) {
 							}
 						</td>
 						<td class="p-2">
-							@partials.OffCanvas(booking.Id) {
+							@partials.OffCanvas(partials.OffCanvasProps{ID: booking.Id, Label: "Open"}) {
 								@offCanvasBookingData(booking)
 							}
 						</td>
@@ -282,7 +288,7 @@ templ previousBookings(data dto.UserAccountDetail) {
 							<p class="text-neutral-gray">{ booking.UpdatedAt }</p>
 						</td>
 						<td class="p-2">
-							@partials.OffCanvas(booking.Id) {
+							@partials.OffCanvas(partials.OffCanvasProps{ID: booking.Id}) {
 								@offCanvasBookingData(booking)
 							}
 						</td>

@@ -1,6 +1,11 @@
 package partials
 
-templ ImageViewer(title, image string) {
+type ImageViewerProps struct {
+	Title string
+	URL   string
+}
+
+templ ImageViewer(props ImageViewerProps) {
 	<div x-data="{imageViewerOpen: false}">
 		<!-- Image -->
 		<div
@@ -8,7 +13,7 @@ templ ImageViewer(title, image string) {
 			class="cursor-pointer outline-1 outline-pale-gray max-h-full h-full"
 		>
 			<img
-				src={ image }
+				src={ props.URL }
 				alt="image"
 				class="max-h-full object-contain"
 				loading="lazy"
@@ -34,11 +39,11 @@ templ ImageViewer(title, image string) {
 				x-transition:enter-end="opacity-100"
 				class="rounded-sm bg-white p-2 outline-1 outline-pale-gray"
 			>
-				if title != "" {
-					<h3 class="mb-2 font-medium">{ title }</h3>
+				if props.Title!= "" {
+					<h3 class="mb-2 font-medium">{ props.Title }</h3>
 				}
 				<img
-					src={ image }
+					src={ props.URL }
 					alt="image"
 					loading="lazy"
 					class="max-h-[80vh] max-w-[80vw] object-cover"

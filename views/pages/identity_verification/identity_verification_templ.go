@@ -158,15 +158,24 @@ func IdentityVerification(user models.AdminModel, request dto.VerificationReques
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.ImageViewer(partials.ImageViewerProps{
+				Title: "ID Front",
+				URL:   fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL),
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.ImageViewer(partials.ImageViewerProps{
+				Title: "ID Back",
+				URL:   fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL),
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = partials.ImageViewer("Selfie", fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = partials.ImageViewer(partials.ImageViewerProps{
+				Title: "Selfie",
+				URL:   fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL),
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -220,7 +229,7 @@ func acceptButton(requestId string) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(requestId)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification.templ`, Line: 127, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification.templ`, Line: 136, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -262,7 +271,7 @@ func rejectButton(requestId string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(requestId)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification.templ`, Line: 203, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/identity_verification/identity_verification.templ`, Line: 212, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
