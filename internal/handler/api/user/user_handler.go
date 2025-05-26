@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/service/sse"
 	user_service "nearbyassist/internal/service/user"
 	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
@@ -234,6 +235,8 @@ func (h *userHandler) AddExpertise(c echo.Context) error {
 			Error:   err.Error(),
 		})
 	}
+
+	sse.New().IncreaseApplication()
 
 	return c.JSON(http.StatusNoContent, nil)
 }

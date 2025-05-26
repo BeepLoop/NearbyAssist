@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
+	admin_repo "nearbyassist/internal/repository/admin"
 	notification_repo "nearbyassist/internal/repository/notification"
 	user_repo "nearbyassist/internal/repository/user"
 	verification_repo "nearbyassist/internal/repository/verification"
@@ -23,9 +24,11 @@ import (
 const (
 	ERR_ALREADY_VERIFIED = "account already verified"
 	ERR_INVALID_REASON   = "provided reason not allowed"
+	ERR_UNAUTHORIZED     = "unauthorized"
 )
 
 type Service struct {
+	adminStore        admin_repo.AdminRepository
 	userStore         user_repo.UserRepository
 	verificationStore verification_repo.VerificationRepository
 	notifStore        notification_repo.NotificationRepository
@@ -37,6 +40,7 @@ type Service struct {
 }
 
 func NewService(
+	adminStore admin_repo.AdminRepository,
 	userStore user_repo.UserRepository,
 	verificationStore verification_repo.VerificationRepository,
 	notifStore notification_repo.NotificationRepository,
@@ -47,6 +51,7 @@ func NewService(
 	jwt core.Authenticator,
 ) *Service {
 	return &Service{
+		adminStore:        adminStore,
 		userStore:         userStore,
 		verificationStore: verificationStore,
 		notifStore:        notifStore,
@@ -232,7 +237,16 @@ func (s *Service) GetRequest(id string) (*dto.VerificationRequest, error) {
 	return data, nil
 }
 
-func (s *Service) AcceptRequest(id string) error {
+func (s *Service) AcceptRequest(adminId, confirmationPassword, id string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
 	request, err := s.verificationStore.FindById(id)
 	if err != nil {
 		return err
@@ -288,9 +302,18 @@ func (s *Service) AcceptRequest(id string) error {
 	return nil
 }
 
-func (s *Service) RejectRequest(id, reason string) error {
+func (s *Service) RejectRequest(adminId, confirmationPassword, id, reason string) error {
 	if reason == "" {
 		return errors.New(ERR_INVALID_REASON)
+	}
+
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	encryptedReason, err := s.encrypt.EncryptString(reason)

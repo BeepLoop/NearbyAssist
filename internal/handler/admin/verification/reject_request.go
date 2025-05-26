@@ -14,21 +14,23 @@ import (
 func (h *verificationHandler) RejectRequest(c echo.Context) error {
 	reason := c.FormValue("reason")
 	requestId := c.FormValue("requestId")
+	password := c.FormValue("password")
 
-	if requestId == "" {
-		if err := utils.SetFlashMessage(c, "error", "Invalid application ID"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId+"?error=id_error")
-		}
-
-		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId)
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
 	user, _ := h.verificationService.GetUserWithRequest(requestId)
 
-	if err := h.verificationService.RejectRequest(requestId, reason); err != nil {
+	if err := h.verificationService.RejectRequest(admin.Id, password, requestId, reason); err != nil {
 		if strings.Contains(err.Error(), verification_service.ERR_INVALID_REASON) {
 			if err := utils.SetFlashMessage(c, "error", "Invalid reason"); err != nil {
 				return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId+"?error=invalid_reason_error")
+			}
+		} else if strings.Contains(err.Error(), verification_service.ERR_UNAUTHORIZED) {
+			if err := utils.SetFlashMessage(c, "error", "Unauthorized action"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId+"?error=unauthorized_action")
 			}
 		} else {
 			if err := utils.SetFlashMessage(c, "error", "Rejection failed"); err != nil {
@@ -38,8 +40,6 @@ func (h *verificationHandler) RejectRequest(c echo.Context) error {
 
 		return c.Redirect(http.StatusSeeOther, "/admin/verification-requests/"+requestId)
 	}
-
-	admin, _ := utils.GetAdminFromSession(c)
 
 	activity := activitylog.Input{
 		AdminId:    admin.Id,

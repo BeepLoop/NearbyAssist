@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/models"
+	admin_repo "nearbyassist/internal/repository/admin"
 	application_repo "nearbyassist/internal/repository/application"
 	notification_repo "nearbyassist/internal/repository/notification"
 	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
@@ -16,7 +17,12 @@ import (
 	"nearbyassist/internal/utils"
 )
 
+const (
+	ERR_UNAUTHORIZED = "unauthorized"
+)
+
 type Service struct {
+	adminStore           admin_repo.AdminRepository
 	applicationStore     application_repo.ApplicationRepository
 	supportingImageStore supportingimage_repo.Repository
 	policeClearanceStore policeclearance_repo.Repository
@@ -28,6 +34,7 @@ type Service struct {
 }
 
 func NewService(
+	adminStore admin_repo.AdminRepository,
 	applicationStore application_repo.ApplicationRepository,
 	supportingImageStore supportingimage_repo.Repository,
 	policeClearanceStore policeclearance_repo.Repository,
@@ -38,6 +45,7 @@ func NewService(
 	jwt core.Authenticator,
 ) *Service {
 	return &Service{
+		adminStore:           adminStore,
 		applicationStore:     applicationStore,
 		supportingImageStore: supportingImageStore,
 		policeClearanceStore: policeClearanceStore,
@@ -149,7 +157,16 @@ func (s *Service) GetApplicationDetail(applicationId string) (*models.Applicatio
 	return application, nil
 }
 
-func (s *Service) AcceptRequest(applicationId string) error {
+func (s *Service) AcceptRequest(adminId, confirmationPassword, applicationId string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
 	application, err := s.applicationStore.FindById(applicationId)
 	if err != nil {
 		return err
@@ -211,9 +228,18 @@ func (s *Service) AcceptRequest(applicationId string) error {
 	return nil
 }
 
-func (s *Service) RejectRequest(id, reason string) error {
+func (s *Service) RejectRequest(adminId, confirmationPassword, id, reason string) error {
 	if reason == "" {
 		return errors.New("invalid reason")
+	}
+
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	encryptedReason, err := s.encrypt.EncryptString(reason)

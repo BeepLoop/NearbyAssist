@@ -10,6 +10,7 @@ import (
 	pages "nearbyassist/views/pages/pending_services"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -60,6 +61,7 @@ func (h *handler) PendingServicesList(c echo.Context) error {
 }
 
 func (h *handler) PendingServiceDetail(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
 	serviceId := c.Param("serviceId")
 
 	admin, err := utils.GetAdminFromSession(c)
@@ -69,28 +71,40 @@ func (h *handler) PendingServiceDetail(c echo.Context) error {
 
 	detail, err := h.listingReviewService.PendingServiceDetail(serviceId)
 	if err != nil {
-		page := pages.PendingServiceDetail(*admin, dto.PendingService{})
+		page := pages.PendingServiceDetail(*admin, dto.PendingService{}, flash)
 		return page.Render(context.Background(), c.Response().Writer)
 	}
 
-	page := pages.PendingServiceDetail(*admin, *detail)
+	page := pages.PendingServiceDetail(*admin, *detail, flash)
 	return page.Render(context.Background(), c.Response().Writer)
 }
 
 func (h *handler) Accept(c echo.Context) error {
 	serviceId := c.FormValue("serviceId")
+	password := c.FormValue("password")
 
-	if err := h.listingReviewService.Accept(serviceId); err != nil {
-		if err := utils.SetFlashMessage(c, "error", "accepting submission failed"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/pending-services?error=action_failed")
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
+	if err := h.listingReviewService.Accept(admin.Id, password, serviceId); err != nil {
+		if strings.Contains(err.Error(), listingreview.ERR_UNAUTHORIZED) {
+			if err := utils.SetFlashMessage(c, "error", "Unauthorized action"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/pending-services"+serviceId+"?error=unauthorized_action")
+			}
 		}
+
+		if err := utils.SetFlashMessage(c, "error", "accepting submission failed"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/pending-services"+serviceId+"?error=action_failed")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/pending-services/"+serviceId)
 	}
 
 	if err := utils.SetFlashMessage(c, "success", "service submission accepted"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/pending-services?success=submission_accepted")
 	}
-
-	admin, _ := utils.GetAdminFromSession(c)
 
 	activity := activitylog.Input{
 		AdminId:    admin.Id,
@@ -107,18 +121,29 @@ func (h *handler) Accept(c echo.Context) error {
 func (h *handler) Reject(c echo.Context) error {
 	serviceId := c.FormValue("serviceId")
 	reason := c.FormValue("reason")
+	password := c.FormValue("password")
 
-	if err := h.listingReviewService.Reject(serviceId, reason); err != nil {
-		if err := utils.SetFlashMessage(c, "error", "rejecting submission failed"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/pending-services?error=action_failed")
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
+	}
+
+	if err := h.listingReviewService.Reject(admin.Id, password, serviceId, reason); err != nil {
+		if strings.Contains(err.Error(), listingreview.ERR_UNAUTHORIZED) {
+			if err := utils.SetFlashMessage(c, "error", "Unauthorized action"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/pending-services/"+serviceId+"?error=unauthorized_action")
+			}
 		}
+		if err := utils.SetFlashMessage(c, "error", "rejecting submission failed"); err != nil {
+			return c.Redirect(http.StatusSeeOther, "/admin/pending-services"+serviceId+"?error=action_failed")
+		}
+
+		return c.Redirect(http.StatusSeeOther, "/admin/pending-services/"+serviceId)
 	}
 
 	if err := utils.SetFlashMessage(c, "success", "service submission rejected"); err != nil {
 		return c.Redirect(http.StatusSeeOther, "/admin/pending-services?success=submission_rejected")
 	}
-
-	admin, _ := utils.GetAdminFromSession(c)
 
 	activity := activitylog.Input{
 		AdminId:    admin.Id,

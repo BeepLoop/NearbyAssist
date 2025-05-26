@@ -97,6 +97,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	// ===== USER =======
 	userRoute := v1.Group("/user")
 	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
@@ -107,6 +108,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		userService := user_service.NewService(userStore, vendorStore, applicationStore, supportingImageStore, resourceService, s.FS, s.Encrypt, s.Hash, s.JWT)
 		userVerificationService := verification_service.NewService(
+			adminStore,
 			userStore,
 			verificationStore,
 			notificationStore,
@@ -265,6 +267,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		applicationRoute.Use(middleware.CheckAuth(s.JWT))
 
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
@@ -273,6 +276,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
 		applicationService := application_service.NewService(
+			adminStore,
 			applicationStore,
 			supportingImageStore,
 			policeClearanceStore,

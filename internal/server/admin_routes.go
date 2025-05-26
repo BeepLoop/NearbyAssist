@@ -163,6 +163,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		applicationService := application_service.NewService(
+			adminStore,
 			applicationStore,
 			supportingImageStore,
 			policeClearanceStore,
@@ -194,6 +195,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		requestService := verification_service.NewService(
+			adminStore,
 			userStore,
 			requestStore,
 			notificationStore,
@@ -224,7 +226,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
-		listingReviewService := listingreview.NewService(serviceStore, vendorStore, notifStore, resourceService, s.WS, s.Encrypt)
+		listingReviewService := listingreview.NewService(adminStore, serviceStore, vendorStore, notifStore, resourceService, s.WS, s.Encrypt)
 
 		handler := pendingservices.NewHandler(listingReviewService)
 

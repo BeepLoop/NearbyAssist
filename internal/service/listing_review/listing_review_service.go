@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
+	admin_repo "nearbyassist/internal/repository/admin"
 	notification_repo "nearbyassist/internal/repository/notification"
 	service_repo "nearbyassist/internal/repository/service"
 	vendor_repo "nearbyassist/internal/repository/vendor"
@@ -18,9 +19,11 @@ import (
 
 const (
 	ERR_SERVICE_NOT_UNDER_REVIEW = "service not under review"
+	ERR_UNAUTHORIZED             = "unauthorized"
 )
 
 type Service struct {
+	adminStore      admin_repo.AdminRepository
 	serviceStore    service_repo.ServiceRepository
 	vendorStore     vendor_repo.VendorRepository
 	notifStore      notification_repo.NotificationRepository
@@ -30,6 +33,7 @@ type Service struct {
 }
 
 func NewService(
+	adminStore admin_repo.AdminRepository,
 	serviceStore service_repo.ServiceRepository,
 	vendorStore vendor_repo.VendorRepository,
 	notifStore notification_repo.NotificationRepository,
@@ -38,6 +42,7 @@ func NewService(
 	encrypt core.Encryption,
 ) *Service {
 	return &Service{
+		adminStore:      adminStore,
 		serviceStore:    serviceStore,
 		vendorStore:     vendorStore,
 		notifStore:      notifStore,
@@ -173,7 +178,16 @@ func (s *Service) PendingServiceDetail(serviceId string) (*dto.PendingService, e
 	return pendingService, nil
 }
 
-func (s *Service) Accept(serviceId string) error {
+func (s *Service) Accept(adminId, confirmationPassword, serviceId string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
 	service, err := s.serviceStore.FindById(serviceId)
 	if err != nil {
 		return err
@@ -241,7 +255,16 @@ func (s *Service) Accept(serviceId string) error {
 	return nil
 }
 
-func (s *Service) Reject(serviceId, reason string) error {
+func (s *Service) Reject(adminId, confirmationPassword, serviceId, reason string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
 	service, err := s.serviceStore.FindById(serviceId)
 	if err != nil {
 		return err
