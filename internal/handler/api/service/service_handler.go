@@ -477,7 +477,8 @@ func (h *serviceHandler) GetSavedServices(c echo.Context) error {
 func (h *serviceHandler) SearchService(c echo.Context) error {
 	params := utils.ParseQuery(c.QueryString())
 
-	services, err := h.serviceService.SearchService(params)
+	bearerToken := utils.BearerTokenFromHeader(c)
+	services, err := h.serviceService.SearchService(bearerToken, params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error occurred while searching service",

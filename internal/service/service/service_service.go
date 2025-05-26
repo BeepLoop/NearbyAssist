@@ -554,7 +554,12 @@ func (s *Service) DeleteExtra(bearerToken, extraId string) error {
 	return s.serviceStore.DeleteExtra(extraId)
 }
 
-func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSearchResult, error) {
+func (s *Service) SearchService(bearerToken string, params map[string]string) ([]*response.ServiceSearchResult, error) {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return nil, err
+	}
+
 	// Update search history
 	if q, ok := params["q"]; ok {
 		tags := strings.Split(q, ",")
@@ -599,6 +604,10 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 	validServices := slices.AppendSeq(
 		make([]*models.ServiceModel, 0),
 		utils.Retain(matchedServices, func(service *models.ServiceModel) bool {
+			if service.VendorId == userId {
+				return false
+			}
+
 			restricted, err := s.serviceStore.IsVendorRestricted(service.Id)
 			if err != nil || restricted {
 				return false
