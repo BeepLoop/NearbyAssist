@@ -19,6 +19,7 @@ type SSE struct {
 	report               int
 	passwordResetRequest int
 	bugs                 int
+	pendingService       int
 }
 
 func New() *SSE {
@@ -32,6 +33,7 @@ func New() *SSE {
 		report:               0,
 		passwordResetRequest: 0,
 		bugs:                 0,
+		pendingService:       0,
 	}
 	return instance
 }
@@ -96,6 +98,18 @@ func (s *SSE) IncreaseBugReport() {
 	s.bugs++
 }
 
+func (s *SSE) DecreasePendingService() {
+	if s.pendingService <= 0 {
+		return
+	}
+
+	s.pendingService--
+}
+
+func (s *SSE) IncreasePendingService() {
+	s.pendingService++
+}
+
 func (s *SSE) GetMarshalled() ([]byte, error) {
 	data := struct {
 		Verification         int `json:"verification"`
@@ -103,12 +117,14 @@ func (s *SSE) GetMarshalled() ([]byte, error) {
 		Report               int `json:"report"`
 		PasswordResetRequest int `json:"prr"`
 		Bugs                 int `json:"bugs"`
+		PendingService       int `json:"pendingService"`
 	}{
 		Verification:         s.verification,
 		Application:          s.application,
 		Report:               s.report,
 		PasswordResetRequest: s.passwordResetRequest,
 		Bugs:                 s.bugs,
+		PendingService:       s.pendingService,
 	}
 
 	return json.Marshal(data)
@@ -122,6 +138,7 @@ func (s *SSE) SetValues(db *sqlx.DB) {
 	s.report = s.queryReportedUserCount(db)
 	s.passwordResetRequest = s.queryPasswordResetRequestCount(db)
 	s.bugs = s.queryBugCount(db)
+	s.pendingService = s.queryPendingService(db)
 
 	fmt.Println("setting values complete")
 }
@@ -206,6 +223,24 @@ func (s *SSE) queryBugCount(db *sqlx.DB) int {
 	count := 0
 	if err := db.GetContext(ctx, &count, query); err != nil {
 		fmt.Println("error retrieving bug report count: ", err.Error())
+		return 0
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return 0
+	}
+
+	return count
+}
+
+func (s *SSE) queryPendingService(db *sqlx.DB) int {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT COUNT(id) FROM Service WHERE status = 'under_review'"
+	count := 0
+	if err := db.GetContext(ctx, &count, query); err != nil {
+		fmt.Println("error retrieving pending service count: ", err.Error())
 		return 0
 	}
 

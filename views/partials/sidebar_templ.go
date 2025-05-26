@@ -34,7 +34,7 @@ func Sidebar(user models.AdminModel) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-screen flex flex-col outline-1 outline-pale-gray justify-between bg-white\"><div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-screen flex flex-col border border-r border-pale-gray justify-between bg-white overflow-y-scroll text-xs\"><div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -46,7 +46,7 @@ func Sidebar(user models.AdminModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"mt-8\"><form action=\"/auth/logout\" method=\"POST\"><button type=\"submit\" class=\"w-full flex items-center gap-2 px-4 py-2 text-sm text-neutral-dark outline-1 outline-pale-gray hover:bg-danger/50 cursor-pointer\" role=\"menuitem\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"red\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9\"></path></svg> Sign-out</button></form></div><script>\n            (function() {\n                 const verification = document.getElementById(\"sidebar_verification\")\n                 const application = document.getElementById(\"sidebar_application\")\n                 const report = document.getElementById(\"sidebar_report\")\n                 const prr = document.getElementById(\"sidebar_prr\")\n                 const bugs = document.getElementById(\"sidebar_bugs\")\n\n                 function updateIndicator(parentElement, value) {\n                     if (!parentElement) return;\n\n                     const indicator = parentElement.querySelector('[data-indicator]');\n                     if (value === 0) {\n                         indicator.parentNode.classList.remove(\"grid\");\n                         indicator.parentNode.classList.add(\"hidden\");\n                         return;\n                     }\n\n                     indicator.innerText = value;\n                     indicator.parentNode.classList.remove(\"hidden\");\n                     indicator.parentNode.classList.add(\"grid\");\n                 }\n\n                 const sse = new EventSource(\"/admin/sse\");\n\n                 sse.onmessage = function(event) {\n                     const data = JSON.parse(event.data);\n                     console.log(data);\n\n                     updateIndicator(verification, data.verification);\n                     updateIndicator(application, data.application);\n                     updateIndicator(report, data.report);\n                     updateIndicator(prr, data.prr);\n                     updateIndicator(bugs, data.bugs);\n                 }\n\n                 sse.onerror = function(error) {\n                     console.error(error);\n                 }\n             })();\n        </script></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"mt-8\"><form action=\"/auth/logout\" method=\"POST\"><button type=\"submit\" class=\"w-full flex items-center gap-2 px-4 py-2 text-sm text-neutral-dark outline-1 outline-pale-gray hover:bg-danger/50 cursor-pointer\" role=\"menuitem\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"red\" class=\"size-4\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9\"></path></svg> Sign-out</button></form></div><script>\n            (function() {\n                 const verification = document.getElementById(\"sidebar_verification\")\n                 const application = document.getElementById(\"sidebar_application\")\n                 const report = document.getElementById(\"sidebar_report\")\n                 const prr = document.getElementById(\"sidebar_prr\")\n                 const bugs = document.getElementById(\"sidebar_bugs\")\n                 const pendingService = document.getElementById(\"sidebar_pending_service\")\n\n                 function updateIndicator(parentElement, value) {\n                     if (!parentElement) return;\n\n                     const indicator = parentElement.querySelector('[data-indicator]');\n                     if (value === 0) {\n                         indicator.parentNode.classList.remove(\"grid\");\n                         indicator.parentNode.classList.add(\"hidden\");\n                         return;\n                     }\n\n                     indicator.innerText = value;\n                     indicator.parentNode.classList.remove(\"hidden\");\n                     indicator.parentNode.classList.add(\"grid\");\n                 }\n\n                 const sse = new EventSource(\"/admin/sse\");\n\n                 sse.onmessage = function(event) {\n                     const data = JSON.parse(event.data);\n\n                     updateIndicator(verification, data.verification);\n                     updateIndicator(application, data.application);\n                     updateIndicator(report, data.report);\n                     updateIndicator(prr, data.prr);\n                     updateIndicator(bugs, data.bugs);\n                     updateIndicator(pendingService, data.pendingService);\n                 }\n\n                 sse.onerror = function(error) {\n                     console.error(error);\n                 }\n             })();\n        </script></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -194,6 +194,18 @@ func navlist(user models.AdminModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = nav.SubItem(nav.NavItemProps{
+				ID:    "pending_service",
+				Path:  "/admin/pending-services",
+				Label: "Pending services",
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			return nil
 		})
 		templ_7745c5c3_Err = nav.NavWithSubItem("Requests").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
@@ -219,7 +231,7 @@ func navlist(user models.AdminModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -256,7 +268,7 @@ func navlist(user models.AdminModel) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -296,7 +308,7 @@ func navlist(user models.AdminModel) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -324,7 +336,7 @@ func navlist(user models.AdminModel) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</ul></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

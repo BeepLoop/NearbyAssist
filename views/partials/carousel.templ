@@ -1,0 +1,111 @@
+package partials
+
+type CarouselProps struct {
+	ImageURLs []string
+}
+
+templ Carousel(props CarouselProps) {
+	<div class="relative w-full overflow-hidden outline-1 outline-pale-gray">
+		<!-- previous button -->
+		<button
+			type="button"
+			id="prevBtn"
+			class="text-on-white absolute top-1/2 left-5 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/40 p-2 transition"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="3" class="size-5 pr-0.5 md:size-6" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+			</svg>
+		</button>
+		<!-- next button -->
+		<button
+			type="button"
+			id="nextBtn"
+			class="text-on-white absolute top-1/2 right-5 z-20 flex -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/40 p-2 transition"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="3" class="size-5 pl-0.5 md:size-6" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+			</svg>
+		</button>
+		<!-- carousel -->
+		<div class="relative min-h-[50svh] w-full bg-neutral-gray/50" id="carousel"></div>
+		@templ.JSONScript("images", props.ImageURLs)
+		<script>
+            (function() {
+                function closestSiblingWithId(el, id) {
+                    let sibling = el.previousElementSibling;
+
+                    while(sibling) {
+                        if (sibling.id === id) {
+                            return sibling;
+                        }
+
+                        sibling = sibling.previousElementSibling;
+                    }
+
+                    return null;
+                }
+
+                function createImageElement(imageSrc) {
+                    const classes = [
+                        "absolute",
+                        "w-full",
+                        "h-full",
+                        "inset-0",
+                        "object-cover",
+                        "text-neutral-dark",
+                    ];
+                    const img = document.createElement("img");
+                    classes.forEach(e => img.classList.add(e));
+                    img.src = `/api/v1/resource/public/${imageSrc}`;
+                    return img;
+                }
+
+                const script = document.currentScript;
+                const images = JSON.parse(script.previousElementSibling.textContent);
+                const nextBtn = closestSiblingWithId(script, "nextBtn");
+                const prevBtn = closestSiblingWithId(script, "prevBtn");
+                const carousel = closestSiblingWithId(script, "carousel");
+                let currImageIndex = 0;
+
+                if (nextBtn) {
+                    nextBtn.addEventListener("click", () => {
+                        if (!images.length) return;
+
+                        if (currImageIndex >= images.length - 1) {
+                            currImageIndex = 0;
+                        } else {
+                            currImageIndex++;
+                        }
+
+                        if (images.length === 0) return;
+                        const img = createImageElement(images[currImageIndex]);
+                        carousel.innerHTML = "";
+                        carousel.append(img);
+                    });
+                }
+
+                if (prevBtn) {
+                    prevBtn.addEventListener("click", () => {
+                        if (!images.length) return;
+
+                        if (currImageIndex <= 0) {
+                            currImageIndex = images.length - 1;
+                        } else {
+                            currImageIndex--;
+                        }
+
+                        if (images.length === 0) return;
+                        const img = createImageElement(images[currImageIndex]);
+                        carousel.innerHTML = "";
+                        carousel.append(img);
+                    });
+                }
+
+                if (images.length === 0) return;
+                const img = createImageElement(images[currImageIndex]);
+                carousel.innerHTML = "";
+                carousel.append(img);
+             })();
+        </script>
+	</div>
+}

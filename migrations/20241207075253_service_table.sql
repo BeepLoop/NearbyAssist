@@ -8,8 +8,12 @@ CREATE TABLE IF NOT EXISTS Service (
     pricingType ENUM('fixed', 'per_hour', 'per_day') NOT NULL DEFAULT 'fixed',
     signature VARCHAR(64) NOT NULL,
     disabled BOOLEAN DEFAULT FALSE,
+    status ENUM('under_review', 'accepted', 'rejected') DEFAULT 'under_review',
+    rejectReason TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    acceptedAt TIMESTAMP,
+    rejectedAt TIMESTAMP,
     PRIMARY KEY(id),
     FOREIGN KEY(vendorId) REFERENCES Vendor(vendorId),
     INDEX(id, vendorId, signature)

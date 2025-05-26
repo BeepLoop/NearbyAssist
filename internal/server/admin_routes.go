@@ -9,6 +9,7 @@ import (
 	log_handler "nearbyassist/internal/handler/admin/logHandler"
 	map_handler "nearbyassist/internal/handler/admin/map"
 	passwordreset_handler "nearbyassist/internal/handler/admin/password_reset"
+	pendingservices "nearbyassist/internal/handler/admin/pending_services"
 	"nearbyassist/internal/handler/admin/settingshandler"
 	"nearbyassist/internal/handler/admin/ssehandler"
 	"nearbyassist/internal/handler/admin/userManagement"
@@ -39,6 +40,7 @@ import (
 	dashboard_service "nearbyassist/internal/service/dashboard"
 	expertise_service "nearbyassist/internal/service/expertise"
 	"nearbyassist/internal/service/invite_service"
+	listingreview "nearbyassist/internal/service/listing_review"
 	map_service "nearbyassist/internal/service/map"
 	passwordreset_service "nearbyassist/internal/service/password_reset"
 	resource_service "nearbyassist/internal/service/resource"
@@ -154,6 +156,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		applicationRoute.Use(middleware.CheckSession)
 		applicationRoute.Use(middleware.CheckMustChangePass(adminStore))
 
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
 		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
 		policeClearanceStore := policeclearance_repo.NewMysqlImplementation(s.DB)
@@ -161,6 +164,8 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		applicationService := application_service.NewService(
+			adminStore,
+			vendorStore,
 			applicationStore,
 			supportingImageStore,
 			policeClearanceStore,
@@ -192,6 +197,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		requestService := verification_service.NewService(
+			adminStore,
 			userStore,
 			requestStore,
 			notificationStore,
@@ -208,6 +214,28 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		verificationRoute.GET("/:requestId", requestHandler.GetRequest)
 		verificationRoute.POST("/accept", requestHandler.AcceptRequest)
 		verificationRoute.POST("/reject", requestHandler.RejectRequest)
+	}
+
+	pendingServices := r.Group("/pending-services")
+	{
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
+
+		pendingServices.Use(middleware.CheckSession)
+		pendingServices.Use(middleware.CheckMustChangePass(adminStore))
+
+		serviceStore := service_repo.NewMysqlServiceRepository(s.DB)
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
+		notifStore := notification_repo.NewMysqlNotificationRepository(s.DB)
+
+		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
+		listingReviewService := listingreview.NewService(adminStore, serviceStore, vendorStore, notifStore, resourceService, s.WS, s.Encrypt)
+
+		handler := pendingservices.NewHandler(listingReviewService)
+
+		pendingServices.GET("", handler.PendingServicesList)
+		pendingServices.GET("/:serviceId", handler.PendingServiceDetail)
+		pendingServices.POST("/accept", handler.Accept)
+		pendingServices.POST("/reject", handler.Reject)
 	}
 
 	userManagementRoute := r.Group("/user-management")
@@ -273,7 +301,6 @@ func (s *Server) adminRoutes(r *echo.Group) {
 
 		expertiseRoute.GET("", handler.GetAllExpertise)
 		expertiseRoute.POST("", handler.CreateExpertise)
-		expertiseRoute.POST("/tags", handler.AddTagToExpertise)
 	}
 
 	accountManagementRoute := r.Group("/account-management")

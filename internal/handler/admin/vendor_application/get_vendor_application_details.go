@@ -2,9 +2,9 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/service/activitylog"
+	application_service "nearbyassist/internal/service/application"
 	"nearbyassist/internal/service/cache"
 	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/utils"
@@ -88,26 +88,28 @@ func (h *applicationHandler) GetVendorApplicationDetails(c echo.Context) error {
 
 func (h *applicationHandler) AcceptRequest(c echo.Context) error {
 	applicationId := c.FormValue("applicationId")
+	password := c.FormValue("password")
 
-	if applicationId == "" {
-		if err := utils.SetFlashMessage(c, "error", "Invalid application ID"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=id_error")
-		}
-
-		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
 	application, _ := h.applicationService.GetApplicationDetail(applicationId)
 
-	if err := h.applicationService.AcceptRequest(applicationId); err != nil {
-		if err := utils.SetFlashMessage(c, "error", "Request accept failed"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=accept_error")
+	if err := h.applicationService.AcceptRequest(admin.Id, password, applicationId); err != nil {
+		if strings.Contains(err.Error(), application_service.ERR_UNAUTHORIZED) {
+			if err := utils.SetFlashMessage(c, "error", "Unauthorized action"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=unauthorized_action")
+			}
+		} else {
+			if err := utils.SetFlashMessage(c, "error", "Request accept failed"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=accept_error")
+			}
 		}
 
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
-
-	admin, _ := utils.GetAdminFromSession(c)
 
 	activity := activitylog.Input{
 		AdminId:    admin.Id,
@@ -124,22 +126,23 @@ func (h *applicationHandler) AcceptRequest(c echo.Context) error {
 func (h *applicationHandler) RejectRequest(c echo.Context) error {
 	reason := c.FormValue("reason")
 	applicationId := c.FormValue("applicationId")
+	password := c.FormValue("password")
 
-	if applicationId == "" {
-		if err := utils.SetFlashMessage(c, "error", "Invalid application ID"); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=id_error")
-		}
-
-		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
+	admin, err := utils.GetAdminFromSession(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
 	application, _ := h.applicationService.GetApplicationDetail(applicationId)
 
-	if err := h.applicationService.RejectRequest(applicationId, reason); err != nil {
-		fmt.Println(err.Error())
+	if err := h.applicationService.RejectRequest(admin.Id, password, applicationId, reason); err != nil {
 		if strings.Contains(err.Error(), "invalid reason") {
 			if err := utils.SetFlashMessage(c, "error", "Provide a reason for rejection"); err != nil {
 				return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=invalid_reason_error")
+			}
+		} else if strings.Contains(err.Error(), application_service.ERR_UNAUTHORIZED) {
+			if err := utils.SetFlashMessage(c, "error", "Unauthorized action"); err != nil {
+				return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId+"?error=unauthorized_action")
 			}
 		} else {
 			if err := utils.SetFlashMessage(c, "error", "Rejection failed"); err != nil {
@@ -149,8 +152,6 @@ func (h *applicationHandler) RejectRequest(c echo.Context) error {
 
 		return c.Redirect(http.StatusSeeOther, "/admin/vendor-applications/"+applicationId)
 	}
-
-	admin, _ := utils.GetAdminFromSession(c)
 
 	activity := activitylog.Input{
 		AdminId:    admin.Id,

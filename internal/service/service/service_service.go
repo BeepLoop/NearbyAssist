@@ -2,7 +2,6 @@ package service_service
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -15,8 +14,10 @@ import (
 	"nearbyassist/internal/response"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
+	"nearbyassist/internal/service/geodistance"
 	"nearbyassist/internal/service/route_engine"
 	searchhistory "nearbyassist/internal/service/search_history"
+	"nearbyassist/internal/service/sse"
 	"nearbyassist/internal/service/suggestion_engine"
 	"nearbyassist/internal/utils"
 	"slices"
@@ -87,13 +88,20 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 		return "", errors.New(ERR_DUPLICATE_SERVICE)
 	}
 
+	tags := slices.AppendSeq(
+		make([]string, 0),
+		utils.Map(req.Tags, func(tag string) string {
+			return strings.TrimSpace(tag)
+		}),
+	)
+
 	newService := &models.ServiceModel{
 		VendorId:     req.VendorId,
 		Title:        utils.Must(s.encrypt.EncryptString(req.Title)),
 		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
 		Price:        req.Price,
 		PricingType:  models.PricingType(req.PricingType),
-		TagsAsString: req.Tags,
+		TagsAsString: tags,
 		Extras: slices.AppendSeq(
 			make([]*models.ExtraModel, 0),
 			utils.Map(req.Extras, func(x request.NewExtra) *models.ExtraModel {
@@ -107,11 +115,22 @@ func (s *Service) CreateService(req *request.AddServicePayload) (string, error) 
 		Signature: signature,
 	}
 
+	var serviceId string
 	if newService.PricingType == models.FIXED_PRICING {
-		return s.serviceStore.Create(newService)
+		serviceId, err = s.serviceStore.Create(newService)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		serviceId, err = s.serviceStore.CreateWithPricingType(newService)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	return s.serviceStore.CreateWithPricingType(newService)
+	sse.New().IncreasePendingService()
+
+	return serviceId, nil
 }
 
 func (s *Service) GetService(serviceId string) (*response.DetailedServiceResponse, error) {
@@ -155,9 +174,9 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 			Price:       service.Price,
 			PricingType: string(service.PricingType),
 			Tags: slices.AppendSeq(
-				make([]response.Tag, 0),
-				utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
-					return response.Tag{Id: t.Id, Title: t.Title}
+				make([]string, 0),
+				utils.Map(service.Tags, func(t *models.TagModel) string {
+					return t.Title
 				}),
 			),
 			Extras: slices.AppendSeq(
@@ -181,7 +200,13 @@ func (s *Service) GetService(serviceId string) (*response.DetailedServiceRespons
 				Latitude:  service.Address.Latitude,
 				Longitude: service.Address.Longitude,
 			},
-			Disabled: service.Disabled,
+			Disabled:     service.Disabled,
+			Status:       string(service.Status),
+			RejectReason: service.RejectReason.String,
+			CreatedAt:    service.CreatedAt,
+			UpdatedAt:    service.UpdatedAt,
+			AcceptedAt:   service.AcceptedAt.String,
+			RejectedAt:   service.RejectedAt.String,
 		},
 		Vendor: response.Vendor{
 			Id:       vendor.VendorId,
@@ -250,6 +275,13 @@ func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePa
 		}
 	}
 
+	tags := slices.AppendSeq(
+		make([]string, 0),
+		utils.Map(req.Tags, func(tag string) string {
+			return strings.TrimSpace(tag)
+		}),
+	)
+
 	updatedService := &models.ServiceModel{
 		Model:        models.Model{Id: req.Id},
 		VendorId:     req.VendorId,
@@ -257,11 +289,37 @@ func (s *Service) UpdateService(bearerToken string, req *request.UpdateServicePa
 		Description:  utils.Must(s.encrypt.EncryptString(req.Description)),
 		Price:        req.Price,
 		PricingType:  models.PricingType(req.PricingType),
-		TagsAsString: req.Tags,
+		TagsAsString: tags,
 		Signature:    computeSignature(req.VendorId, req.Title, req.Description, req.PricingType, s.hash.Generate),
 	}
 
 	if err := s.serviceStore.Update(updatedService); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) Resubmit(bearerToken, serviceId string) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	service, err := s.serviceStore.FindById(serviceId)
+	if err != nil {
+		return err
+	}
+
+	if service.VendorId != userId {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
+	if service.Status != models.SERVICE_STATUS_REJECTED {
+		return errors.New(ERR_FORBIDDEN_ACTION)
+	}
+
+	if err := s.serviceStore.Resubmit(serviceId); err != nil {
 		return err
 	}
 
@@ -496,7 +554,12 @@ func (s *Service) DeleteExtra(bearerToken, extraId string) error {
 	return s.serviceStore.DeleteExtra(extraId)
 }
 
-func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSearchResult, error) {
+func (s *Service) SearchService(bearerToken string, params map[string]string) ([]*response.ServiceSearchResult, error) {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return nil, err
+	}
+
 	// Update search history
 	if q, ok := params["q"]; ok {
 		tags := strings.Split(q, ",")
@@ -504,13 +567,6 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		for _, tag := range tags {
 			cleaned := strings.ReplaceAll(tag, "_", " ")
 			searchhistory.New().Insert(cleaned)
-		}
-	}
-
-	origin := new(models.GeoSpatialModel)
-	if location, ok := params["l"]; ok {
-		if err := origin.FromString(location); err != nil {
-			return nil, err
 		}
 	}
 
@@ -548,6 +604,10 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 	validServices := slices.AppendSeq(
 		make([]*models.ServiceModel, 0),
 		utils.Retain(matchedServices, func(service *models.ServiceModel) bool {
+			if service.VendorId == userId {
+				return false
+			}
+
 			restricted, err := s.serviceStore.IsVendorRestricted(service.Id)
 			if err != nil || restricted {
 				return false
@@ -562,8 +622,45 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 		}),
 	)
 
+	origin := new(models.GeoSpatialModel)
+	if location, ok := params["l"]; ok {
+		if err := origin.FromString(location); err != nil {
+			return nil, err
+		}
+	}
+
+	radius := 0.0
+	if r, ok := params["r"]; !ok {
+		return nil, errors.New("missing parameter radius")
+	} else {
+		radius = utils.StringToFloat64ElseZero(r)
+	}
+
+	// Filter out services outside of given radius
+	inRangeServices := slices.AppendSeq(
+		make([]*models.ServiceModel, 0),
+		utils.Retain(validServices, func(service *models.ServiceModel) bool {
+			userLocation := geodistance.Coordinate{
+				Latitude:  origin.Latitude,
+				Longitude: origin.Longitude,
+			}
+
+			serviceLocation := geodistance.Coordinate{
+				Latitude:  service.Address.Latitude,
+				Longitude: service.Address.Longitude,
+			}
+
+			distanceInMeter := userLocation.DistanceTo(serviceLocation, geodistance.M)
+			if distanceInMeter > geodistance.Distance(radius) {
+				return false
+			}
+
+			return true
+		}),
+	)
+
 	// Retrieve vendor details of each service
-	for _, service := range validServices {
+	for _, service := range inRangeServices {
 		if vendor, err := s.vendorStore.FindById(service.VendorId); err != nil {
 			return nil, err
 		} else {
@@ -576,7 +673,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 	completedBookingMap := make(map[string]int)
 	computedDistances := make(map[string]float32)
 	alternatives := make([]saw.Alternative, 0)
-	for _, service := range validServices {
+	for _, service := range inRangeServices {
 		destination := &models.GeoSpatialModel{
 			Latitude:  service.Address.Latitude,
 			Longitude: service.Address.Longitude,
@@ -681,7 +778,7 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 
 	results := slices.AppendSeq(
 		make([]*response.ServiceSearchResult, 0),
-		utils.Map(validServices, func(service *models.ServiceModel) *response.ServiceSearchResult {
+		utils.Map(inRangeServices, func(service *models.ServiceModel) *response.ServiceSearchResult {
 			return &response.ServiceSearchResult{
 				Id:                service.Id,
 				VendorName:        utils.Must(s.encrypt.DecryptString(service.Vendor.User.Name)),
@@ -700,9 +797,9 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 					Price:       service.Price,
 					PricingType: string(service.PricingType),
 					Tags: slices.AppendSeq(
-						make([]response.Tag, 0),
-						utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
-							return response.Tag{Id: t.Id, Title: t.Title}
+						make([]string, 0),
+						utils.Map(service.Tags, func(t *models.TagModel) string {
+							return t.Title
 						}),
 					),
 					Extras: slices.AppendSeq(
@@ -726,16 +823,17 @@ func (s *Service) SearchService(params map[string]string) ([]*response.ServiceSe
 						Latitude:  service.Address.Latitude,
 						Longitude: service.Address.Longitude,
 					},
-					Disabled: service.Disabled,
+					Disabled:     service.Disabled,
+					Status:       string(service.Status),
+					RejectReason: utils.Must(s.encrypt.DecryptString(service.RejectReason.String)),
+					CreatedAt:    service.CreatedAt,
+					UpdatedAt:    service.UpdatedAt,
+					AcceptedAt:   service.AcceptedAt.String,
+					RejectedAt:   service.RejectedAt.String,
 				},
 			}
 		}),
 	)
-
-	utils.ForEach(results, func(result *response.ServiceSearchResult) {
-		b, _ := json.MarshalIndent(result, "", "  ")
-		fmt.Println(string(b))
-	})
 
 	return results, nil
 }

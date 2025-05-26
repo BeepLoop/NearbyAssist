@@ -109,8 +109,12 @@ func (s *Service) GetAllBasicUsers(limit, offset int) ([]dto.User, error) {
 				Name:     utils.Must(s.encrypt.DecryptString(account.Name)),
 				Email:    utils.Must(s.encrypt.DecryptString(account.Email)),
 				ImageURL: account.ImageUrl,
-				Address:  utils.Must(s.encrypt.DecryptString(account.Address.Address)),
-				Phone:    utils.Must(s.encrypt.DecryptString(account.Phone)),
+				Address: dto.Address{
+					Address:   utils.Must(s.encrypt.DecryptString(account.Address.Address)),
+					Latitude:  account.Address.Latitude,
+					Longitude: account.Address.Longitude,
+				},
+				Phone: utils.Must(s.encrypt.DecryptString(account.Phone)),
 				Socials: slices.AppendSeq(
 					make([]dto.Social, 0),
 					utils.Map(account.Socials, func(social models.SocialModel) dto.Social {
@@ -131,6 +135,55 @@ func (s *Service) GetAllBasicUsers(limit, offset int) ([]dto.User, error) {
 			}
 		}),
 	)
+
+	return data, nil
+}
+
+func (s *Service) FindById(id string) (*dto.User, error) {
+	user, err := s.userStore.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	identification := dto.Identification{}
+	if user.HasSubmittedIdentification {
+		identification = dto.Identification{
+			Type:          user.Identification.Type,
+			IdNumber:      utils.Must(s.encrypt.DecryptString(user.Identification.ReferenceNumber)),
+			FrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.FrontImageUrl)),
+			BackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(user.Identification.BackImageUrl)),
+		}
+	}
+
+	data := &dto.User{
+		Id:       user.Id,
+		Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
+		Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
+		ImageURL: user.ImageUrl,
+		Address: dto.Address{
+			Address:   utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+			Latitude:  user.Address.Latitude,
+			Longitude: user.Address.Longitude,
+		},
+		Phone: utils.Must(s.encrypt.DecryptString(user.Phone)),
+		Socials: slices.AppendSeq(
+			make([]dto.Social, 0),
+			utils.Map(user.Socials, func(social models.SocialModel) dto.Social {
+				return dto.Social{
+					Id:    social.Id,
+					Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+					Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+					URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+				}
+			}),
+		),
+		Identification:             identification,
+		CreatedAt:                  utils.FormatDate(user.CreatedAt),
+		DateVerified:               utils.FormatDate(user.VerifiedAt.String),
+		IsRestricted:               user.Restricted,
+		IsBanned:                   user.Banned,
+		HasSubmittedIdentification: user.HasSubmittedIdentification,
+	}
 
 	return data, nil
 }
@@ -157,8 +210,12 @@ func (s *Service) FindByEmail(email string) (*dto.User, error) {
 		Name:     utils.Must(s.encrypt.DecryptString(user.Name)),
 		Email:    utils.Must(s.encrypt.DecryptString(user.Email)),
 		ImageURL: user.ImageUrl,
-		Address:  utils.Must(s.encrypt.DecryptString(user.Address.Address)),
-		Phone:    utils.Must(s.encrypt.DecryptString(user.Phone)),
+		Address: dto.Address{
+			Address:   utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+			Latitude:  user.Address.Latitude,
+			Longitude: user.Address.Longitude,
+		},
+		Phone: utils.Must(s.encrypt.DecryptString(user.Phone)),
 		Socials: slices.AppendSeq(
 			make([]dto.Social, 0),
 			utils.Map(user.Socials, func(social models.SocialModel) dto.Social {
@@ -179,6 +236,75 @@ func (s *Service) FindByEmail(email string) (*dto.User, error) {
 	}
 
 	return data, nil
+}
+
+func (s *Service) GetUserById(userId string) (*response.DetailedUser, error) {
+	user, err := s.userStore.FindById(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	isVendor, err := s.userStore.IsVendor(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.userStore.LiftRestrictionIfExpired(user.Id); err != nil {
+		return nil, err
+	}
+
+	dailyBookingLimit := 0
+	vendorExpertises := make([]response.Expertise, 0)
+	if isVendor {
+		if vendor, err := s.vendorStore.FindById(user.Id); err != nil {
+			return nil, err
+		} else {
+			dailyBookingLimit = vendor.DBL
+		}
+
+		expertises, err := s.userStore.GetExpertise(user.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, expertise := range expertises {
+			vendorExpertises = append(vendorExpertises, response.Expertise{
+				Id:    expertise.Id,
+				Title: expertise.Title,
+			})
+		}
+	}
+
+	response := &response.DetailedUser{
+		Id:         user.Id,
+		Name:       utils.Must(s.encrypt.DecryptString(user.Name)),
+		Email:      utils.Must(s.encrypt.DecryptString(user.Email)),
+		ImageUrl:   user.ImageUrl,
+		IsVerified: user.Verified,
+		IsVendor:   isVendor,
+		Address:    utils.Must(s.encrypt.DecryptString(user.Address.Address)),
+		Phone:      utils.Must(s.encrypt.DecryptString(user.Phone)),
+		Latitude:   user.Address.Latitude,
+		Longitude:  user.Address.Longitude,
+		Expertises: vendorExpertises,
+		Socials: slices.AppendSeq(
+			make([]response.Social, 0),
+			utils.Map(user.Socials, func(social models.SocialModel) response.Social {
+				return response.Social{
+					Id:    social.Id,
+					Site:  utils.Must(s.encrypt.DecryptString(social.Site)),
+					Title: utils.Must(s.encrypt.DecryptString(social.Title)),
+					URL:   utils.Must(s.encrypt.DecryptString(social.Url)),
+				}
+			}),
+		),
+		IsRestricted:           user.Restricted,
+		DBL:                    dailyBookingLimit,
+		HasPendingVerification: user.HasPendingVerification,
+		HasPendingApplication:  user.HasPendingApplication,
+	}
+
+	return response, nil
 }
 
 func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
@@ -216,19 +342,9 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 		}
 
 		for _, expertise := range expertises {
-			expertiseTags := make([]response.Tag, 0)
-
-			for _, tag := range expertise.Tags {
-				expertiseTags = append(expertiseTags, response.Tag{
-					Id:    tag.Id,
-					Title: tag.Title,
-				})
-			}
-
 			vendorExpertises = append(vendorExpertises, response.Expertise{
 				Id:    expertise.Id,
 				Title: expertise.Title,
-				Tags:  expertiseTags,
 			})
 		}
 	}
@@ -256,8 +372,10 @@ func (s *Service) GetUser(bearerToken string) (*response.DetailedUser, error) {
 				}
 			}),
 		),
-		IsRestricted: user.Restricted,
-		DBL:          dailyBookingLimit,
+		IsRestricted:           user.Restricted,
+		DBL:                    dailyBookingLimit,
+		HasPendingVerification: user.HasPendingVerification,
+		HasPendingApplication:  user.HasPendingApplication,
 	}
 
 	return response, nil
@@ -311,7 +429,7 @@ func (s *Service) DeleteSocial(bearerToken, id string) error {
 	return nil
 }
 
-func (s *Service) AddUserExpertise(bearerToken, expertiseId string, file *multipart.FileHeader) error {
+func (s *Service) AddVendorExpertise(bearerToken, expertiseId string, file *multipart.FileHeader) error {
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return err
@@ -417,4 +535,14 @@ func (s *Service) ChangeAddress(bearerToken string, req *request.ChangeAddressPa
 	}
 
 	return s.userStore.ChangeAddress(userId, address)
+}
+
+func (s *Service) UpdatePhone(bearerToken string, req *request.UpdatePhonePayload) error {
+	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
+	if err != nil {
+		return err
+	}
+
+	encryptedPhone := utils.Must(s.encrypt.EncryptString(req.Phone))
+	return s.userStore.UpdatePhone(userId, encryptedPhone)
 }

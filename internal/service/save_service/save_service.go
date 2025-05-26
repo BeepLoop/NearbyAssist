@@ -111,9 +111,9 @@ func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServ
 				Price:       service.Price,
 				PricingType: string(service.PricingType),
 				Tags: slices.AppendSeq(
-					make([]response.Tag, 0),
-					utils.Map(service.Tags, func(t *models.TagModel) response.Tag {
-						return response.Tag{Id: t.Id, Title: t.Title}
+					make([]string, 0),
+					utils.Map(service.Tags, func(t *models.TagModel) string {
+						return t.Title
 					}),
 				),
 				Extras: slices.AppendSeq(
@@ -137,7 +137,13 @@ func (s *Service) GetSavedServices(bearerToken string) ([]*response.DetailedServ
 					Latitude:  service.Address.Latitude,
 					Longitude: service.Address.Longitude,
 				},
-				Disabled: service.Disabled,
+				Disabled:     service.Disabled,
+				Status:       string(service.Status),
+				RejectReason: utils.Must(s.encrypt.DecryptString(service.RejectReason.String)),
+				CreatedAt:    service.CreatedAt,
+				UpdatedAt:    service.UpdatedAt,
+				AcceptedAt:   service.AcceptedAt.String,
+				RejectedAt:   service.RejectedAt.String,
 			},
 			Vendor: response.Vendor{
 				Id:       vendor.VendorId,

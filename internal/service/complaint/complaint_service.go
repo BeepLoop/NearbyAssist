@@ -324,8 +324,12 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 				Name:     utils.Must(s.encrypt.DecryptString(vendor.User.Name)),
 				Email:    utils.Must(s.encrypt.DecryptString(vendor.User.Email)),
 				ImageURL: vendor.User.ImageUrl,
-				Address:  utils.Try(s.encrypt.DecryptString(vendor.User.Address.Address)),
-				Phone:    utils.Try(s.encrypt.DecryptString(vendor.User.Phone)),
+				Address: dto.Address{
+					Address:   utils.Try(s.encrypt.DecryptString(vendor.User.Address.Address)),
+					Latitude:  vendor.User.Address.Latitude,
+					Longitude: vendor.User.Address.Longitude,
+				},
+				Phone: utils.Try(s.encrypt.DecryptString(vendor.User.Phone)),
 				Socials: slices.AppendSeq(
 					make([]dto.Social, 0),
 					utils.Map(vendor.User.Socials, func(social models.SocialModel) dto.Social {
@@ -374,8 +378,12 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 					Latitude:  service.Address.Latitude,
 					Longitude: service.Address.Longitude,
 				},
-				CreatedAt: utils.FormatDate(service.CreatedAt),
-				UpdatedAt: utils.FormatDate(service.UpdatedAt),
+				Status:       string(service.Status),
+				RejectReason: utils.Must(s.encrypt.DecryptString(service.RejectReason.String)),
+				CreatedAt:    utils.FormatDate(service.CreatedAt),
+				UpdatedAt:    utils.FormatDate(service.UpdatedAt),
+				AcceptedAt:   utils.FormatDate(service.AcceptedAt.String),
+				RejectedAt:   utils.FormatDate(service.RejectedAt.String),
 			},
 			ServiceId:          res.ServiceId,
 			ServiceTitle:       utils.Must(s.encrypt.DecryptString(res.ServiceTitle)),
@@ -410,8 +418,12 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			Name:     utils.Must(s.encrypt.DecryptString(reporter.Name)),
 			Email:    utils.Must(s.encrypt.DecryptString(reporter.Email)),
 			ImageURL: reporter.ImageUrl,
-			Address:  utils.Must(s.encrypt.DecryptString(reporter.Address.Address)),
-			Phone:    utils.Must(s.encrypt.DecryptString(reporter.Phone)),
+			Address: dto.Address{
+				Address:   utils.Must(s.encrypt.DecryptString(reporter.Address.Address)),
+				Latitude:  reporter.Address.Latitude,
+				Longitude: reported.Address.Longitude,
+			},
+			Phone: utils.Must(s.encrypt.DecryptString(reporter.Phone)),
 			Socials: slices.AppendSeq(
 				make([]dto.Social, 0),
 				utils.Map(reporter.Socials, func(social models.SocialModel) dto.Social {
@@ -433,8 +445,12 @@ func (s *Service) GetReport(reportId string) (*dto.UserReportDetail, error) {
 			Name:     utils.Must(s.encrypt.DecryptString(reported.Name)),
 			Email:    utils.Must(s.encrypt.DecryptString(reported.Email)),
 			ImageURL: reported.ImageUrl,
-			Address:  utils.Must(s.encrypt.DecryptString(reported.Address.Address)),
-			Phone:    utils.Must(s.encrypt.DecryptString(reported.Phone)),
+			Address: dto.Address{
+				Address:   utils.Must(s.encrypt.DecryptString(reported.Address.Address)),
+				Latitude:  reported.Address.Latitude,
+				Longitude: reported.Address.Longitude,
+			},
+			Phone: utils.Must(s.encrypt.DecryptString(reported.Phone)),
 			Socials: slices.AppendSeq(
 				make([]dto.Social, 0),
 				utils.Map(reported.Socials, func(social models.SocialModel) dto.Social {

@@ -1,9 +1,11 @@
 package user
 
 import (
+	"database/sql"
 	"encoding/json"
 	"nearbyassist/internal/models"
 	"nearbyassist/internal/request"
+	"nearbyassist/internal/service/sse"
 	user_service "nearbyassist/internal/service/user"
 	verification_service "nearbyassist/internal/service/verification"
 	"nearbyassist/internal/utils"
@@ -30,7 +32,44 @@ func (h *userHandler) GetUser(c echo.Context) error {
 
 	user, err := h.userService.GetUser(bearerToken)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, models.Error{
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error while retrieving user data",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"user": user,
+	})
+}
+
+func (h *userHandler) FindUser(c echo.Context) error {
+	userId := c.Param("userId")
+
+	user, err := h.userService.GetUserById(userId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error while retrieving user data",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, utils.Mapper{
+		"user": user,
+	})
+}
+
+func (h *userHandler) FindUserByEmail(c echo.Context) error {
+	user, err := h.userService.FindByEmail(c.Param("email"))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, models.Error{
+				Message: "Email not found",
+				Error:   "Email not found",
+			})
+		}
+
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error while retrieving user data",
 			Error:   err.Error(),
 		})
@@ -169,7 +208,7 @@ func (h *userHandler) AddExpertise(c echo.Context) error {
 	}
 
 	bearerToken := utils.BearerTokenFromHeader(c)
-	if err := h.userService.AddUserExpertise(bearerToken, expertiseId, files[0]); err != nil {
+	if err := h.userService.AddVendorExpertise(bearerToken, expertiseId, files[0]); err != nil {
 		if strings.Contains(err.Error(), user_service.ERR_FORBIDDEN) {
 			return echo.NewHTTPError(http.StatusForbidden, models.Error{
 				Message: "Adding expertise not allowed",
@@ -196,6 +235,8 @@ func (h *userHandler) AddExpertise(c echo.Context) error {
 			Error:   err.Error(),
 		})
 	}
+
+	sse.New().IncreaseApplication()
 
 	return c.JSON(http.StatusNoContent, nil)
 }
@@ -241,6 +282,33 @@ func (h *userHandler) ChangeAddress(c echo.Context) error {
 	if err := h.userService.ChangeAddress(bearerToken, req); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
 			Message: "Error updating address",
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *userHandler) UpdatePhone(c echo.Context) error {
+	req := new(request.UpdatePhonePayload)
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error binding request body",
+			Error:   err.Error(),
+		})
+	}
+
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, models.Error{
+			Message: "Error validating request body",
+			Error:   err.Error(),
+		})
+	}
+
+	bearerToken := utils.BearerTokenFromHeader(c)
+	if err := h.userService.UpdatePhone(bearerToken, req); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, models.Error{
+			Message: "Error updating phone",
 			Error:   err.Error(),
 		})
 	}

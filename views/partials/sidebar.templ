@@ -6,7 +6,7 @@ import (
 )
 
 templ Sidebar(user models.AdminModel) {
-	<div class="h-screen flex flex-col outline-1 outline-pale-gray justify-between bg-white">
+	<div class="h-screen flex flex-col border border-r border-pale-gray justify-between bg-white overflow-y-scroll text-xs">
 		<div>
 			@logo()
 			@navlist(user)
@@ -32,6 +32,7 @@ templ Sidebar(user models.AdminModel) {
                  const report = document.getElementById("sidebar_report")
                  const prr = document.getElementById("sidebar_prr")
                  const bugs = document.getElementById("sidebar_bugs")
+                 const pendingService = document.getElementById("sidebar_pending_service")
 
                  function updateIndicator(parentElement, value) {
                      if (!parentElement) return;
@@ -52,13 +53,13 @@ templ Sidebar(user models.AdminModel) {
 
                  sse.onmessage = function(event) {
                      const data = JSON.parse(event.data);
-                     console.log(data);
 
                      updateIndicator(verification, data.verification);
                      updateIndicator(application, data.application);
                      updateIndicator(report, data.report);
                      updateIndicator(prr, data.prr);
                      updateIndicator(bugs, data.bugs);
+                     updateIndicator(pendingService, data.pendingService);
                  }
 
                  sse.onerror = function(error) {
@@ -178,6 +179,11 @@ templ navlist(user models.AdminModel) {
 					ID:    "application",
 					Path:  "/admin/vendor-applications",
 					Label: "Vendor applications",
+				})
+				@nav.SubItem(nav.NavItemProps{
+					ID:    "pending_service",
+					Path:  "/admin/pending-services",
+					Label: "Pending services",
 				})
 			}
 			@nav.NavWithSubItem("User Management") {

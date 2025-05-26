@@ -55,6 +55,17 @@ func (h *userManagementHandler) GetVendorList(c echo.Context) error {
 				return page.Render(context.Background(), c.Response().Writer)
 			}
 			results = users
+		} else if strings.HasPrefix(params.Get("query"), "id:") {
+			query := params.Get("query")[len("id:"):]
+
+			user, err := h.vendorService.FindByIdDTO(query)
+			if err != nil {
+				fmt.Println("error get vendors by expertise: ", err.Error())
+				page := pages.VendorList(*admin, make([]dto.Vendor, 0))
+				return page.Render(context.Background(), c.Response().Writer)
+			}
+
+			results = append(results, *user)
 		} else {
 			// Fallback search by email
 			query := params.Get("query")

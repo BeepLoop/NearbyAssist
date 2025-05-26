@@ -91,15 +91,6 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 				return response.Expertise{
 					Id:    expertise.Id,
 					Title: expertise.Title,
-					Tags: slices.AppendSeq(
-						make([]response.Tag, 0),
-						utils.Map(expertise.Tags, func(tag *models.TagModel) response.Tag {
-							return response.Tag{
-								Id:    tag.Id,
-								Title: tag.Title,
-							}
-						}),
-					),
 				}
 			}),
 		)
@@ -146,8 +137,10 @@ func (s *Service) Login(req *request.UserLoginPayload) (*response.LoginResponse,
 					}
 				}),
 			),
-			IsRestricted: user.Restricted,
-			DBL:          dailyBookingLimit,
+			IsRestricted:           user.Restricted,
+			DBL:                    dailyBookingLimit,
+			HasPendingVerification: user.HasPendingVerification,
+			HasPendingApplication:  user.HasPendingApplication,
 		},
 	}
 
@@ -199,20 +192,22 @@ func (s *Service) Register(req *request.UserRegisterPayload) (*response.LoginRes
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		User: response.DetailedUser{
-			Id:           user.Id,
-			Name:         req.Name,
-			Email:        req.Email,
-			ImageUrl:     req.ImageURL,
-			IsVerified:   false,
-			IsVendor:     false,
-			Address:      req.Address,
-			Phone:        req.Phone,
-			Latitude:     req.Latitude,
-			Longitude:    req.Longitude,
-			Expertises:   make([]response.Expertise, 0),
-			Socials:      make([]response.Social, 0),
-			IsRestricted: false,
-			DBL:          0,
+			Id:                     user.Id,
+			Name:                   req.Name,
+			Email:                  req.Email,
+			ImageUrl:               req.ImageURL,
+			IsVerified:             false,
+			IsVendor:               false,
+			Address:                req.Address,
+			Phone:                  req.Phone,
+			Latitude:               req.Latitude,
+			Longitude:              req.Longitude,
+			Expertises:             make([]response.Expertise, 0),
+			Socials:                make([]response.Social, 0),
+			IsRestricted:           false,
+			DBL:                    0,
+			HasPendingVerification: false,
+			HasPendingApplication:  false,
 		},
 	}
 

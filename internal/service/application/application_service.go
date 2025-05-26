@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"mime/multipart"
 	"nearbyassist/internal/models"
+	admin_repo "nearbyassist/internal/repository/admin"
 	application_repo "nearbyassist/internal/repository/application"
 	notification_repo "nearbyassist/internal/repository/notification"
 	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
 	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
+	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
@@ -16,7 +18,15 @@ import (
 	"nearbyassist/internal/utils"
 )
 
+const (
+	ERR_UNAUTHORIZED          = "unauthorized"
+	ERR_DUPLICATE_EXPERTISE   = "duplicate expertise"
+	ERR_DUPLICATE_APPLICATION = "duplicate application"
+)
+
 type Service struct {
+	adminStore           admin_repo.AdminRepository
+	vendorStore          vendor_repo.VendorRepository
 	applicationStore     application_repo.ApplicationRepository
 	supportingImageStore supportingimage_repo.Repository
 	policeClearanceStore policeclearance_repo.Repository
@@ -28,6 +38,8 @@ type Service struct {
 }
 
 func NewService(
+	adminStore admin_repo.AdminRepository,
+	vendorStore vendor_repo.VendorRepository,
 	applicationStore application_repo.ApplicationRepository,
 	supportingImageStore supportingimage_repo.Repository,
 	policeClearanceStore policeclearance_repo.Repository,
@@ -38,6 +50,8 @@ func NewService(
 	jwt core.Authenticator,
 ) *Service {
 	return &Service{
+		adminStore:           adminStore,
+		vendorStore:          vendorStore,
 		applicationStore:     applicationStore,
 		supportingImageStore: supportingImageStore,
 		policeClearanceStore: policeClearanceStore,
@@ -53,6 +67,22 @@ func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*mu
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return "", err
+	}
+
+	if hasExpertise, err := s.vendorStore.HasExpertise(userId, expertiseId); err != nil {
+		return "", err
+	} else {
+		if hasExpertise {
+			return "", errors.New(ERR_DUPLICATE_EXPERTISE)
+		}
+	}
+
+	if hasApplication, err := s.applicationStore.HasPendingApplication(userId, expertiseId); err != nil {
+		return "", err
+	} else {
+		if hasApplication {
+			return "", errors.New(ERR_DUPLICATE_APPLICATION)
+		}
 	}
 
 	application := new(models.ApplicationModel)
@@ -149,7 +179,16 @@ func (s *Service) GetApplicationDetail(applicationId string) (*models.Applicatio
 	return application, nil
 }
 
-func (s *Service) AcceptRequest(applicationId string) error {
+func (s *Service) AcceptRequest(adminId, confirmationPassword, applicationId string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
 	application, err := s.applicationStore.FindById(applicationId)
 	if err != nil {
 		return err
@@ -211,9 +250,18 @@ func (s *Service) AcceptRequest(applicationId string) error {
 	return nil
 }
 
-func (s *Service) RejectRequest(id, reason string) error {
+func (s *Service) RejectRequest(adminId, confirmationPassword, id, reason string) error {
 	if reason == "" {
 		return errors.New("invalid reason")
+	}
+
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	encryptedReason, err := s.encrypt.EncryptString(reason)
@@ -264,7 +312,14 @@ func (s *Service) RejectRequest(id, reason string) error {
 		Payload:    notification,
 	}
 
+	syncEvent := &websocket.EventModel{
+		ReceiverId: application.ApplicantId,
+		Type:       websocket.EVT_SYNC,
+		Payload:    nil,
+	}
+
 	s.ws.Send(event)
+	s.ws.Send(syncEvent)
 
 	return nil
 }

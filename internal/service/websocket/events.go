@@ -8,17 +8,20 @@ import (
 type Event string
 
 const (
-	EVT_PONG                     Event = "pong"
-	EVT_MSSG                     Event = "message"
-	EVT_NOTIF                    Event = "notification"
-	EVT_SYNC                     Event = "sync"
-	EVT_BOOKING_COMPLETE         Event = "bookingComplete"
-	EVT_BOOKING_CONFIRMED        Event = "bookingConfirmed"
-	EVT_BOOKING_RESCHEDULED      Event = "bookingRescheduled"
-	EVT_BOOKING_REJECTED         Event = "bookingRejected"
-	EVT_CLIENT_CANCELLED_BOOKING Event = "clientCancelledBooking"
-	EVT_VENDOR_CANCELLED_BOOKING Event = "vendorCancelledBooking"
-	EVT_RECEIVED_BOOKING         Event = "receivedBooking"
+	EVT_PONG                               Event = "pong"
+	EVT_MSSG                               Event = "message"
+	EVT_NOTIF                              Event = "notification"
+	EVT_SYNC                               Event = "sync"
+	EVT_BOOKING_COMPLETE                   Event = "bookingComplete"
+	EVT_BOOKING_CONFIRMED                  Event = "bookingConfirmed"
+	EVT_BOOKING_RESCHEDULED                Event = "bookingRescheduled"
+	EVT_BOOKING_REJECTED                   Event = "bookingRejected"
+	EVT_CLIENT_CANCELLED_BOOKING           Event = "clientCancelledBooking"
+	EVT_VENDOR_CANCELLED_BOOKING           Event = "vendorCancelledBooking"
+	EVT_CLIENT_CANCELLED_CONFIRMED_BOOKING Event = "clientCancelledConfirmedBooking"
+	EVT_RECEIVED_BOOKING                   Event = "receivedBooking"
+	EVT_SERVICE_ACCEPTED                   Event = "serviceAccepted"
+	EVT_SERVICE_REJECTED                   Event = "serviceRejected"
 )
 
 type EventModel struct {

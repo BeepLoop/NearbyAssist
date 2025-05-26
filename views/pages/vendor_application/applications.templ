@@ -7,7 +7,9 @@ import (
 	"nearbyassist/views/partials"
 )
 
-templ Applications(user models.AdminModel, applications []models.ApplicationModel) {
+templ Applications(user models.AdminModel, applications []models.ApplicationModel, flash string) {
+	@templ.JSONScript("flash", flash)
+	@partials.ToastNotification()
 	@layout.Layout(user) {
 		@partials.PageBanner("Vendor Applications", "View and manage vendor applications")
 		@applicationsData(applications)

@@ -16,3 +16,7 @@ func ParseDateString(date string) (time.Time, error) {
 
 	return parsed, nil
 }
+
+func ISO8601ToRFC339(date string) (time.Time, error) {
+	return time.Parse(time.RFC3339, date)
+}

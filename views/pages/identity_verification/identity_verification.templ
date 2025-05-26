@@ -32,7 +32,10 @@ templ IdentityVerification(user models.AdminModel, request dto.VerificationReque
 				</div>
 				<div class="flex gap-2 ">
 					<h3 class="font-medium text-neutral-dark">Address:</h3>
-					<p class="text-neutral-gray">{ request.Address }</p>
+					<a
+						href={ templ.URL(fmt.Sprintf("/admin/map/?point=%f,%f", request.Address.Latitude, request.Address.Longitude)) }
+						class="text-good hover:underline"
+					>{ request.Address.Address }</a>
 				</div>
 				<div class="flex gap-2 ">
 					<h3 class="font-medium text-neutral-dark">ID Type:</h3>
@@ -48,9 +51,18 @@ templ IdentityVerification(user models.AdminModel, request dto.VerificationReque
 			<div class="mt-4">
 				<h3 class="mb-4 font-medium text-neutral-dark">Documents</h3>
 				<div class="grid grid-cols-3 gap-2">
-					@partials.ImageViewer("ID Front", fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL))
-					@partials.ImageViewer("ID Back", fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL))
-					@partials.ImageViewer("Selfie", fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL))
+					@partials.ImageViewer(partials.ImageViewerProps{
+						Title: "ID Front",
+						URL:   fmt.Sprintf("/api/v1/resource/%s", request.IDFrontImageURL),
+					})
+					@partials.ImageViewer(partials.ImageViewerProps{
+						Title: "ID Back",
+						URL:   fmt.Sprintf("/api/v1/resource/%s", request.IDBackImageURL),
+					})
+					@partials.ImageViewer(partials.ImageViewerProps{
+						Title: "Selfie",
+						URL:   fmt.Sprintf("/api/v1/resource/%s", request.SelfieImageURL),
+					})
 				</div>
 			</div>
 		</div>
@@ -110,27 +122,41 @@ templ acceptButton(requestId string) {
 					</div>
 				</div>
 				<!-- Dialog Footer -->
-				<div class="mt-4 flex justify-end gap-2">
-					<button
-						x-on:click="acceptModalOpen = false"
-						type="button"
-						class="rounded-sm px-4 py-2 cursor-pointer font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75"
-					>Cancel</button>
+				<div class="mt-4">
 					<form
 						action="/admin/verification-requests/accept"
 						method="POST"
 						x-on:submit="loading = true"
 					>
-						<input
-							type="text"
-							hidden="true"
-							value={ requestId }
-							name="requestId"
-						/>
-						<button
-							type="submit"
-							class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-xs text-center font-medium text-white hover:opacity-75"
-						>Continue</button>
+						<!-- Inputs -->
+						<div class="mt-4 grid gap-2">
+							<input
+								type="text"
+								hidden="true"
+								value={ requestId }
+								name="requestId"
+							/>
+							<!-- admin password -->
+							<div class="">
+								<label for="password" class="font-medium text-neutral-dark">Password</label>
+								@partials.Password(partials.PasswordProps{
+									Placeholder: "password",
+									Id:          "password",
+									Name:        "password",
+								})
+							</div>
+						</div>
+						<div class="flex gap-2 justify-end mt-2">
+							<button
+								x-on:click="acceptModalOpen = false"
+								type="button"
+								class="rounded-sm px-4 py-2 cursor-pointer font-medium text-neutral-dark hover:bg-neutral-gray/25 hover:opacity-75"
+							>Cancel</button>
+							<button
+								type="submit"
+								class="cursor-pointer rounded-sm bg-primary px-4 py-2 text-xs text-center font-medium text-white hover:opacity-75"
+							>Continue</button>
+						</div>
 					</form>
 				</div>
 			</div>
@@ -195,7 +221,7 @@ templ rejectButton(requestId string) {
 					<form
 						action="/admin/verification-requests/reject"
 						method="POST"
-						class="grid gap-4"
+						class="grid gap-2"
 					>
 						<input
 							type="text"
@@ -214,10 +240,18 @@ templ rejectButton(requestId string) {
 								class="mt-1.5 w-full rounded-sm border border-neutral-gray-lighter p-2 text-sm text-neutral-dark focus:border-primary focus:outline-none"
 							></textarea>
 						</div>
-						<div class="flex justify-end">
+						<div class="mt-2">
+							<label for="password" class="font-medium text-neutral-dark">Password</label>
+							@partials.Password(partials.PasswordProps{
+								Placeholder: "password",
+								Id:          "password",
+								Name:        "password",
+							})
+						</div>
+						<div class="flex justify-end mt-2">
 							<button
 								type="submit"
-								class="cursor-pointer rounded-sm bg-danger bg-danger p-2 text-sm font-semibold text-white hover:opacity-75"
+								class="cursor-pointer rounded-sm bg-danger bg-danger p-2 text-xs font-semibold text-white hover:opacity-75"
 							>Continue</button>
 						</div>
 					</form>

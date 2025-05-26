@@ -8,7 +8,6 @@ import (
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/expertise"
 	"net/http"
-	"slices"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -58,7 +57,6 @@ func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
 		data = append(data, models.ExpertiseModel{
 			Model: entry.Model,
 			Title: entry.Title,
-			Tags:  entry.Tags,
 		})
 	}
 
@@ -68,7 +66,6 @@ func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
 
 func (h *expertiseHandler) CreateExpertise(c echo.Context) error {
 	title := c.FormValue("title")
-	tags := c.FormValue("tags")
 
 	if title == "" {
 		if err := utils.SetFlashMessage(c, "error", "invalid title"); err != nil {
@@ -79,10 +76,10 @@ func (h *expertiseHandler) CreateExpertise(c echo.Context) error {
 	}
 
 	data := &models.ExpertiseModel{
-		Title: strings.ToLower(title),
+		Title: strings.ToLower(strings.TrimSpace(title)),
 	}
 
-	if _, err := h.expertService.CreateExpertise(data, tags); err != nil {
+	if _, err := h.expertService.CreateExpertise(data); err != nil {
 		if err := utils.SetFlashMessage(c, "error", err.Error()); err != nil {
 			return c.Redirect(http.StatusSeeOther, "/admin/expertise?error=creation_error")
 		}
@@ -95,40 +92,6 @@ func (h *expertiseHandler) CreateExpertise(c echo.Context) error {
 	activity := activitylog.Input{
 		AdminId: admin.Id,
 		Action:  activitylog.ACTION_CREATED_EXPERTISE,
-	}
-	activitylog.MustGetInstance().Create(activity)
-
-	return c.Redirect(http.StatusSeeOther, "/admin/expertise")
-}
-
-func (h *expertiseHandler) AddTagToExpertise(c echo.Context) error {
-	expertiseId := c.FormValue("expertiseId")
-	title := c.FormValue("title")
-
-	titles := strings.Split(title, ",")
-	newTags := slices.AppendSeq(
-		make([]*models.TagModel, 0),
-		utils.Map(titles, func(title string) *models.TagModel {
-			cleaned := strings.TrimSpace(title)
-			return &models.TagModel{
-				Title: cleaned,
-			}
-		}),
-	)
-
-	if err := h.expertService.AddTagToExpertise(expertiseId, newTags); err != nil {
-		if err := utils.SetFlashMessage(c, "error", err.Error()); err != nil {
-			return c.Redirect(http.StatusSeeOther, "/admin/expertise?error=creation_error")
-		}
-
-		return c.Redirect(http.StatusSeeOther, "/admin/expertise")
-	}
-
-	admin, _ := utils.GetAdminFromSession(c)
-
-	activity := activitylog.Input{
-		AdminId: admin.Id,
-		Action:  activitylog.ACTION_ADDED_EXPERTISE_TAG,
 	}
 	activitylog.MustGetInstance().Create(activity)
 

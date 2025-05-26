@@ -1,6 +1,8 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type BookingStatus string
 
@@ -26,6 +28,8 @@ type BookingModel struct {
 	Quantity           int            `db:"quantity"`
 	Cost               string         `db:"cost"`
 	IsReviewed         bool           `db:"isReviewed"`
+	RequestedStart     string         `db:"requestedStart"`
+	RequestedEnd       string         `db:"requestedEnd"`
 	ScheduleStart      sql.NullString `db:"scheduleStart"`
 	ScheduleEnd        sql.NullString `db:"scheduleEnd"`
 	CancelReason       sql.NullString `db:"cancelReason"`

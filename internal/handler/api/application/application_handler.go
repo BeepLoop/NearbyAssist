@@ -42,16 +42,16 @@ func (h *applicationHandler) CreateApplication(c echo.Context) error {
 
 	applicationId, err := h.applicationService.CreateApplication(bearerToken, expertiseId, files)
 	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
+		if strings.Contains(err.Error(), application_service.ERR_DUPLICATE_EXPERTISE) {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-				Message: "Application already exists",
+				Message: "Already have this expertise",
 				Error:   err.Error(),
 			})
 		}
 
-		if strings.Contains(err.Error(), "Already approved") {
+		if strings.Contains(err.Error(), application_service.ERR_DUPLICATE_APPLICATION) {
 			return echo.NewHTTPError(http.StatusBadRequest, models.Error{
-				Message: "You already have that expertise",
+				Message: "You already have pending application for this expertise",
 				Error:   err.Error(),
 			})
 		}

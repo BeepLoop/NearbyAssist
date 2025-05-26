@@ -23,6 +23,7 @@ import (
 	booking_repo "nearbyassist/internal/repository/booking"
 	bug_report_repo "nearbyassist/internal/repository/bug_report"
 	e2ee_repo "nearbyassist/internal/repository/e2ee"
+	expertise_repo "nearbyassist/internal/repository/expertise"
 	message_repo "nearbyassist/internal/repository/message"
 	notification_repo "nearbyassist/internal/repository/notification"
 	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
@@ -96,8 +97,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	// ===== USER =======
 	userRoute := v1.Group("/user")
 	{
-		userRoute.Use(middleware.CheckAuth(s.JWT))
-
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
@@ -108,6 +108,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		userService := user_service.NewService(userStore, vendorStore, applicationStore, supportingImageStore, resourceService, s.FS, s.Encrypt, s.Hash, s.JWT)
 		userVerificationService := verification_service.NewService(
+			adminStore,
 			userStore,
 			verificationStore,
 			notificationStore,
@@ -120,25 +121,29 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		handler := user.NewHandler(userService, userVerificationService)
 
-		userRoute.GET("", handler.GetUser)
-		userRoute.GET("/verify", handler.CheckVerificationStatus)
-		userRoute.POST("/verify", handler.VerifyAccount)
-		userRoute.POST("/socials", handler.AddSocial)
-		userRoute.DELETE("/socials/:id", handler.DeleteSocial)
-		userRoute.POST("/addExpertise", handler.AddExpertise)
-		userRoute.POST("/dbl/:value", handler.SetDBL)
-		userRoute.PUT("/address", handler.ChangeAddress)
+		userRoute.GET("", handler.GetUser, middleware.CheckAuth(s.JWT))
+		userRoute.GET("/:userId", handler.FindUser, middleware.CheckAuth(s.JWT))
+		userRoute.GET("/exists/:email", handler.FindUserByEmail)
+		userRoute.GET("/verify", handler.CheckVerificationStatus, middleware.CheckAuth(s.JWT))
+		userRoute.POST("/verify", handler.VerifyAccount, middleware.CheckAuth(s.JWT))
+		userRoute.POST("/socials", handler.AddSocial, middleware.CheckAuth(s.JWT))
+		userRoute.DELETE("/socials/:id", handler.DeleteSocial, middleware.CheckAuth(s.JWT))
+		userRoute.POST("/addExpertise", handler.AddExpertise, middleware.CheckAuth(s.JWT))
+		userRoute.POST("/dbl/:value", handler.SetDBL, middleware.CheckAuth(s.JWT))
+		userRoute.PUT("/address", handler.ChangeAddress, middleware.CheckAuth(s.JWT))
+		userRoute.PUT("/phone", handler.UpdatePhone, middleware.CheckAuth(s.JWT))
 	}
 
 	// ===== TAGS =======
 	tagRoute := v1.Group("/tags")
 	{
 		tagStore := tag_repo.NewMysqlTagRepository(s.DB)
-		tagService := tag_service.NewService(tagStore)
+		expertiseStore := expertise_repo.NewMysqlExpertiseRepository(s.DB)
+		tagService := tag_service.NewService(tagStore, expertiseStore)
 		handler := tag.NewHandler(tagService)
 
 		tagRoute.GET("", handler.GetTags)
-		tagRoute.GET("/expertise", handler.GetExpertise)
+		tagRoute.GET("/expertise", handler.GetExpertiseList)
 	}
 
 	// ===== VENDOR =======
@@ -188,6 +193,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		serviceRoute.POST("", handler.CreateService)
 		serviceRoute.GET("/search", handler.SearchService)
 		serviceRoute.GET("/:serviceId", handler.GetService)
+		serviceRoute.PUT("/:serviceId", handler.Resubmit)
 		serviceRoute.PUT("", handler.UpdateService)
 		serviceRoute.POST("/addImage/:serviceId", handler.AddImage)
 		serviceRoute.DELETE("/deleteImage/:imageId", handler.DeleteImage)
@@ -261,6 +267,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 	{
 		applicationRoute.Use(middleware.CheckAuth(s.JWT))
 
+		adminStore := admin_repo.NewMysqlAdminRepository(s.DB)
 		userStore := user_repo.NewMysqlUserRepository(s.DB)
 		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
@@ -269,6 +276,8 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 		notificationStore := notification_repo.NewMysqlNotificationRepository(s.DB)
 
 		applicationService := application_service.NewService(
+			adminStore,
+			vendorStore,
 			applicationStore,
 			supportingImageStore,
 			policeClearanceStore,

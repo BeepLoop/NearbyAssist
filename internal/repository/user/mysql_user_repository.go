@@ -119,6 +119,32 @@ func (s *MysqlUserRepository) ChangeAddress(userId string, address *models.Addre
 	return nil
 }
 
+func (s *MysqlUserRepository) UpdatePhone(userId, phone string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	updatePhone := "UPDATE User SET phone = ? WHERE id = ?"
+	if _, err := tx.ExecContext(ctx, updatePhone, phone, userId); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return context.DeadlineExceeded
+	}
+
+	return nil
+}
+
 func (s *MysqlUserRepository) GetBasicUserAccounts(limit, offset int) ([]*models.UserModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -214,6 +240,21 @@ func (s *MysqlUserRepository) FindById(id string) (*models.UserModel, error) {
 		return nil, err
 	}
 
+	if !user.Verified {
+		hasPendingVerification, err := s.hasPendingVerification(user.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		user.HasPendingVerification = hasPendingVerification
+	}
+
+	if hasPendingApplication, err := s.hasPendingApplication(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.HasPendingApplication = hasPendingApplication
+	}
+
 	if banned, err := s.IsBanned(user.Id); err != nil {
 		fmt.Println("error get is banned: ", err.Error())
 		return nil, err
@@ -291,6 +332,21 @@ func (s *MysqlUserRepository) FindByEmailHash(emailHash string) (*models.UserMod
     `
 	if err := s.db.GetContext(ctx, user, query, emailHash); err != nil {
 		return nil, err
+	}
+
+	if !user.Verified {
+		hasPendingVerification, err := s.hasPendingVerification(user.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		user.HasPendingVerification = hasPendingVerification
+	}
+
+	if hasPendingApplication, err := s.hasPendingApplication(user.Id); err != nil {
+		return nil, err
+	} else {
+		user.HasPendingApplication = hasPendingApplication
 	}
 
 	if banned, err := s.IsBanned(user.Id); err != nil {
@@ -478,42 +534,20 @@ func (s *MysqlUserRepository) GetExpertise(userId string) ([]*models.ExpertiseMo
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Get vendor expertise
 	expertiseQuery := `
         SELECT 
             e.id,
             e.title
         FROM 
             Expertise e
-            JOIN UserExpertise ve ON ve.expertiseId = e.id
+            JOIN VendorExpertise ve ON ve.expertiseId = e.id
         WHERE
-            ve.userId = ?
+            ve.vendorId = ?
     `
 
 	expertises := make([]*models.ExpertiseModel, 0)
 	if err := s.db.SelectContext(ctx, &expertises, expertiseQuery, userId); err != nil {
 		return nil, err
-	}
-
-	// Get all tags for each expertise
-	tagQuery := `
-        SELECT
-            t.id,
-            t.title
-        FROM 
-            Tag t 
-            JOIN ExpertiseTag et ON et.tagId = t.id
-        WHERE
-            et.expertiseId = ?
-    `
-
-	for _, expertise := range expertises {
-		tags := make([]*models.TagModel, 0)
-		if err := s.db.SelectContext(ctx, &tags, tagQuery, expertise.Id); err != nil {
-			return nil, err
-		}
-
-		expertise.Tags = tags
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -720,4 +754,48 @@ func (s *MysqlUserRepository) ForceLiftRestriction(userId string) error {
 	}
 
 	return nil
+}
+
+func (s *MysqlUserRepository) hasPendingVerification(userId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT EXISTS
+            (SELECT 1 FROM IdentityVerification WHERE userId = ? AND status = 'pending')
+        AS has_pending
+    `
+
+	hasPending := false
+	if err := s.db.GetContext(ctx, &hasPending, query, userId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return hasPending, nil
+}
+
+func (s *MysqlUserRepository) hasPendingApplication(userId string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT EXISTS
+            (SELECT 1 FROM Application WHERE applicantId = ? AND status = 'pending')
+        AS has_pending
+    `
+
+	hasPending := false
+	if err := s.db.GetContext(ctx, &hasPending, query, userId); err != nil {
+		return false, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return false, context.DeadlineExceeded
+	}
+
+	return hasPending, nil
 }

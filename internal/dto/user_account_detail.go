@@ -18,7 +18,7 @@ type User struct {
 	Name                       string
 	Email                      string
 	ImageURL                   string
-	Address                    string
+	Address                    Address
 	Phone                      string
 	Socials                    []Social
 	Identification             Identification
@@ -34,7 +34,7 @@ type Vendor struct {
 	Name           string
 	Email          string
 	ImageURL       string
-	Address        string
+	Address        Address
 	Phone          string
 	Socials        []Social
 	Identification Identification
@@ -82,18 +82,22 @@ type Extra struct {
 }
 
 type Service struct {
-	Id          string
-	VendorId    string
-	Title       string
-	Description string
-	Price       string
-	PricingType string
-	Tags        []string
-	Extras      []Extra
-	Images      []Image
-	Address     Address
-	CreatedAt   string
-	UpdatedAt   string
+	Id           string
+	VendorId     string
+	Title        string
+	Description  string
+	Price        string
+	PricingType  string
+	Tags         []string
+	Extras       []Extra
+	Images       []Image
+	Address      Address
+	Status       string
+	RejectReason string
+	CreatedAt    string
+	UpdatedAt    string
+	AcceptedAt   string
+	RejectedAt   string
 }
 
 type Image struct {

@@ -15,6 +15,8 @@ type Booking struct {
 	Status             string         `json:"status"`
 	CreatedAt          string         `json:"createdAt"`
 	UpdatedAt          string         `json:"updatedAt"`
+	RequestedStart     string         `json:"requestedStart"`
+	RequestedEnd       string         `json:"requestedEnd"`
 	ScheduleStart      string         `json:"scheduleStart"`
 	ScheduleEnd        string         `json:"scheduleEnd"`
 	CancelReason       string         `json:"cancelReason"`
@@ -40,17 +42,23 @@ type ServiceBareInfo struct {
 }
 
 type Service struct {
-	Id          string   `json:"id"`
-	VendorId    string   `json:"vendorId"`
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	Price       string   `json:"price"`
-	PricingType string   `json:"pricingType"`
-	Tags        []Tag    `json:"tags"`
-	Extras      []Extra  `json:"extras"`
-	Images      []Image  `json:"images"`
-	Location    Location `json:"location"`
-	Disabled    bool     `json:"disabled"`
+	Id           string   `json:"id"`
+	VendorId     string   `json:"vendorId"`
+	Title        string   `json:"title"`
+	Description  string   `json:"description"`
+	Price        string   `json:"price"`
+	PricingType  string   `json:"pricingType"`
+	Tags         []string `json:"tags"`
+	Extras       []Extra  `json:"extras"`
+	Images       []Image  `json:"images"`
+	Location     Location `json:"location"`
+	Disabled     bool     `json:"disabled"`
+	Status       string   `json:"status"`
+	RejectReason string   `json:"rejectReason"`
+	CreatedAt    string   `json:"createdAt"`
+	UpdatedAt    string   `json:"updatedAt"`
+	AcceptedAt   string   `json:"acceptedAt"`
+	RejectedAt   string   `json:"rejectedAt"`
 }
 
 type BookingExtra struct {

@@ -18,10 +18,12 @@ templ ReportedUser(user models.AdminModel, data dto.UserReportDetail) {
 		</div>
 		<div class="mx-auto max-w-3xl">
 			<div class="flex justify-end gap-2">
+				<!--
 				@partials.DownloadButton(partials.DownloadButtonProps{
 					Label: "Download",
 					Link:  fmt.Sprintf("/admin/complaints/users/%s/download", data.Report.Id),
 				})
+                -->
 				@closeReport() {
 					@addressReportContent(data.Report.Id)
 				}
@@ -144,7 +146,10 @@ templ overview(data dto.UserReportDetail) {
 			<h1 class="mt-2 text-xl font-medium">Report Attachments</h1>
 			<div class="mt-2 grid grid-cols-3 gap-2">
 				for _, image := range data.Report.Images {
-					@partials.ImageViewer("", fmt.Sprintf("/api/v1/resource/%s", image))
+					@partials.ImageViewer(partials.ImageViewerProps{
+						Title: "",
+						URL:   fmt.Sprintf("/api/v1/resource/%s", image),
+					})
 				}
 			</div>
 		</div>
@@ -309,9 +314,12 @@ templ reported(data dto.UserReportDetail) {
 				<span class="font-medium text-neutral-dark">Email:</span>
 				<p class="text-neutral-gray">{ data.Reported.Email }</p>
 			</div>
-			<div class="mt-2 flex gap-2">
-				<span class="font-medium text-neutral-dark">Address:</span>
-				<p class="text-neutral-gray">{ data.Reported.Address }</p>
+			<div class="flex gap-2 ">
+				<h3 class="font-medium text-neutral-dark">Address:</h3>
+				<a
+					href={ templ.URL(fmt.Sprintf("/admin/map/?point=%f,%f", data.Reported.Address.Latitude, data.Reported.Address.Longitude)) }
+					class="text-good hover:underline"
+				>{ data.Reported.Address.Address }</a>
 			</div>
 			<div class="mt-2 flex gap-2">
 				<span class="font-medium text-neutral-dark">Phone:</span>
@@ -389,7 +397,7 @@ templ reported(data dto.UserReportDetail) {
 									}
 								</td>
 								<td class="p-2">
-									@partials.OffCanvas(report.Id) {
+									@partials.OffCanvas(partials.OffCanvasProps{ID: report.Id, Label: "view"}) {
 										@previousReportMoreInfo(report)
 									}
 								</td>
@@ -428,9 +436,12 @@ templ reporter(data dto.UserReportDetail) {
 				<span class="font-medium text-neutral-dark">Email:</span>
 				<p class="text-neutral-gray">{ data.Reporter.Email }</p>
 			</div>
-			<div class="mt-2 flex gap-2">
-				<span class="font-medium text-neutral-dark">Address:</span>
-				<p class="text-neutral-gray">{ data.Reporter.Address }</p>
+			<div class="flex gap-2 ">
+				<h3 class="font-medium text-neutral-dark">Address:</h3>
+				<a
+					href={ templ.URL(fmt.Sprintf("/admin/map/?point=%f,%f", data.Reporter.Address.Latitude, data.Reporter.Address.Longitude)) }
+					class="text-good hover:underline"
+				>{ data.Reporter.Address.Address }</a>
 			</div>
 			<div class="mt-2 flex gap-2">
 				<span class="font-medium text-neutral-dark">Phone:</span>

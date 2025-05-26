@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"nearbyassist/internal/dto"
 	"nearbyassist/internal/models"
+	admin_repo "nearbyassist/internal/repository/admin"
 	notification_repo "nearbyassist/internal/repository/notification"
 	user_repo "nearbyassist/internal/repository/user"
 	verification_repo "nearbyassist/internal/repository/verification"
@@ -23,9 +24,11 @@ import (
 const (
 	ERR_ALREADY_VERIFIED = "account already verified"
 	ERR_INVALID_REASON   = "provided reason not allowed"
+	ERR_UNAUTHORIZED     = "unauthorized"
 )
 
 type Service struct {
+	adminStore        admin_repo.AdminRepository
 	userStore         user_repo.UserRepository
 	verificationStore verification_repo.VerificationRepository
 	notifStore        notification_repo.NotificationRepository
@@ -37,6 +40,7 @@ type Service struct {
 }
 
 func NewService(
+	adminStore admin_repo.AdminRepository,
 	userStore user_repo.UserRepository,
 	verificationStore verification_repo.VerificationRepository,
 	notifStore notification_repo.NotificationRepository,
@@ -47,6 +51,7 @@ func NewService(
 	jwt core.Authenticator,
 ) *Service {
 	return &Service{
+		adminStore:        adminStore,
 		userStore:         userStore,
 		verificationStore: verificationStore,
 		notifStore:        notifStore,
@@ -179,13 +184,17 @@ func (s *Service) GetRequestList() ([]dto.VerificationRequest, error) {
 		make([]dto.VerificationRequest, 0),
 		utils.Map(requests, func(request *models.IdentityVerificationModel) dto.VerificationRequest {
 			return dto.VerificationRequest{
-				Id:              request.Id,
-				UserID:          request.User.Id,
-				Name:            utils.Must(s.encrypt.DecryptString(request.User.Name)),
-				Email:           utils.Must(s.encrypt.DecryptString(request.User.Email)),
-				ImageURL:        request.User.ImageUrl,
-				Phone:           utils.Must(s.encrypt.DecryptString(request.User.Phone)),
-				Address:         utils.Must(s.encrypt.DecryptString(request.User.Address.Address)),
+				Id:       request.Id,
+				UserID:   request.User.Id,
+				Name:     utils.Must(s.encrypt.DecryptString(request.User.Name)),
+				Email:    utils.Must(s.encrypt.DecryptString(request.User.Email)),
+				ImageURL: request.User.ImageUrl,
+				Phone:    utils.Must(s.encrypt.DecryptString(request.User.Phone)),
+				Address: dto.Address{
+					Address:   utils.Must(s.encrypt.DecryptString(request.User.Address.Address)),
+					Latitude:  request.User.Address.Latitude,
+					Longitude: request.User.Address.Longitude,
+				},
 				IDType:          request.User.Identification.Type,
 				ReferenceNumber: request.User.Identification.ReferenceNumber,
 				IDFrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(request.User.Identification.FrontImageUrl)),
@@ -206,25 +215,38 @@ func (s *Service) GetRequest(id string) (*dto.VerificationRequest, error) {
 	}
 
 	data := &dto.VerificationRequest{
-		Id:              request.Id,
-		UserID:          request.User.Id,
-		Name:            utils.Must(s.encrypt.DecryptString(request.User.Name)),
-		Email:           utils.Must(s.encrypt.DecryptString(request.User.Email)),
-		ImageURL:        request.User.ImageUrl,
-		Phone:           utils.Must(s.encrypt.DecryptString(request.User.Phone)),
-		Address:         utils.Must(s.encrypt.DecryptString(request.User.Address.Address)),
+		Id:       request.Id,
+		UserID:   request.User.Id,
+		Name:     utils.Must(s.encrypt.DecryptString(request.User.Name)),
+		Email:    utils.Must(s.encrypt.DecryptString(request.User.Email)),
+		ImageURL: request.User.ImageUrl,
+		Phone:    utils.Must(s.encrypt.DecryptString(request.User.Phone)),
+		Address: dto.Address{
+			Address:   utils.Must(s.encrypt.DecryptString(request.User.Address.Address)),
+			Latitude:  request.User.Address.Latitude,
+			Longitude: request.User.Address.Longitude,
+		},
 		IDType:          request.User.Identification.Type,
 		ReferenceNumber: utils.Must(s.encrypt.DecryptString(request.User.Identification.ReferenceNumber)),
 		IDFrontImageURL: utils.Must(s.resourceService.SignURLWithDefaultDuration(request.User.Identification.FrontImageUrl)),
 		IDBackImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(request.User.Identification.BackImageUrl)),
 		SelfieImageURL:  utils.Must(s.resourceService.SignURLWithDefaultDuration(request.User.Identification.SelfieImageUrl)),
-		CreatedAt:       request.CreatedAt,
+		CreatedAt:       utils.FormatDate(request.CreatedAt),
 	}
 
 	return data, nil
 }
 
-func (s *Service) AcceptRequest(id string) error {
+func (s *Service) AcceptRequest(adminId, confirmationPassword, id string) error {
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
+	}
+
 	request, err := s.verificationStore.FindById(id)
 	if err != nil {
 		return err
@@ -280,9 +302,18 @@ func (s *Service) AcceptRequest(id string) error {
 	return nil
 }
 
-func (s *Service) RejectRequest(id, reason string) error {
+func (s *Service) RejectRequest(adminId, confirmationPassword, id, reason string) error {
 	if reason == "" {
 		return errors.New(ERR_INVALID_REASON)
+	}
+
+	admin, err := s.adminStore.FindById(adminId)
+	if err != nil {
+		return err
+	}
+
+	if !core.IsPasswordMatch(admin.Password, confirmationPassword) {
+		return errors.New(ERR_UNAUTHORIZED)
 	}
 
 	encryptedReason, err := s.encrypt.EncryptString(reason)
@@ -333,7 +364,14 @@ func (s *Service) RejectRequest(id, reason string) error {
 		Payload:    notification,
 	}
 
+	syncEvent := &websocket.EventModel{
+		ReceiverId: request.User.Id,
+		Type:       websocket.EVT_SYNC,
+		Payload:    nil,
+	}
+
 	s.ws.Send(event)
+	s.ws.Send(syncEvent)
 
 	return nil
 }
