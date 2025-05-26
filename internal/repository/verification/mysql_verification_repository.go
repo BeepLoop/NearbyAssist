@@ -216,7 +216,7 @@ func (s *MysqlVerificationRepository) GetAll(status string) ([]*models.IdentityV
 	defer cancel()
 
 	ids := make([]string, 0)
-	getIds := "SELECT id FROM IdentityVerification WHERE status = ?"
+	getIds := "SELECT id FROM IdentityVerification WHERE status = ? ORDER BY createdAt ASC"
 	if err := s.db.SelectContext(ctx, &ids, getIds, status); err != nil {
 		return nil, err
 	}
