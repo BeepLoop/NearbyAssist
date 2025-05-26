@@ -159,8 +159,8 @@ func (s *Service) CreateBooking(req *request.NewBookingPayload) (string, error) 
 			utils.Map(createdBooking.Extras, func(x *models.BookingExtraModel) response.BookingExtra {
 				return response.BookingExtra{
 					BookingId:   x.BookingId,
-					Title:       x.ExtraTitle,
-					Description: x.ExtraDescription,
+					Title:       utils.Must(s.encrypt.DecryptString(x.ExtraTitle)),
+					Description: utils.Must(s.encrypt.DecryptString(x.ExtraDescription)),
 					Price:       x.Price,
 				}
 			}),
@@ -343,10 +343,6 @@ func (s *Service) ClientCancelBooking(bearerToken string, req *request.CancelBoo
 		return err
 	}
 
-	if booking.Status != models.BOOKING_STATUS_PENDING {
-		return errors.New(ERR_DISALLOWED_ACTION)
-	}
-
 	if booking.Status == models.BOOKING_STATUS_DONE || booking.Status == models.BOOKING_STATUS_CANCELLED {
 		return errors.New(ERR_DISALLOWED_ACTION)
 	}
@@ -395,7 +391,7 @@ func (s *Service) ClientCancelBooking(bearerToken string, req *request.CancelBoo
 	}
 	bookingEvent := &websocket.EventModel{
 		ReceiverId: booking.VendorId,
-		Type:       websocket.EVT_CLIENT_CANCELLED_BOOKING,
+		Type:       utils.Ternary(booking.Status == models.BOOKING_STATUS_CONFIRMED, websocket.EVT_CLIENT_CANCELLED_CONFIRMED_BOOKING, websocket.EVT_CLIENT_CANCELLED_BOOKING),
 		Payload:    utils.Mapper{"id": req.BookingId, "reason": req.Reason},
 	}
 
