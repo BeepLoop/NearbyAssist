@@ -10,6 +10,7 @@ import (
 	notification_repo "nearbyassist/internal/repository/notification"
 	policeclearance_repo "nearbyassist/internal/repository/police_clearance"
 	supportingimage_repo "nearbyassist/internal/repository/supporting_image"
+	vendor_repo "nearbyassist/internal/repository/vendor"
 	"nearbyassist/internal/service/core"
 	"nearbyassist/internal/service/fs"
 	notification_service "nearbyassist/internal/service/notification"
@@ -18,11 +19,14 @@ import (
 )
 
 const (
-	ERR_UNAUTHORIZED = "unauthorized"
+	ERR_UNAUTHORIZED          = "unauthorized"
+	ERR_DUPLICATE_EXPERTISE   = "duplicate expertise"
+	ERR_DUPLICATE_APPLICATION = "duplicate application"
 )
 
 type Service struct {
 	adminStore           admin_repo.AdminRepository
+	vendorStore          vendor_repo.VendorRepository
 	applicationStore     application_repo.ApplicationRepository
 	supportingImageStore supportingimage_repo.Repository
 	policeClearanceStore policeclearance_repo.Repository
@@ -35,6 +39,7 @@ type Service struct {
 
 func NewService(
 	adminStore admin_repo.AdminRepository,
+	vendorStore vendor_repo.VendorRepository,
 	applicationStore application_repo.ApplicationRepository,
 	supportingImageStore supportingimage_repo.Repository,
 	policeClearanceStore policeclearance_repo.Repository,
@@ -46,6 +51,7 @@ func NewService(
 ) *Service {
 	return &Service{
 		adminStore:           adminStore,
+		vendorStore:          vendorStore,
 		applicationStore:     applicationStore,
 		supportingImageStore: supportingImageStore,
 		policeClearanceStore: policeClearanceStore,
@@ -61,6 +67,22 @@ func (s *Service) CreateApplication(bearerToken, expertiseId string, files []*mu
 	userId, err := utils.GetUserIdFromToken(bearerToken, s.jwt.GetClaims)
 	if err != nil {
 		return "", err
+	}
+
+	if hasExpertise, err := s.vendorStore.HasExpertise(userId, expertiseId); err != nil {
+		return "", err
+	} else {
+		if hasExpertise {
+			return "", errors.New(ERR_DUPLICATE_EXPERTISE)
+		}
+	}
+
+	if hasApplication, err := s.applicationStore.HasPendingApplication(userId, expertiseId); err != nil {
+		return "", err
+	} else {
+		if hasApplication {
+			return "", errors.New(ERR_DUPLICATE_APPLICATION)
+		}
 	}
 
 	application := new(models.ApplicationModel)

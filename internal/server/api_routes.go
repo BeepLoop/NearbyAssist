@@ -277,6 +277,7 @@ func (s *Server) v1ApiRoutes(v1 *echo.Group) {
 
 		applicationService := application_service.NewService(
 			adminStore,
+			vendorStore,
 			applicationStore,
 			supportingImageStore,
 			policeClearanceStore,

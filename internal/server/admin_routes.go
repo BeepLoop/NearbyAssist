@@ -156,6 +156,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		applicationRoute.Use(middleware.CheckSession)
 		applicationRoute.Use(middleware.CheckMustChangePass(adminStore))
 
+		vendorStore := vendor_repo.NewMysqlVendorRepository(s.DB)
 		applicationStore := application_repo.NewMysqlApplicationRepository(s.DB)
 		supportingImageStore := supportingimage_repo.NewMysqlImplementation(s.DB)
 		policeClearanceStore := policeclearance_repo.NewMysqlImplementation(s.DB)
@@ -164,6 +165,7 @@ func (s *Server) adminRoutes(r *echo.Group) {
 		resourceService := resource_service.NewService(s.FS, s.Encrypt, s.Hash)
 		applicationService := application_service.NewService(
 			adminStore,
+			vendorStore,
 			applicationStore,
 			supportingImageStore,
 			policeClearanceStore,
