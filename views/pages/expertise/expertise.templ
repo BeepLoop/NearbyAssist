@@ -21,6 +21,7 @@ templ Expertise(user models.AdminModel, data []models.ExpertiseModel, flash stri
 		</div>
 		<!-- expertise table -->
 		@expertiseTable(data)
+		@partials.Pagination()
 	}
 }
 
