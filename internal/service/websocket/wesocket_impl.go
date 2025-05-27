@@ -36,11 +36,18 @@ func (w *websocketImpl) Upgrade(c echo.Context) (*websocket.Conn, error) {
 }
 
 func (w *websocketImpl) RegisterClient(userId string, conn *websocket.Conn) {
+	if oldConn, ok := w.clients[userId]; ok {
+		_ = oldConn.Close()
+	}
+
 	w.clients[userId] = conn
 }
 
 func (w *websocketImpl) RemoveClient(userId string) {
-	delete(w.clients, userId)
+	if oldConn, ok := w.clients[userId]; ok {
+		_ = oldConn.Close()
+		delete(w.clients, userId)
+	}
 }
 
 func (w *websocketImpl) Send(evt *EventModel) {
