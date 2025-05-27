@@ -622,6 +622,8 @@ func (s *MysqlDashboardRepository) GetBookingsThisWeek() ([]*models.BookingModel
             JOIN User uClient ON uClient.id = t.clientId
         WHERE
             DATE(t.createdAt) >= CURDATE() - INTERVAL 6 DAY
+        ORDER BY
+            t.createdAt ASC
     `
 
 	bookings := make([]*models.BookingModel, 0)
