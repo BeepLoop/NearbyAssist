@@ -56,6 +56,23 @@ func (s *MysqlExpertiseRepository) GetAll() ([]*models.ExpertiseModel, error) {
 	return expertise, nil
 }
 
+func (s *MysqlExpertiseRepository) GetAllWithLimit(limit, offset int) ([]*models.ExpertiseModel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	getExpertiseQuery := "SELECT * FROM Expertise ORDER BY createdAt DESC LIMIT ? OFFSET ?"
+	expertise := make([]*models.ExpertiseModel, 0)
+	if err := s.db.SelectContext(ctx, &expertise, getExpertiseQuery, limit, offset); err != nil {
+		return nil, err
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, context.DeadlineExceeded
+	}
+
+	return expertise, nil
+}
+
 func (s *MysqlExpertiseRepository) FindById(id string) (*models.ExpertiseModel, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

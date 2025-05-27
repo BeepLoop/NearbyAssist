@@ -88,8 +88,8 @@ func (s *Service) AddVendorExpertise(bearerToken, expertiseId string, file *mult
 	return nil
 }
 
-func (s *Service) GetAllExpertise() ([]*models.ExpertiseModel, error) {
-	return s.expertiseStore.GetAll()
+func (s *Service) GetAllExpertise(limit, offset int) ([]*models.ExpertiseModel, error) {
+	return s.expertiseStore.GetAllWithLimit(limit, offset)
 }
 
 func (s *Service) FindExpertise(query string) (*models.ExpertiseModel, error) {

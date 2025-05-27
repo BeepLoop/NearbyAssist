@@ -8,9 +8,15 @@ import (
 	"nearbyassist/internal/utils"
 	pages "nearbyassist/views/pages/expertise"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
+)
+
+const (
+	DEFAULT_LIMIT  = 10
+	DEFAULT_OFFSET = 0
 )
 
 type expertiseHandler struct {
@@ -24,15 +30,25 @@ func NewHandler(expertService *expertise_service.Service) *expertiseHandler {
 }
 
 func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
+	flash, _, _ := utils.RetrieveFlashMessage(c)
 	admin, err := utils.GetAdminFromSession(c)
 	if err != nil {
 		return c.Redirect(http.StatusSeeOther, "/auth/login")
 	}
 
 	params := c.QueryParams()
-	results := make([]*models.ExpertiseModel, 0)
 
-	flash, _, _ := utils.RetrieveFlashMessage(c)
+	limit, _ := strconv.Atoi(params.Get("limit"))
+	if limit == 0 {
+		limit = DEFAULT_LIMIT
+	}
+
+	offset, _ := strconv.Atoi(params.Get("offset"))
+	if offset == 0 {
+		offset = DEFAULT_OFFSET
+	}
+
+	results := make([]*models.ExpertiseModel, 0)
 
 	if params.Has("query") && params.Get("query") != "" {
 		title := params.Get("query")
@@ -44,7 +60,7 @@ func (h *expertiseHandler) GetAllExpertise(c echo.Context) error {
 		}
 		results = append(results, expertise)
 	} else {
-		experitises, err := h.expertService.GetAllExpertise()
+		experitises, err := h.expertService.GetAllExpertise(limit, offset)
 		if err != nil {
 			page := pages.Expertise(*admin, make([]models.ExpertiseModel, 0), flash)
 			return page.Render(context.Background(), c.Response().Writer)
