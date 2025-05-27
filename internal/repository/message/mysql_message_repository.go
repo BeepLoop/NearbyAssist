@@ -133,39 +133,58 @@ func (s *MysqlMessageRepository) GetConversations(userId string) ([]*models.Conv
 	defer cancel()
 
 	query := `
-        SELECT 
-            u.id,
-            u.name,
-            u.imageUrl,
-            m.content AS lastMessage,
-            m.sender AS lastMessageSender,
-            m.createdAt AS lastMessageDate,
-            m.seen AS seenLastMessage
-        FROM 
-            User u
-            JOIN (
-                SELECT 
-                    CASE 
-                        WHEN sender < receiver THEN sender 
-                        ELSE receiver 
-                    END AS user1,
-                    CASE 
-                        WHEN sender < receiver THEN receiver 
-                        ELSE sender 
-                    END AS user2,
-                    MAX(createdAt) AS lastMessageDate
-                FROM 
-                    Message
-                GROUP BY 
-                    user1, user2
-            ) latest ON (u.id = latest.user1 OR u.id = latest.user2)
-            JOIN Message m ON m.createdAt = latest.lastMessageDate
-        WHERE 
-            u.id <> ?
+        WITH Conversations AS (
+          SELECT
+            CASE
+              WHEN sender < receiver THEN sender
+              ELSE receiver
+            END AS user1,
+            CASE
+              WHEN sender < receiver THEN receiver
+              ELSE sender
+            END AS user2,
+            MAX(createdAt) AS lastMessageDate
+          FROM
+            Message
+          WHERE
+            sender = ?
+            OR receiver = ?
+          GROUP BY
+            user1,
+            user2
+        ),
+        LatestMessages AS (
+          SELECT
+            m.*
+          FROM
+            Message m
+            JOIN Conversations c ON (
+              ((m.sender = c.user1 AND m.receiver = c.user2)
+              OR (m.sender = c.user2 AND m.receiver = c.user1))
+              AND m.createdAt = c.lastMessageDate
+            )
+        )
+        SELECT
+          u.id,
+          u.name,
+          u.imageUrl,
+          m.content AS lastMessage,
+          m.sender AS lastMessageSender,
+          m.createdAt AS lastMessageDate,
+          m.seen AS seenLastMessage
+        FROM
+          LatestMessages m
+          JOIN User u ON u.id = CASE
+            WHEN m.sender = ? THEN m.receiver
+            ELSE m.sender
+          END
+        ORDER BY
+          m.createdAt ASC;
     `
+	args := []interface{}{userId, userId, userId}
 
 	conversations := make([]*models.ConversationModel, 0)
-	if err := s.db.SelectContext(ctx, &conversations, query, userId); err != nil {
+	if err := s.db.SelectContext(ctx, &conversations, query, args...); err != nil {
 		return nil, err
 	}
 
