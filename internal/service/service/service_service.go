@@ -629,35 +629,44 @@ func (s *Service) SearchService(bearerToken string, params map[string]string) ([
 		}
 	}
 
-	radius := 0.0
-	if r, ok := params["r"]; !ok {
-		return nil, errors.New("missing parameter radius")
+	inRangeServices := make([]*models.ServiceModel, 0)
+	if boundless, ok := params["boundless"]; !ok {
+		return nil, errors.New("missing parameter boundless")
 	} else {
-		radius = utils.StringToFloat64ElseZero(r)
+		if boundless == "true" {
+			inRangeServices = validServices
+		} else {
+			radius := 0.0
+			if r, ok := params["r"]; !ok {
+				return nil, errors.New("missing parameter radius")
+			} else {
+				radius = utils.StringToFloat64ElseZero(r)
+			}
+
+			// Filter out services outside of given radius
+			inRangeServices = slices.AppendSeq(
+				make([]*models.ServiceModel, 0),
+				utils.Retain(validServices, func(service *models.ServiceModel) bool {
+					userLocation := geodistance.Coordinate{
+						Latitude:  origin.Latitude,
+						Longitude: origin.Longitude,
+					}
+
+					serviceLocation := geodistance.Coordinate{
+						Latitude:  service.Address.Latitude,
+						Longitude: service.Address.Longitude,
+					}
+
+					distanceInMeter := userLocation.DistanceTo(serviceLocation, geodistance.M)
+					if distanceInMeter > geodistance.Distance(radius) {
+						return false
+					}
+
+					return true
+				}),
+			)
+		}
 	}
-
-	// Filter out services outside of given radius
-	inRangeServices := slices.AppendSeq(
-		make([]*models.ServiceModel, 0),
-		utils.Retain(validServices, func(service *models.ServiceModel) bool {
-			userLocation := geodistance.Coordinate{
-				Latitude:  origin.Latitude,
-				Longitude: origin.Longitude,
-			}
-
-			serviceLocation := geodistance.Coordinate{
-				Latitude:  service.Address.Latitude,
-				Longitude: service.Address.Longitude,
-			}
-
-			distanceInMeter := userLocation.DistanceTo(serviceLocation, geodistance.M)
-			if distanceInMeter > geodistance.Distance(radius) {
-				return false
-			}
-
-			return true
-		}),
-	)
 
 	// Retrieve vendor details of each service
 	for _, service := range inRangeServices {
