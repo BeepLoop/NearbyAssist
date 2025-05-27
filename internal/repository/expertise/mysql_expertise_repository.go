@@ -81,9 +81,9 @@ func (s *MysqlExpertiseRepository) FindByTitle(title string) (*models.ExpertiseM
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	getExpertiseQuery := "SELECT id, title, createdAt FROM Expertise WHERE title = ?"
+	getExpertiseQuery := fmt.Sprintf("SELECT id, title, createdAt FROM Expertise WHERE title LIKE '%%%s%%'", title)
 	expertise := new(models.ExpertiseModel)
-	if err := s.db.GetContext(ctx, expertise, getExpertiseQuery, title); err != nil {
+	if err := s.db.GetContext(ctx, expertise, getExpertiseQuery); err != nil {
 		fmt.Println("error search: ", err.Error())
 		return nil, err
 	}
